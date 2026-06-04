@@ -1,0 +1,99 @@
+我需要创造一个vue3的ui库windows-ui
+需求
+1 风格类似Windows xp
+2 可以自定义组件前缀默认w-,例如w-button
+3 完整的组件示例
+4 示例跟ui库区分
+5 需要保存每个组件的设计文档到designs目录
+6 需要保存每个组件的开发进度到develops目录
+7 需要保存每个组件的使用说明文档到docs目录
+ui库需要易于修改主题色
+8 需要有以下的组件类型
+Basic 基础组件
+Button 按钮
+Border 边框
+Color 色彩
+Container 布局容器
+Icon 图标
+Layout 布局
+Link 链接
+Text 文本
+Scrollbar 滚动条
+Space 间距
+Splitter 分隔面板
+Typography 排版
+配置组件 Config Provider 全局配置
+Form 表单组件
+Autocomplete 自动补全输入框
+Cascader 级联选择器
+Checkbox 多选框
+ColorPickerPanel 颜色选择器面板
+Color Picker 颜色选择器
+Date Picker Panel 日期选择器面板
+Date Picker 日期选择器
+DateTime Picker 日期时间选择器
+Form 表单组件
+Input 输入框
+Input Number 数字输入框
+Input Tag 标签输入框
+Input OTP
+Mention 提及
+Radio 单选框
+Rate 评分
+Select
+Virtualized Select 虚拟化选择器
+Slider 滑块
+Switch 开关
+Time Picker 时间选择器
+Time Select 时间选择
+Transfer 穿梭框
+TreeSelect 树形选择
+Upload 上传器
+Data 数据展示
+Avatar 头像
+Badge 徽章
+Calendar 日历
+Card 卡片
+Carousel 走马灯
+Collapse 折叠面板
+Descriptions 描述列表
+Empty 空状态
+Image 图片
+Infinite Scroll 无限滚动
+Pagination 分页
+Progress 进度条
+Result 结果
+Skeleton 骨架屏
+Table 表格
+Virtualized Table 虚拟化表格
+Tag 标签
+Timeline 时间线
+Tour 漫游式引导
+Tree 树形控件
+Virtualized Tree 虚拟化树形控件
+Statistic 统计组件
+Segmented 分段控制器
+Navigation 导航
+Affix 固钉
+Anchor 锚点
+Backtop 回到顶部
+Breadcrumb 面包屑
+Dropdown 下拉菜单
+Menu 菜单
+Page Header 页头
+Steps 步骤条
+Tabs 标签页
+Feedback 反馈组件
+Alert 提示
+Dialog 对话框
+Drawer 抽屉
+Loading 加载
+Message 消息提示
+Message Box 消息弹出框
+Notification 通知
+Popconfirm 气泡确认框
+Popover 弹出框
+Tooltip 文字提示
+Others 其他
+Divider 分割线
+Watermark 水印

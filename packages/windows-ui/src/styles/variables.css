@@ -1,0 +1,77 @@
+/* Windows XP Color Palette */
+:root {
+  /* XP Blue Theme */
+  --w-xp-blue: #245edb;
+  --w-xp-blue-light: #3d6df5;
+  --w-xp-blue-dark: #1034a6;
+  --w-xp-title-bar: linear-gradient(180deg, #1f91e5 0%, #1a6fdc 10%, #1a5dc6 100%);
+  --w-xp-title-bar-inactive: linear-gradient(180deg, #7ba4e6 0%, #6b94d6 10%, #5a84c6 100%);
+
+  /* XP Olive Theme */
+  --w-xp-olive: #8ba869;
+  --w-xp-olive-light: #a6c486;
+  --w-xp-olive-dark: #6b8a49;
+
+  /* XP Silver Theme */
+  --w-xp-silver: #c0c0c0;
+  --w-xp-silver-light: #e8e8e8;
+  --w-xp-silver-dark: #a0a0a0;
+
+  /* Classic Colors */
+  --w-color-primary: #245edb;
+  --w-color-success: #3a9e3a;
+  --w-color-warning: #e4a010;
+  --w-color-danger: #d92b2b;
+  --w-color-info: #808080;
+
+  --w-color-white: #ffffff;
+  --w-color-black: #000000;
+
+  /* XP Background Colors */
+  --w-bg-color: #ece9d8;
+  --w-bg-color-page: #3a6ea5;
+  --w-bg-color-overlay: rgba(0, 0, 0, 0.5);
+
+  /* XP Border Colors */
+  --w-border-color: #919b9c;
+  --w-border-color-light: #d6dff7;
+  --w-border-color-dark: #404040;
+  --w-border-color-darker: #808080;
+
+  /* Text Colors */
+  --w-text-color-primary: #000000;
+  --w-text-color-regular: #333333;
+  --w-text-color-secondary: #666666;
+  --w-text-color-placeholder: #a0a0a0;
+  --w-text-color-disabled: #c0c0c0;
+  --w-text-color-inverse: #ffffff;
+
+  /* XP Shadows */
+  --w-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  --w-box-shadow-light: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  --w-box-shadow-dark: 4px 4px 10px rgba(0, 0, 0, 0.5);
+
+  /* XP Border Radius */
+  --w-border-radius-small: 2px;
+  --w-border-radius-base: 3px;
+  --w-border-radius-large: 6px;
+
+  /* XP Fonts */
+  --w-font-family: 'Tahoma', 'Microsoft Sans Serif', sans-serif;
+  --w-font-size-extra-large: 18px;
+  --w-font-size-large: 16px;
+  --w-font-size-medium: 14px;
+  --w-font-size-base: 11px;
+  --w-font-size-small: 10px;
+  --w-font-size-extra-small: 9px;
+
+  /* XP Sizes */
+  --w-component-size-large: 40px;
+  --w-component-size: 32px;
+  --w-component-size-small: 24px;
+
+  /* XP Z-Index */
+  --w-index-normal: 1;
+  --w-index-top: 1000;
+  --w-index-popper: 2000;
+}
