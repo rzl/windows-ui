@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-drawer />
+  <w-drawer v-model="value" />
 </template>
 
 <script setup>
-import { Wdrawer } from '@windows-ui/core'
+import { WDrawer } from '@windows-ui/core'
+import { ref } from 'vue'
+const value = ref('')
 </script>
 ```
 
@@ -18,13 +20,18 @@ import { Wdrawer } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| modelValue | 绑定值（支持 v-model） | boolean | - |
+| title | 标题 | string |  |
+| direction | 方向 | string | right |
+| size | 尺寸 | - | 300px |
+| closeOnClickModal | 点击遮罩是否关闭 | boolean | true |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
+| update:modelValue | 绑定值更新时触发 | value |
+| close | 关闭时触发 | - |
 
 ### Slots
 
@@ -40,5 +47,8 @@ import { Wdrawer } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

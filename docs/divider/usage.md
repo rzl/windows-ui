@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wdivider } from '@windows-ui/core'
+import { WDivider } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,13 +18,8 @@ import { Wdivider } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
-
-### Events
-
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| - | - | - |
+| direction | 方向 | string | horizontal |
+| content | 内容 | string | - |
 
 ### Slots
 
@@ -40,5 +35,8 @@ import { Wdivider } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

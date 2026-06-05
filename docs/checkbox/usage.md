@@ -1,14 +1,16 @@
-# Checkbox 多选框 - 使用说明
+# Checkbox 复选框 - 使用说明
 
 ## 基础用法
 
 ```vue
 <template>
-  <w-checkbox />
+  <w-checkbox v-model="value" />
 </template>
 
 <script setup>
-import { Wcheckbox } from '@windows-ui/core'
+import { WCheckbox } from '@windows-ui/core'
+import { ref } from 'vue'
+const value = ref('')
 </script>
 ```
 
@@ -18,13 +20,17 @@ import { Wcheckbox } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| modelValue | 绑定值（支持 v-model） | - | false |
+| label | 标签文本 | string | - |
+| disabled | 是否禁用 | boolean | - |
+| indeterminate | 是否不确定状态 | boolean | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
+| update:modelValue | 绑定值更新时触发 | value |
+| change | 用户确认选定的值时触发 | value |
 
 ### Slots
 
@@ -40,5 +46,8 @@ import { Wcheckbox } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

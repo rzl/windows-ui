@@ -8,23 +8,9 @@
 </template>
 
 <script setup>
-import { Wtypography } from '@windows-ui/core'
+import { WTypography } from '@windows-ui/core'
 </script>
 ```
-
-## API
-
-### Props
-
-| 属性名 | 说明 | 类型 | 默认值 |
-|--------|------|------|--------|
-| - | - | - | - |
-
-### Events
-
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| - | - | - |
 
 ### Slots
 
@@ -40,5 +26,8 @@ import { Wtypography } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

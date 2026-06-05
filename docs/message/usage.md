@@ -8,29 +8,19 @@
 </template>
 
 <script setup>
-import { Wmessage } from '@windows-ui/core'
+import { WMessage } from '@windows-ui/core'
 </script>
 ```
 
-## API
+### Methods
 
-### Props
-
-| 属性名 | 说明 | 类型 | 默认值 |
-|--------|------|------|--------|
-| - | - | - | - |
-
-### Events
-
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| - | - | - |
-
-### Slots
-
-| 插槽名 | 说明 |
+| 方法名 | 说明 |
 |--------|------|
-| default | 默认内容 |
+| info | 组件暴露的方法 |
+| success | 组件暴露的方法 |
+| warning | 组件暴露的方法 |
+| error | 组件暴露的方法 |
+| show | 组件暴露的方法 |
 
 ## 主题定制
 
@@ -40,5 +30,8 @@ import { Wmessage } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

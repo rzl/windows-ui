@@ -1,4 +1,4 @@
-# Tour 漫游式引导 - 使用说明
+# Tour 漫游引导 - 使用说明
 
 ## 基础用法
 
@@ -8,29 +8,16 @@
 </template>
 
 <script setup>
-import { Wtour } from '@windows-ui/core'
+import { WTour } from '@windows-ui/core'
 </script>
 ```
-
-## API
-
-### Props
-
-| 属性名 | 说明 | 类型 | 默认值 |
-|--------|------|------|--------|
-| - | - | - | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
-
-### Slots
-
-| 插槽名 | 说明 |
-|--------|------|
-| default | 默认内容 |
+| update:visible | 可见性更新时触发 | visible |
+| finish | - | - |
 
 ## 主题定制
 
@@ -40,5 +27,8 @@ import { Wtour } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

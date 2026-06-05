@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wicon } from '@windows-ui/core'
+import { WIcon } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,19 +18,9 @@ import { Wicon } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
-
-### Events
-
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| - | - | - |
-
-### Slots
-
-| 插槽名 | 说明 |
-|--------|------|
-| default | 默认内容 |
+| name | 名称 | string | - |
+| size | 尺寸 | string | default |
+| color | 文字颜色 | string | - |
 
 ## 主题定制
 
@@ -40,5 +30,8 @@ import { Wicon } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

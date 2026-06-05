@@ -1,4 +1,4 @@
-# Badge 徽章 - 使用说明
+# Badge 徽标 - 使用说明
 
 ## 基础用法
 
@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wbadge } from '@windows-ui/core'
+import { WBadge } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,13 +18,10 @@ import { Wbadge } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
-
-### Events
-
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| - | - | - |
+| value | 值 | string | - |
+| max | 最大值 | number | 99 |
+| isDot | - | boolean | - |
+| type | 类型 | string | danger |
 
 ### Slots
 
@@ -40,5 +37,8 @@ import { Wbadge } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

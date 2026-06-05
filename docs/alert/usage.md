@@ -1,4 +1,4 @@
-# Alert 提示 - 使用说明
+# Alert 警告 - 使用说明
 
 ## 基础用法
 
@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Walert } from '@windows-ui/core'
+import { WAlert } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,13 +18,17 @@ import { Walert } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| title | 标题 | string | - |
+| description | 描述文本 | string | - |
+| type | 类型 | string | info |
+| closable | 是否可关闭 | boolean | - |
+| center | 是否居中 | boolean | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
+| close | 关闭时触发 | - |
 
 ### Slots
 
@@ -40,5 +44,8 @@ import { Walert } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

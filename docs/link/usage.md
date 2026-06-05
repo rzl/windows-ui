@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wlink } from '@windows-ui/core'
+import { WLink } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,13 +18,17 @@ import { Wlink } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| type | 类型 | string | default |
+| underline | 是否下划线 | boolean | true |
+| disabled | 是否禁用 | boolean | - |
+| href | 链接地址 | string | - |
+| icon | 图标名称 | string | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
+| click | 点击时触发 | event |
 
 ### Slots
 
@@ -40,5 +44,8 @@ import { Wlink } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-rate />
+  <w-rate v-model="value" />
 </template>
 
 <script setup>
-import { Wrate } from '@windows-ui/core'
+import { WRate } from '@windows-ui/core'
+import { ref } from 'vue'
+const value = ref('')
 </script>
 ```
 
@@ -18,19 +20,17 @@ import { Wrate } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| modelValue | 绑定值（支持 v-model） | number | 0 |
+| max | 最大值 | number | 5 |
+| disabled | 是否禁用 | boolean | - |
+| showScore | - | boolean | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
-
-### Slots
-
-| 插槽名 | 说明 |
-|--------|------|
-| default | 默认内容 |
+| update:modelValue | 绑定值更新时触发 | value |
+| change | 用户确认选定的值时触发 | value |
 
 ## 主题定制
 
@@ -40,5 +40,8 @@ import { Wrate } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

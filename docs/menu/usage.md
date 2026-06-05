@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wmenu } from '@windows-ui/core'
+import { WMenu } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,19 +18,15 @@ import { Wmenu } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| items | 菜单项列表 | array | [] |
+| mode | 菜单模式 | string | vertical |
+| defaultActive | 默认激活项 | string | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
-
-### Slots
-
-| 插槽名 | 说明 |
-|--------|------|
-| default | 默认内容 |
+| select | 选中时触发 | (selection, row) |
 
 ## 主题定制
 
@@ -40,5 +36,8 @@ import { Wmenu } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

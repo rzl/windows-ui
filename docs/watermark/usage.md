@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wwatermark } from '@windows-ui/core'
+import { WWatermark } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,13 +18,10 @@ import { Wwatermark } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
-
-### Events
-
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| - | - | - |
+| content | 内容 | string | Watermark |
+| fontSize | - | number | 14 |
+| color | 文字颜色 | string | rgba(0,0,0,0.1) |
+| rotate | - | number | -30 |
 
 ### Slots
 
@@ -40,5 +37,8 @@ import { Wwatermark } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

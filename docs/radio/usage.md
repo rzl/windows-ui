@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-radio />
+  <w-radio v-model="value" />
 </template>
 
 <script setup>
-import { Wradio } from '@windows-ui/core'
+import { WRadio } from '@windows-ui/core'
+import { ref } from 'vue'
+const value = ref('')
 </script>
 ```
 
@@ -18,13 +20,17 @@ import { Wradio } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| modelValue | 绑定值（支持 v-model） | string | - |
+| label | 标签文本 | string | - |
+| disabled | 是否禁用 | boolean | - |
+| name | 名称 | string | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
+| update:modelValue | 绑定值更新时触发 | value |
+| change | 用户确认选定的值时触发 | value |
 
 ### Slots
 
@@ -40,5 +46,8 @@ import { Wradio } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wlayout } from '@windows-ui/core'
+import { WLayout } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,13 +18,7 @@ import { Wlayout } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
-
-### Events
-
-| 事件名 | 说明 | 回调参数 |
-|--------|------|----------|
-| - | - | - |
+| direction | 方向 | string | vertical |
 
 ### Slots
 
@@ -40,5 +34,8 @@ import { Wlayout } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```

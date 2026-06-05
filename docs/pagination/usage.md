@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { Wpagination } from '@windows-ui/core'
+import { WPagination } from '@windows-ui/core'
 </script>
 ```
 
@@ -18,19 +18,16 @@ import { Wpagination } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| - | - | - | - |
+| currentPage | 当前页 | number | 1 |
+| pageSize | 每页条数 | number | 10 |
+| total | 总条数 | number | 0 |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| - | - | - |
-
-### Slots
-
-| 插槽名 | 说明 |
-|--------|------|
-| default | 默认内容 |
+| update:currentPage | 当前页更新时触发 | currentPage |
+| change | 用户确认选定的值时触发 | value |
 
 ## 主题定制
 
@@ -40,5 +37,8 @@ import { Wpagination } from '@windows-ui/core'
 :root {
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```
