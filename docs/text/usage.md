@@ -4,11 +4,21 @@
 
 ```vue
 <template>
-  <w-text />
+  <w-space direction="vertical">
+    <w-text>默认文本</w-text>
+    <w-text type="primary">主要文本</w-text>
+    <w-text type="success">成功文本</w-text>
+    <w-text type="warning">警告文本</w-text>
+    <w-text type="danger">危险文本</w-text>
+    <w-text size="large">大号文本</w-text>
+    <w-text size="small">小号文本</w-text>
+    <w-text truncated>这是一段会被截断的文本内容...</w-text>
+    <w-text tag="b">加粗文本</w-text>
+  </w-space>
 </template>
 
 <script setup>
-import { WText } from '@windows-ui/core'
+import { WText, WSpace } from '@windows-ui/core'
 </script>
 ```
 

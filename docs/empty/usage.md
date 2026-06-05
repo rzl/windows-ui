@@ -4,7 +4,7 @@
 
 ```vue
 <template>
-  <w-empty />
+  <w-empty description="暂无数据" />
 </template>
 
 <script setup>

@@ -6,6 +6,11 @@ ROOT = Path(__file__).parent.parent
 SRC = ROOT / "packages/windows-ui/src/components"
 DOCS = ROOT / "docs"
 
+EXAMPLES = {}
+_examples_path = Path(__file__).parent / "examples.json"
+if _examples_path.exists():
+    EXAMPLES = json.loads(_examples_path.read_text(encoding="utf-8"))
+
 def extract_props(content):
     props = []
     m = re.search(r"defineProps\(\s*\{([^}]+(?:\{[^}]*\}[^}]*)*)\}\s*\)", content, re.DOTALL)
@@ -447,23 +452,26 @@ def generate_doc(name, content):
     lines.append("## 基础用法")
     lines.append("")
     lines.append("```vue")
-    lines.append("<template>")
-    tag = "w-" + name
-    if name in ("message","message-box","notification","loading"):
-        lines.append(f"  <{tag} />")
-    elif props and props[0]["name"] == "modelValue":
-        lines.append(f"  <{tag} v-model=\"value\" />")
+    if name in EXAMPLES:
+        lines.append(EXAMPLES[name])
     else:
-        lines.append(f"  <{tag} />")
-    lines.append("</template>")
-    lines.append("")
-    lines.append("<script setup>")
-    comp = "".join([p.capitalize() for p in name.split("-")])
-    lines.append(f"import {{ W{comp[0].upper()}{comp[1:]} }} from '@windows-ui/core'")
-    if props and props[0]["name"] == "modelValue":
-        lines.append("import { ref } from 'vue'")
-        lines.append("const value = ref('')")
-    lines.append("</script>")
+        tag = "w-" + name
+        lines.append("<template>")
+        if name in ("message","message-box","notification","loading"):
+            lines.append(f"  <{tag} />")
+        elif props and props[0]["name"] == "modelValue":
+            lines.append(f"  <{tag} v-model=\"value\" />")
+        else:
+            lines.append(f"  <{tag} />")
+        lines.append("</template>")
+        lines.append("")
+        lines.append("<script setup>")
+        comp = "".join([p.capitalize() for p in name.split("-")])
+        lines.append(f"import {{ W{comp[0].upper()}{comp[1:]} }} from '@windows-ui/core'")
+        if props and props[0]["name"] == "modelValue":
+            lines.append("import { ref } from 'vue'")
+            lines.append("const value = ref('')")
+        lines.append("</script>")
     lines.append("```")
     lines.append("")
 

@@ -4,11 +4,18 @@
 
 ```vue
 <template>
-  <w-statistic />
+  <w-row :gutter="20">
+    <w-col :span="8">
+      <w-statistic title="DAU" :value="268500" />
+    </w-col>
+    <w-col :span="8">
+      <w-statistic title="订单" :value="128" />
+    </w-col>
+  </w-row>
 </template>
 
 <script setup>
-import { WStatistic } from '@windows-ui/core'
+import { WStatistic, WRow, WCol } from '@windows-ui/core'
 </script>
 ```
 

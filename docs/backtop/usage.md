@@ -4,6 +4,9 @@
 
 ```vue
 <template>
+  <div style="height: 2000px;">
+    <p>向下滚动查看 Backtop 组件</p>
+  </div>
   <w-backtop />
 </template>
 

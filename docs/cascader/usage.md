@@ -4,13 +4,23 @@
 
 ```vue
 <template>
-  <w-cascader v-model="value" />
+  <w-cascader v-model="value" :options="options" placeholder="请选择" />
 </template>
 
 <script setup>
-import { WCascader } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WCascader } from '@windows-ui/core'
+const value = ref([])
+const options = [
+  {
+    value: 'guide',
+    label: 'Guide',
+    children: [
+      { value: 'disciplines', label: 'Disciplines' },
+      { value: 'navigation', label: 'Navigation' }
+    ]
+  }
+]
 </script>
 ```
 

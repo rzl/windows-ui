@@ -4,11 +4,17 @@
 
 ```vue
 <template>
-  <w-tabs />
+  <w-tabs v-model="activeName">
+    <w-tab-pane label="用户管理" name="first">用户管理内容</w-tab-pane>
+    <w-tab-pane label="配置管理" name="second">配置管理内容</w-tab-pane>
+    <w-tab-pane label="角色管理" name="third">角色管理内容</w-tab-pane>
+  </w-tabs>
 </template>
 
 <script setup>
-import { WTabs } from '@windows-ui/core'
+import { ref } from 'vue'
+import { WTabs, WTabPane } from '@windows-ui/core'
+const activeName = ref('first')
 </script>
 ```
 

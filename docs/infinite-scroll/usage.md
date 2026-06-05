@@ -4,12 +4,32 @@
 
 ```vue
 <template>
-  <w-infinite-scroll />
+  <ul v-infinite-scroll="load" class="list" :infinite-scroll-disabled="disabled">
+    <li v-for="i in count" :key="i" class="list-item">{{ i }}</li>
+  </ul>
+  <p v-if="loading">加载中...</p>
+  <p v-if="noMore">没有更多了</p>
 </template>
 
 <script setup>
-import { WInfiniteScroll } from '@windows-ui/core'
+import { ref, computed } from 'vue'
+const count = ref(10)
+const loading = ref(false)
+const noMore = computed(() => count.value >= 20)
+const disabled = computed(() => loading.value || noMore.value)
+const load = () => {
+  loading.value = true
+  setTimeout(() => {
+    count.value += 2
+    loading.value = false
+  }, 2000)
+}
 </script>
+
+<style scoped>
+.list { height: 300px; overflow: auto; padding: 0; margin: 0; list-style: none; }
+.list-item { display: flex; align-items: center; justify-content: center; height: 50px; border-bottom: 1px solid #e8e8e8; }
+</style>
 ```
 
 ## API

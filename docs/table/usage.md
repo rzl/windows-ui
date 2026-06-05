@@ -4,11 +4,24 @@
 
 ```vue
 <template>
-  <w-table />
+  <w-table :data="tableData" :columns="columns">
+    <template #name="{ row }">
+      <w-tag>{{ row.name }}</w-tag>
+    </template>
+  </w-table>
 </template>
 
 <script setup>
-import { WTable } from '@windows-ui/core'
+import { WTable, WTag } from '@windows-ui/core'
+const columns = [
+  { prop: 'name', label: '姓名' },
+  { prop: 'date', label: '日期' },
+  { prop: 'address', label: '地址' }
+]
+const tableData = [
+  { name: '张三', date: '2024-01-01', address: '北京市' },
+  { name: '李四', date: '2024-01-02', address: '上海市' }
+]
 </script>
 ```
 

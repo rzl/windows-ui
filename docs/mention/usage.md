@@ -4,11 +4,17 @@
 
 ```vue
 <template>
-  <w-mention />
+  <w-mention v-model="text" :options="options" placeholder="输入 @ 提及用户" />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { WMention } from '@windows-ui/core'
+const text = ref('')
+const options = [
+  { label: '张三', value: 'zhangsan' },
+  { label: '李四', value: 'lisi' }
+]
 </script>
 ```
 

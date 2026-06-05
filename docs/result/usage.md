@@ -4,11 +4,15 @@
 
 ```vue
 <template>
-  <w-result />
+  <w-result icon="success" title="成功提示" sub-title="请根据提示进行操作">
+    <template #extra>
+      <w-button type="primary">返回</w-button>
+    </template>
+  </w-result>
 </template>
 
 <script setup>
-import { WResult } from '@windows-ui/core'
+import { WResult, WButton } from '@windows-ui/core'
 </script>
 ```
 

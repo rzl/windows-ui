@@ -4,11 +4,16 @@
 
 ```vue
 <template>
-  <w-virtualized-tree />
+  <w-virtualized-tree :data="data" :props="defaultProps" :height="400" />
 </template>
 
 <script setup>
 import { WVirtualizedTree } from '@windows-ui/core'
+const defaultProps = { children: 'children', label: 'label' }
+const data = Array.from({ length: 100 }, (_, i) => ({
+  label: '节点 ' + (i + 1),
+  children: Array.from({ length: 10 }, (_, j) => ({ label: '子节点 ' + (i + 1) + '-' + (j + 1) }))
+}))
 </script>
 ```
 

@@ -4,11 +4,14 @@
 
 ```vue
 <template>
-  <w-virtualized-select />
+  <w-virtualized-select v-model="value" :options="options" placeholder="请选择" />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { WVirtualizedSelect } from '@windows-ui/core'
+const value = ref('')
+const options = Array.from({ length: 1000 }, (_, i) => ({ label: '选项 ' + (i + 1), value: String(i + 1) }))
 </script>
 ```
 

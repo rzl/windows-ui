@@ -4,11 +4,23 @@
 
 ```vue
 <template>
-  <w-autocomplete />
+  <w-autocomplete
+    v-model="state"
+    :options="restaurants"
+    placeholder="请输入内容"
+    @select="handleSelect"
+  />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { WAutocomplete } from '@windows-ui/core'
+const state = ref('')
+const restaurants = [
+  { value: '三全鲜食（北新泾店）', label: '三全鲜食（北新泾店）' },
+  { value: 'Hot honey 首尔炸鸡（仙霞路）', label: 'Hot honey 首尔炸鸡（仙霞路）' }
+]
+const handleSelect = (item) => console.log(item)
 </script>
 ```
 

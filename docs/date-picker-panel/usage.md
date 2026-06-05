@@ -8,9 +8,9 @@
 </template>
 
 <script setup>
-import { WDatePickerPanel } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WDatePickerPanel } from '@windows-ui/core'
+const value = ref(new Date())
 </script>
 ```
 

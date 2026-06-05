@@ -4,12 +4,27 @@
 
 ```vue
 <template>
-  <w-carousel />
+  <w-carousel height="200px">
+    <w-carousel-item v-for="item in 4" :key="item">
+      <div class="carousel-item">{{ item }}</div>
+    </w-carousel-item>
+  </w-carousel>
 </template>
 
 <script setup>
-import { WCarousel } from '@windows-ui/core'
+import { WCarousel, WCarouselItem } from '@windows-ui/core'
 </script>
+
+<style scoped>
+.carousel-item {
+  height: 200px;
+  background-color: #d3dce6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+</style>
 ```
 
 ## API

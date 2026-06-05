@@ -4,11 +4,12 @@
 
 ```vue
 <template>
-  <w-color />
+  <w-color @select="handleSelect" />
 </template>
 
 <script setup>
 import { WColor } from '@windows-ui/core'
+const handleSelect = (color) => console.log(color)
 </script>
 ```
 

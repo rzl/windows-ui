@@ -4,11 +4,15 @@
 
 ```vue
 <template>
-  <w-breadcrumb />
+  <w-breadcrumb separator="/">
+    <w-breadcrumb-item :to="{ path: '/' }">首页</w-breadcrumb-item>
+    <w-breadcrumb-item>活动管理</w-breadcrumb-item>
+    <w-breadcrumb-item>活动列表</w-breadcrumb-item>
+  </w-breadcrumb>
 </template>
 
 <script setup>
-import { WBreadcrumb } from '@windows-ui/core'
+import { WBreadcrumb, WBreadcrumbItem } from '@windows-ui/core'
 </script>
 ```
 

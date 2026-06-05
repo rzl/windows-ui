@@ -4,11 +4,18 @@
 
 ```vue
 <template>
-  <w-timeline />
+  <w-timeline>
+    <w-timeline-item timestamp="2024-01-01" placement="top">
+      <w-card><h4>更新 Github 模板</h4></w-card>
+    </w-timeline-item>
+    <w-timeline-item timestamp="2024-01-02">
+      <w-card><h4>更新组件库</h4></w-card>
+    </w-timeline-item>
+  </w-timeline>
 </template>
 
 <script setup>
-import { WTimeline } from '@windows-ui/core'
+import { WTimeline, WTimelineItem, WCard } from '@windows-ui/core'
 </script>
 ```
 

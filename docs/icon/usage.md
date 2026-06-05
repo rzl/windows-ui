@@ -4,11 +4,22 @@
 
 ```vue
 <template>
-  <w-icon />
+  <w-space>
+    <w-icon name="search" />
+    <w-icon name="edit" />
+    <w-icon name="delete" />
+    <w-icon name="share" />
+    <w-icon name="arrow-up" />
+    <w-icon name="arrow-down" />
+    <w-icon name="close" />
+    <w-icon name="check" />
+    <w-icon name="info" />
+    <w-icon name="warning" />
+  </w-space>
 </template>
 
 <script setup>
-import { WIcon } from '@windows-ui/core'
+import { WIcon, WSpace } from '@windows-ui/core'
 </script>
 ```
 

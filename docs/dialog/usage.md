@@ -4,13 +4,20 @@
 
 ```vue
 <template>
-  <w-dialog v-model="value" />
+  <w-button @click="visible = true">打开对话框</w-button>
+  <w-dialog v-model="visible" title="提示" width="400px">
+    <span>这是一段信息</span>
+    <template #footer>
+      <w-button @click="visible = false">取消</w-button>
+      <w-button type="primary" @click="visible = false">确定</w-button>
+    </template>
+  </w-dialog>
 </template>
 
 <script setup>
-import { WDialog } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WDialog, WButton } from '@windows-ui/core'
+const visible = ref(false)
 </script>
 ```
 

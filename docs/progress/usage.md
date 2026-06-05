@@ -4,7 +4,10 @@
 
 ```vue
 <template>
-  <w-progress />
+  <w-progress :percentage="50" />
+  <w-progress :percentage="100" status="success" />
+  <w-progress :percentage="80" status="warning" />
+  <w-progress :percentage="30" status="exception" />
 </template>
 
 <script setup>

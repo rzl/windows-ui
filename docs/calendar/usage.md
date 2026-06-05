@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-calendar />
+  <w-calendar v-model="value" />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { WCalendar } from '@windows-ui/core'
+const value = ref(new Date())
 </script>
 ```
 

@@ -4,11 +4,21 @@
 
 ```vue
 <template>
-  <w-dropdown />
+  <w-dropdown @command="handleCommand">
+    <w-button>下拉菜单 <w-icon name="arrowDown" /></w-button>
+    <template #dropdown>
+      <w-dropdown-menu>
+        <w-dropdown-item command="a">黄金糕</w-dropdown-item>
+        <w-dropdown-item command="b">狮子头</w-dropdown-item>
+        <w-dropdown-item command="c">螺蛳粉</w-dropdown-item>
+      </w-dropdown-menu>
+    </template>
+  </w-dropdown>
 </template>
 
 <script setup>
-import { WDropdown } from '@windows-ui/core'
+import { WDropdown, WDropdownMenu, WDropdownItem, WButton, WIcon } from '@windows-ui/core'
+const handleCommand = (cmd) => console.log(cmd)
 </script>
 ```
 

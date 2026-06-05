@@ -4,12 +4,24 @@
 
 ```vue
 <template>
-  <w-badge />
+  <w-badge :value="12" class="item">
+    <w-button>评论</w-button>
+  </w-badge>
+  <w-badge :value="3" class="item" type="primary">
+    <w-button>回复</w-button>
+  </w-badge>
+  <w-badge is-dot class="item">
+    <w-button>消息</w-button>
+  </w-badge>
 </template>
 
 <script setup>
-import { WBadge } from '@windows-ui/core'
+import { WBadge, WButton } from '@windows-ui/core'
 </script>
+
+<style scoped>
+.item { margin-right: 20px; }
+</style>
 ```
 
 ## API

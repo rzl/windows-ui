@@ -4,13 +4,17 @@
 
 ```vue
 <template>
-  <w-checkbox v-model="value" />
+  <w-checkbox-group v-model="checked">
+    <w-checkbox label="选项一" />
+    <w-checkbox label="选项二" />
+    <w-checkbox label="选项三" />
+  </w-checkbox-group>
 </template>
 
 <script setup>
-import { WCheckbox } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WCheckboxGroup, WCheckbox } from '@windows-ui/core'
+const checked = ref(['选项一'])
 </script>
 ```
 

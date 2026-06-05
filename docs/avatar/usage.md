@@ -4,11 +4,17 @@
 
 ```vue
 <template>
-  <w-avatar />
+  <w-space>
+    <w-avatar src="https://example.com/avatar.jpg" />
+    <w-avatar icon="user" />
+    <w-avatar>User</w-avatar>
+    <w-avatar shape="square" icon="user" />
+    <w-avatar :size="40" bg-color="#245edb">U</w-avatar>
+  </w-space>
 </template>
 
 <script setup>
-import { WAvatar } from '@windows-ui/core'
+import { WAvatar, WSpace } from '@windows-ui/core'
 </script>
 ```
 

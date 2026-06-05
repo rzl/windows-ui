@@ -4,11 +4,18 @@
 
 ```vue
 <template>
-  <w-menu />
+  <w-menu default-active="1">
+    <w-menu-item index="1">处理中心</w-menu-item>
+    <w-sub-menu index="2" title="我的工作台">
+      <w-menu-item index="2-1">选项一</w-menu-item>
+      <w-menu-item index="2-2">选项二</w-menu-item>
+    </w-sub-menu>
+    <w-menu-item index="3">消息中心</w-menu-item>
+  </w-menu>
 </template>
 
 <script setup>
-import { WMenu } from '@windows-ui/core'
+import { WMenu, WMenuItem, WSubMenu } from '@windows-ui/core'
 </script>
 ```
 

@@ -4,13 +4,17 @@
 
 ```vue
 <template>
-  <w-tree-select v-model="value" />
+  <w-tree-select v-model="value" :data="data" placeholder="请选择" />
 </template>
 
 <script setup>
-import { WTreeSelect } from '@windows-ui/core'
 import { ref } from 'vue'
+import { WTreeSelect } from '@windows-ui/core'
 const value = ref('')
+const data = [
+  { label: '一级 1', children: [{ label: '二级 1-1' }] },
+  { label: '一级 2', children: [{ label: '二级 2-1' }] }
+]
 </script>
 ```
 

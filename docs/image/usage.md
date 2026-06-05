@@ -4,7 +4,11 @@
 
 ```vue
 <template>
-  <w-image />
+  <w-image
+    style="width: 100px; height: 100px"
+    src="https://example.com/image.jpg"
+    :preview-src-list="['https://example.com/image.jpg']"
+  />
 </template>
 
 <script setup>

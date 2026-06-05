@@ -4,11 +4,14 @@
 
 ```vue
 <template>
-  <w-splitter />
+  <w-splitter style="height: 200px">
+    <w-splitter-pane>左侧面板</w-splitter-pane>
+    <w-splitter-pane>右侧面板</w-splitter-pane>
+  </w-splitter>
 </template>
 
 <script setup>
-import { WSplitter } from '@windows-ui/core'
+import { WSplitter, WSplitterPane } from '@windows-ui/core'
 </script>
 ```
 

@@ -4,11 +4,17 @@
 
 ```vue
 <template>
-  <w-tree />
+  <w-tree :data="data" :props="defaultProps" @node-click="handleNodeClick" />
 </template>
 
 <script setup>
 import { WTree } from '@windows-ui/core'
+const defaultProps = { children: 'children', label: 'label' }
+const data = [
+  { label: '一级 1', children: [{ label: '二级 1-1' }] },
+  { label: '一级 2', children: [{ label: '二级 2-1' }, { label: '二级 2-2' }] }
+]
+const handleNodeClick = (data) => console.log(data)
 </script>
 ```
 

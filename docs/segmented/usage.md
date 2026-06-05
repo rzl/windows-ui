@@ -4,11 +4,14 @@
 
 ```vue
 <template>
-  <w-segmented />
+  <w-segmented v-model="value" :options="options" />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { WSegmented } from '@windows-ui/core'
+const value = ref('Mon')
+const options = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 </script>
 ```
 

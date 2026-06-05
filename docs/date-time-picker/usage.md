@@ -4,12 +4,12 @@
 
 ```vue
 <template>
-  <w-date-time-picker v-model="value" />
+  <w-date-time-picker v-model="value" placeholder="选择日期时间" />
 </template>
 
 <script setup>
-import { WDateTimePicker } from '@windows-ui/core'
 import { ref } from 'vue'
+import { WDateTimePicker } from '@windows-ui/core'
 const value = ref('')
 </script>
 ```

@@ -4,13 +4,17 @@
 
 ```vue
 <template>
-  <w-radio v-model="value" />
+  <w-radio-group v-model="radio">
+    <w-radio label="1">选项一</w-radio>
+    <w-radio label="2">选项二</w-radio>
+    <w-radio label="3">选项三</w-radio>
+  </w-radio-group>
 </template>
 
 <script setup>
-import { WRadio } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WRadioGroup, WRadio } from '@windows-ui/core'
+const radio = ref('1')
 </script>
 ```
 

@@ -4,11 +4,12 @@
 
 ```vue
 <template>
-  <w-page-header />
+  <w-page-header title="详情页面" content="详情内容" @back="goBack" />
 </template>
 
 <script setup>
 import { WPageHeader } from '@windows-ui/core'
+const goBack = () => console.log('返回上一页')
 </script>
 ```
 

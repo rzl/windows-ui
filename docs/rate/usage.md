@@ -5,12 +5,13 @@
 ```vue
 <template>
   <w-rate v-model="value" />
+  <w-rate v-model="value" show-text />
 </template>
 
 <script setup>
-import { WRate } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WRate } from '@windows-ui/core'
+const value = ref(3)
 </script>
 ```
 

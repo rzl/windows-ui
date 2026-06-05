@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-tooltip />
+  <w-tooltip content="Top center" placement="top">
+    <w-button>上方提示</w-button>
+  </w-tooltip>
 </template>
 
 <script setup>
-import { WTooltip } from '@windows-ui/core'
+import { WTooltip, WButton } from '@windows-ui/core'
 </script>
 ```
 

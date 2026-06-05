@@ -4,11 +4,17 @@
 
 ```vue
 <template>
-  <w-config-provider />
+  <w-config-provider :locale="locale" prefix="w">
+    <w-button>默认按钮</w-button>
+  </w-config-provider>
 </template>
 
 <script setup>
-import { WConfigProvider } from '@windows-ui/core'
+import { WConfigProvider, WButton } from '@windows-ui/core'
+const locale = {
+  name: 'zh-cn',
+  button: { confirm: '确定', cancel: '取消' }
+}
 </script>
 ```
 

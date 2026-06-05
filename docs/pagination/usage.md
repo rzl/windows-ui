@@ -4,11 +4,19 @@
 
 ```vue
 <template>
-  <w-pagination />
+  <w-pagination
+    v-model:current-page="currentPage"
+    v-model:page-size="pageSize"
+    :total="100"
+    layout="total, prev, pager, next"
+  />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { WPagination } from '@windows-ui/core'
+const currentPage = ref(1)
+const pageSize = ref(10)
 </script>
 ```
 

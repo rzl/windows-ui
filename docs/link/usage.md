@@ -4,11 +4,19 @@
 
 ```vue
 <template>
-  <w-link />
+  <w-space>
+    <w-link href="https://example.com" target="_blank">默认链接</w-link>
+    <w-link type="primary">主要链接</w-link>
+    <w-link type="success">成功链接</w-link>
+    <w-link type="warning">警告链接</w-link>
+    <w-link type="danger">危险链接</w-link>
+    <w-link :underline="false">无下划线</w-link>
+    <w-link disabled>禁用状态</w-link>
+  </w-space>
 </template>
 
 <script setup>
-import { WLink } from '@windows-ui/core'
+import { WLink, WSpace } from '@windows-ui/core'
 </script>
 ```
 

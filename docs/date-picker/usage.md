@@ -4,13 +4,15 @@
 
 ```vue
 <template>
-  <w-date-picker v-model="value" />
+  <w-date-picker v-model="value" placeholder="选择日期" />
+  <w-date-picker v-model="valueRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" />
 </template>
 
 <script setup>
-import { WDatePicker } from '@windows-ui/core'
 import { ref } from 'vue'
+import { WDatePicker } from '@windows-ui/core'
 const value = ref('')
+const valueRange = ref('')
 </script>
 ```
 

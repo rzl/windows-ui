@@ -4,11 +4,12 @@
 
 ```vue
 <template>
-  <w-color-picker-panel />
+  <w-color-picker-panel @change="handleChange" />
 </template>
 
 <script setup>
 import { WColorPickerPanel } from '@windows-ui/core'
+const handleChange = (color) => console.log(color)
 </script>
 ```
 

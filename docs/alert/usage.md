@@ -4,7 +4,9 @@
 
 ```vue
 <template>
-  <w-alert />
+  <w-alert title="成功提示" description="这是一条成功的提示信息" type="success" show-icon />
+  <w-alert title="警告提示" description="这是一条警告的提示信息" type="warning" show-icon closable />
+  <w-alert title="错误提示" type="error" center />
 </template>
 
 <script setup>

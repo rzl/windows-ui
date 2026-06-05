@@ -4,13 +4,13 @@
 
 ```vue
 <template>
-  <w-input-tag v-model="value" />
+  <w-input-tag v-model="tags" placeholder="输入后按回车添加标签" />
 </template>
 
 <script setup>
-import { WInputTag } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WInputTag } from '@windows-ui/core'
+const tags = ref(['标签一', '标签二'])
 </script>
 ```
 

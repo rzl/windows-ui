@@ -4,11 +4,16 @@
 
 ```vue
 <template>
-  <w-notification />
+  <w-space>
+    <w-button @click="notify">通知</w-button>
+    <w-button @click="notifySuccess">成功通知</w-button>
+  </w-space>
 </template>
 
 <script setup>
-import { WNotification } from '@windows-ui/core'
+import { WButton, WSpace } from '@windows-ui/core'
+const notify = () => {}
+const notifySuccess = () => {}
 </script>
 ```
 

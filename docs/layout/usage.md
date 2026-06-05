@@ -4,12 +4,27 @@
 
 ```vue
 <template>
-  <w-layout />
+  <w-row :gutter="20">
+    <w-col :span="6"><div class="grid-content">1</div></w-col>
+    <w-col :span="6"><div class="grid-content">2</div></w-col>
+    <w-col :span="6"><div class="grid-content">3</div></w-col>
+    <w-col :span="6"><div class="grid-content">4</div></w-col>
+  </w-row>
 </template>
 
 <script setup>
-import { WLayout } from '@windows-ui/core'
+import { WRow, WCol } from '@windows-ui/core'
 </script>
+
+<style scoped>
+.grid-content {
+  background: #d3dce6;
+  border-radius: 4px;
+  min-height: 36px;
+  text-align: center;
+  line-height: 36px;
+}
+</style>
 ```
 
 ## API

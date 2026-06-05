@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-popover />
+  <w-popover title="标题" content="这是一段内容" placement="top">
+    <w-button>hover 激活</w-button>
+  </w-popover>
 </template>
 
 <script setup>
-import { WPopover } from '@windows-ui/core'
+import { WPopover, WButton } from '@windows-ui/core'
 </script>
 ```
 

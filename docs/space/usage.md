@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-space />
+  <w-space wrap>
+    <w-button v-for="i in 10" :key="i">按钮{{ i }}</w-button>
+  </w-space>
 </template>
 
 <script setup>
-import { WSpace } from '@windows-ui/core'
+import { WSpace, WButton } from '@windows-ui/core'
 </script>
 ```
 

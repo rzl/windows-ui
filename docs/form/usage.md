@@ -4,11 +4,31 @@
 
 ```vue
 <template>
-  <w-form />
+  <w-form :model="form" :rules="rules" ref="formRef">
+    <w-form-item label="用户名" prop="name">
+      <w-input v-model="form.name" />
+    </w-form-item>
+    <w-form-item label="邮箱" prop="email">
+      <w-input v-model="form.email" />
+    </w-form-item>
+    <w-form-item>
+      <w-button type="primary" @click="submitForm">提交</w-button>
+      <w-button @click="resetForm">重置</w-button>
+    </w-form-item>
+  </w-form>
 </template>
 
 <script setup>
-import { WForm } from '@windows-ui/core'
+import { ref, reactive } from 'vue'
+import { WForm, WFormItem, WInput, WButton } from '@windows-ui/core'
+const formRef = ref()
+const form = reactive({ name: '', email: '' })
+const rules = {
+  name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }]
+}
+const submitForm = () => formRef.value.validate()
+const resetForm = () => formRef.value.resetFields()
 </script>
 ```
 

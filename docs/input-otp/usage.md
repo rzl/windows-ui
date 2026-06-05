@@ -4,13 +4,13 @@
 
 ```vue
 <template>
-  <w-input-otp v-model="value" />
+  <w-input-otp v-model="otp" :length="6" />
 </template>
 
 <script setup>
-import { WInputOtp } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WInputOtp } from '@windows-ui/core'
+const otp = ref('')
 </script>
 ```
 

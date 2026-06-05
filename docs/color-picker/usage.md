@@ -4,13 +4,13 @@
 
 ```vue
 <template>
-  <w-color-picker v-model="value" />
+  <w-color-picker v-model="color" />
 </template>
 
 <script setup>
-import { WColorPicker } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WColorPicker } from '@windows-ui/core'
+const color = ref('#409EFF')
 </script>
 ```
 

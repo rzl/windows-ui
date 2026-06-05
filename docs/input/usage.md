@@ -4,12 +4,20 @@
 
 ```vue
 <template>
-  <w-input v-model="value" />
+  <w-space direction="vertical">
+    <w-input v-model="value" placeholder="请输入内容" />
+    <w-input v-model="value" clearable placeholder="可清空" />
+    <w-input v-model="value" prefix-icon="search" placeholder="带前缀图标" />
+    <w-input v-model="value" suffix-icon="calendar" placeholder="带后缀图标" />
+    <w-input v-model="value" disabled placeholder="禁用状态" />
+    <w-input v-model="value" size="small" placeholder="小尺寸" />
+    <w-input v-model="value" size="large" placeholder="大尺寸" />
+  </w-space>
 </template>
 
 <script setup>
-import { WInput } from '@windows-ui/core'
 import { ref } from 'vue'
+import { WInput, WSpace } from '@windows-ui/core'
 const value = ref('')
 </script>
 ```

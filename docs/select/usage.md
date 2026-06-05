@@ -4,11 +4,17 @@
 
 ```vue
 <template>
-  <w-select />
+  <w-select v-model="value" placeholder="请选择">
+    <w-option label="选项一" value="1" />
+    <w-option label="选项二" value="2" />
+    <w-option label="选项三" value="3" />
+  </w-select>
 </template>
 
 <script setup>
-import { WSelect } from '@windows-ui/core'
+import { ref } from 'vue'
+import { WSelect, WOption } from '@windows-ui/core'
+const value = ref('')
 </script>
 ```
 

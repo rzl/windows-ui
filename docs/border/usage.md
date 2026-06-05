@@ -4,12 +4,18 @@
 
 ```vue
 <template>
-  <w-border />
+  <w-border>
+    <div class="content">带边框的内容区域</div>
+  </w-border>
 </template>
 
 <script setup>
 import { WBorder } from '@windows-ui/core'
 </script>
+
+<style scoped>
+.content { padding: 20px; }
+</style>
 ```
 
 ## API

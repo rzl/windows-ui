@@ -4,12 +4,23 @@
 
 ```vue
 <template>
-  <w-card />
+  <w-card style="width: 400px">
+    <template #header>
+      <span>卡片名称</span>
+      <w-button type="text">操作按钮</w-button>
+    </template>
+    <div v-for="o in 4" :key="o" class="text item">{{ "列表内容 " + o }}</div>
+  </w-card>
 </template>
 
 <script setup>
-import { WCard } from '@windows-ui/core'
+import { WCard, WButton } from '@windows-ui/core'
 </script>
+
+<style scoped>
+.text { font-size: 14px; }
+.item { margin-bottom: 18px; }
+</style>
 ```
 
 ## API

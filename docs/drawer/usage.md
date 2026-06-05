@@ -4,13 +4,16 @@
 
 ```vue
 <template>
-  <w-drawer v-model="value" />
+  <w-button @click="visible = true">打开抽屉</w-button>
+  <w-drawer v-model="visible" title="标题" direction="rtl">
+    <p>抽屉内容区域</p>
+  </w-drawer>
 </template>
 
 <script setup>
-import { WDrawer } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WDrawer, WButton } from '@windows-ui/core'
+const visible = ref(false)
 </script>
 ```
 

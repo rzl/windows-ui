@@ -5,12 +5,14 @@
 ```vue
 <template>
   <w-slider v-model="value" />
+  <w-slider v-model="valueRange" range />
 </template>
 
 <script setup>
-import { WSlider } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WSlider } from '@windows-ui/core'
+const value = ref(50)
+const valueRange = ref([20, 80])
 </script>
 ```
 

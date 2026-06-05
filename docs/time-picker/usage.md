@@ -4,12 +4,12 @@
 
 ```vue
 <template>
-  <w-time-picker v-model="value" />
+  <w-time-picker v-model="value" placeholder="选择时间" />
 </template>
 
 <script setup>
-import { WTimePicker } from '@windows-ui/core'
 import { ref } from 'vue'
+import { WTimePicker } from '@windows-ui/core'
 const value = ref('')
 </script>
 ```

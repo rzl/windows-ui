@@ -4,7 +4,7 @@
 
 ```vue
 <template>
-  <w-skeleton />
+  <w-skeleton :rows="5" animated />
 </template>
 
 <script setup>

@@ -4,11 +4,15 @@
 
 ```vue
 <template>
-  <w-descriptions />
+  <w-descriptions title="用户信息" border>
+    <w-descriptions-item label="用户名">kooriookami</w-descriptions-item>
+    <w-descriptions-item label="手机号">18100000000</w-descriptions-item>
+    <w-descriptions-item label="居住地">苏州市</w-descriptions-item>
+  </w-descriptions>
 </template>
 
 <script setup>
-import { WDescriptions } from '@windows-ui/core'
+import { WDescriptions, WDescriptionsItem } from '@windows-ui/core'
 </script>
 ```
 

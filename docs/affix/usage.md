@@ -4,11 +4,13 @@
 
 ```vue
 <template>
-  <w-affix />
+  <w-affix :offset="80">
+    <w-button type="primary">固定在顶部 80px</w-button>
+  </w-affix>
 </template>
 
 <script setup>
-import { WAffix } from '@windows-ui/core'
+import { WAffix, WButton } from '@windows-ui/core'
 </script>
 ```
 

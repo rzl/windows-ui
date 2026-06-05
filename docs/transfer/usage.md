@@ -4,11 +4,14 @@
 
 ```vue
 <template>
-  <w-transfer />
+  <w-transfer v-model="value" :data="data" />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { WTransfer } from '@windows-ui/core'
+const data = Array.from({ length: 15 }, (_, i) => ({ key: i + 1, label: '备选项 ' + (i + 1) }))
+const value = ref([1, 4])
 </script>
 ```
 

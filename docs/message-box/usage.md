@@ -4,11 +4,16 @@
 
 ```vue
 <template>
-  <w-message-box />
+  <w-space>
+    <w-button @click="openMsgBox">打开消息框</w-button>
+    <w-button @click="openConfirm">确认框</w-button>
+  </w-space>
 </template>
 
 <script setup>
-import { WMessageBox } from '@windows-ui/core'
+import { WButton, WSpace } from '@windows-ui/core'
+const openMsgBox = () => {}
+const openConfirm = () => {}
 </script>
 ```
 

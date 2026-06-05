@@ -4,11 +4,14 @@
 
 ```vue
 <template>
-  <w-upload />
+  <w-upload action="https://example.com/upload" :on-success="handleSuccess">
+    <w-button type="primary">点击上传</w-button>
+  </w-upload>
 </template>
 
 <script setup>
-import { WUpload } from '@windows-ui/core'
+import { WUpload, WButton } from '@windows-ui/core'
+const handleSuccess = (res, file) => console.log(file.name + ' 上传成功')
 </script>
 ```
 

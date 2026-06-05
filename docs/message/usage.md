@@ -4,11 +4,16 @@
 
 ```vue
 <template>
-  <w-message />
+  <w-space>
+    <w-button @click="$message.info('这是一条消息')">消息</w-button>
+    <w-button @click="$message.success('成功消息')">成功</w-button>
+    <w-button @click="$message.warning('警告消息')">警告</w-button>
+    <w-button @click="$message.error('错误消息')">错误</w-button>
+  </w-space>
 </template>
 
 <script setup>
-import { WMessage } from '@windows-ui/core'
+import { WButton, WSpace } from '@windows-ui/core'
 </script>
 ```
 

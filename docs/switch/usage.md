@@ -4,13 +4,16 @@
 
 ```vue
 <template>
-  <w-switch v-model="value" />
+  <w-space>
+    <w-switch v-model="value" />
+    <w-switch v-model="value" active-text="开" inactive-text="关" />
+  </w-space>
 </template>
 
 <script setup>
-import { WSwitch } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WSwitch, WSpace } from '@windows-ui/core'
+const value = ref(true)
 </script>
 ```
 

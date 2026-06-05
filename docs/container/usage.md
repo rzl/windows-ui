@@ -4,12 +4,31 @@
 
 ```vue
 <template>
-  <w-container />
+  <w-container>
+    <w-header>Header</w-header>
+    <w-main>Main</w-main>
+    <w-footer>Footer</w-footer>
+  </w-container>
 </template>
 
 <script setup>
-import { WContainer } from '@windows-ui/core'
+import { WContainer, WHeader, WMain, WFooter } from '@windows-ui/core'
 </script>
+
+<style scoped>
+.w-header, .w-footer {
+  background-color: #b3c0d1;
+  color: #333;
+  text-align: center;
+  line-height: 60px;
+}
+.w-main {
+  background-color: #e9eef3;
+  color: #333;
+  text-align: center;
+  line-height: 160px;
+}
+</style>
 ```
 
 ## API

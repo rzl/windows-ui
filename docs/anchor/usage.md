@@ -4,11 +4,16 @@
 
 ```vue
 <template>
-  <w-anchor />
+  <w-anchor :links="links" />
 </template>
 
 <script setup>
 import { WAnchor } from '@windows-ui/core'
+const links = [
+  { href: '#basic', title: '基础用法' },
+  { href: '#api', title: 'API' },
+  { href: '#theme', title: '主题定制' }
+]
 </script>
 ```
 

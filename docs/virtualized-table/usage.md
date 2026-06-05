@@ -4,11 +4,21 @@
 
 ```vue
 <template>
-  <w-virtualized-table />
+  <w-virtualized-table :data="data" :columns="columns" :height="400" />
 </template>
 
 <script setup>
 import { WVirtualizedTable } from '@windows-ui/core'
+const columns = [
+  { prop: 'id', label: 'ID', width: 80 },
+  { prop: 'name', label: '名称' },
+  { prop: 'date', label: '日期' }
+]
+const data = Array.from({ length: 1000 }, (_, i) => ({
+  id: i + 1,
+  name: '用户 ' + (i + 1),
+  date: '2024-01-01'
+}))
 </script>
 ```
 

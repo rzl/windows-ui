@@ -4,7 +4,9 @@
 
 ```vue
 <template>
-  <w-watermark />
+  <w-watermark content="Windows UI" :font="{ color: 'rgba(0,0,0,0.1)' }">
+    <div style="height: 300px;">内容区域</div>
+  </w-watermark>
 </template>
 
 <script setup>

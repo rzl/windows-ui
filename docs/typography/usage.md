@@ -4,7 +4,12 @@
 
 ```vue
 <template>
-  <w-typography />
+  <w-typography>
+    <h1>标题一</h1>
+    <h2>标题二</h2>
+    <p>这是一段普通文本，包含 <strong>加粗</strong> 和 <em>斜体</em> 样式。</p>
+    <p>代码片段：<code>const a = 1</code></p>
+  </w-typography>
 </template>
 
 <script setup>

@@ -4,11 +4,20 @@
 
 ```vue
 <template>
-  <w-collapse />
+  <w-collapse v-model="activeNames">
+    <w-collapse-item title="一致性 Consistency" name="1">
+      <div>与现实生活一致：与现实生活的流程、逻辑保持一致。</div>
+    </w-collapse-item>
+    <w-collapse-item title="反馈 Feedback" name="2">
+      <div>控制反馈：通过界面样式和交互动效让用户感知操作。</div>
+    </w-collapse-item>
+  </w-collapse>
 </template>
 
 <script setup>
-import { WCollapse } from '@windows-ui/core'
+import { ref } from 'vue'
+import { WCollapse, WCollapseItem } from '@windows-ui/core'
+const activeNames = ref(['1'])
 </script>
 ```
 

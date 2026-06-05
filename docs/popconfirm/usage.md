@@ -4,11 +4,14 @@
 
 ```vue
 <template>
-  <w-popconfirm />
+  <w-popconfirm title="确定删除吗？" @confirm="handleConfirm">
+    <w-button>删除</w-button>
+  </w-popconfirm>
 </template>
 
 <script setup>
-import { WPopconfirm } from '@windows-ui/core'
+import { WPopconfirm, WButton } from '@windows-ui/core'
+const handleConfirm = () => console.log('确认删除')
 </script>
 ```
 

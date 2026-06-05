@@ -4,11 +4,22 @@
 
 ```vue
 <template>
-  <w-button />
+  <w-space wrap>
+    <w-button>默认按钮</w-button>
+    <w-button type="primary">主要按钮</w-button>
+    <w-button type="success">成功按钮</w-button>
+    <w-button type="warning">警告按钮</w-button>
+    <w-button type="danger">危险按钮</w-button>
+    <w-button type="info">信息按钮</w-button>
+    <w-button plain>朴素按钮</w-button>
+    <w-button round>圆角按钮</w-button>
+    <w-button icon="search" />
+    <w-button type="primary" disabled>禁用状态</w-button>
+  </w-space>
 </template>
 
 <script setup>
-import { WButton } from '@windows-ui/core'
+import { WButton, WSpace } from '@windows-ui/core'
 </script>
 ```
 

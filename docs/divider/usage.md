@@ -4,7 +4,13 @@
 
 ```vue
 <template>
-  <w-divider />
+  <span>雨纷纷</span>
+  <w-divider direction="vertical" />
+  <span>旧故里</span>
+  <w-divider direction="vertical" />
+  <span>草木深</span>
+  <w-divider content-position="left">左侧文本</w-divider>
+  <w-divider content-position="right">右侧文本</w-divider>
 </template>
 
 <script setup>

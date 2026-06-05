@@ -4,13 +4,13 @@
 
 ```vue
 <template>
-  <w-input-number v-model="value" />
+  <w-input-number v-model="num" :min="1" :max="10" />
 </template>
 
 <script setup>
-import { WInputNumber } from '@windows-ui/core'
 import { ref } from 'vue'
-const value = ref('')
+import { WInputNumber } from '@windows-ui/core'
+const num = ref(1)
 </script>
 ```
 

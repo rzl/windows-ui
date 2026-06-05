@@ -4,11 +4,15 @@
 
 ```vue
 <template>
-  <w-steps />
+  <w-steps :active="1">
+    <w-step title="步骤 1" description="描述信息" />
+    <w-step title="步骤 2" description="描述信息" />
+    <w-step title="步骤 3" description="描述信息" />
+  </w-steps>
 </template>
 
 <script setup>
-import { WSteps } from '@windows-ui/core'
+import { WSteps, WStep } from '@windows-ui/core'
 </script>
 ```
 

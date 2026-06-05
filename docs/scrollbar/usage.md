@@ -4,7 +4,9 @@
 
 ```vue
 <template>
-  <w-scrollbar />
+  <w-scrollbar height="200px">
+    <p v-for="item in 20" :key="item">{{ item }}</p>
+  </w-scrollbar>
 </template>
 
 <script setup>

@@ -4,11 +4,19 @@
 
 ```vue
 <template>
-  <w-tag />
+  <w-space>
+    <w-tag>默认标签</w-tag>
+    <w-tag type="success">成功</w-tag>
+    <w-tag type="warning">警告</w-tag>
+    <w-tag type="danger">危险</w-tag>
+    <w-tag type="info">信息</w-tag>
+    <w-tag closable @close="handleClose">可关闭</w-tag>
+  </w-space>
 </template>
 
 <script setup>
-import { WTag } from '@windows-ui/core'
+import { WTag, WSpace } from '@windows-ui/core'
+const handleClose = () => console.log('关闭标签')
 </script>
 ```
 

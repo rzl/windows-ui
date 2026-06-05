@@ -4,11 +4,20 @@
 
 ```vue
 <template>
-  <w-loading />
+  <w-button @click="handleClick">显示加载中</w-button>
+  <div v-loading="loading" style="height: 100px; margin-top: 20px;">
+    加载区域
+  </div>
 </template>
 
 <script setup>
-import { WLoading } from '@windows-ui/core'
+import { ref } from 'vue'
+import { WButton } from '@windows-ui/core'
+const loading = ref(false)
+const handleClick = () => {
+  loading.value = true
+  setTimeout(() => loading.value = false, 2000)
+}
 </script>
 ```
 
