@@ -29,6 +29,11 @@
                 <template #footer><w-button @click="dialogs.nested = false">取消</w-button><w-button type="primary" @click="dialogs.nested = false">保存</w-button></template>
               </w-dialog>
             </demo-block>
+            <demo-block title="禁止拖动" code="&lt;w-button @click=&quot;dialogs.noDrag = true&quot;&gt;禁止拖动&lt;/w-button&gt;
+      &lt;w-dialog v-model=&quot;dialogs.noDrag&quot; title=&quot;不可拖动&quot; :draggable=&quot;false&quot;&gt;&lt;p&gt;该对话框头部不可拖动&lt;/p&gt;&lt;/w-dialog&gt;">
+              <w-button @click="dialogs.noDrag = true">禁止拖动</w-button>
+              <w-dialog v-model="dialogs.noDrag" title="不可拖动" :draggable="false"><p>该对话框头部不可拖动</p></w-dialog>
+            </demo-block>
 
     </demo-section>
   </div>
@@ -39,7 +44,7 @@ import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
 
-const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false })
+const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false, noDrag: false })
 const drawers = reactive({ right: false, bottom: false, left: false, stay: false })
 const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)

@@ -2,8 +2,17 @@
   <teleport to="body">
     <transition name="w-dialog-fade">
       <div v-if="modelValue" class="w-dialog__wrapper" @click.self="handleWrapperClick">
-        <div class="w-dialog" :style="{ width: `${width}px` }">
-          <div class="w-dialog__header">
+        <div
+          ref="dialogRef"
+          class="w-dialog"
+          :class="{ 'is-dragging': isDragging }"
+          :style="dialogStyle"
+        >
+          <div
+            class="w-dialog__header"
+            :class="{ 'is-draggable': draggable }"
+            @mousedown="handleMouseDown"
+          >
             <span class="w-dialog__title">{{ title }}</span>
             <w-icon name="close" size="small" class="w-dialog__close" @click="close" />
           </div>
@@ -23,30 +32,161 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
 
 defineOptions({ name: 'WDialog' })
+
 const props = defineProps({
   modelValue: Boolean,
   title: { type: String, default: '提示' },
   width: { type: Number, default: 420 },
-  closeOnClickModal: { type: Boolean, default: true }
+  closeOnClickModal: { type: Boolean, default: true },
+  draggable: { type: Boolean, default: true }
 })
+
 const emit = defineEmits(['update:modelValue', 'close', 'confirm'])
 
-const close = () => { emit('update:modelValue', false); emit('close') }
-const confirm = () => { emit('confirm'); close() }
-const handleWrapperClick = () => { if (props.closeOnClickModal) close() }
+const dialogRef = ref<HTMLElement>()
+const offset = ref({ x: 0, y: 0 })
+const isDragging = ref(false)
+const dragMoved = ref(false)
+
+const dialogStyle = computed(() => {
+  return {
+    width: `${props.width}px`,
+    transform: `translate(${offset.value.x}px, ${offset.value.y}px)`
+  }
+})
+
+let startX = 0
+let startY = 0
+let startOffsetX = 0
+let startOffsetY = 0
+
+const close = () => {
+  emit('update:modelValue', false)
+  emit('close')
+}
+
+const confirm = () => {
+  emit('confirm')
+  close()
+}
+
+const handleWrapperClick = () => {
+  if (dragMoved.value) return
+  if (props.closeOnClickModal) close()
+}
+
+const handleMouseDown = (e: MouseEvent) => {
+  if (!props.draggable) return
+  isDragging.value = true
+  dragMoved.value = false
+  startX = e.clientX
+  startY = e.clientY
+  startOffsetX = offset.value.x
+  startOffsetY = offset.value.y
+  window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('mouseup', handleMouseUp)
+}
+
+const handleMouseMove = (e: MouseEvent) => {
+  if (!isDragging.value) return
+  const dx = e.clientX - startX
+  const dy = e.clientY - startY
+  if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+    dragMoved.value = true
+  }
+  offset.value = {
+    x: startOffsetX + dx,
+    y: startOffsetY + dy
+  }
+}
+
+const handleMouseUp = () => {
+  isDragging.value = false
+  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('mouseup', handleMouseUp)
+  setTimeout(() => { dragMoved.value = false }, 100)
+}
+
+watch(() => props.modelValue, (val) => {
+  if (val) {
+    offset.value = { x: 0, y: 0 }
+  }
+})
 </script>
 
 <style scoped>
-.w-dialog__wrapper { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-.w-dialog { background: var(--w-bg-color); border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: var(--w-box-shadow-dark); font-family: var(--w-font-family); }
-.w-dialog__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: linear-gradient(180deg, #1f91e5, #1a6fdc, #1a5dc6); color: #fff; font-weight: bold; font-size: var(--w-font-size-medium); }
-.w-dialog__close { cursor: pointer; }
-.w-dialog__body { padding: 16px; font-size: var(--w-font-size-base); }
-.w-dialog__footer { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 16px; border-top: 1px solid #d4d0c8; }
-.w-dialog-fade-enter-active, .w-dialog-fade-leave-active { transition: opacity 0.3s; }
-.w-dialog-fade-enter-from, .w-dialog-fade-leave-to { opacity: 0; }
+.w-dialog__wrapper {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.w-dialog {
+  background: var(--w-bg-color);
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  box-shadow: var(--w-box-shadow-dark);
+  font-family: var(--w-font-family);
+  transition: transform 0s;
+}
+
+.w-dialog.is-dragging {
+  transition: none;
+}
+
+.w-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, #1f91e5, #1a6fdc, #1a5dc6);
+  color: #fff;
+  font-weight: bold;
+  font-size: var(--w-font-size-medium);
+  user-select: none;
+}
+
+.w-dialog__header.is-draggable {
+  cursor: move;
+}
+
+.w-dialog__header.is-draggable:active {
+  cursor: grabbing;
+}
+
+.w-dialog__close {
+  cursor: pointer;
+}
+
+.w-dialog__body {
+  padding: 16px;
+  font-size: var(--w-font-size-base);
+}
+
+.w-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid #d4d0c8;
+}
+
+.w-dialog-fade-enter-active,
+.w-dialog-fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.w-dialog-fade-enter-from,
+.w-dialog-fade-leave-to {
+  opacity: 0;
+}
 </style>

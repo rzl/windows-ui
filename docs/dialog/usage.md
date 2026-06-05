@@ -21,6 +21,18 @@ const visible = ref(false)
 </script>
 ```
 
+## 禁止拖动
+
+默认情况下对话框头部可拖动，可通过 `draggable` 属性禁用：
+
+```vue
+<template>
+  <w-dialog v-model="visible" title="不可拖动" :draggable="false">
+    <p>该对话框头部不可拖动</p>
+  </w-dialog>
+</template>
+```
+
 ## API
 
 ### Props
@@ -31,6 +43,7 @@ const visible = ref(false)
 | title | 标题 | string | 提示 |
 | width | 宽度 | number | 420 |
 | closeOnClickModal | 点击遮罩是否关闭 | boolean | true |
+| draggable | 头部是否允许拖动 | boolean | true |
 
 ### Events
 
