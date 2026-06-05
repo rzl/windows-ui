@@ -10,10 +10,17 @@
 </template>
 
 <script setup lang="ts">
+import { reactive } from 'vue'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 
 const title = 'Autocomplete 自动补全'
+const form = reactive({ auto: '' })
+const autocompleteOptions = [
+  { value: '苹果', label: '苹果' },
+  { value: '香蕉', label: '香蕉' },
+  { value: '橙子', label: '橙子' },
+]
 </script>
 
 <style scoped>

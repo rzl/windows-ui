@@ -10,10 +10,16 @@
 </template>
 
 <script setup lang="ts">
+import { reactive } from 'vue'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 
 const title = 'Calendar 日历'
+const form = reactive({ date: new Date() })
+const calendarEvents = [
+  { date: '2024-01-01', title: '元旦' },
+  { date: '2024-01-15', title: '会议' },
+]
 </script>
 
 <style scoped>
