@@ -18,6 +18,7 @@
               <span class="w-dialog__title">{{ title }}</span>
             </slot>
             <div class="w-dialog__actions">
+              <slot name="action" />
               <w-icon
                 :name="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
                 size="small"

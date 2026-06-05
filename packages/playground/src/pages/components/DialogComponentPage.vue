@@ -49,6 +49,11 @@
               <w-button @click="dialogs.customHeader = true">自定义标题</w-button>
               <w-dialog v-model="dialogs.customHeader"><template #header><w-icon name="warning" size="small" /><span style="margin-left:6px">警告提示</span></template><p>使用 header 插槽自定义标题栏内容。</p><template #footer><w-button @click="dialogs.customHeader = false">知道了</w-button></template></w-dialog>
             </demo-block>
+            <demo-block title="自定义操作按钮" code="&lt;w-button @click=&quot;dialogs.customAction = true&quot;&gt;自定义操作&lt;/w-button&gt;
+      &lt;w-dialog v-model=&quot;dialogs.customAction&quot; title=&quot;操作按钮&quot;&gt;&lt;template #action&gt;&lt;w-icon name=&quot;info&quot; size=&quot;small&quot; style=&quot;cursor:pointer&quot; @click=&quot;alert('更多信息')&quot; /&gt;&lt;/template&gt;&lt;p&gt;使用 action 插槽在全屏按钮左侧插入自定义图标或按钮。&lt;/p&gt;&lt;template #footer&gt;&lt;w-button @click=&quot;dialogs.customAction = false&quot;&gt;关闭&lt;/w-button&gt;&lt;/template&gt;&lt;/w-dialog&gt;">
+              <w-button @click="dialogs.customAction = true">自定义操作</w-button>
+              <w-dialog v-model="dialogs.customAction" title="操作按钮"><template #action><w-icon name="info" size="small" style="cursor:pointer" @click="alert('更多信息')" /></template><p>使用 action 插槽在全屏按钮左侧插入自定义图标或按钮。</p><template #footer><w-button @click="dialogs.customAction = false">关闭</w-button></template></w-dialog>
+            </demo-block>
 
     </demo-section>
   </div>
@@ -59,7 +64,7 @@ import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
 
-const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false, noDrag: false, full: false, fullDefault: false, customHeader: false })
+const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false, noDrag: false, full: false, fullDefault: false, customHeader: false, customAction: false })
 const drawers = reactive({ right: false, bottom: false, left: false, stay: false })
 const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)

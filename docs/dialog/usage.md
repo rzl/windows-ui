@@ -63,6 +63,21 @@ const visible = ref(false)
 </template>
 ```
 
+## 自定义操作按钮
+
+通过 `action` 插槽在全屏按钮左侧插入自定义图标或按钮：
+
+```vue
+<template>
+  <w-dialog v-model="visible" title="操作按钮">
+    <template #action>
+      <w-icon name="info" size="small" style="cursor: pointer" @click="handleInfo" />
+    </template>
+    <p>自定义操作按钮内容</p>
+  </w-dialog>
+</template>
+```
+
 ## API
 
 ### Props
@@ -90,6 +105,7 @@ const visible = ref(false)
 |--------|------|
 | default | 默认内容 |
 | header | 标题内容，覆盖 `title` 属性 |
+| action | 自定义操作按钮，插入在全屏按钮左侧 |
 | footer | 底部内容 |
 
 ## 主题定制
