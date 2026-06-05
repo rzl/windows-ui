@@ -4,12 +4,17 @@
     <div class="demo-block__content">
       <slot />
     </div>
+    <code-block v-if="code" :code="code" />
+    <slot name="code" />
   </div>
 </template>
 
 <script setup lang="ts">
+import CodeBlock from './CodeBlock.vue'
+
 defineProps({
-  title: String
+  title: String,
+  code: String
 })
 </script>
 
