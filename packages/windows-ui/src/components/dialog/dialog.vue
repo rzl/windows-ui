@@ -14,7 +14,9 @@
             @mousedown="handleMouseDown"
             @touchstart.passive="handleTouchStart"
           >
-            <span class="w-dialog__title">{{ title }}</span>
+            <slot name="header">
+              <span class="w-dialog__title">{{ title }}</span>
+            </slot>
             <div class="w-dialog__actions">
               <w-icon
                 :name="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"

@@ -47,6 +47,22 @@ const visible = ref(false)
 
 对话框头部右侧提供全屏切换图标，用户可随时在窗口模式与全屏模式之间切换。设置 `fullscreen` 仅影响初始状态。
 
+## 自定义标题
+
+通过 `header` 插槽自定义标题栏内容：
+
+```vue
+<template>
+  <w-dialog v-model="visible">
+    <template #header>
+      <w-icon name="warning" size="small" />
+      <span style="margin-left: 6px">警告提示</span>
+    </template>
+    <p>自定义标题内容</p>
+  </w-dialog>
+</template>
+```
+
 ## API
 
 ### Props
@@ -73,6 +89,7 @@ const visible = ref(false)
 | 插槽名 | 说明 |
 |--------|------|
 | default | 默认内容 |
+| header | 标题内容，覆盖 `title` 属性 |
 | footer | 底部内容 |
 
 ## 主题定制
