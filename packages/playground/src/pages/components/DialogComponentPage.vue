@@ -35,9 +35,14 @@
               <w-dialog v-model="dialogs.noDrag" title="不可拖动" :draggable="false"><p>该对话框头部不可拖动</p></w-dialog>
             </demo-block>
             <demo-block title="全屏对话框" code="&lt;w-button @click=&quot;dialogs.full = true&quot;&gt;全屏对话框&lt;/w-button&gt;
-      &lt;w-dialog v-model=&quot;dialogs.full&quot; title=&quot;全屏模式&quot; fullscreen&gt;&lt;p&gt;全屏对话框占满整个视口，内容区域自动撑开。&lt;/p&gt;&lt;template #footer&gt;&lt;w-button @click=&quot;dialogs.full = false&quot;&gt;关闭&lt;/w-button&gt;&lt;/template&gt;&lt;/w-dialog&gt;">
+      &lt;w-dialog v-model=&quot;dialogs.full&quot; title=&quot;全屏模式&quot;&gt;&lt;p&gt;点击标题栏图标可切换全屏/窗口模式。&lt;/p&gt;&lt;template #footer&gt;&lt;w-button @click=&quot;dialogs.full = false&quot;&gt;关闭&lt;/w-button&gt;&lt;/template&gt;&lt;/w-dialog&gt;">
               <w-button @click="dialogs.full = true">全屏对话框</w-button>
-              <w-dialog v-model="dialogs.full" title="全屏模式" fullscreen><p>全屏对话框占满整个视口，内容区域自动撑开。</p><template #footer><w-button @click="dialogs.full = false">关闭</w-button></template></w-dialog>
+              <w-dialog v-model="dialogs.full" title="全屏模式"><p>点击标题栏图标可切换全屏/窗口模式。</p><template #footer><w-button @click="dialogs.full = false">关闭</w-button></template></w-dialog>
+            </demo-block>
+            <demo-block title="默认全屏" code="&lt;w-button @click=&quot;dialogs.fullDefault = true&quot;&gt;默认全屏&lt;/w-button&gt;
+      &lt;w-dialog v-model=&quot;dialogs.fullDefault&quot; title=&quot;默认全屏&quot; fullscreen&gt;&lt;p&gt;打开时直接进入全屏模式，仍可点击图标退出。&lt;/p&gt;&lt;template #footer&gt;&lt;w-button @click=&quot;dialogs.fullDefault = false&quot;&gt;关闭&lt;/w-button&gt;&lt;/template&gt;&lt;/w-dialog&gt;">
+              <w-button @click="dialogs.fullDefault = true">默认全屏</w-button>
+              <w-dialog v-model="dialogs.fullDefault" title="默认全屏" fullscreen><p>打开时直接进入全屏模式，仍可点击图标退出。</p><template #footer><w-button @click="dialogs.fullDefault = false">关闭</w-button></template></w-dialog>
             </demo-block>
 
     </demo-section>
@@ -49,7 +54,7 @@ import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
 
-const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false, noDrag: false, full: false })
+const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false, noDrag: false, full: false, fullDefault: false })
 const drawers = reactive({ right: false, bottom: false, left: false, stay: false })
 const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)

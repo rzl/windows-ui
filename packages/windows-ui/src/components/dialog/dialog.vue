@@ -5,17 +5,25 @@
         <div
           ref="dialogRef"
           class="w-dialog"
-          :class="{ 'is-dragging': isDragging, 'is-fullscreen': fullscreen }"
+          :class="{ 'is-dragging': isDragging, 'is-fullscreen': isFullscreen }"
           :style="dialogStyle"
         >
           <div
             class="w-dialog__header"
-            :class="{ 'is-draggable': draggable }"
+            :class="{ 'is-draggable': draggable && !isFullscreen }"
             @mousedown="handleMouseDown"
             @touchstart.passive="handleTouchStart"
           >
             <span class="w-dialog__title">{{ title }}</span>
-            <w-icon name="close" size="small" class="w-dialog__close" @click="close" />
+            <div class="w-dialog__actions">
+              <w-icon
+                :name="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
+                size="small"
+                class="w-dialog__fullscreen"
+                @click="toggleFullscreen"
+              />
+              <w-icon name="close" size="small" class="w-dialog__close" @click="close" />
+            </div>
           </div>
           <div class="w-dialog__body">
             <slot />
@@ -54,9 +62,10 @@ const dialogRef = ref<HTMLElement>()
 const offset = ref({ x: 0, y: 0 })
 const isDragging = ref(false)
 const dragMoved = ref(false)
+const isFullscreen = ref(props.fullscreen)
 
 const dialogStyle = computed(() => {
-  if (props.fullscreen) {
+  if (isFullscreen.value) {
     return {
       width: '100%',
       height: '100%',
@@ -68,6 +77,10 @@ const dialogStyle = computed(() => {
     transform: `translate(${offset.value.x}px, ${offset.value.y}px)`
   }
 })
+
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value
+}
 
 let startX = 0
 let startY = 0
@@ -117,7 +130,7 @@ const endDrag = () => {
 }
 
 const handleMouseDown = (e: MouseEvent) => {
-  if (!props.draggable || props.fullscreen) return
+  if (!props.draggable || isFullscreen.value) return
   startDrag(e.clientX, e.clientY)
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', handleMouseUp)
@@ -134,7 +147,7 @@ const handleMouseUp = () => {
 }
 
 const handleTouchStart = (e: TouchEvent) => {
-  if (!props.draggable || props.fullscreen) return
+  if (!props.draggable || isFullscreen.value) return
   const touch = e.touches[0]
   startDrag(touch.clientX, touch.clientY)
   window.addEventListener('touchmove', handleTouchMove, { passive: false })
@@ -156,6 +169,7 @@ const handleTouchEnd = () => {
 watch(() => props.modelValue, (val) => {
   if (val) {
     offset.value = { x: 0, y: 0 }
+    isFullscreen.value = props.fullscreen
   }
 })
 </script>
@@ -221,6 +235,13 @@ watch(() => props.modelValue, (val) => {
   cursor: grabbing;
 }
 
+.w-dialog__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.w-dialog__fullscreen,
 .w-dialog__close {
   cursor: pointer;
 }

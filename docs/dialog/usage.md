@@ -35,7 +35,7 @@ const visible = ref(false)
 
 ## 全屏对话框
 
-通过 `fullscreen` 属性让对话框占满整个视口：
+通过 `fullscreen` 属性让对话框打开时直接进入全屏模式：
 
 ```vue
 <template>
@@ -44,6 +44,8 @@ const visible = ref(false)
   </w-dialog>
 </template>
 ```
+
+对话框头部右侧提供全屏切换图标，用户可随时在窗口模式与全屏模式之间切换。设置 `fullscreen` 仅影响初始状态。
 
 ## API
 
