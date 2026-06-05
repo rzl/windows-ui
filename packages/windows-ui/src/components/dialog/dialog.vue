@@ -12,6 +12,7 @@
             class="w-dialog__header"
             :class="{ 'is-draggable': draggable }"
             @mousedown="handleMouseDown"
+            @touchstart.passive="handleTouchStart"
           >
             <span class="w-dialog__title">{{ title }}</span>
             <w-icon name="close" size="small" class="w-dialog__close" @click="close" />
@@ -80,22 +81,19 @@ const handleWrapperClick = () => {
   if (props.closeOnClickModal) close()
 }
 
-const handleMouseDown = (e: MouseEvent) => {
-  if (!props.draggable) return
+const startDrag = (clientX: number, clientY: number) => {
   isDragging.value = true
   dragMoved.value = false
-  startX = e.clientX
-  startY = e.clientY
+  startX = clientX
+  startY = clientY
   startOffsetX = offset.value.x
   startOffsetY = offset.value.y
-  window.addEventListener('mousemove', handleMouseMove)
-  window.addEventListener('mouseup', handleMouseUp)
 }
 
-const handleMouseMove = (e: MouseEvent) => {
+const moveDrag = (clientX: number, clientY: number) => {
   if (!isDragging.value) return
-  const dx = e.clientX - startX
-  const dy = e.clientY - startY
+  const dx = clientX - startX
+  const dy = clientY - startY
   if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
     dragMoved.value = true
   }
@@ -105,11 +103,46 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 }
 
-const handleMouseUp = () => {
+const endDrag = () => {
   isDragging.value = false
+  setTimeout(() => { dragMoved.value = false }, 100)
+}
+
+const handleMouseDown = (e: MouseEvent) => {
+  if (!props.draggable) return
+  startDrag(e.clientX, e.clientY)
+  window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('mouseup', handleMouseUp)
+}
+
+const handleMouseMove = (e: MouseEvent) => {
+  moveDrag(e.clientX, e.clientY)
+}
+
+const handleMouseUp = () => {
+  endDrag()
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('mouseup', handleMouseUp)
-  setTimeout(() => { dragMoved.value = false }, 100)
+}
+
+const handleTouchStart = (e: TouchEvent) => {
+  if (!props.draggable) return
+  const touch = e.touches[0]
+  startDrag(touch.clientX, touch.clientY)
+  window.addEventListener('touchmove', handleTouchMove, { passive: false })
+  window.addEventListener('touchend', handleTouchEnd)
+}
+
+const handleTouchMove = (e: TouchEvent) => {
+  e.preventDefault()
+  const touch = e.touches[0]
+  moveDrag(touch.clientX, touch.clientY)
+}
+
+const handleTouchEnd = () => {
+  endDrag()
+  window.removeEventListener('touchmove', handleTouchMove)
+  window.removeEventListener('touchend', handleTouchEnd)
 }
 
 watch(() => props.modelValue, (val) => {
@@ -157,6 +190,7 @@ watch(() => props.modelValue, (val) => {
 
 .w-dialog__header.is-draggable {
   cursor: move;
+  touch-action: none;
 }
 
 .w-dialog__header.is-draggable:active {
