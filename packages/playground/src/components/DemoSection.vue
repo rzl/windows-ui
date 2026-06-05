@@ -22,6 +22,21 @@
 <script setup lang="ts">
 import { ref, computed, watch, inject, onMounted, onUnmounted } from 'vue'
 import { marked } from 'marked'
+import hljs from 'highlight.js/lib/core'
+import xml from 'highlight.js/lib/languages/xml'
+import javascript from 'highlight.js/lib/languages/javascript'
+import css from 'highlight.js/lib/languages/css'
+import typescript from 'highlight.js/lib/languages/typescript'
+import bash from 'highlight.js/lib/languages/bash'
+import json from 'highlight.js/lib/languages/json'
+import 'highlight.js/styles/github-dark.css'
+
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('json', json)
 
 const props = defineProps({
   id: String,
@@ -33,6 +48,20 @@ const props = defineProps({
 const showDocs = ref(true)
 const docContent = ref('')
 const toggleDocs = () => { showDocs.value = !showDocs.value }
+
+const renderer = new marked.Renderer()
+renderer.code = (token: any) => {
+  const code = token.text || ''
+  const lang = token.lang || ''
+  let highlighted = ''
+  if (lang && hljs.getLanguage(lang)) {
+    highlighted = hljs.highlight(code, { language: lang }).value
+  } else {
+    highlighted = hljs.highlightAuto(code).value
+  }
+  return `<pre><code class="hljs language-${lang || 'plaintext'}">${highlighted}</code></pre>`
+}
+marked.use({ renderer })
 
 const renderedDoc = computed(() => {
   return marked.parse(docContent.value || '暂无文档内容', { async: false })
