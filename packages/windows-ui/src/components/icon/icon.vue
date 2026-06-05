@@ -5,6 +5,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+defineOptions({ name: 'WIcon' })
+
 const props = defineProps({
   name: { type: String, required: true },
   size: { type: String, default: 'default' },
