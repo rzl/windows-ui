@@ -30,7 +30,7 @@ import WButton from '../button/button.vue'
 
 defineOptions({ name: 'WCalendar' })
 const props = defineProps({
-  modelValue: String,
+  modelValue: { type: [String, Date] as () => (string | Date), default: '' },
   events: { type: Array as () => { date: string; title: string }[], default: () => [] }
 })
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -59,7 +59,13 @@ const days = computed(() => {
 
 const isSelected = (day: any) => {
   if (!props.modelValue || !day.current) return false
-  const [y, m, d] = props.modelValue.split('-').map(Number)
+  let dateStr: string
+  if (props.modelValue instanceof Date) {
+    dateStr = `${props.modelValue.getFullYear()}-${String(props.modelValue.getMonth() + 1).padStart(2, '0')}-${String(props.modelValue.getDate()).padStart(2, '0')}`
+  } else {
+    dateStr = String(props.modelValue)
+  }
+  const [y, m, d] = dateStr.split('-').map(Number)
   return y === currentYear.value && m === currentMonth.value + 1 && d === day.date
 }
 
