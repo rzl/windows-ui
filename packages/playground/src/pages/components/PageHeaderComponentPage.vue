@@ -14,6 +14,8 @@
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 
+const alert = (msg: string) => window.alert(msg)
+
 const title = 'Page Header 页头'
 </script>
 

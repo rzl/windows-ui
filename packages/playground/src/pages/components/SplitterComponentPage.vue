@@ -21,6 +21,8 @@
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 
+const iconNames = ['info','warning','error','success','close','folder','file','search','user','star','arrowUp','arrowDown','arrowLeft','arrowRight','menu','home','loading']
+
 const title = 'Splitter 分隔面板'
 </script>
 

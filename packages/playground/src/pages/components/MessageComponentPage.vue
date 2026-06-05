@@ -44,6 +44,15 @@
 <script setup lang="ts">
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+import { reactive, ref } from 'vue'
+
+const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false })
+const drawers = reactive({ right: false, bottom: false, left: false, stay: false })
+const msgRef = ref<any>(null)
+const notifyRef = ref<any>(null)
+const msgBoxRef = ref<any>(null)
+
+const alert = (msg: string) => window.alert(msg)
 
 const title = 'Message 消息提示'
 </script>
