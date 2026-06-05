@@ -33,6 +33,18 @@ const visible = ref(false)
 </template>
 ```
 
+## 全屏对话框
+
+通过 `fullscreen` 属性让对话框占满整个视口：
+
+```vue
+<template>
+  <w-dialog v-model="visible" title="全屏模式" fullscreen>
+    <p>全屏对话框内容区域自动撑开</p>
+  </w-dialog>
+</template>
+```
+
 ## API
 
 ### Props
@@ -44,6 +56,7 @@ const visible = ref(false)
 | width | 宽度 | number | 420 |
 | closeOnClickModal | 点击遮罩是否关闭 | boolean | true |
 | draggable | 头部是否允许拖动 | boolean | true |
+| fullscreen | 是否全屏显示 | boolean | false |
 
 ### Events
 

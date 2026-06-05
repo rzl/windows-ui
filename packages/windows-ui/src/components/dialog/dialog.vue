@@ -5,7 +5,7 @@
         <div
           ref="dialogRef"
           class="w-dialog"
-          :class="{ 'is-dragging': isDragging }"
+          :class="{ 'is-dragging': isDragging, 'is-fullscreen': fullscreen }"
           :style="dialogStyle"
         >
           <div
@@ -44,7 +44,8 @@ const props = defineProps({
   title: { type: String, default: '提示' },
   width: { type: Number, default: 420 },
   closeOnClickModal: { type: Boolean, default: true },
-  draggable: { type: Boolean, default: true }
+  draggable: { type: Boolean, default: true },
+  fullscreen: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['update:modelValue', 'close', 'confirm'])
@@ -55,6 +56,13 @@ const isDragging = ref(false)
 const dragMoved = ref(false)
 
 const dialogStyle = computed(() => {
+  if (props.fullscreen) {
+    return {
+      width: '100%',
+      height: '100%',
+      transform: 'none'
+    }
+  }
   return {
     width: `${props.width}px`,
     transform: `translate(${offset.value.x}px, ${offset.value.y}px)`
@@ -109,7 +117,7 @@ const endDrag = () => {
 }
 
 const handleMouseDown = (e: MouseEvent) => {
-  if (!props.draggable) return
+  if (!props.draggable || props.fullscreen) return
   startDrag(e.clientX, e.clientY)
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', handleMouseUp)
@@ -126,7 +134,7 @@ const handleMouseUp = () => {
 }
 
 const handleTouchStart = (e: TouchEvent) => {
-  if (!props.draggable) return
+  if (!props.draggable || props.fullscreen) return
   const touch = e.touches[0]
   startDrag(touch.clientX, touch.clientY)
   window.addEventListener('touchmove', handleTouchMove, { passive: false })
@@ -174,6 +182,22 @@ watch(() => props.modelValue, (val) => {
 
 .w-dialog.is-dragging {
   transition: none;
+}
+
+.w-dialog.is-fullscreen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100% !important;
+  height: 100% !important;
+  border: none;
+  border-radius: 0;
+}
+
+.w-dialog.is-fullscreen .w-dialog__body {
+  flex: 1;
+  overflow: auto;
 }
 
 .w-dialog__header {
