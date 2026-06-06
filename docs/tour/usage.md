@@ -28,6 +28,13 @@ const steps = [
 | update:visible | 可见性更新时触发 | visible |
 | finish | - | - |
 
+### Slots
+
+| 插槽名 | 说明 |
+|--------|------|
+| header | 作用域插槽，参数 `{ step, index }`，替换步骤标题 |
+| action | 作用域插槽，参数 `{ step, index }`，标题右侧操作区 |
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

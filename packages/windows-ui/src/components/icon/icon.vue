@@ -36,7 +36,10 @@ const icons: Record<string, string> = {
   home: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L1 7h3v8h4V9h2v6h4V7h3z" fill="#808080" stroke="#404040"/></svg>',
   loading: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="2" r="1.5" fill="#245edb"/><circle cx="12" cy="4" r="1.5" fill="#245edb" opacity="0.8"/><circle cx="14" cy="8" r="1.5" fill="#245edb" opacity="0.6"/><circle cx="12" cy="12" r="1.5" fill="#245edb" opacity="0.4"/><circle cx="8" cy="14" r="1.5" fill="#245edb" opacity="0.2"/></svg>',
   fullscreen: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 5V2h3M14 5V2h-3M2 11v3h3M14 11v3h-3" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
-  'fullscreen-exit': '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 2v3H2M11 2v3h3M5 14v-3H2M11 14v-3h3" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>'
+  'fullscreen-exit': '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 2v3H2M11 2v3h3M5 14v-3H2M11 14v-3h3" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+  more: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="1.5" fill="#000"/><circle cx="8" cy="8" r="1.5" fill="#000"/><circle cx="12" cy="8" r="1.5" fill="#000"/></svg>',
+  delete: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 4h10M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1" stroke="#000" stroke-width="1" fill="none"/><path d="M7 7v5M9 7v5" stroke="#000" stroke-width="1"/></svg>',
+  help: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" fill="#808080"/><text x="8" y="12" text-anchor="middle" fill="white" font-size="10" font-family="Arial" font-weight="bold">?</text></svg>'
 }
 
 const svgContent = computed(() => {

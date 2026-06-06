@@ -7,6 +7,12 @@
       <demo-block title="警告类型" code="&lt;w-popconfirm title=&quot;此操作不可恢复！&quot; type=&quot;warning&quot; @confirm=&quot;alert('已确认')&quot;&gt;&lt;w-button type=&quot;warning&quot;&gt;危险操作&lt;/w-button&gt;&lt;/w-popconfirm&gt;"><w-popconfirm title="此操作不可恢复！" type="warning" @confirm="alert('已确认')"><w-button type="warning">危险操作</w-button></w-popconfirm></demo-block>
       <demo-block title="配合图标" code="&lt;w-popconfirm title=&quot;确认提交审核？&quot; @confirm=&quot;alert('已提交')&quot;&gt;&lt;w-button type=&quot;primary&quot;&gt;提交审核&lt;/w-button&gt;&lt;/w-popconfirm&gt;"><w-popconfirm title="确认提交审核？" @confirm="alert('已提交')"><w-button type="primary">提交审核</w-button></w-popconfirm></demo-block>
       <demo-block title="纯文本触发" code="&lt;w-popconfirm title=&quot;确认注销？&quot; @confirm=&quot;alert('已注销')&quot;&gt;&lt;w-link type=&quot;danger&quot;&gt;注销账号&lt;/w-link&gt;&lt;/w-popconfirm&gt;"><w-popconfirm title="确认注销？" @confirm="alert('已注销')"><w-link type="danger">注销账号</w-link></w-popconfirm></demo-block>
+      <demo-block title="自定义操作按钮" code="&lt;w-popconfirm title=&quot;确认删除？&quot;&gt;&lt;template #action&gt;&lt;w-button size=&quot;small&quot; @click=&quot;alert('自定义取消')&quot;&gt;不了&lt;/w-button&gt;&lt;w-button size=&quot;small&quot; type=&quot;danger&quot; @click=&quot;alert('自定义确认')&quot;&gt;删除&lt;/w-button&gt;&lt;/template&gt;&lt;w-button type=&quot;danger&quot;&gt;删除&lt;/w-button&gt;&lt;/w-popconfirm&gt;">
+        <w-popconfirm title="确认删除？">
+          <template #action><w-button size="small" @click="alert('自定义取消')">不了</w-button><w-button size="small" type="danger" @click="alert('自定义确认')">删除</w-button></template>
+          <w-button type="danger">删除</w-button>
+        </w-popconfirm>
+      </demo-block>
 
     </demo-section>
   </div>

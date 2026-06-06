@@ -33,6 +33,8 @@ const activeNames = ref(['1'])
 | 插槽名 | 说明 |
 |--------|------|
 | default | 默认内容 |
+| header | 作用域插槽，参数 `{ item, index }`，替换面板标题区 |
+| action | 作用域插槽，参数 `{ item, index }`，面板标题右侧操作区 |
 
 ## 主题定制
 

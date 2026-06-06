@@ -4,8 +4,13 @@
       <div v-if="visible" class="w-message-box__wrapper" @click.self="handleWrapperClick">
         <div class="w-message-box">
           <div class="w-message-box__header">
-            <span>{{ title }}</span>
-            <w-icon name="close" size="small" class="w-message-box__close" @click="cancel" />
+            <slot name="header">
+              <span class="w-message-box__title">{{ title }}</span>
+            </slot>
+            <div class="w-message-box__actions">
+              <slot name="action" />
+              <w-icon name="close" size="small" class="w-message-box__close" @click="cancel" />
+            </div>
           </div>
           <div class="w-message-box__body">
             <w-icon v-if="type" :name="type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info'" />
@@ -54,6 +59,7 @@ defineExpose({ open, confirm, cancel })
 .w-message-box__wrapper { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; }
 .w-message-box { width: 360px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: var(--w-box-shadow-dark); font-family: var(--w-font-family); }
 .w-message-box__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--w-xp-title-bar); color: #fff; font-weight: bold; font-size: var(--w-font-size-medium); }
+.w-message-box__actions { display: flex; align-items: center; gap: 8px; }
 .w-message-box__close { cursor: pointer; }
 .w-message-box__body { display: flex; align-items: center; gap: 12px; padding: 20px 16px; font-size: var(--w-font-size-base); }
 .w-message-box__footer { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 16px; border-top: 1px solid #d4d0c8; }

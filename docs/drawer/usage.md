@@ -41,6 +41,8 @@ const visible = ref(false)
 | 插槽名 | 说明 |
 |--------|------|
 | default | 默认内容 |
+| header | 替换标题栏内容，默认显示 title |
+| action | 标题栏右侧、关闭按钮左侧的自定义操作区 |
 
 ## 主题定制
 

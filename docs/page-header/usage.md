@@ -33,6 +33,8 @@ const goBack = () => console.log('返回上一页')
 | 插槽名 | 说明 |
 |--------|------|
 | extra | 自定义内容 |
+| title | 替换标题文本 |
+| action | 标题右侧操作区，与 extra 插槽并存 |
 
 ## 主题定制
 

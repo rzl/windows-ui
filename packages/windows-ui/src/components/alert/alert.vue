@@ -2,10 +2,15 @@
   <div :class="['w-alert', `w-alert--${type}`, { 'is-center': center }]">
     <w-icon :name="iconName" />
     <div class="w-alert__content">
-      <div v-if="title" class="w-alert__title">{{ title }}</div>
+      <div v-if="title || $slots.title" class="w-alert__title">
+        <slot name="title">{{ title }}</slot>
+      </div>
       <div class="w-alert__description"><slot>{{ description }}</slot></div>
     </div>
-    <w-icon v-if="closable" name="close" size="small" class="w-alert__close" @click="handleClose" />
+    <div class="w-alert__actions">
+      <slot name="action" />
+      <w-icon v-if="closable" name="close" size="small" class="w-alert__close" @click="handleClose" />
+    </div>
   </div>
 </template>
 
@@ -39,6 +44,7 @@ const handleClose = () => emit('close')
 .w-alert--error { background: #ffe8e8; border-color: var(--w-color-danger); color: var(--w-color-danger); }
 .w-alert__content { flex: 1; }
 .w-alert__title { font-weight: bold; margin-bottom: 2px; }
+.w-alert__actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; }
 .w-alert__close { cursor: pointer; }
 .w-alert.is-center { justify-content: center; text-align: center; }
 </style>

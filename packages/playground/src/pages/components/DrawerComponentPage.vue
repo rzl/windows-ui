@@ -23,6 +23,16 @@
               <w-button @click="drawers.stay = true">需手动关闭</w-button>
               <w-drawer v-model="drawers.stay" title="重要操作" :close-on-click-modal="false"><p>请点击右上角 X 或按钮关闭</p><template #footer><w-button @click="drawers.stay = false">关闭</w-button></template></w-drawer>
             </demo-block>
+            <demo-block title="自定义标题" code="&lt;w-button @click=&quot;drawers.customHeader = true&quot;&gt;自定义标题&lt;/w-button&gt;
+      &lt;w-drawer v-model=&quot;drawers.customHeader&quot;&gt;&lt;template #header&gt;&lt;w-icon name=&quot;warning&quot; size=&quot;small&quot; /&gt;&lt;span style=&quot;margin-left:6px&quot;&gt;警告&lt;/span&gt;&lt;/template&gt;&lt;p&gt;使用 header 插槽自定义抽屉标题。&lt;/p&gt;&lt;/w-drawer&gt;">
+              <w-button @click="drawers.customHeader = true">自定义标题</w-button>
+              <w-drawer v-model="drawers.customHeader"><template #header><w-icon name="warning" size="small" /><span style="margin-left:6px">警告</span></template><p>使用 header 插槽自定义抽屉标题。</p></w-drawer>
+            </demo-block>
+            <demo-block title="自定义操作" code="&lt;w-button @click=&quot;drawers.customAction = true&quot;&gt;自定义操作&lt;/w-button&gt;
+      &lt;w-drawer v-model=&quot;drawers.customAction&quot; title=&quot;操作&quot;&gt;&lt;template #action&gt;&lt;w-icon name=&quot;info&quot; size=&quot;small&quot; style=&quot;cursor:pointer&quot; @click=&quot;alert('更多信息')&quot; /&gt;&lt;/template&gt;&lt;p&gt;使用 action 插槽在关闭按钮左侧插入自定义操作。&lt;/p&gt;&lt;/w-drawer&gt;">
+              <w-button @click="drawers.customAction = true">自定义操作</w-button>
+              <w-drawer v-model="drawers.customAction" title="操作"><template #action><w-icon name="info" size="small" style="cursor:pointer" @click="alert('更多信息')" /></template><p>使用 action 插槽在关闭按钮左侧插入自定义操作。</p></w-drawer>
+            </demo-block>
 
     </demo-section>
   </div>
@@ -34,7 +44,7 @@ import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
 
 const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false })
-const drawers = reactive({ right: false, bottom: false, left: false, stay: false })
+const drawers = reactive({ right: false, bottom: false, left: false, stay: false, customHeader: false, customAction: false })
 const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)
 const msgBoxRef = ref<any>(null)

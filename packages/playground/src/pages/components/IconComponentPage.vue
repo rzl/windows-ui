@@ -37,7 +37,7 @@ import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 
 const title = 'Icon 图标'
-const iconNames = ['search', 'folder', 'file', 'user', 'star', 'arrowUp', 'arrowDown', 'arrowLeft', 'arrowRight', 'close', 'info', 'warning', 'error', 'success', 'menu', 'home', 'loading', 'fullscreen', 'fullscreen-exit']
+const iconNames = ['search', 'folder', 'file', 'user', 'star', 'arrowUp', 'arrowDown', 'arrowLeft', 'arrowRight', 'close', 'info', 'warning', 'error', 'success', 'menu', 'home', 'loading', 'fullscreen', 'fullscreen-exit', 'more', 'delete', 'help']
 </script>
 
 <style scoped>

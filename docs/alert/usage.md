@@ -37,6 +37,8 @@ import { WAlert } from '@windows-ui/core'
 | 插槽名 | 说明 |
 |--------|------|
 | default | 默认内容 |
+| title | 替换标题文本 |
+| action | 关闭按钮左侧的自定义操作区 |
 
 ## 主题定制
 

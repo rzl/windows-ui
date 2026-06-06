@@ -2,9 +2,14 @@
   <div class="w-page-header">
     <div class="w-page-header__left">
       <span v-if="showBack" class="w-page-header__back" @click="$emit('back')">&larr; 返回</span>
-      <div class="w-page-header__title">{{ title }}</div>
+      <div class="w-page-header__title">
+        <slot name="title">{{ title }}</slot>
+      </div>
     </div>
-    <div v-if="$slots.extra" class="w-page-header__extra"><slot name="extra" /></div>
+    <div v-if="$slots.extra || $slots.action" class="w-page-header__extra">
+      <slot name="action" />
+      <slot name="extra" />
+    </div>
   </div>
 </template>
 

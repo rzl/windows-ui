@@ -2,8 +2,18 @@
   <div class="w-popconfirm" v-click-outside="close">
     <div @click="open = true"><slot /></div>
     <div v-show="open" class="w-popconfirm__popper">
-      <div class="w-popconfirm__content"><w-icon :name="type === 'warning' ? 'warning' : 'info'" /><span>{{ title }}</span></div>
-      <div class="w-popconfirm__actions"><w-button size="small" @click="cancel">取消</w-button><w-button size="small" type="primary" @click="confirm">确定</w-button></div>
+      <div class="w-popconfirm__content">
+        <slot name="title">
+          <w-icon :name="type === 'warning' ? 'warning' : 'info'" />
+          <span>{{ title }}</span>
+        </slot>
+      </div>
+      <div class="w-popconfirm__actions">
+        <slot name="action">
+          <w-button size="small" @click="cancel">取消</w-button>
+          <w-button size="small" type="primary" @click="confirm">确定</w-button>
+        </slot>
+      </div>
     </div>
   </div>
 </template>

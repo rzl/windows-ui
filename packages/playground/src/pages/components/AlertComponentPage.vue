@@ -19,6 +19,18 @@
             <demo-block title="可关闭" code="&lt;w-alert title=&quot;可关闭提示&quot; description=&quot;点击右侧 X 关闭此消息&quot; type=&quot;info&quot; closable @close=&quot;alert('已关闭')&quot; /&gt;"><w-alert title="可关闭提示" description="点击右侧 X 关闭此消息" type="info" closable @close="alert('已关闭')" /></demo-block>
             <demo-block title="居中显示" code="&lt;w-alert title=&quot;居中提示&quot; description=&quot;内容居中对齐&quot; type=&quot;info&quot; center /&gt;"><w-alert title="居中提示" description="内容居中对齐" type="info" center /></demo-block>
             <demo-block title="仅标题" code="&lt;w-alert title=&quot;这是一个没有描述的提示&quot; type=&quot;success&quot; /&gt;"><w-alert title="这是一个没有描述的提示" type="success" /></demo-block>
+            <demo-block title="自定义标题" code="&lt;w-alert type=&quot;info&quot;&gt;&lt;template #title&gt;&lt;w-icon name=&quot;warning&quot; size=&quot;small&quot; style=&quot;margin-right:4px&quot; /&gt;&lt;span&gt;自定义标题&lt;/span&gt;&lt;/template&gt;&lt;template #default&gt;使用 title 插槽自定义标题内容。&lt;/template&gt;&lt;/w-alert&gt;">
+              <w-alert type="info">
+                <template #title><w-icon name="warning" size="small" style="margin-right:4px" /><span>自定义标题</span></template>
+                <template #default>使用 title 插槽自定义标题内容。</template>
+              </w-alert>
+            </demo-block>
+            <demo-block title="自定义操作" code="&lt;w-alert title=&quot;可执行操作&quot; type=&quot;info&quot; closable&gt;&lt;template #action&gt;&lt;w-link type=&quot;primary&quot; style=&quot;font-size:12px&quot;&gt;查看详情&lt;/w-link&gt;&lt;/template&gt;使用 action 插槽在关闭按钮左侧插入自定义操作。&lt;/w-alert&gt;">
+              <w-alert title="可执行操作" type="info" closable>
+                <template #action><w-link type="primary" style="font-size:12px">查看详情</w-link></template>
+                使用 action 插槽在关闭按钮左侧插入自定义操作。
+              </w-alert>
+            </demo-block>
 
     </demo-section>
   </div>

@@ -2,8 +2,15 @@
   <div class="w-collapse">
     <div v-for="(item, i) in items" :key="i" :class="['w-collapse__item', { 'is-active': isActive(i) }]">
       <div class="w-collapse__header" @click="toggle(i)">
-        <w-icon :name="isActive(i) ? 'arrowDown' : 'arrowRight'" size="small" />
-        <span>{{ item.title }}</span>
+        <div class="w-collapse__header-content">
+          <slot name="header" :item="item" :index="i">
+            <w-icon :name="isActive(i) ? 'arrowDown' : 'arrowRight'" size="small" />
+            <span>{{ item.title }}</span>
+          </slot>
+        </div>
+        <div class="w-collapse__actions" @click.stop>
+          <slot name="action" :item="item" :index="i" />
+        </div>
       </div>
       <div v-show="isActive(i)" class="w-collapse__content">
         <slot :item="item" :index="i">{{ item.content }}</slot>
@@ -33,7 +40,9 @@ const toggle = (i: number) => {
 .w-collapse { border: 1px solid #919b9c; }
 .w-collapse__item { border-bottom: 1px solid #d4d0c8; }
 .w-collapse__item:last-child { border-bottom: none; }
-.w-collapse__header { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: linear-gradient(180deg, #f8f8f8, #e0e0e0); cursor: pointer; font-size: var(--w-font-size-base); font-weight: bold; }
+.w-collapse__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: linear-gradient(180deg, #f8f8f8, #e0e0e0); cursor: pointer; font-size: var(--w-font-size-base); font-weight: bold; }
+.w-collapse__header-content { display: flex; align-items: center; gap: 6px; flex: 1; }
+.w-collapse__actions { display: flex; align-items: center; gap: 8px; }
 .w-collapse__header:hover { background: linear-gradient(180deg, #fff, #f0f0f0); }
 .w-collapse__content { padding: 8px; background: #fff; font-size: var(--w-font-size-base); }
 </style>

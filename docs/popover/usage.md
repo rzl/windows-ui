@@ -32,6 +32,8 @@ import { WPopover, WButton } from '@windows-ui/core'
 |--------|------|
 | content | 内容插槽 |
 | default | 默认内容 |
+| header | 替换标题区，默认显示 title |
+| action | 标题右侧操作区 |
 
 ## 主题定制
 
