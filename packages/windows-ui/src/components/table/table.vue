@@ -3,18 +3,18 @@
     <table>
       <colgroup>
         <col
-          v-for="col in normalizedColumns"
+          v-for="(col, i) in normalizedColumns"
           :key="col.__key"
-          :style="{ width: (typeof col.width === 'number' ? `${col.width}px` : (col.width || `${colContentWidthPx(col)}px`)) }"
+          :style="i === lastFlexibleColIndex ? {} : { width: `${colContentWidthPx(col)}px` }"
         />
       </colgroup>
       <thead>
         <tr>
           <th
-            v-for="col in columnsWithOffset"
+            v-for="(col, ci) in columnsWithOffset"
             :key="col.__key"
             :class="[headerCellClass(col), stickyClass(col)]"
-            :style="[headerCellStyle(col), stickyStyle(col)]"
+            :style="[headerCellStyle(col, ci), stickyStyle(col)]"
           >
             <div class="w-table__cell-content">
               <template v-if="col.type === 'selection'">
@@ -81,6 +81,11 @@
                 </span>
               </template>
             </div>
+            <span
+              class="w-table__resize-handle"
+              @mousedown.stop="(e: MouseEvent) => startResize(e, col)"
+              @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, col)"
+            />
           </th>
         </tr>
       </thead>
@@ -95,10 +100,10 @@
             @dblclick="handleRowDblclick(row, ri)"
           >
             <td
-              v-for="col in columnsWithOffset"
+              v-for="(col, ci) in columnsWithOffset"
               :key="col.__key"
               :class="[cellClass(col), stickyClass(col)]"
-              :style="[cellStyle(col), stickyStyle(col)]"
+              :style="[cellStyle(col, ci), stickyStyle(col)]"
               @click="handleCellClick(row, col, ri)"
             >
               <template v-if="col.type === 'selection'">
@@ -151,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount, watch, type PropType } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount, type PropType } from 'vue'
 import WEmpty from '../empty/empty.vue'
 import WCheckbox from '../checkbox/checkbox.vue'
 import WIcon from '../icon/icon.vue'
@@ -213,7 +218,8 @@ watch(() => props.expandRowKeys, (val) => {
   expandedKeys.value = new Set(val)
 })
 
-// ----- 列规范化 -----
+// ----- 列宽拖拽 -----
+const columnWidths = ref<Record<string, number>>({})
 const normalizedColumns = computed(() => {
   return props.columns.map((col, i) => ({
     ...col,
@@ -228,22 +234,91 @@ const hasExpandColumn = computed(() => normalizedColumns.value.some(c => c.type 
 // ----- 列宽辅助 -----
 // 内容宽度（cellStyle / colgroup 用）
 const colContentWidthPx = (col: any): number => {
+  const key = col.prop || String(col.type)
+  if (columnWidths.value[key] !== undefined) return columnWidths.value[key]
   if (typeof col.width === 'number') return col.width
   if (typeof col.width === 'string' && col.width.endsWith('px')) return parseInt(col.width)
   if (col.type === 'selection' || col.type === 'expand') return 48
   return 80
 }
 
+// 最后一个没有设置 width 的普通列索引（selection/expand 除外，用于自适应填充剩余宽度）
+const lastFlexibleColIndex = computed(() => {
+  const cols = normalizedColumns.value
+  for (let i = cols.length - 1; i >= 0; i--) {
+    const c = cols[i]
+    if (!c.width && c.type !== 'selection' && c.type !== 'expand') return i
+  }
+  return -1
+})
+
 // 实际占据宽度（固定列偏移量计算用）
 const colActualWidthPx = (col: any): number => {
-  const w = colContentWidthPx(col)
-  const padH = { small: 16, default: 20, large: 24 }[props.size] || 20
-  const borderH = props.border ? 2 : 0
-  return w + padH + borderH
+  return colContentWidthPx(col)
+}
+
+const initColumnWidths = () => {
+  const widths: Record<string, number> = {}
+  props.columns.forEach(col => {
+    const key = col.prop || String(col.type)
+    let w = 0
+    if (typeof col.width === 'number') w = col.width
+    else if (typeof col.width === 'string' && col.width.endsWith('px')) w = parseInt(col.width)
+    else if (col.type === 'selection' || col.type === 'expand') w = 48
+    else w = 80
+    widths[key] = w
+  })
+  columnWidths.value = widths
+}
+watch(() => props.columns, initColumnWidths, { deep: true, immediate: true })
+
+// ----- 列宽拖拽事件 -----
+const resizingCol = ref<string | null>(null)
+const resizeStartX = ref(0)
+const resizeStartWidth = ref(0)
+const resizedCols = ref<Set<string>>(new Set())
+
+const getClientX = (e: MouseEvent | TouchEvent): number => {
+  if ('touches' in e) return e.touches[0]?.clientX ?? 0
+  return e.clientX
+}
+
+const startResize = (e: MouseEvent | TouchEvent, col: any) => {
+  e.preventDefault()
+  const key = col.prop || String(col.type)
+  resizingCol.value = key
+  resizedCols.value.add(key)
+  resizeStartX.value = getClientX(e)
+  resizeStartWidth.value = colContentWidthPx(col)
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+  document.addEventListener('mousemove', handleResize)
+  document.addEventListener('mouseup', stopResize)
+  document.addEventListener('touchmove', handleResize, { passive: false })
+  document.addEventListener('touchend', stopResize)
+}
+
+const handleResize = (e: MouseEvent | TouchEvent) => {
+  e.preventDefault()
+  if (!resizingCol.value) return
+  const delta = getClientX(e) - resizeStartX.value
+  const newWidth = Math.max(30, resizeStartWidth.value + delta)
+  columnWidths.value[resizingCol.value] = newWidth
+}
+
+const stopResize = () => {
+  resizingCol.value = null
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
+  document.removeEventListener('mousemove', handleResize)
+  document.removeEventListener('mouseup', stopResize)
+  document.removeEventListener('touchmove', handleResize)
+  document.removeEventListener('touchend', stopResize)
 }
 
 // ----- 固定列偏移计算 -----
 const columnsWithOffset = computed(() => {
+  columnWidths.value // 建立响应依赖，拖拽后重新计算偏移量
   const cols = normalizedColumns.value
   const n = cols.length
   let leftAccum = 0
@@ -296,7 +371,7 @@ const toggleExpand = (row: any, index: number) => {
 }
 
 // ----- 表格类名与样式 -----
-const hasFixedColumn = computed(() => normalizedColumns.value.some((c: any) => c.fixed === 'left' || c.fixed === 'right'))
+const hasFixedColumn = computed(() => normalizedColumns.value.some((c: any) => c.fixed === 'left' || c.fixed === 'right' || c.width))
 
 const tableClasses = computed(() => {
   return [
@@ -451,12 +526,16 @@ const headerCellClass = (col: any) => {
   return classes
 }
 
-const headerCellStyle = (col: any) => {
+const headerCellStyle = (col: any, index: number) => {
   const style: Record<string, string> = {}
-  if (col.width) {
-    const w = typeof col.width === 'number' ? `${col.width}px` : col.width
-    style.width = w
-    style.minWidth = w
+  const isFlexible = index === lastFlexibleColIndex.value
+  if (!isFlexible) {
+    const wpx = `${colContentWidthPx(col)}px`
+    style.width = wpx
+    style.minWidth = wpx
+    style.maxWidth = wpx
+  } else {
+    style.minWidth = `${colContentWidthPx(col)}px`
   }
   if (col.minWidth) style.minWidth = typeof col.minWidth === 'number' ? `${col.minWidth}px` : col.minWidth
   return style
@@ -469,12 +548,16 @@ const cellClass = (col: any) => {
   return classes
 }
 
-const cellStyle = (col: any) => {
+const cellStyle = (col: any, index: number) => {
   const style: Record<string, string> = {}
-  if (col.width) {
-    const w = typeof col.width === 'number' ? `${col.width}px` : col.width
-    style.width = w
-    style.minWidth = w
+  const isFlexible = index === lastFlexibleColIndex.value
+  if (!isFlexible) {
+    const wpx = `${colContentWidthPx(col)}px`
+    style.width = wpx
+    style.minWidth = wpx
+    style.maxWidth = wpx
+  } else {
+    style.minWidth = `${colContentWidthPx(col)}px`
   }
   if (col.minWidth) style.minWidth = typeof col.minWidth === 'number' ? `${col.minWidth}px` : col.minWidth
   return style
@@ -535,12 +618,13 @@ const computedData = computed(() => {
 
   return result
 })
+
 </script>
 
 <style scoped>
-.w-table { border: 1px solid #919b9c; background: #fff; font-family: var(--w-font-family); overflow-x: auto; }
-.w-table table { width: auto; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--w-font-size-base); }
-.w-table.has-fixed-column table { table-layout: fixed !important; }
+.w-table { border: 1px solid #919b9c; background: #fff; font-family: var(--w-font-family); overflow-x: auto; box-sizing: border-box; }
+.w-table table { width: auto; border-collapse: separate; border-spacing: 0; font-size: var(--w-font-size-base); }
+
 .w-table th { background: linear-gradient(180deg, #f8f8f8, #e0e0e0); padding: 6px 10px; text-align: left; border-bottom: 1px solid #d4d0c8; font-weight: bold; }
 .w-table td { padding: 6px 10px; border-bottom: 1px solid #e8e8e8; }
 .w-table tr:hover td { background: #f0f8ff; }
@@ -638,4 +722,13 @@ const computedData = computed(() => {
 .w-table tr.is-warning td { background: #fff8e1; }
 .w-table tr.is-danger td { background: #ffebee; }
 .w-table tr.is-success td { background: #e8f5e9; }
+
+/* resize handle */
+.w-table th { position: relative; }
+.w-table__resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 10; }
+.w-table__resize-handle:hover { background: var(--w-color-primary); opacity: 0.4; }
+
+/* table layout */
+.w-table table { width: 100%; }
+.w-table th, .w-table td { box-sizing: border-box; }
 </style>

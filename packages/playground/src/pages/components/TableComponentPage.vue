@@ -62,6 +62,13 @@
         </div>
       </demo-block>
 
+      <demo-block title="列宽拖拽" :code="codeResize">
+        <div style="max-width: 480px; border: 1px solid #919b9c;">
+          <w-table :data="tableData" :columns="resizeColumns" border />
+        </div>
+        <p class="demo-note">拖动表头右侧分割线调整列宽，超出容器会产生横向滚动条</p>
+      </demo-block>
+
       <demo-block title="固定表头" :code="codeFixedHeader">
         <w-table :data="fixedHeaderData" :columns="fixedHeaderColumns" :max-height="300" border />
       </demo-block>
@@ -113,7 +120,8 @@ import {
   codePagination,
   codeFixedHeader,
   codeFixedColumn,
-  codeExpandRow
+  codeExpandRow,
+  codeResize
 } from './table-demo-codes'
 
 const title = 'Table 表格'
@@ -260,6 +268,13 @@ const fixedHeaderData = Array.from({ length: 20 }, (_, i) => ({
   department: ['技术部', '产品部', '设计部', '运营部'][i % 4],
   address: ['北京市', '上海市', '广州市', '深圳市', '杭州市'][i % 5]
 }))
+
+const resizeColumns = [
+  { prop: 'name', label: '姓名', width: 120 },
+  { prop: 'age', label: '年龄', width: 80, align: 'center' as const },
+  { prop: 'department', label: '部门', width: 120 },
+  { prop: 'address', label: '地址', width: 150 }
+]
 
 const fixedColumnColumns = [
   { type: 'selection' as const, prop: 'selection', label: ' ', width: 48, fixed: 'left' as const },

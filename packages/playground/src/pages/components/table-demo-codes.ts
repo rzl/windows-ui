@@ -300,6 +300,28 @@ const pagedData = computed(() => {
 })
 ${endTag}`
 
+export const codeResize = `<template>
+  <div style="max-width: 480px; border: 1px solid #919b9c;">
+    <w-table :data="tableData" :columns="tableColumns" border />
+  </div>
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+const tableColumns = [
+  { prop: 'name', label: '姓名', width: 120 },
+  { prop: 'age', label: '年龄', width: 80, align: 'center' },
+  { prop: 'department', label: '部门', width: 120 },
+  { prop: 'address', label: '地址', width: 150 }
+]
+const tableData = [
+  { name: '张三', age: 28, department: '技术部', address: '北京市' },
+  { name: '李四', age: 32, department: '产品部', address: '上海市' },
+  { name: '王五', age: 24, department: '设计部', address: '广州市' },
+  { name: '赵六', age: 35, department: '技术部', address: '深圳市' }
+]
+${endTag}`
+
 export const codeFixedHeader = `<template>
   <w-table :data="tableData" :columns="tableColumns" :max-height="300" border />
 </template>

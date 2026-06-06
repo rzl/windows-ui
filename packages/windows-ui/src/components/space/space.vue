@@ -12,7 +12,7 @@ const spaceStyle = computed(() => ({ gap: typeof props.size === 'number' ? `${pr
 </script>
 
 <style scoped>
-.w-space { display: inline-flex; }
+.w-space { display: inline-flex; max-width: 100%; }
 .w-space--vertical { flex-direction: column; }
 .w-space--horizontal { flex-direction: row; }
 </style>
