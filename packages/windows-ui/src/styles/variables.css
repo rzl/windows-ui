@@ -101,4 +101,7 @@
   --w-index-normal: 1;
   --w-index-top: 1000;
   --w-index-popper: 2000;
+
+  /* Table */
+  --w-table-current-row-bg: #dcebfc;
 }

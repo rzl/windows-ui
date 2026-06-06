@@ -57,6 +57,7 @@ import WProgress from './components/progress/progress.vue'
 import WResult from './components/result/result.vue'
 import WSkeleton from './components/skeleton/skeleton.vue'
 import WTable from './components/table/table.vue'
+import type { ColumnItem } from './components/table/table.vue'
 import WVirtualizedTable from './components/virtualized-table/virtualized-table.vue'
 import WTag from './components/tag/tag.vue'
 import WTimeline from './components/timeline/timeline.vue'
@@ -234,6 +235,7 @@ export {
   WResult,
   WSkeleton,
   WTable,
+  ColumnItem,
   WVirtualizedTable,
   WTag,
   WTimeline,

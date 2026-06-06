@@ -73,6 +73,7 @@ function buildThemeStyle(theme: Record<string, string>) {
         })
       }
       if (key === 'primary') {
+        style['--w-table-current-row-bg'] = mixColor(val, '#ffffff', 15)
         style['--w-xp-title-bar'] = `linear-gradient(180deg, ${mixColor(val, '#ffffff', 40)} 0%, ${mixColor(val, '#ffffff', 70)} 10%, ${val} 100%)`
         const inactiveVars = [
           { name: '--w-xp-title-bar-inactive-start', weight: 60 },
