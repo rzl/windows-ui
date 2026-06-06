@@ -2,17 +2,47 @@
 
 ## 基础用法
 
+### 左右分隔
+
 ```vue
 <template>
-  <w-splitter style="height: 200px">
-    <w-splitter-pane>左侧面板</w-splitter-pane>
-    <w-splitter-pane>右侧面板</w-splitter-pane>
+  <w-splitter :split="40" style="height: 200px">
+    <template #first>左侧面板</template>
+    <template #second>右侧面板</template>
   </w-splitter>
 </template>
+```
 
-<script setup>
-import { WSplitter, WSplitterPane } from '@windows-ui/core'
-</script>
+### 上下分隔
+
+```vue
+<template>
+  <w-splitter direction="vertical" :split="30" style="height: 200px">
+    <template #first>上面板</template>
+    <template #second>下面板</template>
+  </w-splitter>
+</template>
+```
+
+### 组合分隔
+
+```vue
+<template>
+  <w-splitter direction="vertical" :split="50" style="height: 300px">
+    <template #first>
+      <w-splitter :split="50" style="height: 100%">
+        <template #first>左上</template>
+        <template #second>右上</template>
+      </w-splitter>
+    </template>
+    <template #second>
+      <w-splitter :split="50" style="height: 100%">
+        <template #first>左下</template>
+        <template #second>右下</template>
+      </w-splitter>
+    </template>
+  </w-splitter>
+</template>
 ```
 
 ## API
@@ -21,14 +51,15 @@ import { WSplitter, WSplitterPane } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| split | - | number | 50 |
+| split | 第一个面板所占百分比 | number | 50 |
+| direction | 分隔方向，`horizontal` 为左右，`vertical` 为上下 | string | horizontal |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
-| left | 左侧内容 |
-| right | 右侧内容 |
+| first | 第一个面板内容（左/上） |
+| second | 第二个面板内容（右/下） |
 
 ## 主题定制
 
