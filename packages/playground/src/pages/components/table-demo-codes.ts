@@ -55,6 +55,32 @@ const tableColumns = [
 ]
 ${endTag}`
 
+export const codeVirtualScroll = `<template>
+  <w-table
+    :data="tableData"
+    :columns="tableColumns"
+    virtualized
+    :height="300"
+    border
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+const tableColumns = [
+  { prop: 'id', label: 'ID', width: 80, align: 'center' },
+  { prop: 'name', label: '姓名' },
+  { prop: 'department', label: '部门' },
+  { prop: 'address', label: '地址' }
+]
+const tableData = Array.from({ length: 1000 }, (_, i) => ({
+  id: i + 1,
+  name: '用户 ' + (i + 1),
+  department: ['技术部', '产品部', '设计部', '运营部'][i % 4],
+  address: ['北京市', '上海市', '广州市', '深圳市', '杭州市'][i % 5]
+}))
+${endTag}`
+
 export const codeVirtual = `<template>
   <w-virtualized-table :data="virtualData" :columns="virtualColumns" :height="300" />
 </template>
@@ -373,6 +399,156 @@ const tableData = Array.from({ length: 8 }, (_, i) => ({
   address: ['北京市', '上海市', '广州市', '深圳市', '杭州市'][i % 5]
 }))
 const handleEdit = (row) => console.log('编辑', row.name)
+${endTag}`
+
+export const codeMultiHeader = `<template>
+  <w-table :data="tableData" :columns="tableColumns" border />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+const tableColumns = [
+  {
+    label: '基本信息',
+    children: [
+      { prop: 'name', label: '姓名', width: 100 },
+      { prop: 'age', label: '年龄', width: 80, align: 'center' }
+    ]
+  },
+  {
+    label: '工作信息',
+    children: [
+      { prop: 'department', label: '部门', width: 120 },
+      {
+        label: '薪资',
+        children: [
+          { prop: 'baseSalary', label: '基本工资', align: 'right' },
+          { prop: 'bonus', label: '奖金', align: 'right' }
+        ]
+      }
+    ]
+  },
+  { prop: 'status', label: '状态', width: 100, align: 'center' }
+]
+const tableData = [
+  { name: '张三', age: 28, department: '技术部', baseSalary: '15,000', bonus: '3,000', status: '在职' },
+  { name: '李四', age: 32, department: '产品部', baseSalary: '18,000', bonus: '4,000', status: '在职' },
+  { name: '王五', age: 24, department: '设计部', baseSalary: '12,000', bonus: '2,000', status: '实习' }
+]
+${endTag}`
+
+export const codeTree = `<template>
+  <w-table
+    :data="treeData"
+    :columns="treeColumns"
+    row-key="id"
+    default-expand-all
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+const treeColumns = [
+  { prop: 'name', label: '名称' },
+  { prop: 'type', label: '类型', width: 100, align: 'center' },
+  { prop: 'count', label: '人数', width: 80, align: 'center' },
+  { prop: 'leader', label: '负责人' }
+]
+const treeData = [
+  {
+    id: 1, name: '总部', type: '公司', count: 120, leader: '张总',
+    children: [
+      {
+        id: 2, name: '技术部', type: '部门', count: 45, leader: '李总监',
+        children: [
+          { id: 5, name: '前端组', type: '小组', count: 12, leader: '王组长' },
+          { id: 6, name: '后端组', type: '小组', count: 18, leader: '赵组长' },
+          { id: 7, name: '测试组', type: '小组', count: 8, leader: '孙组长' }
+        ]
+      },
+      {
+        id: 3, name: '产品部', type: '部门', count: 20, leader: '周总监',
+        children: [
+          { id: 8, name: '产品一组', type: '小组', count: 10, leader: '吴组长' },
+          { id: 9, name: '产品二组', type: '小组', count: 10, leader: '郑组长' }
+        ]
+      },
+      { id: 4, name: '设计部', type: '部门', count: 15, leader: '钱总监' }
+    ]
+  }
+]
+${endTag}`
+
+export const codeTreeSelection = `<template>
+  <w-table
+    :data="treeData"
+    :columns="treeColumns"
+    row-key="id"
+    default-expand-all
+    @selection-change="handleSelectionChange"
+  />
+  <p style="margin-top:8px;font-size:12px;color:#666;">
+    已选 {{ selected.length }} 项
+  </p>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { WTable } from '@windows-ui/core'
+const treeColumns = [
+  { type: 'selection', prop: 'selection', label: ' ' },
+  { prop: 'name', label: '名称' },
+  { prop: 'type', label: '类型', width: 100, align: 'center' },
+  { prop: 'count', label: '人数', width: 80, align: 'center' }
+]
+const treeData = [
+  {
+    id: 1, name: '总部', type: '公司', count: 120,
+    children: [
+      {
+        id: 2, name: '技术部', type: '部门', count: 45,
+        children: [
+          { id: 5, name: '前端组', type: '小组', count: 12 },
+          { id: 6, name: '后端组', type: '小组', count: 18 }
+        ]
+      },
+      { id: 3, name: '产品部', type: '部门', count: 20 }
+    ]
+  }
+]
+const selected = ref([])
+const handleSelectionChange = (val) => { selected.value = val }
+${endTag}`
+
+export const codeTreeLazy = `<template>
+  <w-table
+    :data="lazyData"
+    :columns="treeColumns"
+    row-key="id"
+    lazy
+    :load="load"
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+const treeColumns = [
+  { prop: 'name', label: '名称' },
+  { prop: 'date', label: '日期', width: 120, align: 'center' }
+]
+const lazyData = [
+  { id: 1, name: '项目 A', date: '2024-01', hasChildren: true },
+  { id: 2, name: '项目 B', date: '2024-03', hasChildren: true },
+  { id: 3, name: '项目 C', date: '2024-06', hasChildren: false }
+]
+const load = (row, treeNode, resolve) => {
+  setTimeout(() => {
+    resolve([
+      { id: row.id * 10 + 1, name: row.name + '-阶段1', date: row.date, hasChildren: false },
+      { id: row.id * 10 + 2, name: row.name + '-阶段2', date: row.date, hasChildren: false }
+    ])
+  }, 400)
+}
 ${endTag}`
 
 export const codeExpandRow = `<template>

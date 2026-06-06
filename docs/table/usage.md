@@ -401,6 +401,42 @@ const pagedData = computed(() => {
 </script>
 ```
 
+### 虚拟滚动
+
+当数据量很大时，开启 `virtualized` 属性并配合 `height` 设置固定高度，表格仅渲染可视区域内的行，大幅提升滚动性能。
+
+```vue
+<template>
+  <w-table
+    :data="tableData"
+    :columns="tableColumns"
+    virtualized
+    :height="300"
+    border
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+
+const tableColumns = [
+  { prop: 'id', label: 'ID', width: 80, align: 'center' },
+  { prop: 'name', label: '姓名' },
+  { prop: 'department', label: '部门' },
+  { prop: 'address', label: '地址' }
+]
+
+const tableData = Array.from({ length: 1000 }, (_, i) => ({
+  id: i + 1,
+  name: '用户 ' + (i + 1),
+  department: ['技术部', '产品部', '设计部', '运营部'][i % 4],
+  address: ['北京市', '上海市', '广州市', '深圳市', '杭州市'][i % 5]
+}))
+</script>
+```
+
+> 虚拟滚动采用固定行高策略，默认 `row-height` 为 `40px`。当前版本不建议与树形表格或展开行同时使用。
+
 ### 固定表头
 
 通过 `max-height` 属性限制表格最大高度，当内容超出时表头会自动固定，表格体滚动。
@@ -471,6 +507,164 @@ const handleEdit = (row) => {
 </script>
 ```
 
+### 树形表格
+
+当数据中存在嵌套的 `children` 数组时，表格会自动识别为树形结构。通过 `row-key` 指定唯一标识字段，`default-expand-all` 可默认展开所有节点。
+
+```vue
+<template>
+  <w-table
+    :data="treeData"
+    :columns="treeColumns"
+    row-key="id"
+    default-expand-all
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+
+const treeColumns = [
+  { prop: 'name', label: '名称' },
+  { prop: 'type', label: '类型', width: 100, align: 'center' },
+  { prop: 'count', label: '人数', width: 80, align: 'center' },
+  { prop: 'leader', label: '负责人' }
+]
+
+const treeData = [
+  {
+    id: 1, name: '总部', type: '公司', count: 120, leader: '张总',
+    children: [
+      {
+        id: 2, name: '技术部', type: '部门', count: 45, leader: '李总监',
+        children: [
+          { id: 5, name: '前端组', type: '小组', count: 12, leader: '王组长' },
+          { id: 6, name: '后端组', type: '小组', count: 18, leader: '赵组长' }
+        ]
+      },
+      { id: 3, name: '产品部', type: '部门', count: 20, leader: '周总监' }
+    ]
+  }
+]
+</script>
+```
+
+#### 懒加载
+
+设置 `lazy` 属性并传入 `load` 方法，可实现子节点按需异步加载。数据行需通过 `hasChildren` 字段（可通过 `tree-props` 自定义）标识是否包含子节点。
+
+```vue
+<template>
+  <w-table
+    :data="lazyData"
+    :columns="treeColumns"
+    row-key="id"
+    lazy
+    :load="load"
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+
+const treeColumns = [
+  { prop: 'name', label: '名称' },
+  { prop: 'date', label: '日期', width: 120, align: 'center' }
+]
+
+const lazyData = [
+  { id: 1, name: '项目 A', date: '2024-01', hasChildren: true },
+  { id: 2, name: '项目 B', date: '2024-03', hasChildren: true },
+  { id: 3, name: '项目 C', date: '2024-06', hasChildren: false }
+]
+
+const load = (row, treeNode, resolve) => {
+  setTimeout(() => {
+    resolve([
+      { id: row.id * 10 + 1, name: row.name + '-阶段1', date: row.date, hasChildren: false },
+      { id: row.id * 10 + 2, name: row.name + '-阶段2', date: row.date, hasChildren: false }
+    ])
+  }, 400)
+}
+</script>
+```
+
+#### 树形 + 多选
+
+树形表格支持多选列，父子节点选中状态会自动联动：
+- 选中父节点 → 自动选中所有子孙节点
+- 取消父节点 → 自动取消所有子孙节点
+- 子节点部分选中 → 父节点显示半选状态
+
+```vue
+<template>
+  <w-table
+    :data="treeData"
+    :columns="columns"
+    row-key="id"
+    default-expand-all
+    @selection-change="handleSelectionChange"
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+
+const columns = [
+  { type: 'selection', prop: 'selection', label: ' ' },
+  { prop: 'name', label: '名称' },
+  { prop: 'type', label: '类型' }
+]
+// treeData 同上
+</script>
+```
+
+### 多级表头
+
+通过 `columns` 中嵌套 `children` 实现多级表头。分组列只显示在表头中，不对应数据单元格；子列才是真正的数据列，支持任意层级嵌套。
+
+```vue
+<template>
+  <w-table :data="tableData" :columns="tableColumns" border />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+
+const tableColumns = [
+  {
+    label: '基本信息',
+    children: [
+      { prop: 'name', label: '姓名', width: 100 },
+      { prop: 'age', label: '年龄', width: 80, align: 'center' }
+    ]
+  },
+  {
+    label: '工作信息',
+    children: [
+      { prop: 'department', label: '部门', width: 120 },
+      {
+        label: '薪资',
+        children: [
+          { prop: 'baseSalary', label: '基本工资', align: 'right' },
+          { prop: 'bonus', label: '奖金', align: 'right' }
+        ]
+      }
+    ]
+  },
+  { prop: 'status', label: '状态', width: 100, align: 'center' }
+]
+
+const tableData = [
+  { name: '张三', age: 28, department: '技术部', baseSalary: '15,000', bonus: '3,000', status: '在职' },
+  { name: '李四', age: 32, department: '产品部', baseSalary: '18,000', bonus: '4,000', status: '在职' },
+  { name: '王五', age: 24, department: '设计部', baseSalary: '12,000', bonus: '2,000', status: '实习' }
+]
+</script>
+```
+
+> 多级表头下，固定列、列宽拖拽、排序、筛选等功能均只作用于叶子列（最底层的数据列）。
+
 ### 展开行
 
 将某一列的 `type` 设为 `'expand'`，并通过 `#expand` 插槽自定义展开内容。点击行首的展开图标即可展开/收起详情。
@@ -523,6 +717,15 @@ const tableData = [
 | emptyText | 空数据时显示的文本 | `string` | `'暂无数据'` |
 | maxHeight | 表格最大高度，超出后表头固定并滚动 | `number \| string` | — |
 | expandRowKeys | 当前已展开行的 key 数组（受控） | `Array<string \| number>` | `[]` |
+| rowKey | 行的唯一标识字段名或自定义函数 | `string \| (row) => string \| number` | `'id'` |
+| treeProps | 树形数据配置 | `{ children?: string, hasChildren?: string }` | `{ children: 'children', hasChildren: 'hasChildren' }` |
+| defaultExpandAll | 是否默认展开所有树节点 | `boolean` | `false` |
+| lazy | 是否开启懒加载 | `boolean` | `false` |
+| load | 懒加载方法，异步获取子节点数据 | `(row, treeNode, resolve) => void` | — |
+| indent | 树节点缩进距离（像素） | `number` | `16` |
+| virtualized | 是否开启虚拟滚动 | `boolean` | `false` |
+| rowHeight | 虚拟滚动时的行高（像素） | `number` | `40` |
+| height | 表格固定高度（虚拟滚动时必须设置） | `number \| string` | — |
 
 ### Column 配置
 
@@ -539,6 +742,7 @@ const tableData = [
 | filterMethod | 自定义筛选匹配函数，接收当前列已选值数组和行数据 | `(values, row) => boolean` | — |
 | type | 列类型，`'selection'` 为选择列，`'expand'` 为展开列 | `'selection' \| 'expand' \| 'default'` | `'default'` |
 | fixed | 列是否固定在左侧或右侧 | `'left' \| 'right'` | — |
+| children | 子列配置，用于多级表头 | `Array<ColumnItem>` | — |
 
 ### Events
 

@@ -83,6 +83,23 @@
         </div>
       </demo-block>
 
+      <demo-block title="树形表格" :code="codeTree">
+        <w-table :data="treeData" :columns="treeColumns" row-key="id" default-expand-all />
+      </demo-block>
+
+      <demo-block title="树形表格 + 多选" :code="codeTreeSelection">
+        <w-table :data="treeData" :columns="treeSelectionColumns" row-key="id" default-expand-all @selection-change="handleTreeSelectionChange" />
+        <p class="demo-note">已选 {{ treeSelected.length }} 项</p>
+      </demo-block>
+
+      <demo-block title="懒加载树形" :code="codeTreeLazy">
+        <w-table :data="lazyData" :columns="treeColumns" row-key="id" lazy :load="loadTree" />
+      </demo-block>
+
+      <demo-block title="多级表头" :code="codeMultiHeader">
+        <w-table :data="multiHeaderData" :columns="multiHeaderColumns" border />
+      </demo-block>
+
       <demo-block title="展开行" :code="codeExpandRow">
         <w-table :data="expandData" :columns="expandColumns">
           <template #expand="{ row }">
@@ -93,6 +110,11 @@
             </div>
           </template>
         </w-table>
+      </demo-block>
+
+      <demo-block title="虚拟滚动" :code="codeVirtualScroll">
+        <w-table :data="virtualScrollData" :columns="virtualScrollColumns" virtualized :height="300" border />
+        <p class="demo-note">大数据量下仅渲染可视区域行，滚动流畅</p>
       </demo-block>
 
       <demo-block title="虚拟化表格" :code="codeVirtual"><w-virtualized-table :data="virtualData" :columns="virtualColumns" :height="300" /></demo-block>
@@ -121,7 +143,12 @@ import {
   codeFixedHeader,
   codeFixedColumn,
   codeExpandRow,
-  codeResize
+  codeResize,
+  codeTree,
+  codeTreeSelection,
+  codeTreeLazy,
+  codeMultiHeader,
+  codeVirtualScroll
 } from './table-demo-codes'
 
 const title = 'Table 表格'
@@ -253,6 +280,20 @@ const virtualData = Array.from({ length: 200 }, (_, i) => ({
   department: ['技术部', '产品部', '设计部', '运营部'][i % 4]
 }))
 
+const virtualScrollColumns = [
+  { prop: 'id', label: 'ID', width: 80, align: 'center' as const },
+  { prop: 'name', label: '姓名' },
+  { prop: 'department', label: '部门' },
+  { prop: 'address', label: '地址' }
+]
+
+const virtualScrollData = Array.from({ length: 1000 }, (_, i) => ({
+  id: i + 1,
+  name: '用户 ' + (i + 1),
+  department: ['技术部', '产品部', '设计部', '运营部'][i % 4],
+  address: ['北京市', '上海市', '广州市', '深圳市', '杭州市'][i % 5]
+}))
+
 const fixedHeaderColumns = [
   { prop: 'id', label: 'ID', width: 60, align: 'center' as const },
   { prop: 'name', label: '姓名' },
@@ -306,6 +347,93 @@ const expandData = [
   { name: '李四', age: 32, department: '产品部', address: '上海市浦东新区', joinDate: '2019-07-01', remark: '高级产品经理' },
   { name: '王五', age: 24, department: '设计部', address: '广州市天河区', joinDate: '2022-01-10', remark: 'UI 设计师' },
   { name: '赵六', age: 35, department: '技术部', address: '深圳市南山区', joinDate: '2018-05-20', remark: '架构师' }
+]
+
+const treeColumns = [
+  { prop: 'name', label: '名称' },
+  { prop: 'type', label: '类型', width: 100, align: 'center' as const },
+  { prop: 'count', label: '人数', width: 80, align: 'center' as const },
+  { prop: 'leader', label: '负责人' }
+]
+
+const treeData = [
+  {
+    id: 1, name: '总部', type: '公司', count: 120, leader: '张总',
+    children: [
+      {
+        id: 2, name: '技术部', type: '部门', count: 45, leader: '李总监',
+        children: [
+          { id: 5, name: '前端组', type: '小组', count: 12, leader: '王组长' },
+          { id: 6, name: '后端组', type: '小组', count: 18, leader: '赵组长' },
+          { id: 7, name: '测试组', type: '小组', count: 8, leader: '孙组长' }
+        ]
+      },
+      {
+        id: 3, name: '产品部', type: '部门', count: 20, leader: '周总监',
+        children: [
+          { id: 8, name: '产品一组', type: '小组', count: 10, leader: '吴组长' },
+          { id: 9, name: '产品二组', type: '小组', count: 10, leader: '郑组长' }
+        ]
+      },
+      { id: 4, name: '设计部', type: '部门', count: 15, leader: '钱总监' }
+    ]
+  }
+]
+
+const treeSelectionColumns = [
+  { type: 'selection' as const, prop: 'selection', label: ' ' },
+  { prop: 'name', label: '名称' },
+  { prop: 'type', label: '类型', width: 100, align: 'center' as const },
+  { prop: 'count', label: '人数', width: 80, align: 'center' as const }
+]
+
+const treeSelected = ref<any[]>([])
+const handleTreeSelectionChange = (val: any[]) => { treeSelected.value = val }
+
+const lazyData = [
+  { id: 1, name: '项目 A', date: '2024-01', hasChildren: true },
+  { id: 2, name: '项目 B', date: '2024-03', hasChildren: true },
+  { id: 3, name: '项目 C', date: '2024-06', hasChildren: false }
+]
+
+const loadTree = (row: any, treeNode: any, resolve: (data: any[]) => void) => {
+  setTimeout(() => {
+    resolve([
+      { id: row.id * 10 + 1, name: row.name + '-阶段1', date: row.date, hasChildren: false },
+      { id: row.id * 10 + 2, name: row.name + '-阶段2', date: row.date, hasChildren: false }
+    ])
+  }, 400)
+}
+
+const multiHeaderColumns = [
+  {
+    label: '基本信息',
+    children: [
+      { prop: 'name', label: '姓名', width: 100 },
+      { prop: 'age', label: '年龄', width: 80, align: 'center' as const }
+    ]
+  },
+  {
+    label: '工作信息',
+    children: [
+      { prop: 'department', label: '部门', width: 120 },
+      {
+        label: '薪资',
+        children: [
+          { prop: 'baseSalary', label: '基本工资', align: 'right' as const },
+          { prop: 'bonus', label: '奖金', align: 'right' as const }
+        ]
+      }
+    ]
+  },
+  { prop: 'status', label: '状态', width: 100, align: 'center' as const }
+]
+
+const multiHeaderData = [
+  { name: '张三', age: 28, department: '技术部', baseSalary: '15,000', bonus: '3,000', status: '在职' },
+  { name: '李四', age: 32, department: '产品部', baseSalary: '18,000', bonus: '4,000', status: '在职' },
+  { name: '王五', age: 24, department: '设计部', baseSalary: '12,000', bonus: '2,000', status: '实习' },
+  { name: '赵六', age: 35, department: '技术部', baseSalary: '22,000', bonus: '6,000', status: '在职' }
 ]
 
 const handleEdit = (row: any) => alert('编辑: ' + row.name)

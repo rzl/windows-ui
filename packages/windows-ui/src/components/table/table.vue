@@ -1,5 +1,5 @@
 <template>
-  <div :class="tableClasses" :style="tableStyle">
+  <div ref="tableRef" :class="tableClasses" :style="tableStyle" @scroll="handleTableScroll">
     <table>
       <colgroup>
         <col
@@ -9,59 +9,61 @@
         />
       </colgroup>
       <thead>
-        <tr>
+        <tr v-for="rowIdx in headerRowCount" :key="rowIdx">
           <th
-            v-for="(col, ci) in columnsWithOffset"
-            :key="col.__key"
-            :class="[headerCellClass(col), stickyClass(col)]"
-            :style="[headerCellStyle(col, ci), stickyStyle(col)]"
+            v-for="node in collectLevelNodes(headerNodes, rowIdx - 1)"
+            :key="node.__key + '-' + rowIdx"
+            :colspan="node.__isLeaf ? undefined : node.__leafCount"
+            :rowspan="node.__isLeaf ? headerRowCount - node.__level : undefined"
+            :class="[headerCellClass(node), stickyClass(node)]"
+            :style="[node.__isLeaf ? leafHeaderCellStyle(node) : {}, stickyStyle(node)]"
           >
             <div class="w-table__cell-content">
-              <template v-if="col.type === 'selection'">
+              <template v-if="node.type === 'selection' && node.__isLeaf">
                 <w-checkbox
                   :model-value="isAllSelected"
                   :indeterminate="isIndeterminate"
                   @change="toggleAllSelection"
                 />
               </template>
-              <template v-else>
-                <slot :name="'header-' + col.prop" :column="col">
-                  {{ col.label }}
+              <template v-else-if="node.__isLeaf">
+                <slot :name="'header-' + node.prop" :column="node">
+                  {{ node.label }}
                 </slot>
                 <span
-                  v-if="col.sortable"
+                  v-if="node.sortable"
                   class="w-table__sort"
-                  @click.stop="handleSort(col)"
+                  @click.stop="handleSort(node)"
                 >
                   <w-icon
                     name="arrowUp"
                     size="small"
-                    :class="{ 'is-active': sortState.prop === col.prop && sortState.order === 'ascending' }"
+                    :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'ascending' }"
                   />
                   <w-icon
                     name="arrowDown"
                     size="small"
-                    :class="{ 'is-active': sortState.prop === col.prop && sortState.order === 'descending' }"
+                    :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'descending' }"
                   />
                 </span>
                 <span
-                  v-if="col.filters?.length"
+                  v-if="node.filters?.length"
                   class="w-table__filter"
-                  @click.stop="toggleFilter(col)"
+                  @click.stop="toggleFilter(node)"
                 >
                   <w-icon
                     name="arrowDown"
                     size="small"
-                    :class="{ 'is-active': !!filterState[col.prop]?.length }"
+                    :class="{ 'is-active': node.prop && !!filterState[node.prop]?.length }"
                   />
                   <div
-                    v-if="activeFilter === col.prop"
+                    v-if="node.prop && activeFilter === node.prop"
                     class="w-table__filter-panel"
                     @click.stop
                   >
                     <div class="w-table__filter-list">
                       <w-checkbox
-                        v-for="f in col.filters"
+                        v-for="f in node.filters"
                         :key="f.value"
                         v-model="filterTempValues"
                         :label="f.value"
@@ -70,80 +72,111 @@
                       </w-checkbox>
                     </div>
                     <div class="w-table__filter-actions">
-                      <w-button size="small" @click="confirmFilter(col)">
+                      <w-button size="small" @click="confirmFilter(node)">
                         确定
                       </w-button>
-                      <w-button size="small" @click="resetFilter(col)">
+                      <w-button size="small" @click="resetFilter(node)">
                         重置
                       </w-button>
                     </div>
                   </div>
                 </span>
               </template>
+              <template v-else>
+                {{ node.label }}
+              </template>
             </div>
             <span
+              v-if="node.__isLeaf"
               class="w-table__resize-handle"
-              @mousedown.stop="(e: MouseEvent) => startResize(e, col)"
-              @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, col)"
+              @mousedown.stop="(e: MouseEvent) => startResize(e, node)"
+              @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, node)"
             />
           </th>
         </tr>
       </thead>
       <tbody>
+        <tr v-if="topPaddingHeight > 0" :style="{ height: `${topPaddingHeight}px` }">
+          <td :colspan="normalizedColumns.length" style="padding: 0; border: none;" />
+        </tr>
         <template
-          v-for="(row, ri) in computedData"
-          :key="rowKey(row, ri)"
+          v-for="(item, ri) in visibleFlatRows"
+          :key="item.key"
         >
           <tr
-            :class="rowClass(row, ri)"
-            @click="handleRowClick(row, ri)"
-            @dblclick="handleRowDblclick(row, ri)"
+            :class="rowClass(item.row, virtualStartIndex + ri)"
+            @click="handleRowClick(item.row, virtualStartIndex + ri)"
+            @dblclick="handleRowDblclick(item.row, virtualStartIndex + ri)"
           >
             <td
               v-for="(col, ci) in columnsWithOffset"
               :key="col.__key"
               :class="[cellClass(col), stickyClass(col)]"
               :style="[cellStyle(col, ci), stickyStyle(col)]"
-              @click="handleCellClick(row, col, ri)"
+              @click="handleCellClick(item.row, col, virtualStartIndex + ri)"
             >
               <template v-if="col.type === 'selection'">
                 <w-checkbox
-                  :model-value="isRowSelected(row, ri)"
-                  @change="(v: boolean) => toggleRowSelection(row, ri, v)"
+                  :model-value="isRowSelected(item.row, virtualStartIndex + ri)"
+                  :indeterminate="isTreeTable && isRowIndeterminate(item)"
+                  @change="(v: boolean) => toggleRowSelection(item.row, virtualStartIndex + ri, v)"
                 />
               </template>
               <template v-else-if="col.type === 'expand'">
                 <span
                   class="w-table__expand-icon"
-                  @click.stop="toggleExpand(row, ri)"
+                  @click.stop="toggleExpand(item.row, virtualStartIndex + ri)"
                 >
-                  {{ isExpanded(row, ri) ? '▼' : '▶' }}
+                  {{ isExpanded(item.row, virtualStartIndex + ri) ? '▼' : '▶' }}
                 </span>
               </template>
               <template v-else>
-                <slot :name="col.prop" :row="row" :$index="ri">
-                  {{ row[col.prop] }}
-                </slot>
+                <div class="w-table__cell-content">
+                  <template v-if="ci === firstDataColumnIndex && isTreeTable">
+                    <span
+                      v-for="n in item.level"
+                      :key="n"
+                      class="w-table__tree-indent"
+                      :style="{ width: `${props.indent}px` }"
+                    />
+                    <span
+                      v-if="item.treeNode"
+                      class="w-table__tree-expand-icon"
+                      :class="{ 'is-loading': isTreeLoading(item) }"
+                      @click.stop="toggleTreeExpand(item)"
+                    >
+                      <template v-if="isTreeLoading(item)">⏳</template>
+                      <template v-else>{{ isTreeExpanded(item) ? '▼' : '▶' }}</template>
+                    </span>
+                    <span v-else class="w-table__tree-expand-icon is-leaf" />
+                  </template>
+                  <slot :name="col.prop" :row="item.row" :$index="virtualStartIndex + ri">
+                    {{ col.prop !== undefined ? item.row[col.prop] : '' }}
+                  </slot>
+                </div>
               </template>
             </td>
           </tr>
           <tr
-            v-if="hasExpandColumn && isExpanded(row, ri)"
-            :key="'expand-' + rowKey(row, ri)"
+            v-if="hasExpandColumn && isExpanded(item.row, virtualStartIndex + ri)"
+            :key="'expand-' + item.key"
             class="w-table__expanded-row"
           >
             <td :colspan="normalizedColumns.length">
               <div class="w-table__expanded-cell">
                 <slot
                   name="expand"
-                  :row="row"
-                  :$index="ri"
+                  :row="item.row"
+                  :$index="virtualStartIndex + ri"
                 />
               </div>
             </td>
           </tr>
         </template>
-        <tr v-if="!computedData.length">
+        <tr v-if="bottomPaddingHeight > 0" :style="{ height: `${bottomPaddingHeight}px` }">
+          <td :colspan="normalizedColumns.length" style="padding: 0; border: none;" />
+        </tr>
+        <tr v-if="!computedFlatRows.length">
           <td :colspan="normalizedColumns.length" class="w-table__empty">
             <slot name="empty">
               <w-empty :description="emptyText || '暂无数据'" />
@@ -165,7 +198,7 @@ import WButton from '../button/button.vue'
 defineOptions({ name: 'WTable' })
 
 export interface ColumnItem {
-  prop: string
+  prop?: string
   label: string
   width?: number | string
   minWidth?: number | string
@@ -176,6 +209,26 @@ export interface ColumnItem {
   filterMethod?: (value: any[], row: any) => boolean
   type?: 'selection' | 'expand' | 'default'
   fixed?: 'left' | 'right'
+  children?: ColumnItem[]
+}
+
+interface HeaderNode extends ColumnItem {
+  __level: number
+  __isLeaf: boolean
+  __leafCount: number
+  __key: string
+  children?: HeaderNode[]
+}
+
+interface TreeNodeInfo {
+  level: number
+  parent: any | null
+  parentKey: string | number | null
+  children: any[]
+  loaded: boolean
+  loading: boolean
+  hasChildren: boolean
+  expanded: boolean
 }
 
 const props = defineProps({
@@ -188,7 +241,16 @@ const props = defineProps({
   rowClassName: { type: [String, Function] as PropType<string | ((row: any, index: number) => string)>, default: '' },
   emptyText: { type: String, default: '' },
   maxHeight: { type: [String, Number] as PropType<string | number>, default: '' },
-  expandRowKeys: { type: Array as () => (string | number)[], default: () => [] }
+  expandRowKeys: { type: Array as () => (string | number)[], default: () => [] },
+  rowKey: { type: [String, Function] as PropType<string | ((row: any) => string | number)>, default: 'id' },
+  treeProps: { type: Object as () => { children?: string; hasChildren?: string }, default: () => ({ children: 'children', hasChildren: 'hasChildren' }) },
+  defaultExpandAll: Boolean,
+  lazy: Boolean,
+  load: { type: Function as PropType<(row: any, treeNode: any, resolve: (data: any[]) => void) => void>, default: null },
+  indent: { type: Number, default: 16 },
+  virtualized: Boolean,
+  rowHeight: { type: Number, default: 40 },
+  height: { type: [String, Number] as PropType<string | number>, default: '' }
 })
 
 const emit = defineEmits([
@@ -204,6 +266,140 @@ const emit = defineEmits([
   'expand-change'
 ])
 
+// ----- 多级表头辅助函数 -----
+const analyzeColumns = (columns: ColumnItem[], level: number = 0): HeaderNode[] => {
+  return columns.map((col, i) => {
+    const hasChildren = col.children && col.children.length > 0
+    const baseKey = col.type === 'selection' || col.type === 'expand'
+      ? `__${col.type}__${level}__${i}`
+      : (col.prop || `__group__${level}__${i}`)
+    if (hasChildren) {
+      const childNodes = analyzeColumns(col.children!, level + 1)
+      const leafCount = childNodes.reduce((sum, c) => sum + c.__leafCount, 0)
+      const { children: _c, ...rest } = col
+      return {
+        ...rest,
+        __level: level,
+        __isLeaf: false,
+        __leafCount: leafCount,
+        __key: baseKey,
+        children: childNodes,
+        type: col.type || 'default',
+        align: col.align || 'left'
+      } as HeaderNode
+    }
+    return {
+      ...col,
+      __level: level,
+      __isLeaf: true,
+      __leafCount: 1,
+      __key: baseKey,
+      type: col.type || 'default',
+      align: col.align || 'left'
+    } as HeaderNode
+  })
+}
+
+const getMaxDepth = (nodes: HeaderNode[]): number => {
+  let max = 0
+  const dfs = (node: HeaderNode, depth: number) => {
+    if (node.__isLeaf) {
+      max = Math.max(max, depth)
+    } else if (node.children) {
+      node.children.forEach(c => dfs(c, depth + 1))
+    }
+  }
+  nodes.forEach(n => dfs(n, 1))
+  return max
+}
+
+const collectLevelNodes = (nodes: HeaderNode[], level: number): HeaderNode[] => {
+  const result: HeaderNode[] = []
+  const walk = (nodeList: HeaderNode[]) => {
+    nodeList.forEach(node => {
+      if (node.__level === level) {
+        result.push(node)
+      } else if (!node.__isLeaf && node.children) {
+        walk(node.children)
+      }
+    })
+  }
+  walk(nodes)
+  return result
+}
+
+const findLeafColumn = (prop: string): ColumnItem | undefined => {
+  const find = (cols: ColumnItem[]): ColumnItem | undefined => {
+    for (const col of cols) {
+      if (col.prop === prop) return col
+      if (col.children) {
+        const found = find(col.children)
+        if (found) return found
+      }
+    }
+    return undefined
+  }
+  return find(props.columns)
+}
+
+// ----- 虚拟滚动 -----
+const tableRef = ref<HTMLElement | null>(null)
+const scrollTop = ref(0)
+const viewportHeight = ref(0)
+
+const virtualStartIndex = computed(() => {
+  if (!props.virtualized) return 0
+  return Math.floor(scrollTop.value / props.rowHeight)
+})
+
+const virtualVisibleCount = computed(() => {
+  if (!props.virtualized) return computedFlatRows.value.length
+  return Math.ceil(viewportHeight.value / props.rowHeight) + 2
+})
+
+const virtualEndIndex = computed(() => {
+  if (!props.virtualized) return computedFlatRows.value.length
+  return Math.min(virtualStartIndex.value + virtualVisibleCount.value, computedFlatRows.value.length)
+})
+
+const visibleFlatRows = computed(() => {
+  if (!props.virtualized) return computedFlatRows.value
+  return computedFlatRows.value.slice(virtualStartIndex.value, virtualEndIndex.value)
+})
+
+const topPaddingHeight = computed(() => {
+  if (!props.virtualized) return 0
+  return virtualStartIndex.value * props.rowHeight
+})
+
+const bottomPaddingHeight = computed(() => {
+  if (!props.virtualized) return 0
+  return (computedFlatRows.value.length - virtualEndIndex.value) * props.rowHeight
+})
+
+const handleTableScroll = (e: Event) => {
+  scrollTop.value = (e.target as HTMLElement).scrollTop
+}
+
+const updateViewportHeight = () => {
+  if (tableRef.value) {
+    viewportHeight.value = tableRef.value.clientHeight
+  }
+}
+
+onMounted(() => {
+  if (props.virtualized) {
+    updateViewportHeight()
+    window.addEventListener('resize', updateViewportHeight)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (props.virtualized) {
+    window.removeEventListener('resize', updateViewportHeight)
+  }
+})
+
 // ----- 内部状态 -----
 const selectedKeys = ref<(string | number)[]>([])
 const currentRow = ref<any>(null)
@@ -218,23 +414,139 @@ watch(() => props.expandRowKeys, (val) => {
   expandedKeys.value = new Set(val)
 })
 
+// ----- 树形表格状态 -----
+const treeNodeMap = ref<Map<string | number, TreeNodeInfo>>(new Map())
+const expandedTreeKeys = ref<Set<string | number>>(new Set())
+const flatRows = ref<{ row: any; key: string | number; level: number; treeNode: boolean; parentKey: string | number | null }[]>([])
+
+const isTreeTable = computed(() => {
+  return props.data.some(row => {
+    const childrenKey = props.treeProps.children || 'children'
+    return Array.isArray(row[childrenKey]) && row[childrenKey].length > 0
+  }) || props.lazy
+})
+
+const firstDataColumnIndex = computed(() => {
+  return normalizedColumns.value.findIndex(c => c.type !== 'selection' && c.type !== 'expand')
+})
+
+// ----- 行 key -----
+const getRowKey = (row: any, index?: number): string | number => {
+  if (typeof props.rowKey === 'function') {
+    return props.rowKey(row) ?? index
+  }
+  if (typeof props.rowKey === 'string') {
+    return row[props.rowKey] ?? index
+  }
+  return row.id ?? row.key ?? row.value ?? index
+}
+
+// ----- 扁平化树形数据 -----
+const buildTreeNodeMap = (
+  rows: any[],
+  parent: any | null,
+  parentKey: string | number | null,
+  level: number,
+  newMap: Map<string | number, TreeNodeInfo>
+) => {
+  const childrenKey = props.treeProps.children || 'children'
+  const hasChildrenKey = props.treeProps.hasChildren || 'hasChildren'
+
+  rows.forEach((row, index) => {
+    const key = getRowKey(row, index)
+    const rawChildren = row[childrenKey]
+    const hasChildren = props.lazy
+      ? !!row[hasChildrenKey]
+      : Array.isArray(rawChildren) && rawChildren.length > 0
+
+    const existing = treeNodeMap.value.get(key)
+    let expanded = false
+    if (existing) {
+      expanded = existing.expanded
+    } else if (props.defaultExpandAll) {
+      expanded = true
+    } else {
+      expanded = expandedTreeKeys.value.has(key)
+    }
+
+    const nodeInfo: TreeNodeInfo = {
+      level,
+      parent,
+      parentKey,
+      children: Array.isArray(rawChildren) ? [...rawChildren] : [],
+      loaded: existing ? existing.loaded : (!props.lazy || (Array.isArray(rawChildren) && rawChildren.length > 0)),
+      loading: existing ? existing.loading : false,
+      hasChildren,
+      expanded
+    }
+
+    if (existing && existing.loaded && existing.children.length > 0) {
+      nodeInfo.children = existing.children
+    }
+
+    newMap.set(key, nodeInfo)
+
+    // 递归构建所有子节点的 map（即使未展开）
+    if (hasChildren || (Array.isArray(rawChildren) && rawChildren.length > 0)) {
+      buildTreeNodeMap(nodeInfo.children, row, key, level + 1, newMap)
+    }
+  })
+}
+
+const rebuildFlatRows = () => {
+  const newMap = new Map<string | number, TreeNodeInfo>()
+  buildTreeNodeMap(props.data, null, null, 0, newMap)
+  treeNodeMap.value = newMap
+
+  const result: typeof flatRows.value = []
+  const flattenVisible = (rows: any[], level: number) => {
+    rows.forEach((row, index) => {
+      const key = getRowKey(row, index)
+      const node = newMap.get(key)
+      if (!node) return
+
+      const hasChildren = node.hasChildren
+
+      result.push({ row, key, level, treeNode: hasChildren, parentKey: node.parentKey })
+
+      if (node.expanded && node.loaded) {
+        flattenVisible(node.children, level + 1)
+      }
+    })
+  }
+
+  flattenVisible(props.data, 0)
+  flatRows.value = result
+}
+
+watch(() => props.data, rebuildFlatRows, { deep: true, immediate: true })
+watch(expandedTreeKeys, rebuildFlatRows, { deep: true })
+watch(() => props.defaultExpandAll, rebuildFlatRows)
+
+// ----- 多级表头 computed -----
+const headerNodes = computed(() => analyzeColumns(props.columns))
+const leafColumns = computed(() => {
+  const leaves: HeaderNode[] = []
+  const collect = (nodes: HeaderNode[]) => {
+    nodes.forEach(node => {
+      if (node.__isLeaf) leaves.push(node)
+      else if (node.children) collect(node.children)
+    })
+  }
+  collect(headerNodes.value)
+  return leaves
+})
+const headerRowCount = computed(() => getMaxDepth(headerNodes.value))
+
 // ----- 列宽拖拽 -----
 const columnWidths = ref<Record<string, number>>({})
-const normalizedColumns = computed(() => {
-  return props.columns.map((col, i) => ({
-    ...col,
-    __key: col.type === 'selection' || col.type === 'expand' ? `__${col.type}__${i}` : col.prop,
-    type: col.type || 'default',
-    align: col.align || 'left'
-  }))
-})
+const normalizedColumns = computed(() => leafColumns.value)
 
 const hasExpandColumn = computed(() => normalizedColumns.value.some(c => c.type === 'expand'))
 
 // ----- 列宽辅助 -----
-// 内容宽度（cellStyle / colgroup 用）
 const colContentWidthPx = (col: any): number => {
-  const key = col.prop || String(col.type)
+  const key = col.__key || col.prop || String(col.type)
   if (columnWidths.value[key] !== undefined) return columnWidths.value[key]
   if (typeof col.width === 'number') return col.width
   if (typeof col.width === 'string' && col.width.endsWith('px')) return parseInt(col.width)
@@ -242,7 +554,6 @@ const colContentWidthPx = (col: any): number => {
   return 80
 }
 
-// 最后一个没有设置 width 的普通列索引（selection/expand 除外，用于自适应填充剩余宽度）
 const lastFlexibleColIndex = computed(() => {
   const cols = normalizedColumns.value
   for (let i = cols.length - 1; i >= 0; i--) {
@@ -252,22 +563,28 @@ const lastFlexibleColIndex = computed(() => {
   return -1
 })
 
-// 实际占据宽度（固定列偏移量计算用）
 const colActualWidthPx = (col: any): number => {
   return colContentWidthPx(col)
 }
 
 const initColumnWidths = () => {
   const widths: Record<string, number> = {}
-  props.columns.forEach(col => {
-    const key = col.prop || String(col.type)
-    let w = 0
-    if (typeof col.width === 'number') w = col.width
-    else if (typeof col.width === 'string' && col.width.endsWith('px')) w = parseInt(col.width)
-    else if (col.type === 'selection' || col.type === 'expand') w = 48
-    else w = 80
-    widths[key] = w
-  })
+  const walk = (cols: ColumnItem[]) => {
+    cols.forEach(col => {
+      if (col.children && col.children.length > 0) {
+        walk(col.children)
+      } else {
+        const key = col.prop || String(col.type)
+        let w = 0
+        if (typeof col.width === 'number') w = col.width
+        else if (typeof col.width === 'string' && col.width.endsWith('px')) w = parseInt(col.width)
+        else if (col.type === 'selection' || col.type === 'expand') w = 48
+        else w = 80
+        widths[key] = w
+      }
+    })
+  }
+  walk(props.columns)
   columnWidths.value = widths
 }
 watch(() => props.columns, initColumnWidths, { deep: true, immediate: true })
@@ -285,7 +602,7 @@ const getClientX = (e: MouseEvent | TouchEvent): number => {
 
 const startResize = (e: MouseEvent | TouchEvent, col: any) => {
   e.preventDefault()
-  const key = col.prop || String(col.type)
+  const key = col.__key || col.prop || String(col.type)
   resizingCol.value = key
   resizedCols.value.add(key)
   resizeStartX.value = getClientX(e)
@@ -339,7 +656,10 @@ const columnsWithOffset = computed(() => {
     }
   }
 
-  const lastLeftIndex = cols.findLastIndex((c: any) => c.fixed === 'left')
+  let lastLeftIndex = -1
+  for (let i = n - 1; i >= 0; i--) {
+    if (cols[i].fixed === 'left') { lastLeftIndex = i; break }
+  }
   const firstRightIndex = cols.findIndex((c: any) => c.fixed === 'right')
 
   return cols.map((col, i) => ({
@@ -351,18 +671,13 @@ const columnsWithOffset = computed(() => {
   }))
 })
 
-// ----- 行 key -----
-const rowKey = (row: any, index: number) => {
-  return row.id ?? row.key ?? row.value ?? index
-}
-
 // ----- 展开行 -----
 const isExpanded = (row: any, index: number) => {
-  return expandedKeys.value.has(rowKey(row, index))
+  return expandedKeys.value.has(getRowKey(row, index))
 }
 
 const toggleExpand = (row: any, index: number) => {
-  const key = rowKey(row, index)
+  const key = getRowKey(row, index)
   const newSet = new Set(expandedKeys.value)
   if (newSet.has(key)) newSet.delete(key)
   else newSet.add(key)
@@ -380,15 +695,20 @@ const tableClasses = computed(() => {
     {
       'is-border': props.border,
       'is-stripe': props.stripe,
-      'is-scrollable': !!props.maxHeight,
-      'has-fixed-column': hasFixedColumn.value
+      'is-scrollable': !!props.maxHeight || props.virtualized,
+      'has-fixed-column': hasFixedColumn.value,
+      'is-tree-table': isTreeTable.value,
+      'is-virtualized': props.virtualized
     }
   ]
 })
 
 const tableStyle = computed(() => {
   const style: Record<string, string> = {}
-  if (props.maxHeight) {
+  if (props.height) {
+    style.height = typeof props.height === 'number' ? `${props.height}px` : props.height
+    style.overflowY = 'auto'
+  } else if (props.maxHeight) {
     style.maxHeight = typeof props.maxHeight === 'number' ? `${props.maxHeight}px` : props.maxHeight
     style.overflowY = 'auto'
   }
@@ -397,7 +717,7 @@ const tableStyle = computed(() => {
 
 // ----- 排序处理 -----
 const handleSort = (col: ColumnItem) => {
-  if (!col.sortable || col.type === 'selection' || col.type === 'expand') return
+  if (!col.sortable || col.type === 'selection' || col.type === 'expand' || !col.prop) return
   const currentOrder = sortState.value.prop === col.prop ? sortState.value.order : null
   let nextOrder: 'ascending' | 'descending' | null = null
   if (currentOrder === null) nextOrder = 'ascending'
@@ -410,6 +730,7 @@ const handleSort = (col: ColumnItem) => {
 
 // ----- 筛选处理 -----
 const toggleFilter = (col: ColumnItem) => {
+  if (!col.prop) return
   if (activeFilter.value === col.prop) {
     activeFilter.value = null
   } else {
@@ -419,12 +740,14 @@ const toggleFilter = (col: ColumnItem) => {
 }
 
 const confirmFilter = (col: ColumnItem) => {
+  if (!col.prop) return
   filterState.value = { ...filterState.value, [col.prop]: [...filterTempValues.value] }
   activeFilter.value = null
   emit('filter-change', { prop: col.prop, values: filterState.value[col.prop] })
 }
 
 const resetFilter = (col: ColumnItem) => {
+  if (!col.prop) return
   filterTempValues.value = []
   filterState.value = { ...filterState.value, [col.prop]: [] }
   activeFilter.value = null
@@ -441,43 +764,156 @@ const closeFilterPanel = (e: MouseEvent) => {
 onMounted(() => { document.addEventListener('click', closeFilterPanel) })
 onBeforeUnmount(() => { document.removeEventListener('click', closeFilterPanel) })
 
+// ----- 树形展开 -----
+const isTreeExpanded = (item: any) => {
+  const node = treeNodeMap.value.get(item.key)
+  return node ? node.expanded : false
+}
+
+const isTreeLoading = (item: any) => {
+  const node = treeNodeMap.value.get(item.key)
+  return node ? node.loading : false
+}
+
+const toggleTreeExpand = (item: any) => {
+  const key = item.key
+  const node = treeNodeMap.value.get(key)
+  if (!node) return
+
+  if (node.hasChildren && !node.loaded && props.lazy && props.load) {
+    node.loading = true
+    treeNodeMap.value = new Map(treeNodeMap.value)
+
+    props.load(item.row, node, (children: any[]) => {
+      node.children = children
+      node.loaded = true
+      node.loading = false
+      node.expanded = true
+      expandedTreeKeys.value = new Set([...expandedTreeKeys.value, key])
+      treeNodeMap.value = new Map(treeNodeMap.value)
+      rebuildFlatRows()
+    })
+    return
+  }
+
+  node.expanded = !node.expanded
+  const newSet = new Set(expandedTreeKeys.value)
+  if (node.expanded) newSet.add(key)
+  else newSet.delete(key)
+  expandedTreeKeys.value = newSet
+  treeNodeMap.value = new Map(treeNodeMap.value)
+  rebuildFlatRows()
+}
+
 // ----- 选择处理 -----
 const isRowSelected = (row: any, index: number) => {
-  return selectedKeys.value.includes(rowKey(row, index))
+  return selectedKeys.value.includes(getRowKey(row, index))
+}
+
+const isRowIndeterminate = (item: any) => {
+  if (!isTreeTable.value) return false
+  const node = treeNodeMap.value.get(item.key)
+  if (!node || !node.children.length) return false
+  const childKeys = node.children.map((child: any) => getRowKey(child))
+  const selectedChildren = childKeys.filter((k: string | number) => selectedKeys.value.includes(k))
+  return selectedChildren.length > 0 && selectedChildren.length < childKeys.length
+}
+
+const getDescendantKeys = (row: any): (string | number)[] => {
+  const key = getRowKey(row)
+  const node = treeNodeMap.value.get(key)
+  if (!node || !node.children.length) return []
+  const result: (string | number)[] = []
+  const collect = (children: any[]) => {
+    children.forEach(child => {
+      const childKey = getRowKey(child)
+      result.push(childKey)
+      const childNode = treeNodeMap.value.get(childKey)
+      if (childNode && childNode.children.length) {
+        collect(childNode.children)
+      }
+    })
+  }
+  collect(node.children)
+  return result
+}
+
+const updateParentSelections = (row: any, selectedArr: (string | number)[]) => {
+  const key = getRowKey(row)
+  const node = treeNodeMap.value.get(key)
+  if (!node || !node.parentKey) return
+
+  const parentKey = node.parentKey
+  const parentNode = treeNodeMap.value.get(parentKey)
+  if (!parentNode) return
+
+  const siblingKeys = parentNode.children.map((child: any) => getRowKey(child))
+  const selectedSiblings = siblingKeys.filter((k: string | number) => selectedArr.includes(k))
+  const parentIdx = selectedArr.indexOf(parentKey)
+
+  if (selectedSiblings.length === siblingKeys.length && siblingKeys.length > 0) {
+    if (parentIdx === -1) selectedArr.push(parentKey)
+  } else {
+    if (parentIdx > -1) selectedArr.splice(parentIdx, 1)
+  }
+
+  if (parentNode.parent) {
+    updateParentSelections(parentNode.parent, selectedArr)
+  }
 }
 
 const isAllSelected = computed(() => {
-  if (!props.data.length) return false
-  return props.data.every((row, i) => selectedKeys.value.includes(rowKey(row, i)))
+  if (!computedFlatRows.value.length) return false
+  return computedFlatRows.value.every(item => selectedKeys.value.includes(item.key))
 })
 
 const isIndeterminate = computed(() => {
-  if (!props.data.length) return false
-  const selectedCount = props.data.filter((row, i) => selectedKeys.value.includes(rowKey(row, i))).length
-  return selectedCount > 0 && selectedCount < props.data.length
+  if (!computedFlatRows.value.length) return false
+  const selectedCount = computedFlatRows.value.filter(item => selectedKeys.value.includes(item.key)).length
+  return selectedCount > 0 && selectedCount < computedFlatRows.value.length
 })
 
 const toggleRowSelection = (row: any, index: number, checked: boolean) => {
-  const key = rowKey(row, index)
+  const key = getRowKey(row, index)
   const arr = [...selectedKeys.value]
   const idx = arr.indexOf(key)
+
   if (checked && idx === -1) arr.push(key)
   else if (!checked && idx > -1) arr.splice(idx, 1)
+
+  if (isTreeTable.value) {
+    if (checked) {
+      const descendants = getDescendantKeys(row)
+      descendants.forEach(dk => {
+        if (!arr.includes(dk)) arr.push(dk)
+      })
+    } else {
+      const descendants = getDescendantKeys(row)
+      descendants.forEach(dk => {
+        const dIdx = arr.indexOf(dk)
+        if (dIdx > -1) arr.splice(dIdx, 1)
+      })
+    }
+
+    updateParentSelections(row, arr)
+  }
+
   selectedKeys.value = arr
-  const selection = props.data.filter((r, i) => arr.includes(rowKey(r, i)))
+  const selection = flatRows.value.filter(item => arr.includes(item.key)).map(item => item.row)
   emit('select', selection, row)
   emit('selection-change', selection)
 }
 
 const toggleAllSelection = (checked: boolean) => {
   if (checked) {
-    const allKeys = props.data.map((row, i) => rowKey(row, i))
+    const allKeys = computedFlatRows.value.map(item => item.key)
     selectedKeys.value = allKeys
-    emit('select-all', [...props.data])
-    emit('selection-change', [...props.data])
+    const selection = computedFlatRows.value.map(item => item.row)
+    emit('select-all', selection)
+    emit('selection-change', selection)
   } else {
     selectedKeys.value = []
-    emit('select-all', [])
+    emit('select-all', [] )
     emit('selection-change', [])
   }
 }
@@ -488,7 +924,7 @@ const handleRowClick = (row: any, index: number) => {
   if (props.highlightCurrentRow) {
     const oldRow = currentRow.value
     currentRow.value = row
-    currentRowKey.value = rowKey(row, index)
+    currentRowKey.value = getRowKey(row, index)
     emit('current-change', row, oldRow)
   }
 }
@@ -498,14 +934,14 @@ const handleRowDblclick = (row: any, index: number) => {
 }
 
 const handleCellClick = (row: any, col: ColumnItem, index: number) => {
-  emit('cell-click', row, col, row[col.prop], index)
+  emit('cell-click', row, col, col.prop !== undefined ? row[col.prop] : undefined, index)
 }
 
 // ----- 行样式 -----
 const rowClass = (row: any, index: number) => {
   const classes: string[] = []
   if (props.stripe && index % 2 === 1) classes.push('is-striped')
-  const key = rowKey(row, index)
+  const key = getRowKey(row, index)
   if (props.highlightCurrentRow && currentRowKey.value !== null && currentRowKey.value === key) {
     classes.push('is-current-row')
   }
@@ -526,8 +962,9 @@ const headerCellClass = (col: any) => {
   return classes
 }
 
-const headerCellStyle = (col: any, index: number) => {
+const leafHeaderCellStyle = (col: any) => {
   const style: Record<string, string> = {}
+  const index = normalizedColumns.value.findIndex(c => c.__key === col.__key)
   const isFlexible = index === lastFlexibleColIndex.value
   if (!isFlexible) {
     const wpx = `${colContentWidthPx(col)}px`
@@ -564,7 +1001,7 @@ const cellStyle = (col: any, index: number) => {
 }
 
 const stickyClass = (col: any) => {
-  if (!col.fixed) return []
+  if (!col.fixed || col.__isLeaf === false) return []
   const classes: string[] = [`is-fixed-${col.fixed}`]
   if (col.__isLastLeft) classes.push('is-last-fixed-left')
   if (col.__isFirstRight) classes.push('is-first-fixed-right')
@@ -573,7 +1010,7 @@ const stickyClass = (col: any) => {
 
 const stickyStyle = (col: any) => {
   const style: Record<string, string> = {}
-  if (col.fixed) {
+  if (col.fixed && col.__isLeaf !== false) {
     style.position = 'sticky'
     if (col.fixed === 'left' && col.__leftOffset !== null) {
       style.left = `${col.__leftOffset}px`
@@ -585,28 +1022,28 @@ const stickyStyle = (col: any) => {
   return style
 }
 
-// ----- 数据计算（筛选 + 排序） -----
-const computedData = computed(() => {
-  let result = [...props.data]
+// ----- 数据计算（筛选 + 排序）-----
+const computedFlatRows = computed(() => {
+  let result = [...flatRows.value]
 
   // 筛选
   Object.entries(filterState.value).forEach(([prop, values]) => {
     if (!values?.length) return
-    const col = props.columns.find(c => c.prop === prop)
+    const col = findLeafColumn(prop)
     if (!col || !col.filters?.length) return
-    result = result.filter(row => {
-      if (col.filterMethod) return col.filterMethod(values, row)
-      return values.includes(row[prop])
+    result = result.filter(item => {
+      if (col.filterMethod) return col.filterMethod(values, item.row)
+      return values.includes(item.row[prop])
     })
   })
 
   // 排序
   if (sortState.value.order && sortState.value.prop) {
     const { prop, order } = sortState.value
-    const isCustom = props.columns.find(c => c.prop === prop)?.sortable === 'custom'
+    const isCustom = findLeafColumn(prop)?.sortable === 'custom'
     if (!isCustom) {
       result.sort((a, b) => {
-        const av = a[prop], bv = b[prop]
+        const av = a.row[prop], bv = b.row[prop]
         if (av === bv) return 0
         if (av == null) return 1
         if (bv == null) return -1
@@ -677,6 +1114,13 @@ const computedData = computed(() => {
 .w-table__expand-icon:hover { color: var(--w-color-primary); }
 .w-table__expanded-row td { background: #f5f5f5; border-bottom: 1px solid #e0e0e0; padding: 12px 16px; }
 .w-table__expanded-cell { padding: 4px 8px; }
+
+/* tree */
+.w-table__tree-indent { display: inline-block; flex-shrink: 0; }
+.w-table__tree-expand-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; cursor: pointer; font-size: 10px; color: #666; flex-shrink: 0; margin-right: 2px; }
+.w-table__tree-expand-icon:hover { color: var(--w-color-primary); }
+.w-table__tree-expand-icon.is-leaf { cursor: default; visibility: hidden; }
+.w-table__tree-expand-icon.is-loading { cursor: default; }
 
 /* fixed columns */
 .w-table th.is-fixed-left,
