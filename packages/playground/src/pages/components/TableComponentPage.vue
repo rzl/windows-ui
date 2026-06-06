@@ -281,18 +281,26 @@ const virtualData = Array.from({ length: 200 }, (_, i) => ({
 }))
 
 const virtualScrollColumns = [
-  { prop: 'id', label: 'ID', width: 80, align: 'center' as const },
-  { prop: 'name', label: '姓名' },
-  { prop: 'department', label: '部门' },
-  { prop: 'address', label: '地址' }
+  { prop: 'id', label: 'ID', width: 60, align: 'center' as const },
+  { prop: 'name', label: '姓名', width: 100 },
+  ...Array.from({ length: 200 }, (_, i) => ({
+    prop: 'field' + i,
+    label: '字段' + (i + 1),
+    width: 80,
+    align: 'center' as const
+  }))
 ]
 
-const virtualScrollData = Array.from({ length: 1000 }, (_, i) => ({
-  id: i + 1,
-  name: '用户 ' + (i + 1),
-  department: ['技术部', '产品部', '设计部', '运营部'][i % 4],
-  address: ['北京市', '上海市', '广州市', '深圳市', '杭州市'][i % 5]
-}))
+const virtualScrollData = Array.from({ length: 1000 }, (_, i) => {
+  const row: Record<string, any> = {
+    id: i + 1,
+    name: '用户 ' + (i + 1)
+  }
+  for (let j = 0; j < 200; j++) {
+    row['field' + j] = String(i * 200 + j + 1)
+  }
+  return row
+})
 
 const fixedHeaderColumns = [
   { prop: 'id', label: 'ID', width: 60, align: 'center' as const },
