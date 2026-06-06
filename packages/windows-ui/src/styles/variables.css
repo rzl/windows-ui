@@ -5,7 +5,10 @@
   --w-xp-blue-light: #3d6df5;
   --w-xp-blue-dark: #1034a6;
   --w-xp-title-bar: linear-gradient(180deg, var(--w-color-primary-lighter) 0%, var(--w-color-primary-light) 10%, var(--w-color-primary) 100%);
-  --w-xp-title-bar-inactive: linear-gradient(180deg, color-mix(in srgb, var(--w-color-primary) 60%, white) 0%, color-mix(in srgb, var(--w-color-primary) 50%, white) 10%, color-mix(in srgb, var(--w-color-primary) 40%, white) 100%);
+  --w-xp-title-bar-inactive-start: #7ba4e6;
+  --w-xp-title-bar-inactive-mid: #6b94d6;
+  --w-xp-title-bar-inactive-end: #5a84c6;
+  --w-xp-title-bar-inactive: linear-gradient(180deg, var(--w-xp-title-bar-inactive-start) 0%, var(--w-xp-title-bar-inactive-mid) 10%, var(--w-xp-title-bar-inactive-end) 100%);
 
   /* XP Olive Theme */
   --w-xp-olive: #8ba869;
@@ -19,34 +22,34 @@
 
   /* Classic Colors */
   --w-color-primary: #245edb;
-  --w-color-primary-lighter: color-mix(in srgb, var(--w-color-primary) 40%, white);
-  --w-color-primary-light: color-mix(in srgb, var(--w-color-primary) 70%, white);
-  --w-color-primary-dark: color-mix(in srgb, var(--w-color-primary) 70%, black);
-  --w-color-primary-darker: color-mix(in srgb, var(--w-color-primary) 50%, black);
+  --w-color-primary-lighter: #9ebaf5;
+  --w-color-primary-light: #5a84ff;
+  --w-color-primary-dark: #1a5dc6;
+  --w-color-primary-darker: #1034a6;
 
   --w-color-success: #3a9e3a;
-  --w-color-success-lighter: color-mix(in srgb, var(--w-color-success) 40%, white);
-  --w-color-success-light: color-mix(in srgb, var(--w-color-success) 70%, white);
-  --w-color-success-dark: color-mix(in srgb, var(--w-color-success) 70%, black);
-  --w-color-success-darker: color-mix(in srgb, var(--w-color-success) 50%, black);
+  --w-color-success-lighter: #8fd48f;
+  --w-color-success-light: #5ac45a;
+  --w-color-success-dark: #2a8a2a;
+  --w-color-success-darker: #1a6a1a;
 
   --w-color-warning: #e4a010;
-  --w-color-warning-lighter: color-mix(in srgb, var(--w-color-warning) 40%, white);
-  --w-color-warning-light: color-mix(in srgb, var(--w-color-warning) 70%, white);
-  --w-color-warning-dark: color-mix(in srgb, var(--w-color-warning) 70%, black);
-  --w-color-warning-darker: color-mix(in srgb, var(--w-color-warning) 50%, black);
+  --w-color-warning-lighter: #f0d070;
+  --w-color-warning-light: #f0c040;
+  --w-color-warning-dark: #c48810;
+  --w-color-warning-darker: #a07010;
 
   --w-color-danger: #d92b2b;
-  --w-color-danger-lighter: color-mix(in srgb, var(--w-color-danger) 40%, white);
-  --w-color-danger-light: color-mix(in srgb, var(--w-color-danger) 70%, white);
-  --w-color-danger-dark: color-mix(in srgb, var(--w-color-danger) 70%, black);
-  --w-color-danger-darker: color-mix(in srgb, var(--w-color-danger) 50%, black);
+  --w-color-danger-lighter: #e88a8a;
+  --w-color-danger-light: #e84a4a;
+  --w-color-danger-dark: #b81818;
+  --w-color-danger-darker: #900808;
 
   --w-color-info: #808080;
-  --w-color-info-lighter: color-mix(in srgb, var(--w-color-info) 40%, white);
-  --w-color-info-light: color-mix(in srgb, var(--w-color-info) 70%, white);
-  --w-color-info-dark: color-mix(in srgb, var(--w-color-info) 70%, black);
-  --w-color-info-darker: color-mix(in srgb, var(--w-color-info) 50%, black);
+  --w-color-info-lighter: #c0c0c0;
+  --w-color-info-light: #a0a0a0;
+  --w-color-info-dark: #606060;
+  --w-color-info-darker: #404040;
 
   --w-color-white: #ffffff;
   --w-color-black: #000000;

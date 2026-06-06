@@ -1,9 +1,32 @@
 <template>
-  <w-config-provider prefix="w">
+  <w-config-provider prefix="w" :size="globalSize" :theme="globalTheme">
     <div class="playground">
       <header class="playground-header">
         <h1>🖥️ Windows UI</h1>
         <p>Vue 3 UI Library - Windows XP Style</p>
+        <div class="global-controls">
+          <div class="control-group">
+            <span class="control-label">尺寸</span>
+            <button
+              v-for="s in ['small', 'default', 'large']"
+              :key="s"
+              :class="['size-btn', { active: globalSize === s }]"
+              @click="globalSize = s"
+            >
+              {{ s }}
+            </button>
+          </div>
+          <div class="control-group">
+            <span class="control-label">主题色</span>
+            <button class="preset-btn" style="background:#245edb" @click="themeColors.primary = '#245edb'; updateTheme()" />
+            <button class="preset-btn" style="background:#ff69b4" @click="themeColors.primary = '#ff69b4'; updateTheme()" />
+            <button class="preset-btn" style="background:#d92b2b" @click="themeColors.primary = '#d92b2b'; updateTheme()" />
+            <button class="preset-btn" style="background:#3a9e3a" @click="themeColors.primary = '#3a9e3a'; updateTheme()" />
+            <input type="color" :value="themeColors.primary" @change="e => { themeColors.primary = (e.target as HTMLInputElement).value; updateTheme() }" class="color-input" title="primary" />
+            <button class="reset-btn" @click="resetTheme">重置</button>
+            <div class="color-preview" :style="{ backgroundColor: themeColors.primary }"></div>
+          </div>
+        </div>
       </header>
 
       <div class="playground-body">
@@ -30,12 +53,41 @@
 </template>
 
 <script setup lang="ts">
+import { reactive, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const $route = useRoute()
 
 const isActive = (path: string) => {
   return $route.path === path || (path !== '/' && $route.path.startsWith(path + '/'))
+}
+
+const globalSize = ref<'small' | 'default' | 'large'>('default')
+
+const defaultColors = {
+  primary: '#245edb',
+  success: '#3a9e3a',
+  warning: '#e4a010',
+  danger: '#d92b2b',
+}
+
+const themeColors = reactive({ ...defaultColors })
+
+const globalTheme = computed(() => {
+  const t: Record<string, string> = {}
+  if (themeColors.primary !== defaultColors.primary) t.primary = themeColors.primary
+  if (themeColors.success !== defaultColors.success) t.success = themeColors.success
+  if (themeColors.warning !== defaultColors.warning) t.warning = themeColors.warning
+  if (themeColors.danger !== defaultColors.danger) t.danger = themeColors.danger
+  return t
+})
+
+function updateTheme() {
+  // themeColors 变化会自动触发 globalTheme computed 重新计算
+}
+
+function resetTheme() {
+  Object.assign(themeColors, defaultColors)
 }
 
 const navItems = [
@@ -128,18 +180,29 @@ const navItems = [
 
 <style scoped>
 .playground { min-height: 100vh; display: flex; flex-direction: column; }
-.playground-header { text-align: center; padding: 20px; background: linear-gradient(180deg, #1f91e5, #1a6fdc, #1a5dc6); color: #fff; flex-shrink: 0; }
+.playground-header { text-align: center; padding: 20px; background: var(--w-xp-title-bar); color: #fff; flex-shrink: 0; }
 .playground-header h1 { margin: 0 0 6px; font-size: 28px; }
-.playground-header p { margin: 0; opacity: 0.9; font-size: 13px; }
+.playground-header p { margin: 0 0 12px; opacity: 0.9; font-size: 13px; }
+.global-controls { display: inline-flex; align-items: center; gap: 24px; background: rgba(0,0,0,0.15); padding: 8px 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); }
+.control-group { display: flex; align-items: center; gap: 8px; }
+.control-label { font-size: 12px; opacity: 0.9; }
+.size-btn { padding: 3px 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; font-size: 12px; border-radius: 2px; }
+.size-btn:hover { background: rgba(255,255,255,0.25); }
+.size-btn.active { background: rgba(255,255,255,0.9); color: var(--w-color-primary); font-weight: bold; border-color: #fff; }
+.preset-btn { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.6); border-radius: 3px; cursor: pointer; padding: 0; }
+.color-input { width: 24px; height: 24px; border: 1px solid rgba(255,255,255,0.4); padding: 0; background: none; cursor: pointer; }
+.color-preview { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.6); border-radius: 3px; }
+.reset-btn { padding: 3px 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; font-size: 12px; border-radius: 2px; }
+.reset-btn:hover { background: rgba(255,255,255,0.25); }
 .playground-body { display: flex; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; padding: 16px; gap: 16px; }
 .playground-sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 16px; align-self: flex-start; max-height: calc(100vh - 32px); overflow-y: auto; }
 .sidebar-nav { background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; }
 .sidebar-link { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #000; text-decoration: none; font-size: 13px; border-bottom: 1px solid #d4d0c8; transition: background 0.15s; }
 .sidebar-link:last-child { border-bottom: none; }
-.sidebar-link:hover { background: var(--w-xp-blue-light); color: #fff; }
+.sidebar-link:hover { background: var(--w-color-primary-light); color: #fff; }
 .sidebar-link.is-active { background: var(--w-color-primary); color: #fff; font-weight: bold; }
 .sidebar-link.is-indented { padding-left: 28px; font-size: 12px; background: #f5f5f5; }
-.sidebar-link.is-indented:hover { background: #e8e8e8; color: #245edb; }
-.sidebar-link.is-indented.is-active { background: #dcebfc; color: #245edb; }
+.sidebar-link.is-indented:hover { background: #e8e8e8; color: var(--w-color-primary); }
+.sidebar-link.is-indented.is-active { background: #dcebfc; color: var(--w-color-primary); }
 .playground-content { flex: 1; min-width: 0; }
 </style>
