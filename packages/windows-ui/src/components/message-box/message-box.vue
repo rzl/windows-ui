@@ -53,7 +53,7 @@ defineExpose({ open, confirm, cancel })
 <style scoped>
 .w-message-box__wrapper { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; }
 .w-message-box { width: 360px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: var(--w-box-shadow-dark); font-family: var(--w-font-family); }
-.w-message-box__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: linear-gradient(180deg, #1f91e5, #1a6fdc, #1a5dc6); color: #fff; font-weight: bold; font-size: var(--w-font-size-medium); }
+.w-message-box__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--w-xp-title-bar); color: #fff; font-weight: bold; font-size: var(--w-font-size-medium); }
 .w-message-box__close { cursor: pointer; }
 .w-message-box__body { display: flex; align-items: center; gap: 12px; padding: 20px 16px; font-size: var(--w-font-size-base); }
 .w-message-box__footer { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 16px; border-top: 1px solid #d4d0c8; }

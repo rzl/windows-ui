@@ -48,7 +48,7 @@ const close = () => { emit('update:visible', false); current.value = 0 }
 <style scoped>
 .w-tour__mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; }
 .w-tour__content { width: 320px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; box-shadow: var(--w-box-shadow-dark); z-index: 10000; }
-.w-tour__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: linear-gradient(180deg, #1f91e5, #1a6fdc, #1a5dc6); color: #fff; font-weight: bold; font-size: var(--w-font-size-medium); }
+.w-tour__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--w-xp-title-bar); color: #fff; font-weight: bold; font-size: var(--w-font-size-medium); }
 .w-tour__header .w-icon { cursor: pointer; }
 .w-tour__body { padding: 12px; font-size: var(--w-font-size-base); }
 .w-tour__footer { display: flex; justify-content: flex-end; gap: 6px; padding: 8px; border-top: 1px solid #d4d0c8; }

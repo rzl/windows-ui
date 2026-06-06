@@ -222,7 +222,7 @@ watch(() => props.modelValue, (val) => {
   justify-content: space-between;
   align-items: center;
   padding: 6px 10px;
-  background: linear-gradient(180deg, #1f91e5, #1a6fdc, #1a5dc6);
+  background: var(--w-xp-title-bar);
   color: #fff;
   font-weight: bold;
   font-size: var(--w-font-size-medium);

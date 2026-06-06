@@ -9,24 +9,28 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WAvatar' })
 const props = defineProps({
   src: String,
   alt: String,
   icon: String,
-  size: { type: [String, Number], default: 'default' },
+  size: { type: [String, Number], default: undefined },
   shape: { type: String, default: 'circle' },
   bgColor: String,
   color: String
 })
+
+const globalSize = useGlobalSize()
+const size = computed(() => props.size !== undefined ? props.size : globalSize.value)
 
 const initials = computed(() => props.alt?.slice(0, 2).toUpperCase() || '?')
 const avatarStyle = computed(() => {
   const style: Record<string, string> = {}
   if (props.bgColor) style.backgroundColor = props.bgColor
   if (props.color) style.color = props.color
-  if (typeof props.size === 'number') { style.width = `${props.size}px`; style.height = `${props.size}px` }
+  if (typeof size.value === 'number') { style.width = `${size.value}px`; style.height = `${size.value}px` }
   return style
 })
 const handleError = () => {}

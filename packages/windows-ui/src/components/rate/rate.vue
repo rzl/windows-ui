@@ -41,7 +41,7 @@ const select = (i: number) => {
 <style scoped>
 .w-rate { display: inline-flex; align-items: center; gap: 2px; }
 .w-rate__item { cursor: pointer; color: #c0c0c0; }
-.w-rate__item.is-active { color: #e4a010; }
+.w-rate__item.is-active { color: var(--w-color-warning); }
 .w-rate.is-disabled .w-rate__item { cursor: not-allowed; }
 .w-rate__score { margin-left: 8px; font-size: var(--w-font-size-base); color: var(--w-text-color-secondary); }
 </style>

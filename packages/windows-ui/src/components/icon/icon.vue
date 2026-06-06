@@ -4,14 +4,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WIcon' })
 
 const props = defineProps({
   name: { type: String, required: true },
-  size: { type: String, default: 'default' },
+  size: { type: String, default: undefined },
   color: String
 })
+
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 
 const icons: Record<string, string> = {
   info: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" fill="#1f91e5"/><text x="8" y="12" text-anchor="middle" fill="white" font-size="10" font-family="Arial" font-weight="bold">i</text></svg>',

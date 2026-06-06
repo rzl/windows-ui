@@ -16,10 +16,10 @@ const handleClick = (e: MouseEvent) => { if (!props.disabled) emit('click', e) }
 <style scoped>
 .w-link { font-family: var(--w-font-family); font-size: var(--w-font-size-base); color: #0000ee; text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
 .w-link.is-underline:hover { text-decoration: underline; }
-.w-link--primary { color: #245edb; }
-.w-link--success { color: #3a9e3a; }
-.w-link--warning { color: #c48810; }
-.w-link--danger { color: #d92b2b; }
-.w-link--info { color: #808080; }
+.w-link--primary { color: var(--w-color-primary); }
+.w-link--success { color: var(--w-color-success); }
+.w-link--warning { color: var(--w-color-warning); }
+.w-link--danger { color: var(--w-color-danger); }
+.w-link--info { color: var(--w-color-info); }
 .w-link.is-disabled { color: #c0c0c0; cursor: not-allowed; }
 </style>

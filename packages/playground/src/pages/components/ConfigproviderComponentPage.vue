@@ -11,6 +11,30 @@
               </w-config-provider>
             </demo-block>
 
+            <demo-block title="全局尺寸" code="&lt;w-config-provider size=&quot;large&quot;&gt;
+        &lt;w-button&gt;大按钮&lt;/w-button&gt;
+        &lt;w-input placeholder=&quot;大输入框&quot; /&gt;
+        &lt;w-tag&gt;大标签&lt;/w-tag&gt;
+      &lt;/w-config-provider&gt;">
+              <w-config-provider size="large">
+                <w-button>大按钮</w-button>
+                <w-input placeholder="大输入框" style="margin-left:8px" />
+                <w-tag style="margin-left:8px">大标签</w-tag>
+              </w-config-provider>
+            </demo-block>
+
+            <demo-block title="主题色配置" code="&lt;w-config-provider :theme=&quot;{ primary: '#c43e3e', danger: '#c43e3e' }&quot;&gt;
+        &lt;w-button type=&quot;primary&quot;&gt;主题按钮&lt;/w-button&gt;
+        &lt;w-link type=&quot;primary&quot;&gt;主题链接&lt;/w-link&gt;
+        &lt;w-tag type=&quot;primary&quot;&gt;主题标签&lt;/w-tag&gt;
+      &lt;/w-config-provider&gt;">
+              <w-config-provider :theme="{ primary: '#c43e3e', danger: '#c43e3e' }">
+                <w-button type="primary">主题按钮</w-button>
+                <w-link type="primary" style="margin-left:8px">主题链接</w-link>
+                <w-tag type="primary" style="margin-left:8px">主题标签</w-tag>
+              </w-config-provider>
+            </demo-block>
+
     </demo-section>
   </div>
 </template>

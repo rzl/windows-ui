@@ -4,8 +4,8 @@
   --w-xp-blue: #245edb;
   --w-xp-blue-light: #3d6df5;
   --w-xp-blue-dark: #1034a6;
-  --w-xp-title-bar: linear-gradient(180deg, #1f91e5 0%, #1a6fdc 10%, #1a5dc6 100%);
-  --w-xp-title-bar-inactive: linear-gradient(180deg, #7ba4e6 0%, #6b94d6 10%, #5a84c6 100%);
+  --w-xp-title-bar: linear-gradient(180deg, var(--w-color-primary-lighter) 0%, var(--w-color-primary-light) 10%, var(--w-color-primary) 100%);
+  --w-xp-title-bar-inactive: linear-gradient(180deg, color-mix(in srgb, var(--w-color-primary) 60%, white) 0%, color-mix(in srgb, var(--w-color-primary) 50%, white) 10%, color-mix(in srgb, var(--w-color-primary) 40%, white) 100%);
 
   /* XP Olive Theme */
   --w-xp-olive: #8ba869;
@@ -19,10 +19,34 @@
 
   /* Classic Colors */
   --w-color-primary: #245edb;
+  --w-color-primary-lighter: color-mix(in srgb, var(--w-color-primary) 40%, white);
+  --w-color-primary-light: color-mix(in srgb, var(--w-color-primary) 70%, white);
+  --w-color-primary-dark: color-mix(in srgb, var(--w-color-primary) 70%, black);
+  --w-color-primary-darker: color-mix(in srgb, var(--w-color-primary) 50%, black);
+
   --w-color-success: #3a9e3a;
+  --w-color-success-lighter: color-mix(in srgb, var(--w-color-success) 40%, white);
+  --w-color-success-light: color-mix(in srgb, var(--w-color-success) 70%, white);
+  --w-color-success-dark: color-mix(in srgb, var(--w-color-success) 70%, black);
+  --w-color-success-darker: color-mix(in srgb, var(--w-color-success) 50%, black);
+
   --w-color-warning: #e4a010;
+  --w-color-warning-lighter: color-mix(in srgb, var(--w-color-warning) 40%, white);
+  --w-color-warning-light: color-mix(in srgb, var(--w-color-warning) 70%, white);
+  --w-color-warning-dark: color-mix(in srgb, var(--w-color-warning) 70%, black);
+  --w-color-warning-darker: color-mix(in srgb, var(--w-color-warning) 50%, black);
+
   --w-color-danger: #d92b2b;
+  --w-color-danger-lighter: color-mix(in srgb, var(--w-color-danger) 40%, white);
+  --w-color-danger-light: color-mix(in srgb, var(--w-color-danger) 70%, white);
+  --w-color-danger-dark: color-mix(in srgb, var(--w-color-danger) 70%, black);
+  --w-color-danger-darker: color-mix(in srgb, var(--w-color-danger) 50%, black);
+
   --w-color-info: #808080;
+  --w-color-info-lighter: color-mix(in srgb, var(--w-color-info) 40%, white);
+  --w-color-info-light: color-mix(in srgb, var(--w-color-info) 70%, white);
+  --w-color-info-dark: color-mix(in srgb, var(--w-color-info) 70%, black);
+  --w-color-info-darker: color-mix(in srgb, var(--w-color-info) 50%, black);
 
   --w-color-white: #ffffff;
   --w-color-black: #000000;

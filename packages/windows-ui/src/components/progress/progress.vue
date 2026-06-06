@@ -23,10 +23,10 @@ const props = defineProps({
 const percent = computed(() => Math.max(0, Math.min(100, props.percentage)))
 
 const statusColor = computed(() => {
-  if (props.status === 'success') return '#3a9e3a'
-  if (props.status === 'warning') return '#e4a010'
-  if (props.status === 'danger') return '#d92b2b'
-  return 'linear-gradient(180deg, #5a84ff, #245edb)'
+  if (props.status === 'success') return 'var(--w-color-success)'
+  if (props.status === 'warning') return 'var(--w-color-warning)'
+  if (props.status === 'danger') return 'var(--w-color-danger)'
+  return 'linear-gradient(180deg, var(--w-color-primary-light), var(--w-color-primary))'
 })
 </script>
 

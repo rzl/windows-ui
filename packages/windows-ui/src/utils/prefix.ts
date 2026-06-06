@@ -1,4 +1,4 @@
-import { inject, type InjectionKey, type Ref } from 'vue'
+import { inject, computed, type InjectionKey, type Ref } from 'vue'
 
 export const configProviderContextKey: InjectionKey<Ref<{ prefix: string; size: string; zIndex: number }>> = Symbol('configProviderContextKey')
 
@@ -20,4 +20,9 @@ export function usePrefix() {
     prefix,
     withPrefix
   }
+}
+
+export function useGlobalSize() {
+  const config = inject(configProviderContextKey, undefined)
+  return computed(() => (config?.value?.size as string) || 'default')
 }

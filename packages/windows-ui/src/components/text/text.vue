@@ -3,8 +3,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WText' })
-defineProps({ tag: { type: String, default: 'span' }, size: { type: String, default: 'default' }, type: { type: String, default: 'default' } })
+const props = defineProps({ tag: { type: String, default: 'span' }, size: { type: String, default: undefined }, type: { type: String, default: 'default' } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 </script>
 
 <style scoped>

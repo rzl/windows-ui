@@ -18,6 +18,38 @@ const locale = {
 </script>
 ```
 
+## 全局尺寸
+
+通过 `size` 属性可以统一设置旗下组件的尺寸，支持 `large`、`default`、`small`。
+
+```vue
+<template>
+  <w-config-provider size="large">
+    <w-button>大按钮</w-button>
+    <w-input placeholder="大输入框" />
+    <w-tag>大标签</w-tag>
+    <w-text>大文本</w-text>
+    <w-avatar icon="user" />
+  </w-config-provider>
+</template>
+```
+
+受影响的组件：`WButton`、`WInput`、`WTag`、`WText`、`WAvatar`、`WIcon`。
+
+## 主题色配置
+
+通过 `theme` 属性可以动态修改全局主题色，支持 `primary`、`success`、`warning`、`danger`、`info`、`bgColor`、`textColor`。
+
+```vue
+<template>
+  <w-config-provider :theme="{ primary: '#c43e3e', bgColor: '#f5f0e8' }">
+    <w-button type="primary">主题按钮</w-button>
+    <w-link type="primary">主题链接</w-link>
+    <w-tag type="primary">主题标签</w-tag>
+  </w-config-provider>
+</template>
+```
+
 ## API
 
 ### Props
@@ -27,6 +59,7 @@ const locale = {
 | prefix | 前缀内容 | string | w |
 | size | 尺寸 | string | default |
 | zIndex | 层级 | number | 2000 |
+| theme | 主题色配置 | `Record<string, string>` | `{}` |
 
 ### Slots
 
