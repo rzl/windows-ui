@@ -6,6 +6,7 @@
       <demo-block title="基础用法" code="&lt;w-rate v-model=&quot;form.rate&quot; /&gt;"><w-rate v-model="form.rate" /></demo-block>
       <demo-block title="显示分数" code="&lt;w-rate v-model=&quot;form.rate&quot; show-score /&gt;"><w-rate v-model="form.rate" show-score /></demo-block>
       <demo-block title="禁用" code="&lt;w-rate v-model=&quot;form.rate&quot; disabled /&gt;"><w-rate v-model="form.rate" disabled /></demo-block>
+      <demo-block title="最大数量" code="&lt;w-rate v-model=&quot;form.rateMax&quot; :max=&quot;10&quot; show-score /&gt;"><w-rate v-model="form.rateMax" :max="10" show-score /></demo-block>
 
     </demo-section>
   </div>
@@ -19,7 +20,7 @@ import { reactive } from 'vue'
 const form = reactive({
   input: '', input2: '', number: 0, tags: ['标签1', '标签2'], otp: '', otp2: '',
   auto: '', cascader: [] as string[], checkbox: [] as string[], color: '#245edb',
-  date: '', date2: '', datetime: '', radio: 'A', rate: 3, select: '', slider: 30,
+  date: '', date2: '', datetime: '', radio: 'A', rate: 3, rateMax: 7, select: '', slider: 30,
   switch: true, time: '', timeselect: '', transfer: [] as string[], treeselect: '',
   mention: '', name: '', email: '', gender: 'male', hobbies: [] as string[]
 })

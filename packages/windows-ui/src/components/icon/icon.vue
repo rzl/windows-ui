@@ -27,7 +27,7 @@ const icons: Record<string, string> = {
   file: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 1h8l4 4v10H2z" fill="#fff" stroke="#808080"/><path d="M10 1v4h4" fill="none" stroke="#808080"/></svg>',
   search: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="7" cy="7" r="5" fill="none" stroke="#000"/><path d="M11 11l4 4" stroke="#000" stroke-width="2"/></svg>',
   user: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5" r="3" fill="#808080"/><path d="M2 14c0-3 3-5 6-5s6 2 6 5" fill="#808080"/></svg>',
-  star: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 5h5l-4 3 1.5 5L8 10l-4.5 4 1.5-5-4-3h5z" fill="#e4a010"/></svg>',
+  star: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 5h5l-4 3 1.5 5L8 10l-4.5 4 1.5-5-4-3h5z" fill="currentColor"/></svg>',
   arrowUp: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2l6 8H2z" fill="#000"/></svg>',
   arrowDown: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 14l-6-8h12z" fill="#000"/></svg>',
   arrowLeft: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 8l8-6v12z" fill="#000"/></svg>',
