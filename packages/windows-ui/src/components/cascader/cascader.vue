@@ -1,6 +1,6 @@
 <template>
   <div class="w-cascader" v-click-outside="close">
-    <w-input v-model="displayValue" readonly :placeholder="placeholder" @click="open = !open" />
+    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-cascader__dropdown">
       <div class="w-cascader__menu">
         <div v-for="opt in currentOptions" :key="opt.value" :class="['w-cascader__item', { 'is-active': selected[0] === opt.value }]" @click="select(opt, 0)">{{ opt.label }}<span v-if="opt.children">&nbsp;&gt;</span></div>
@@ -16,8 +16,8 @@
 import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
 defineOptions({ name: 'WCascader' })
-const props = defineProps({ modelValue: Array as () => string[], options: { type: Array as () => any[], default: () => [] }, placeholder: String })
-const emit = defineEmits(['update:modelValue', 'change'])
+const props = defineProps({ modelValue: Array as () => string[], options: { type: Array as () => any[], default: () => [] }, placeholder: String, clearable: { type: Boolean, default: true } })
+const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
 const selected = ref<string[]>(props.modelValue || [])
 const currentOptions = computed(() => props.options)
@@ -33,6 +33,7 @@ const select = (opt: any, level: number) => {
   selected.value.push(opt.value)
   if (!opt.children) { emit('update:modelValue', [...selected.value]); emit('change', [...selected.value]); open.value = false }
 }
+const handleClear = () => { selected.value = []; emit('update:modelValue', []); emit('change', []); emit('clear') }
 const close = () => { open.value = false }
 const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>

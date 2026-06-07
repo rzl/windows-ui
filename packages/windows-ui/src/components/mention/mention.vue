@@ -1,6 +1,6 @@
 <template>
   <div class="w-mention" v-click-outside="close">
-    <w-input v-model="inputValue" :placeholder="placeholder" @input="handleInput" @keydown="handleKeydown" />
+    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" @input="handleInput" @keydown="handleKeydown" @clear="handleClear" />
     <div v-show="open && filtered.length" class="w-mention__list">
       <div v-for="item in filtered" :key="item.value" :class="['w-mention__item', { 'is-active': item.value === activeValue }]" @click="select(item)">{{ item.label }}</div>
     </div>
@@ -16,9 +16,10 @@ const props = defineProps({
   modelValue: String,
   placeholder: String,
   prefix: { type: String, default: '@' },
-  options: { type: Array as () => { label: string; value: string }[], default: () => [] }
+  options: { type: Array as () => { label: string; value: string }[], default: () => [] },
+  clearable: { type: Boolean, default: true }
 })
-const emit = defineEmits(['update:modelValue', 'select'])
+const emit = defineEmits(['update:modelValue', 'select', 'clear'])
 
 const inputValue = ref(props.modelValue || '')
 const open = ref(false)
@@ -56,6 +57,7 @@ const select = (item: any) => {
   prefixIndex.value = -1
 }
 const close = () => { open.value = false }
+const handleClear = () => { emit('update:modelValue', ''); emit('clear') }
 
 const vClickOutside = {
   mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) },

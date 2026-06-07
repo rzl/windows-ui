@@ -3,7 +3,10 @@
     <div class="w-virtualized-select__trigger" @click="open = !open">
       <span v-if="selectedLabel">{{ selectedLabel }}</span>
       <span v-else class="w-virtualized-select__placeholder">{{ placeholder }}</span>
-      <w-icon name="arrowDown" size="small" />
+      <div class="w-virtualized-select__icons">
+        <w-icon v-if="clearable && selectedLabel" name="close" size="small" class="w-virtualized-select__clear" @click.stop="handleClear" />
+        <w-icon name="arrowDown" size="small" />
+      </div>
     </div>
     <div v-show="open" class="w-virtualized-select__dropdown">
       <div class="w-virtualized-select__viewport" :style="{ height: `${itemHeight * Math.min(visibleCount, totalItems)}px` }" @scroll="handleScroll">
@@ -25,9 +28,10 @@ const props = defineProps({
   options: { type: Array as () => { label: string; value: any }[], default: () => [] },
   placeholder: { type: String, default: '请选择' },
   itemHeight: { type: Number, default: 28 },
-  visibleCount: { type: Number, default: 8 }
+  visibleCount: { type: Number, default: 8 },
+  clearable: { type: Boolean, default: true }
 })
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 
 const open = ref(false)
 const scrollTop = ref(0)
@@ -37,6 +41,7 @@ const startIndex = computed(() => Math.floor(scrollTop.value / props.itemHeight)
 const visibleOptions = computed(() => props.options.slice(startIndex.value, startIndex.value + props.visibleCount + 1))
 const select = (opt: any) => { emit('update:modelValue', opt.value); emit('change', opt.value); open.value = false }
 const close = () => { open.value = false }
+const handleClear = () => { emit('update:modelValue', undefined); emit('change', undefined); emit('clear') }
 const handleScroll = (e: Event) => { scrollTop.value = (e.target as HTMLDivElement).scrollTop }
 
 const vClickOutside = {
@@ -53,4 +58,6 @@ const vClickOutside = {
 .w-virtualized-select__viewport { overflow-y: auto; }
 .w-virtualized-select__option { padding: 0 8px; cursor: pointer; font-size: var(--w-font-size-base); }
 .w-virtualized-select__option:hover, .w-virtualized-select__option.is-selected { background: var(--w-xp-blue); color: #fff; }
+.w-virtualized-select__icons { display: flex; align-items: center; gap: 4px; }
+.w-virtualized-select__clear { cursor: pointer; }
 </style>

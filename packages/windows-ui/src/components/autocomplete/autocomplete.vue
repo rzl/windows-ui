@@ -1,6 +1,6 @@
 <template>
   <div class="w-autocomplete" v-click-outside="close">
-    <w-input v-model="inputValue" :placeholder="placeholder" @focus="open = true" @input="handleInput" />
+    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" @focus="open = true" @input="handleInput" @clear="handleClear" />
     <div v-show="open && filtered.length" class="w-autocomplete__suggestions">
       <div v-for="item in filtered" :key="item.value" class="w-autocomplete__item" @click="select(item)">{{ item.label }}</div>
     </div>
@@ -11,8 +11,8 @@
 import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
 defineOptions({ name: 'WAutocomplete' })
-const props = defineProps({ modelValue: String, placeholder: String, options: { type: Array as () => { label: string; value: string }[], default: () => [] } })
-const emit = defineEmits(['update:modelValue', 'select'])
+const props = defineProps({ modelValue: String, placeholder: String, options: { type: Array as () => { label: string; value: string }[], default: () => [] }, clearable: { type: Boolean, default: true } })
+const emit = defineEmits(['update:modelValue', 'select', 'clear'])
 const inputValue = ref(props.modelValue || '')
 const open = ref(false)
 const filtered = computed(() => {
@@ -22,6 +22,7 @@ const filtered = computed(() => {
 const handleInput = (e: Event) => { inputValue.value = (e.target as HTMLInputElement).value; emit('update:modelValue', inputValue.value); open.value = true }
 const select = (item: any) => { inputValue.value = item.label; emit('update:modelValue', item.value); emit('select', item); open.value = false }
 const close = () => { open.value = false }
+const handleClear = () => { emit('update:modelValue', ''); emit('clear') }
 const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>
 

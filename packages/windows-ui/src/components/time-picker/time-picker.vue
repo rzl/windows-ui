@@ -1,6 +1,6 @@
 <template>
   <div class="w-time-picker" v-click-outside="close">
-    <w-input v-model="displayValue" readonly :placeholder="placeholder" @click="open = !open" />
+    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-time-picker__popper">
       <div class="w-time-picker__panel">
         <div class="w-time-picker__column"><div v-for="h in 24" :key="h" :class="['w-time-picker__cell', { 'is-active': h - 1 === hour }]" @click="hour = h - 1">{{ String(h - 1).padStart(2, '0') }}</div></div>
@@ -17,8 +17,8 @@ import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
 import WButton from '../button/button.vue'
 defineOptions({ name: 'WTimePicker' })
-const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择时间' } })
-const emit = defineEmits(['update:modelValue', 'change'])
+const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择时间' }, clearable: { type: Boolean, default: true } })
+const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
 const parts = props.modelValue?.split(':').map(Number) || [0, 0, 0]
 const hour = ref(parts[0] || 0)
@@ -26,6 +26,7 @@ const minute = ref(parts[1] || 0)
 const second = ref(parts[2] || 0)
 const displayValue = computed(() => props.modelValue || '')
 const confirm = () => { const val = `${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')}:${String(second.value).padStart(2, '0')}`; emit('update:modelValue', val); emit('change', val); open.value = false }
+const handleClear = () => { emit('update:modelValue', ''); emit('change', ''); emit('clear') }
 const close = () => { open.value = false }
 const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>

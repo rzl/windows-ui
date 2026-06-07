@@ -6,7 +6,7 @@
 <template>
   <w-space direction="vertical">
     <w-input v-model="value" placeholder="请输入内容" />
-    <w-input v-model="value" clearable placeholder="可清空" />
+    <w-input v-model="value" placeholder="默认可清空" />
     <w-input v-model="value" prefix-icon="search" placeholder="带前缀图标" />
     <w-input v-model="value" suffix-icon="calendar" placeholder="带后缀图标" />
     <w-input v-model="value" disabled placeholder="禁用状态" />
@@ -34,7 +34,7 @@ const value = ref('')
 | size | 尺寸 | string | default |
 | disabled | 是否禁用 | boolean | - |
 | readonly | 是否只读 | boolean | - |
-| clearable | 是否可清空 | boolean | - |
+| clearable | 是否可清空 | boolean | true |
 | prefixIcon | 前缀图标 | string | - |
 | suffixIcon | 后缀图标 | string | - |
 

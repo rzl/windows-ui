@@ -11,18 +11,21 @@
       @keydown="handleKeydown($event, i - 1)"
       @paste="handlePaste"
     />
+    <w-icon v-if="clearable && modelValue" name="close" size="small" class="w-input-otp__clear" @click="handleClear" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import WIcon from '../icon/icon.vue'
 
 defineOptions({ name: 'WInputOTP' })
 const props = defineProps({
   modelValue: String,
-  length: { type: Number, default: 6 }
+  length: { type: Number, default: 6 },
+  clearable: { type: Boolean, default: true }
 })
-const emit = defineEmits(['update:modelValue', 'complete'])
+const emit = defineEmits(['update:modelValue', 'complete', 'clear'])
 
 const values = ref<string[]>(new Array(props.length).fill(''))
 const inputRefs = ref<HTMLInputElement[]>([])
@@ -53,10 +56,16 @@ const handlePaste = (e: ClipboardEvent) => {
   chars.forEach((c, i) => { values.value[i] = c })
   inputRefs.value[Math.min(chars.length, props.length - 1)]?.focus()
 }
+const handleClear = () => {
+  values.value = new Array(props.length).fill('')
+  emit('update:modelValue', '')
+  emit('clear')
+}
 </script>
 
 <style scoped>
-.w-input-otp { display: flex; gap: 6px; }
+.w-input-otp { display: inline-flex; align-items: center; gap: 6px; }
 .w-input-otp__digit { width: 32px; height: 36px; border: 1px solid #7f9db9; text-align: center; font-size: 18px; font-family: var(--w-font-family); background: #fff; }
 .w-input-otp__digit:focus { border-color: var(--w-color-primary); outline: 1px solid #a5c2e8; outline-offset: -2px; }
+.w-input-otp__clear { cursor: pointer; margin-left: 4px; }
 </style>

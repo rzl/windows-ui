@@ -22,11 +22,13 @@ const value = ref('')
 |--------|------|------|--------|
 | modelValue | 绑定值（支持 v-model） | string | - |
 | placeholder | 占位提示文本 | string | 选择时间 |
+| clearable | 是否可清空 | boolean | true |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
+| clear | 清空时触发 | - |
 | update:modelValue | 绑定值更新时触发 | value |
 | change | 用户确认选定的值时触发 | value |
 

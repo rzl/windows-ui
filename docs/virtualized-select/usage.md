@@ -15,10 +15,18 @@ const options = Array.from({ length: 1000 }, (_, i) => ({ label: '选项 ' + (i 
 </script>
 ```
 
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| modelValue | 绑定值（支持 v-model） | string/number | - |
+| clearable | 是否可清空 | boolean | true |
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
+| clear | 清空时触发 | - |
 | update:modelValue | 绑定值更新时触发 | value |
 | change | 用户确认选定的值时触发 | value |
 

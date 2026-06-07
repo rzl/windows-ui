@@ -29,7 +29,7 @@ const props = defineProps({
   size: { type: String, default: undefined },
   disabled: Boolean,
   readonly: Boolean,
-  clearable: Boolean,
+  clearable: { type: Boolean, default: true },
   prefixIcon: String,
   suffixIcon: String
 })

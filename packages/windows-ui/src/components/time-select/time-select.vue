@@ -1,5 +1,5 @@
 <template>
-  <w-select v-model="innerValue" :options="timeOptions" :placeholder="placeholder" @change="handleChange" />
+  <w-select v-model="innerValue" :options="timeOptions" :placeholder="placeholder" @change="handleChange" @clear="handleClear" />
 </template>
 
 <script setup lang="ts">
@@ -7,7 +7,7 @@ import { ref, computed } from 'vue'
 import WSelect from '../select/select.vue'
 defineOptions({ name: 'WTimeSelect' })
 const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择时间' }, start: { type: String, default: '00:00' }, end: { type: String, default: '23:59' }, step: { type: String, default: '00:30' } })
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const innerValue = ref(props.modelValue)
 const timeOptions = computed(() => {
   const opts: { label: string; value: string }[] = []
@@ -26,4 +26,5 @@ const timeOptions = computed(() => {
   return opts
 })
 const handleChange = (v: string) => { emit('update:modelValue', v); emit('change', v) }
+const handleClear = () => { emit('update:modelValue', ''); emit('change', ''); emit('clear') }
 </script>
