@@ -28,6 +28,7 @@
 - [x] 树形多选联动（父子选中状态自动同步 + 半选状态）
 - [x] 多级表头（columns 嵌套 children + rowspan/colspan 自动计算）
 - [x] 虚拟滚动（固定行高 + 可视区域渲染 + 上下占位行 + 与固定列兼容）
+- [x] 横向虚拟滚动（virtual-x + 左右固定列 + 占位列保持宽度 + 与纵向虚拟滚动兼容）
 
 ## 待优化项（Phase 3）
 - [x] 树形数据（tree-props + lazy + default-expand-all + 父子多选联动）

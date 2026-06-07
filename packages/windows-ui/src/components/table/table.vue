@@ -3,101 +3,187 @@
     <table>
       <colgroup>
         <col
-          v-for="(col, i) in normalizedColumns"
+          v-for="(col, i) in renderColumns"
           :key="col.__key"
-          :style="i === lastFlexibleColIndex ? {} : { width: `${colContentWidthPx(col)}px` }"
+          :style="colStyleForRender(col, i)"
         />
       </colgroup>
       <thead>
-        <tr v-for="rowIdx in headerRowCount" :key="rowIdx">
-          <th
-            v-for="node in collectLevelNodes(headerNodes, rowIdx - 1)"
-            :key="node.__key + '-' + rowIdx"
-            :colspan="node.__isLeaf ? undefined : node.__leafCount"
-            :rowspan="node.__isLeaf ? headerRowCount - node.__level : undefined"
-            :class="[headerCellClass(node), stickyClass(node)]"
-            :style="[node.__isLeaf ? leafHeaderCellStyle(node) : {}, stickyStyle(node)]"
-          >
-            <div class="w-table__cell-content">
-              <template v-if="node.type === 'selection' && node.__isLeaf">
-                <w-checkbox
-                  :model-value="isAllSelected"
-                  :indeterminate="isIndeterminate"
-                  @change="toggleAllSelection"
+        <template v-if="headerRowCount > 1">
+          <tr v-for="rowIdx in headerRowCount" :key="rowIdx">
+            <th
+              v-for="node in collectLevelNodes(headerNodes, rowIdx - 1)"
+              :key="node.__key + '-' + rowIdx"
+              :colspan="node.__isLeaf ? undefined : node.__leafCount"
+              :rowspan="node.__isLeaf ? headerRowCount - node.__level : undefined"
+              :class="[headerCellClass(node), stickyClass(node)]"
+              :style="[node.__isLeaf ? leafHeaderCellStyle(node, -1) : {}, stickyStyle(node)]"
+            >
+              <div class="w-table__cell-content">
+                <template v-if="node.type === 'selection' && node.__isLeaf">
+                  <w-checkbox
+                    :model-value="isAllSelected"
+                    :indeterminate="isIndeterminate"
+                    @change="toggleAllSelection"
+                  />
+                </template>
+                <template v-else-if="node.__isLeaf">
+                  <slot :name="'header-' + node.prop" :column="node">
+                    {{ node.label }}
+                  </slot>
+                  <span
+                    v-if="node.sortable"
+                    class="w-table__sort"
+                    @click.stop="handleSort(node)"
+                  >
+                    <w-icon
+                      name="arrowUp"
+                      size="small"
+                      :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'ascending' }"
+                    />
+                    <w-icon
+                      name="arrowDown"
+                      size="small"
+                      :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'descending' }"
+                    />
+                  </span>
+                  <span
+                    v-if="node.filters?.length"
+                    class="w-table__filter"
+                    @click.stop="toggleFilter(node)"
+                  >
+                    <w-icon
+                      name="arrowDown"
+                      size="small"
+                      :class="{ 'is-active': node.prop && !!filterState[node.prop]?.length }"
+                    />
+                    <div
+                      v-if="node.prop && activeFilter === node.prop"
+                      class="w-table__filter-panel"
+                      @click.stop
+                    >
+                      <div class="w-table__filter-list">
+                        <w-checkbox
+                          v-for="f in node.filters"
+                          :key="f.value"
+                          v-model="filterTempValues"
+                          :label="f.value"
+                        >
+                          {{ f.text }}
+                        </w-checkbox>
+                      </div>
+                      <div class="w-table__filter-actions">
+                        <w-button size="small" @click="confirmFilter(node)">
+                          确定
+                        </w-button>
+                        <w-button size="small" @click="resetFilter(node)">
+                          重置
+                        </w-button>
+                      </div>
+                    </div>
+                  </span>
+                </template>
+                <template v-else>
+                  {{ node.label }}
+                </template>
+              </div>
+              <span
+                v-if="node.__isLeaf"
+                class="w-table__resize-handle"
+                @mousedown.stop="(e: MouseEvent) => startResize(e, node)"
+                @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, node)"
+              />
+            </th>
+          </tr>
+        </template>
+        <template v-else>
+          <tr>
+            <th
+              v-for="(col, ci) in renderColumns"
+              :key="col.__key"
+              :class="[headerCellClass(col), stickyClass(col)]"
+              :style="[leafHeaderCellStyle(col, ci), stickyStyle(col)]"
+            >
+              <template v-if="!col.__isPadding">
+                <div class="w-table__cell-content">
+                  <template v-if="col.type === 'selection'">
+                    <w-checkbox
+                      :model-value="isAllSelected"
+                      :indeterminate="isIndeterminate"
+                      @change="toggleAllSelection"
+                    />
+                  </template>
+                  <template v-else>
+                    <slot :name="'header-' + col.prop" :column="col">
+                      {{ col.label }}
+                    </slot>
+                    <span
+                      v-if="col.sortable"
+                      class="w-table__sort"
+                      @click.stop="handleSort(col)"
+                    >
+                      <w-icon
+                        name="arrowUp"
+                        size="small"
+                        :class="{ 'is-active': col.prop && sortState.prop === col.prop && sortState.order === 'ascending' }"
+                      />
+                      <w-icon
+                        name="arrowDown"
+                        size="small"
+                        :class="{ 'is-active': col.prop && sortState.prop === col.prop && sortState.order === 'descending' }"
+                      />
+                    </span>
+                    <span
+                      v-if="col.filters?.length"
+                      class="w-table__filter"
+                      @click.stop="toggleFilter(col)"
+                    >
+                      <w-icon
+                        name="arrowDown"
+                        size="small"
+                        :class="{ 'is-active': col.prop && !!filterState[col.prop]?.length }"
+                      />
+                      <div
+                        v-if="col.prop && activeFilter === col.prop"
+                        class="w-table__filter-panel"
+                        @click.stop
+                      >
+                        <div class="w-table__filter-list">
+                          <w-checkbox
+                            v-for="f in col.filters"
+                            :key="f.value"
+                            v-model="filterTempValues"
+                            :label="f.value"
+                          >
+                            {{ f.text }}
+                          </w-checkbox>
+                        </div>
+                        <div class="w-table__filter-actions">
+                          <w-button size="small" @click="confirmFilter(col)">
+                            确定
+                          </w-button>
+                          <w-button size="small" @click="resetFilter(col)">
+                            重置
+                          </w-button>
+                        </div>
+                      </div>
+                    </span>
+                  </template>
+                </div>
+                <span
+                  v-if="!col.__isPadding"
+                  class="w-table__resize-handle"
+                  @mousedown.stop="(e: MouseEvent) => startResize(e, col)"
+                  @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, col)"
                 />
               </template>
-              <template v-else-if="node.__isLeaf">
-                <slot :name="'header-' + node.prop" :column="node">
-                  {{ node.label }}
-                </slot>
-                <span
-                  v-if="node.sortable"
-                  class="w-table__sort"
-                  @click.stop="handleSort(node)"
-                >
-                  <w-icon
-                    name="arrowUp"
-                    size="small"
-                    :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'ascending' }"
-                  />
-                  <w-icon
-                    name="arrowDown"
-                    size="small"
-                    :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'descending' }"
-                  />
-                </span>
-                <span
-                  v-if="node.filters?.length"
-                  class="w-table__filter"
-                  @click.stop="toggleFilter(node)"
-                >
-                  <w-icon
-                    name="arrowDown"
-                    size="small"
-                    :class="{ 'is-active': node.prop && !!filterState[node.prop]?.length }"
-                  />
-                  <div
-                    v-if="node.prop && activeFilter === node.prop"
-                    class="w-table__filter-panel"
-                    @click.stop
-                  >
-                    <div class="w-table__filter-list">
-                      <w-checkbox
-                        v-for="f in node.filters"
-                        :key="f.value"
-                        v-model="filterTempValues"
-                        :label="f.value"
-                      >
-                        {{ f.text }}
-                      </w-checkbox>
-                    </div>
-                    <div class="w-table__filter-actions">
-                      <w-button size="small" @click="confirmFilter(node)">
-                        确定
-                      </w-button>
-                      <w-button size="small" @click="resetFilter(node)">
-                        重置
-                      </w-button>
-                    </div>
-                  </div>
-                </span>
-              </template>
-              <template v-else>
-                {{ node.label }}
-              </template>
-            </div>
-            <span
-              v-if="node.__isLeaf"
-              class="w-table__resize-handle"
-              @mousedown.stop="(e: MouseEvent) => startResize(e, node)"
-              @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, node)"
-            />
-          </th>
-        </tr>
+            </th>
+          </tr>
+        </template>
       </thead>
       <tbody>
         <tr v-if="topPaddingHeight > 0" :style="{ height: `${topPaddingHeight}px` }">
-          <td :colspan="normalizedColumns.length" style="padding: 0; border: none;" />
+          <td :colspan="totalColSpan" style="padding: 0; border: none;" />
         </tr>
         <template
           v-for="(item, ri) in visibleFlatRows"
@@ -109,51 +195,53 @@
             @dblclick="handleRowDblclick(item.row, virtualStartIndex + ri)"
           >
             <td
-              v-for="(col, ci) in columnsWithOffset"
+              v-for="(col, ci) in renderColumns"
               :key="col.__key"
               :class="[cellClass(col), stickyClass(col)]"
               :style="[cellStyle(col, ci), stickyStyle(col)]"
               @click="handleCellClick(item.row, col, virtualStartIndex + ri)"
             >
-              <template v-if="col.type === 'selection'">
-                <w-checkbox
-                  :model-value="isRowSelected(item.row, virtualStartIndex + ri)"
-                  :indeterminate="isTreeTable && isRowIndeterminate(item)"
-                  @change="(v: boolean) => toggleRowSelection(item.row, virtualStartIndex + ri, v)"
-                />
-              </template>
-              <template v-else-if="col.type === 'expand'">
-                <span
-                  class="w-table__expand-icon"
-                  @click.stop="toggleExpand(item.row, virtualStartIndex + ri)"
-                >
-                  {{ isExpanded(item.row, virtualStartIndex + ri) ? '▼' : '▶' }}
-                </span>
-              </template>
-              <template v-else>
-                <div class="w-table__cell-content">
-                  <template v-if="ci === firstDataColumnIndex && isTreeTable">
-                    <span
-                      v-for="n in item.level"
-                      :key="n"
-                      class="w-table__tree-indent"
-                      :style="{ width: `${props.indent}px` }"
-                    />
-                    <span
-                      v-if="item.treeNode"
-                      class="w-table__tree-expand-icon"
-                      :class="{ 'is-loading': isTreeLoading(item) }"
-                      @click.stop="toggleTreeExpand(item)"
-                    >
-                      <template v-if="isTreeLoading(item)">⏳</template>
-                      <template v-else>{{ isTreeExpanded(item) ? '▼' : '▶' }}</template>
-                    </span>
-                    <span v-else class="w-table__tree-expand-icon is-leaf" />
-                  </template>
-                  <slot :name="col.prop" :row="item.row" :$index="virtualStartIndex + ri">
-                    {{ col.prop !== undefined ? item.row[col.prop] : '' }}
-                  </slot>
-                </div>
+              <template v-if="!col.__isPadding">
+                <template v-if="col.type === 'selection'">
+                  <w-checkbox
+                    :model-value="isRowSelected(item.row, virtualStartIndex + ri)"
+                    :indeterminate="isTreeTable && isRowIndeterminate(item)"
+                    @change="(v: boolean) => toggleRowSelection(item.row, virtualStartIndex + ri, v)"
+                  />
+                </template>
+                <template v-else-if="col.type === 'expand'">
+                  <span
+                    class="w-table__expand-icon"
+                    @click.stop="toggleExpand(item.row, virtualStartIndex + ri)"
+                  >
+                    {{ isExpanded(item.row, virtualStartIndex + ri) ? '▼' : '▶' }}
+                  </span>
+                </template>
+                <template v-else>
+                  <div class="w-table__cell-content">
+                    <template v-if="ci === firstDataColumnIndex && isTreeTable">
+                      <span
+                        v-for="n in item.level"
+                        :key="n"
+                        class="w-table__tree-indent"
+                        :style="{ width: `${props.indent}px` }"
+                      />
+                      <span
+                        v-if="item.treeNode"
+                        class="w-table__tree-expand-icon"
+                        :class="{ 'is-loading': isTreeLoading(item) }"
+                        @click.stop="toggleTreeExpand(item)"
+                      >
+                        <template v-if="isTreeLoading(item)">⏳</template>
+                        <template v-else>{{ isTreeExpanded(item) ? '▼' : '▶' }}</template>
+                      </span>
+                      <span v-else class="w-table__tree-expand-icon is-leaf" />
+                    </template>
+                    <slot :name="col.prop" :row="item.row" :$index="virtualStartIndex + ri">
+                      {{ col.prop !== undefined ? item.row[col.prop] : '' }}
+                    </slot>
+                  </div>
+                </template>
               </template>
             </td>
           </tr>
@@ -162,7 +250,7 @@
             :key="'expand-' + item.key"
             class="w-table__expanded-row"
           >
-            <td :colspan="normalizedColumns.length">
+            <td :colspan="totalColSpan">
               <div class="w-table__expanded-cell">
                 <slot
                   name="expand"
@@ -174,10 +262,10 @@
           </tr>
         </template>
         <tr v-if="bottomPaddingHeight > 0" :style="{ height: `${bottomPaddingHeight}px` }">
-          <td :colspan="normalizedColumns.length" style="padding: 0; border: none;" />
+          <td :colspan="totalColSpan" style="padding: 0; border: none;" />
         </tr>
         <tr v-if="!computedFlatRows.length">
-          <td :colspan="normalizedColumns.length" class="w-table__empty">
+          <td :colspan="totalColSpan" class="w-table__empty">
             <slot name="empty">
               <w-empty :description="emptyText || '暂无数据'" />
             </slot>
@@ -250,7 +338,8 @@ const props = defineProps({
   indent: { type: Number, default: 16 },
   virtualized: Boolean,
   rowHeight: { type: Number, default: 40 },
-  height: { type: [String, Number] as PropType<string | number>, default: '' }
+  height: { type: [String, Number] as PropType<string | number>, default: '' },
+  virtualX: Boolean
 })
 
 const emit = defineEmits([
@@ -345,7 +434,9 @@ const findLeafColumn = (prop: string): ColumnItem | undefined => {
 // ----- 虚拟滚动 -----
 const tableRef = ref<HTMLElement | null>(null)
 const scrollTop = ref(0)
+const scrollLeft = ref(0)
 const viewportHeight = ref(0)
+const viewportWidth = ref(0)
 
 const virtualStartIndex = computed(() => {
   if (!props.virtualized) return 0
@@ -378,25 +469,28 @@ const bottomPaddingHeight = computed(() => {
 })
 
 const handleTableScroll = (e: Event) => {
-  scrollTop.value = (e.target as HTMLElement).scrollTop
+  const target = e.target as HTMLElement
+  scrollTop.value = target.scrollTop
+  scrollLeft.value = target.scrollLeft
 }
 
-const updateViewportHeight = () => {
+const updateViewport = () => {
   if (tableRef.value) {
     viewportHeight.value = tableRef.value.clientHeight
+    viewportWidth.value = tableRef.value.clientWidth
   }
 }
 
 onMounted(() => {
   if (props.virtualized) {
-    updateViewportHeight()
-    window.addEventListener('resize', updateViewportHeight)
+    updateViewport()
+    window.addEventListener('resize', updateViewport)
   }
 })
 
 onBeforeUnmount(() => {
   if (props.virtualized) {
-    window.removeEventListener('resize', updateViewportHeight)
+    window.removeEventListener('resize', updateViewport)
   }
 })
 
@@ -554,15 +648,6 @@ const colContentWidthPx = (col: any): number => {
   return 80
 }
 
-const lastFlexibleColIndex = computed(() => {
-  const cols = normalizedColumns.value
-  for (let i = cols.length - 1; i >= 0; i--) {
-    const c = cols[i]
-    if (!c.width && c.type !== 'selection' && c.type !== 'expand') return i
-  }
-  return -1
-})
-
 const colActualWidthPx = (col: any): number => {
   return colContentWidthPx(col)
 }
@@ -601,6 +686,7 @@ const getClientX = (e: MouseEvent | TouchEvent): number => {
 }
 
 const startResize = (e: MouseEvent | TouchEvent, col: any) => {
+  if (col.__isPadding) return
   e.preventDefault()
   const key = col.__key || col.prop || String(col.type)
   resizingCol.value = key
@@ -670,6 +756,90 @@ const columnsWithOffset = computed(() => {
     __isFirstRight: i === firstRightIndex
   }))
 })
+
+// ----- 横向虚拟滚动 -----
+const canVirtualX = computed(() => {
+  return props.virtualized && props.virtualX && headerRowCount.value === 1 && !isTreeTable.value && !hasExpandColumn.value
+})
+
+const leftFixedCols = computed(() => canVirtualX.value ? columnsWithOffset.value.filter(c => c.fixed === 'left') : [])
+const rightFixedCols = computed(() => canVirtualX.value ? columnsWithOffset.value.filter(c => c.fixed === 'right') : [])
+const middleCols = computed(() => canVirtualX.value ? columnsWithOffset.value.filter(c => !c.fixed) : [])
+
+const middleStartIndex = computed(() => {
+  if (!canVirtualX.value) return 0
+  let acc = 0
+  for (let i = 0; i < middleCols.value.length; i++) {
+    const w = colContentWidthPx(middleCols.value[i])
+    if (acc + w > scrollLeft.value) return i
+    acc += w
+  }
+  return middleCols.value.length
+})
+
+const middleEndIndex = computed(() => {
+  if (!canVirtualX.value) return middleCols.value.length
+  let acc = 0
+  for (let i = 0; i < middleStartIndex.value; i++) acc += colContentWidthPx(middleCols.value[i])
+  for (let i = middleStartIndex.value; i < middleCols.value.length; i++) {
+    acc += colContentWidthPx(middleCols.value[i])
+    if (acc > scrollLeft.value + viewportWidth.value) return i + 1
+  }
+  return middleCols.value.length
+})
+
+const visibleMiddleCols = computed(() => {
+  if (!canVirtualX.value) return []
+  return middleCols.value.slice(middleStartIndex.value, middleEndIndex.value)
+})
+
+const leftPaddingWidth = computed(() => {
+  if (!canVirtualX.value) return 0
+  let w = 0
+  for (let i = 0; i < middleStartIndex.value; i++) w += colContentWidthPx(middleCols.value[i])
+  return w
+})
+
+const rightPaddingWidth = computed(() => {
+  if (!canVirtualX.value) return 0
+  let w = 0
+  for (let i = middleEndIndex.value; i < middleCols.value.length; i++) w += colContentWidthPx(middleCols.value[i])
+  return w
+})
+
+const renderColumns = computed(() => {
+  if (!canVirtualX.value) return columnsWithOffset.value
+  const result: any[] = []
+  leftFixedCols.value.forEach(c => result.push({ ...c, __isPadding: false }))
+  if (leftPaddingWidth.value > 0) result.push({ __isPadding: true, __paddingWidth: leftPaddingWidth.value, __key: '__left_padding__' })
+  visibleMiddleCols.value.forEach(c => result.push({ ...c, __isPadding: false }))
+  if (rightPaddingWidth.value > 0) result.push({ __isPadding: true, __paddingWidth: rightPaddingWidth.value, __key: '__right_padding__' })
+  rightFixedCols.value.forEach(c => result.push({ ...c, __isPadding: false }))
+  return result
+})
+
+const totalColSpan = computed(() => canVirtualX.value ? renderColumns.value.length : normalizedColumns.value.length)
+
+const renderLastFlexibleColIndex = computed(() => {
+  const cols = renderColumns.value
+  for (let i = cols.length - 1; i >= 0; i--) {
+    const c = cols[i]
+    if (!c.__isPadding && !c.width && c.type !== 'selection' && c.type !== 'expand') return i
+  }
+  return -1
+})
+
+const colStyleForRender = (col: any, index: number): Record<string, string> => {
+  if (col.__isPadding) {
+    return { width: `${col.__paddingWidth}px`, minWidth: `${col.__paddingWidth}px` }
+  }
+  const isFlexible = index === renderLastFlexibleColIndex.value
+  if (!isFlexible) {
+    const wpx = `${colContentWidthPx(col)}px`
+    return { width: wpx, minWidth: wpx, maxWidth: wpx }
+  }
+  return { minWidth: `${colContentWidthPx(col)}px` }
+}
 
 // ----- 展开行 -----
 const isExpanded = (row: any, index: number) => {
@@ -934,6 +1104,7 @@ const handleRowDblclick = (row: any, index: number) => {
 }
 
 const handleCellClick = (row: any, col: ColumnItem, index: number) => {
+  if ((col as any).__isPadding) return
   emit('cell-click', row, col, col.prop !== undefined ? row[col.prop] : undefined, index)
 }
 
@@ -956,16 +1127,17 @@ const rowClass = (row: any, index: number) => {
 
 // ----- 单元格样式 -----
 const headerCellClass = (col: any) => {
+  if (col.__isPadding) return []
   const classes: string[] = ['w-table__cell']
   if (col.className) classes.push(col.className)
   if (col.align) classes.push(`is-align-${col.align}`)
   return classes
 }
 
-const leafHeaderCellStyle = (col: any) => {
+const leafHeaderCellStyle = (col: any, index: number) => {
+  if (col.__isPadding) return {}
   const style: Record<string, string> = {}
-  const index = normalizedColumns.value.findIndex(c => c.__key === col.__key)
-  const isFlexible = index === lastFlexibleColIndex.value
+  const isFlexible = index === renderLastFlexibleColIndex.value
   if (!isFlexible) {
     const wpx = `${colContentWidthPx(col)}px`
     style.width = wpx
@@ -979,6 +1151,7 @@ const leafHeaderCellStyle = (col: any) => {
 }
 
 const cellClass = (col: any) => {
+  if (col.__isPadding) return []
   const classes: string[] = ['w-table__cell']
   if (col.className) classes.push(col.className)
   if (col.align) classes.push(`is-align-${col.align}`)
@@ -986,8 +1159,9 @@ const cellClass = (col: any) => {
 }
 
 const cellStyle = (col: any, index: number) => {
+  if (col.__isPadding) return {}
   const style: Record<string, string> = {}
-  const isFlexible = index === lastFlexibleColIndex.value
+  const isFlexible = index === renderLastFlexibleColIndex.value
   if (!isFlexible) {
     const wpx = `${colContentWidthPx(col)}px`
     style.width = wpx
@@ -1001,7 +1175,7 @@ const cellStyle = (col: any, index: number) => {
 }
 
 const stickyClass = (col: any) => {
-  if (!col.fixed || col.__isLeaf === false) return []
+  if (!col.fixed || col.__isLeaf === false || col.__isPadding) return []
   const classes: string[] = [`is-fixed-${col.fixed}`]
   if (col.__isLastLeft) classes.push('is-last-fixed-left')
   if (col.__isFirstRight) classes.push('is-first-fixed-right')
@@ -1010,7 +1184,7 @@ const stickyClass = (col: any) => {
 
 const stickyStyle = (col: any) => {
   const style: Record<string, string> = {}
-  if (col.fixed && col.__isLeaf !== false) {
+  if (col.fixed && col.__isLeaf !== false && !col.__isPadding) {
     style.position = 'sticky'
     if (col.fixed === 'left' && col.__leftOffset !== null) {
       style.left = `${col.__leftOffset}px`

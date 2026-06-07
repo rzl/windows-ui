@@ -117,6 +117,11 @@
         <p class="demo-note">大数据量下仅渲染可视区域行，滚动流畅</p>
       </demo-block>
 
+      <demo-block title="横向虚拟滚动" :code="codeVirtualX">
+        <w-table :data="virtualXData" :columns="virtualXColumns" virtualized virtual-x :height="300" border />
+        <p class="demo-note">200+ 列场景下仅渲染可视区域列，搭配左右固定列更流畅</p>
+      </demo-block>
+
       <demo-block title="虚拟化表格" :code="codeVirtual"><w-virtualized-table :data="virtualData" :columns="virtualColumns" :height="300" /></demo-block>
 
     </demo-section>
@@ -148,7 +153,8 @@ import {
   codeTreeSelection,
   codeTreeLazy,
   codeMultiHeader,
-  codeVirtualScroll
+  codeVirtualScroll,
+  codeVirtualX
 } from './table-demo-codes'
 
 const title = 'Table 表格'
@@ -292,6 +298,30 @@ const virtualScrollColumns = [
 ]
 
 const virtualScrollData = Array.from({ length: 1000 }, (_, i) => {
+  const row: Record<string, any> = {
+    id: i + 1,
+    name: '用户 ' + (i + 1)
+  }
+  for (let j = 0; j < 200; j++) {
+    row['field' + j] = String(i * 200 + j + 1)
+  }
+  return row
+})
+
+const virtualXColumns = [
+  { type: 'selection' as const, prop: 'selection', label: ' ', width: 48, fixed: 'left' as const },
+  { prop: 'id', label: 'ID', width: 60, align: 'center' as const, fixed: 'left' as const },
+  { prop: 'name', label: '姓名', width: 100, fixed: 'left' as const },
+  ...Array.from({ length: 200 }, (_, i) => ({
+    prop: 'field' + i,
+    label: '字段' + (i + 1),
+    width: 80,
+    align: 'center' as const
+  })),
+  { prop: 'action', label: '操作', width: 80, fixed: 'right' as const }
+]
+
+const virtualXData = Array.from({ length: 1000 }, (_, i) => {
   const row: Record<string, any> = {
     id: i + 1,
     name: '用户 ' + (i + 1)

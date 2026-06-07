@@ -81,6 +81,38 @@ const tableData = Array.from({ length: 1000 }, (_, i) => ({
 }))
 ${endTag}`
 
+export const codeVirtualX = `<template>
+  <w-table
+    :data="tableData"
+    :columns="tableColumns"
+    virtualized
+    virtual-x
+    :height="300"
+    border
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+const tableColumns = [
+  { prop: 'id', label: 'ID', width: 60, align: 'center' },
+  { prop: 'name', label: '姓名', width: 100 },
+  ...Array.from({ length: 200 }, (_, i) => ({
+    prop: 'field' + i,
+    label: '字段' + (i + 1),
+    width: 80,
+    align: 'center'
+  }))
+]
+const tableData = Array.from({ length: 1000 }, (_, i) => {
+  const row = { id: i + 1, name: '用户 ' + (i + 1) }
+  for (let j = 0; j < 200; j++) {
+    row['field' + j] = String(i * 200 + j + 1)
+  }
+  return row
+})
+${endTag}`
+
 export const codeVirtual = `<template>
   <w-virtualized-table :data="virtualData" :columns="virtualColumns" :height="300" />
 </template>

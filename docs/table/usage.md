@@ -437,6 +437,53 @@ const tableData = Array.from({ length: 1000 }, (_, i) => ({
 
 > 虚拟滚动采用固定行高策略，默认 `row-height` 为 `40px`。当前版本不建议与树形表格或展开行同时使用。
 
+### 横向虚拟滚动
+
+当列数量极大（上百列）时，在 `virtualized` 基础上开启 `virtual-x`，表格会仅渲染可视区域内的列，左右固定列仍然保留。该特性要求：
+- 已开启 `virtualized` 与 `height`
+- 不能同时存在多级表头
+- 不能同时开启树形表格或展开行
+
+```vue
+<template>
+  <w-table
+    :data="tableData"
+    :columns="tableColumns"
+    virtualized
+    virtual-x
+    :height="300"
+    border
+  />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+
+const tableColumns = [
+  { type: 'selection', prop: 'selection', label: ' ', width: 48, fixed: 'left' },
+  { prop: 'id', label: 'ID', width: 60, align: 'center', fixed: 'left' },
+  { prop: 'name', label: '姓名', width: 100, fixed: 'left' },
+  ...Array.from({ length: 200 }, (_, i) => ({
+    prop: 'field' + i,
+    label: '字段' + (i + 1),
+    width: 80,
+    align: 'center'
+  })),
+  { prop: 'action', label: '操作', width: 80, fixed: 'right' }
+]
+
+const tableData = Array.from({ length: 1000 }, (_, i) => {
+  const row = { id: i + 1, name: '用户 ' + (i + 1) }
+  for (let j = 0; j < 200; j++) {
+    row['field' + j] = String(i * 200 + j + 1)
+  }
+  return row
+})
+</script>
+```
+
+> 横向虚拟滚动通过左右 padding 占位列保持表格总宽度不变，固定列会始终渲染在可视区域两侧。
+
 ### 固定表头
 
 通过 `max-height` 属性限制表格最大高度，当内容超出时表头会自动固定，表格体滚动。
@@ -726,6 +773,7 @@ const tableData = [
 | virtualized | 是否开启虚拟滚动 | `boolean` | `false` |
 | rowHeight | 虚拟滚动时的行高（像素） | `number` | `40` |
 | height | 表格固定高度（虚拟滚动时必须设置） | `number \| string` | — |
+| virtualX | 是否开启横向虚拟滚动（需同时开启 `virtualized`） | `boolean` | `false` |
 
 ### Column 配置
 
