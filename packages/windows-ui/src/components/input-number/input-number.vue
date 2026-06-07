@@ -26,8 +26,13 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const handleInput = (e: Event) => {
-  let val = Number((e.target as HTMLInputElement).value)
+  const target = e.target as HTMLInputElement
+  let val = Number(target.value)
+  if (Number.isNaN(val)) {
+    val = props.modelValue
+  }
   val = Math.max(props.min, Math.min(props.max, val))
+  target.value = String(val)
   emit('update:modelValue', val)
   emit('change', val)
 }

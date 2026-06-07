@@ -25,8 +25,10 @@ defineOptions({ name: 'WDateTimePicker' })
 const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择日期时间' } })
 const emit = defineEmits(['update:modelValue', 'change'])
 const open = ref(false)
-const dateValue = ref(props.modelValue ? props.modelValue.split(' ')[0] : '')
-const parts = props.modelValue?.split(' ')?.[1]?.split(':').map(Number) || [0, 0, 0]
+const now = new Date()
+const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+const dateValue = ref(props.modelValue ? props.modelValue.split(' ')[0] : todayStr)
+const parts = props.modelValue?.split(' ')?.[1]?.split(':').map(Number) || [now.getHours(), now.getMinutes(), now.getSeconds()]
 const hour = ref(parts[0] || 0)
 const minute = ref(parts[1] || 0)
 const second = ref(parts[2] || 0)
@@ -39,6 +41,10 @@ const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: 
 
 <style scoped>
 .w-date-time-picker { position: relative; display: inline-block; }
-.w-date-time-picker__popper { position: absolute; top: 100%; left: 0; z-index: var(--w-index-popper); margin-top: 4px; background: var(--w-bg-color); border: 1px solid #808080; padding: 4px; }
-.w-date-time-picker__time { display: flex; align-items: center; gap: 4px; padding: 8px; justify-content: center; }
+.w-date-time-picker__popper { position: absolute; top: 100%; left: 0; z-index: var(--w-index-popper); margin-top: 4px; background: var(--w-bg-color); border: 1px solid #808080; width: 258px; box-sizing: border-box; padding: 0; }
+.w-date-time-picker__time { display: flex; align-items: center; gap: 4px; padding: 8px; justify-content: center; width: 100%; box-sizing: border-box; }
+:deep(.w-date-picker-panel.w-date-picker-panel) { border: none; }
+:deep(.w-input-number) { flex: 1; min-width: 0; }
+:deep(.w-input-number input) { width: 100%; min-width: 0; font-size: var(--w-font-size-small); }
+:deep(.w-input-number button) { width: 16px; padding: 0; flex-shrink: 0; }
 </style>
