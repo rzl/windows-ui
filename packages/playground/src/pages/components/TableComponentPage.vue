@@ -434,7 +434,7 @@ const lazyData = [
   { id: 3, name: '项目 C', date: '2024-06', hasChildren: false }
 ]
 
-const loadTree = (row: any, treeNode: any, resolve: (data: any[]) => void) => {
+const loadTree = (row: any, _treeNode: any, resolve: (data: any[]) => void) => {
   setTimeout(() => {
     resolve([
       { id: row.id * 10 + 1, name: row.name + '-阶段1', date: row.date, hasChildren: false },

@@ -17,7 +17,7 @@
       >
         <span>{{ day.date }}</span>
         <div v-if="day.events?.length" class="w-calendar__events">
-          <span v-for="(ev, i) in day.events.slice(0, 3)" :key="i" class="w-calendar__event" />
+          <span v-for="(_, i) in day.events.slice(0, 3)" :key="i" class="w-calendar__event" />
         </div>
       </div>
     </div>
@@ -26,11 +26,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { PropType } from 'vue'
 import WButton from '../button/button.vue'
 
 defineOptions({ name: 'WCalendar' })
 const props = defineProps({
-  modelValue: { type: [String, Date] as () => (string | Date), default: '' },
+  modelValue: { type: [String, Date] as PropType<string | Date>, default: '' },
   events: { type: Array as () => { date: string; title: string }[], default: () => [] }
 })
 const emit = defineEmits(['update:modelValue', 'change'])

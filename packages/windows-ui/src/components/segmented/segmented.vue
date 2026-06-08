@@ -11,7 +11,7 @@
 import WIcon from '../icon/icon.vue'
 
 defineOptions({ name: 'WSegmented' })
-const props = defineProps({
+defineProps({
   modelValue: [String, Number] as any,
   options: { type: Array as () => { label: string; value: any; icon?: string; disabled?: boolean }[], default: () => [] }
 })

@@ -11,7 +11,7 @@
               v-for="s in ['small', 'default', 'large']"
               :key="s"
               :class="['size-btn', { active: globalSize === s }]"
-              @click="globalSize = s"
+              @click="globalSize = s as any"
             >
               {{ s }}
             </button>

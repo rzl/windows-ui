@@ -18,6 +18,7 @@ import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
 
+const alert = (msg: string) => window.alert(msg)
 const form = reactive({ date: '', page: 1, segment: 'day' })
 const showTour = ref(false)
 

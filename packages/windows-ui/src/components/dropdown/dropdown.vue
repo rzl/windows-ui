@@ -25,7 +25,7 @@ import WButton from '../button/button.vue'
 import WIcon from '../icon/icon.vue'
 
 defineOptions({ name: 'WDropdown' })
-const props = defineProps({
+defineProps({
   items: { type: Array as () => { label: string; value?: any; icon?: string; disabled?: boolean }[], default: () => [] },
   triggerText: { type: String, default: '下拉菜单' }
 })
