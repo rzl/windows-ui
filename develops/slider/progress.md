@@ -6,9 +6,12 @@
 ## 实现清单
 - [x] 基础结构实现
 - [x] Windows XP 样式设计
-- [x] Props 定义
-- [x] Events 定义
-- [x] 基础交互逻辑
+- [x] Props 定义（modelValue、min、max、step、showStops、showMinMax、disabled）
+- [x] Events 定义（update:modelValue、change）
+- [x] 基础交互逻辑（鼠标拖动）
+- [x] 触摸事件支持（移动端滑动）
+- [x] 悬浮提示（tooltip）及插槽自定义
+- [x] 上下限显示（showMinMax）及插槽自定义
 - [x] 示例代码
 
 ## 待优化项
@@ -19,3 +22,4 @@
 
 ## 变更记录
 - 2024-06-01: 初始版本实现
+- 2026-06-07: 新增触摸事件支持、tooltip 悬浮提示、showMinMax 上下限显示及对应插槽

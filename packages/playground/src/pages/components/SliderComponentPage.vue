@@ -3,9 +3,16 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" description="数值滑块选择" id="slider" doc="slider">
 
-      <demo-block title="基础用法" code="&lt;w-slider v-model=&quot;form.slider&quot; /&gt;"><w-slider v-model="form.slider" /></demo-block>
-      <demo-block title="显示断点" code="&lt;w-slider v-model=&quot;form.slider&quot; :step=&quot;10&quot; show-stops /&gt;"><w-slider v-model="form.slider" :step="10" show-stops /></demo-block>
-      <demo-block title="范围" code="&lt;w-slider v-model=&quot;form.slider&quot; :min=&quot;0&quot; :max=&quot;100&quot; /&gt;"><w-slider v-model="form.slider" :min="0" :max="100" /></demo-block>
+      <demo-block title="基础用法" code="&lt;w-slider v-model=&quot;form.slider1&quot; /&gt;"><w-slider v-model="form.slider1" /></demo-block>
+      <demo-block title="显示断点" code="&lt;w-slider v-model=&quot;form.slider2&quot; :step=&quot;10&quot; show-stops /&gt;"><w-slider v-model="form.slider2" :step="10" show-stops /></demo-block>
+      <demo-block title="范围" code="&lt;w-slider v-model=&quot;form.slider3&quot; :min=&quot;0&quot; :max=&quot;100&quot; /&gt;"><w-slider v-model="form.slider3" :min="0" :max="100" /></demo-block>
+      <demo-block title="显示上下限" code="&lt;w-slider v-model=&quot;form.slider4&quot; show-min-max /&gt;"><w-slider v-model="form.slider4" show-min-max /></demo-block>
+      <demo-block title="自定义上下限" code="&lt;w-slider v-model=&quot;form.slider5&quot; show-min-max&gt;&#10;  &lt;template #min=&quot;{ value }&quot;&gt;最小: {{ value }}&lt;/template&gt;&#10;  &lt;template #max=&quot;{ value }&quot;&gt;最大: {{ value }}&lt;/template&gt;&#10;&lt;/w-slider&gt;">
+        <w-slider v-model="form.slider5" show-min-max>
+          <template #min="{ value }">最小: {{ value }}</template>
+          <template #max="{ value }">最大: {{ value }}</template>
+        </w-slider>
+      </demo-block>
 
     </demo-section>
   </div>
@@ -19,7 +26,7 @@ import { reactive } from 'vue'
 const form = reactive({
   input: '', input2: '', number: 0, tags: ['标签1', '标签2'], otp: '', otp2: '',
   auto: '', cascader: [] as string[], checkbox: [] as string[], color: '#245edb',
-  date: '', date2: '', datetime: '', radio: 'A', rate: 3, select: '', slider: 30,
+  date: '', date2: '', datetime: '', radio: 'A', rate: 3, select: '', slider1: 30, slider2: 30, slider3: 30, slider4: 30, slider5: 30,
   switch: true, time: '', timeselect: '', transfer: [] as string[], treeselect: '',
   mention: '', name: '', email: '', gender: 'male', hobbies: [] as string[]
 })
