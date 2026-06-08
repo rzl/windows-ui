@@ -5,6 +5,7 @@
 
       <demo-block title="基础用法" code="&lt;w-slider v-model=&quot;form.slider1&quot; /&gt;"><w-slider v-model="form.slider1" /></demo-block>
       <demo-block title="显示断点" code="&lt;w-slider v-model=&quot;form.slider2&quot; :step=&quot;10&quot; show-stops /&gt;"><w-slider v-model="form.slider2" :step="10" show-stops /></demo-block>
+      <demo-block title="断点与上下限" code="&lt;w-slider v-model=&quot;form.slider6&quot; :step=&quot;10&quot; show-stops show-min-max /&gt;"><w-slider v-model="form.slider6" :step="10" show-stops show-min-max /></demo-block>
       <demo-block title="范围" code="&lt;w-slider v-model=&quot;form.slider3&quot; :min=&quot;0&quot; :max=&quot;100&quot; /&gt;"><w-slider v-model="form.slider3" :min="0" :max="100" /></demo-block>
       <demo-block title="显示上下限" code="&lt;w-slider v-model=&quot;form.slider4&quot; show-min-max /&gt;"><w-slider v-model="form.slider4" show-min-max /></demo-block>
       <demo-block title="自定义上下限" code="&lt;w-slider v-model=&quot;form.slider5&quot; show-min-max&gt;&#10;  &lt;template #min=&quot;{ value }&quot;&gt;最小: {{ value }}&lt;/template&gt;&#10;  &lt;template #max=&quot;{ value }&quot;&gt;最大: {{ value }}&lt;/template&gt;&#10;&lt;/w-slider&gt;">
@@ -13,6 +14,14 @@
           <template #max="{ value }">最大: {{ value }}</template>
         </w-slider>
       </demo-block>
+      <demo-block title="范围 10 ~ 50" code="&lt;w-slider v-model=&quot;form.slider7&quot; :min=&quot;10&quot; :max=&quot;50&quot; show-min-max /&gt;"><w-slider v-model="form.slider7" :min="10" :max="50" show-min-max /></demo-block>
+      <demo-block title="范围 20 ~ 80（断点）" code="&lt;w-slider v-model=&quot;form.slider8&quot; :min=&quot;20&quot; :max=&quot;80&quot; :step=&quot;10&quot; show-stops show-min-max /&gt;"><w-slider v-model="form.slider8" :min="20" :max="80" :step="10" show-stops show-min-max /></demo-block>
+      <demo-block title="范围 5 ~ 45" code="&lt;w-slider v-model=&quot;form.slider9&quot; :min=&quot;5&quot; :max=&quot;45&quot; show-min-max /&gt;"><w-slider v-model="form.slider9" :min="5" :max="45" show-min-max /></demo-block>
+      <demo-block title="范围 30 ~ 70（断点）" code="&lt;w-slider v-model=&quot;form.slider10&quot; :min=&quot;30&quot; :max=&quot;70&quot; :step=&quot;5&quot; show-stops show-min-max /&gt;"><w-slider v-model="form.slider10" :min="30" :max="70" :step="5" show-stops show-min-max /></demo-block>
+      <demo-block title="范围 3 ~ 72（步长 5）" code="&lt;w-slider v-model=&quot;form.slider11&quot; :min=&quot;3&quot; :max=&quot;72&quot; :step=&quot;5&quot; show-stops show-min-max /&gt;"><w-slider v-model="form.slider11" :min="3" :max="72" :step="5" show-stops show-min-max /></demo-block>
+      <demo-block title="范围 7 ~ 43（步长 3）" code="&lt;w-slider v-model=&quot;form.slider12&quot; :min=&quot;7&quot; :max=&quot;43&quot; :step=&quot;3&quot; show-stops show-min-max /&gt;"><w-slider v-model="form.slider12" :min="7" :max="43" :step="3" show-stops show-min-max /></demo-block>
+      <demo-block title="范围 12 ~ 68（步长 8）" code="&lt;w-slider v-model=&quot;form.slider13&quot; :min=&quot;12&quot; :max=&quot;68&quot; :step=&quot;8&quot; show-stops show-min-max /&gt;"><w-slider v-model="form.slider13" :min="12" :max="68" :step="8" show-stops show-min-max /></demo-block>
+      <demo-block title="显示 0~100，可选 20~80" code="&lt;w-slider v-model=&quot;form.slider14&quot; :min=&quot;0&quot; :max=&quot;100&quot; :range-min=&quot;20&quot; :range-max=&quot;80&quot; show-min-max /&gt;"><w-slider v-model="form.slider14" :min="0" :max="100" :range-min="20" :range-max="80" show-min-max /></demo-block>
 
     </demo-section>
   </div>
@@ -26,7 +35,7 @@ import { reactive } from 'vue'
 const form = reactive({
   input: '', input2: '', number: 0, tags: ['标签1', '标签2'], otp: '', otp2: '',
   auto: '', cascader: [] as string[], checkbox: [] as string[], color: '#245edb',
-  date: '', date2: '', datetime: '', radio: 'A', rate: 3, select: '', slider1: 30, slider2: 30, slider3: 30, slider4: 30, slider5: 30,
+  date: '', date2: '', datetime: '', radio: 'A', rate: 3, select: '', slider1: 30, slider2: 30, slider3: 30, slider4: 30, slider5: 30, slider6: 30, slider7: 30, slider8: 50, slider9: 25, slider10: 50, slider11: 33, slider12: 22, slider13: 36, slider14: 50,
   switch: true, time: '', timeselect: '', transfer: [] as string[], treeselect: '',
   mention: '', name: '', email: '', gender: 'male', hobbies: [] as string[]
 })

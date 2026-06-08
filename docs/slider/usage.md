@@ -30,6 +30,14 @@ const value = ref(50)
 <w-slider v-model="value" show-min-max />
 ```
 
+## 可选范围
+
+通过 `range-min` 和 `range-max` 限定可选范围。轨道会显示完整的 `min` ~ `max`，但 thumb 只能在可选范围内拖动，不可选区域以深灰色标识。
+
+```vue
+<w-slider v-model="value" :min="0" :max="100" :range-min="20" :range-max="80" show-min-max />
+```
+
 ## 自定义悬浮提示
 
 通过 `tooltip` 插槽自定义 thumb 上悬浮显示的内容。
@@ -63,6 +71,8 @@ const value = ref(50)
 | min | 最小值 | number | 0 |
 | max | 最大值 | number | 100 |
 | step | 步长 | number | 1 |
+| rangeMin | 可选范围最小值 | number | — |
+| rangeMax | 可选范围最大值 | number | — |
 | showStops | 是否显示断点 | boolean | false |
 | showMinMax | 是否显示上下限 | boolean | false |
 | disabled | 是否禁用 | boolean | false |
