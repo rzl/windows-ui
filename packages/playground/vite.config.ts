@@ -40,6 +40,7 @@ function docsServerPlugin() {
 }
 
 export default defineConfig({
+  base: './',
   plugins: [vue(), docsServerPlugin()],
   resolve: {
     alias: {
