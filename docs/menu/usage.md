@@ -4,19 +4,70 @@
 
 ```vue
 <template>
-  <w-menu default-active="1">
-    <w-menu-item index="1">处理中心</w-menu-item>
-    <w-sub-menu index="2" title="我的工作台">
-      <w-menu-item index="2-1">选项一</w-menu-item>
-      <w-menu-item index="2-2">选项二</w-menu-item>
-    </w-sub-menu>
-    <w-menu-item index="3">消息中心</w-menu-item>
-  </w-menu>
+  <w-menu :items="items" />
 </template>
 
 <script setup>
-import { WMenu, WMenuItem, WSubMenu } from '@windows-ui/core'
+import { ref } from 'vue'
+
+const items = ref([
+  { label: '首页', icon: 'home' },
+  { label: '产品', icon: 'folder', children: [{ label: '产品A' }, { label: '产品B' }] },
+  { label: '关于', icon: 'user' }
+])
 </script>
+```
+
+## 多级菜单
+
+`items` 支持无限层级嵌套，通过 `children` 字段配置子菜单。
+
+```vue
+<template>
+  <w-menu :items="items" />
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const items = ref([
+  { label: '首页', icon: 'home' },
+  {
+    label: '产品中心',
+    icon: 'folder',
+    children: [
+      { label: '产品A' },
+      {
+        label: '产品B',
+        children: [
+          { label: 'B-基础版' },
+          {
+            label: 'B-专业版',
+            children: [
+              { label: '专业版-详情1' },
+              { label: '专业版-详情2' }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+])
+</script>
+```
+
+## 水平菜单
+
+```vue
+<w-menu mode="horizontal" :items="items" />
+```
+
+## 收起模式
+
+通过 `collapse` 属性将菜单切换为收起状态，仅显示图标，子菜单在悬停时从右侧弹出。支持多级级联弹出。
+
+```vue
+<w-menu collapse :items="items" />
 ```
 
 ## API
@@ -25,15 +76,16 @@ import { WMenu, WMenuItem, WSubMenu } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| items | 菜单项列表 | array | [] |
+| items | 菜单项列表（支持多级 children） | array | [] |
 | mode | 菜单模式 | string | vertical |
-| defaultActive | 默认激活项 | string | - |
+| defaultActive | 默认激活项 | string / number | - |
+| collapse | 是否收起（仅垂直模式有效） | boolean | false |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| select | 选中时触发 | (selection, row) |
+| select | 选中时触发 | (value) |
 
 ## 主题定制
 
