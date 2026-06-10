@@ -8,7 +8,7 @@
 - [x] Windows XP 样式设计
 - [x] Props 定义（name、size、color）
 - [x] 新增 `svg` Prop，支持传入自定义 SVG 字符串
-- [x] 内置图标扩充至 60 个（新增 38 个常用图标）
+- [x] 内置图标扩充至 66 个（新增 44 个常用图标）
 - [x] 示例页面按分组展示图标
 - [x] Events 定义
 - [x] 基础交互逻辑
@@ -24,3 +24,4 @@
 - 2024-06-01: 初始版本实现
 - 2026-06-08: 新增 38 个常用内置图标，示例页面改为分组展示
 - 2026-06-08: 新增 `svg` Prop，支持传入自定义 SVG 字符串
+- 2026-06-08: 扩充后台管理专用图标（computer、logout、password、cart、pie-chart、bar-chart）及 setting 别名

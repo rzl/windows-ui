@@ -61,7 +61,8 @@ const iconGroups = [
   { title: '操作交互', names: ['close', 'search', 'more', 'delete', 'edit', 'plus', 'minus', 'check', 'refresh', 'settings', 'copy', 'upload', 'download', 'print', 'share', 'zoom-in', 'zoom-out', 'lock', 'unlock', 'eye', 'eye-off'] },
   { title: '文件系统', names: ['folder', 'file', 'image', 'video', 'music', 'document'] },
   { title: '状态提示', names: ['info', 'warning', 'error', 'success', 'help', 'loading'] },
-  { title: '通用界面', names: ['user', 'star', 'menu', 'home', 'fullscreen', 'fullscreen-exit', 'heart', 'bell', 'calendar', 'clock', 'mail', 'phone', 'link', 'tag', 'bookmark', 'filter', 'sort', 'grid', 'list'] }
+  { title: '通用界面', names: ['user', 'star', 'menu', 'home', 'fullscreen', 'fullscreen-exit', 'heart', 'bell', 'calendar', 'clock', 'mail', 'phone', 'link', 'tag', 'bookmark', 'filter', 'sort', 'grid', 'list'] },
+  { title: '后台管理', names: ['computer', 'logout', 'password', 'cart', 'pie-chart', 'bar-chart', 'setting'] }
 ]
 
 function getGroupCode(group: { title: string; names: string[] }) {

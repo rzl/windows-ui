@@ -87,6 +87,10 @@ import WPopover from './components/popover/popover.vue'
 import WTooltip from './components/tooltip/tooltip.vue'
 import WDivider from './components/divider/divider.vue'
 import WWatermark from './components/watermark/watermark.vue'
+import WAdminLayout from './components/admin-layout/admin-layout.vue'
+import WSearchForm from './components/search-form/search-form.vue'
+import WPageContainer from './components/page-container/page-container.vue'
+import WPermission from './components/permission/permission.vue'
 
 const components = [
   WButton,
@@ -171,7 +175,11 @@ const components = [
   WPopover,
   WTooltip,
   WDivider,
-  WWatermark
+  WWatermark,
+  WAdminLayout,
+  WSearchForm,
+  WPageContainer,
+  WPermission
 ]
 
 function install(app: App) {
@@ -264,8 +272,14 @@ export {
   WPopover,
   WTooltip,
   WDivider,
-  WWatermark
+  WWatermark,
+  WAdminLayout,
+  WSearchForm,
+  WPageContainer,
+  WPermission
 }
+
+export type { FormRule } from './components/form/form.vue'
 
 export default {
   install

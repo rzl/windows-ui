@@ -5,8 +5,10 @@
   "description": "A Vue 3 UI library inspired by Windows XP",
   "scripts": {
     "dev": "pnpm -C packages/playground dev",
+    "dev:admin": "pnpm -C packages/admin dev",
     "build": "pnpm -C packages/windows-ui build",
-    "build:playground": "pnpm -C packages/playground build"
+    "build:playground": "pnpm -C packages/playground build",
+    "build:admin": "pnpm -C packages/admin build"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
@@ -17,5 +19,8 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "pinia": "^3.0.4"
+  }
 }

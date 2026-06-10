@@ -24,13 +24,31 @@ import { WForm, WFormItem, WInput, WButton } from '@windows-ui/core'
 const formRef = ref()
 const form = reactive({ name: '', email: '' })
 const rules = {
-  name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入用户名' }],
+  email: [{ required: true, message: '请输入邮箱' }, { pattern: /^\S+@\S+\.\S+$/, message: '邮箱格式不正确' }]
 }
-const submitForm = () => formRef.value.validate()
+const submitForm = () => formRef.value.validate().then(valid => { if (valid) alert('提交成功') })
 const resetForm = () => formRef.value.resetFields()
 </script>
 ```
+
+## 验证规则
+
+| 规则名 | 说明 | 示例 |
+|--------|------|------|
+| required | 必填 | `{ required: true, message: '不能为空' }` |
+| pattern | 正则验证 | `{ pattern: /^\d+$/, message: '必须为数字' }` |
+| min | 最小长度 | `{ min: 2, message: '至少2个字符' }` |
+| max | 最大长度 | `{ max: 20, message: '最多20个字符' }` |
+| validator | 自定义验证函数 | `{ validator: (val) => val > 0 || '必须大于0' }` |
+
+## 表单方法
+
+| 方法名 | 说明 |
+|--------|------|
+| validate() | 验证全部字段，返回 Promise<boolean> |
+| resetFields() | 重置表单数据和错误 |
+| clearValidate() | 清除验证错误 |
 
 ## API
 
@@ -38,20 +56,21 @@ const resetForm = () => formRef.value.resetFields()
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| model | - | object | - |
+| model | 表单数据对象 | object | - |
 | rules | 验证规则 | object | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| submit | 提交时触发 | - |
+| submit | 表单提交时触发 | model |
+| validate | 验证完成时触发 | (valid, errors) |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
-| default | 默认内容 |
+| default | 表单内容 |
 
 ## 主题定制
 

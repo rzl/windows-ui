@@ -7,16 +7,94 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue'
 
+export interface FormRule {
+  required?: boolean
+  message?: string
+  pattern?: RegExp
+  min?: number
+  max?: number
+  validator?: (value: any) => boolean | string
+}
+
 defineOptions({ name: 'WForm' })
-const props = defineProps({ model: Object, rules: Object })
-const emit = defineEmits(['submit'])
+const props = defineProps({
+  model: Object as () => Record<string, any>,
+  rules: Object as () => Record<string, FormRule[]>
+})
+const emit = defineEmits(['submit', 'validate'])
 
 const errors = ref<Record<string, string>>({})
+const fieldRefs = ref<any[]>([])
+
 provide('formErrors', errors)
 provide('formModel', props.model)
 provide('formRules', props.rules)
+provide('formRegisterField', (field: any) => {
+  fieldRefs.value.push(field)
+})
 
-const handleSubmit = () => { emit('submit', props.model) }
+const validate = async (): Promise<boolean> => {
+  errors.value = {}
+  if (!props.rules || !props.model) return true
+
+  let valid = true
+  for (const [prop, rules] of Object.entries(props.rules)) {
+    const value = props.model[prop]
+    for (const rule of rules) {
+      if (rule.required && (value === undefined || value === '' || value === null || (Array.isArray(value) && value.length === 0))) {
+        errors.value[prop] = rule.message || `${prop} 不能为空`
+        valid = false
+        break
+      }
+      if (rule.pattern && value !== undefined && value !== '' && !rule.pattern.test(String(value))) {
+        errors.value[prop] = rule.message || `${prop} 格式不正确`
+        valid = false
+        break
+      }
+      if (rule.min !== undefined && typeof value === 'string' && value.length < rule.min) {
+        errors.value[prop] = rule.message || `${prop} 最少 ${rule.min} 个字符`
+        valid = false
+        break
+      }
+      if (rule.max !== undefined && typeof value === 'string' && value.length > rule.max) {
+        errors.value[prop] = rule.message || `${prop} 最多 ${rule.max} 个字符`
+        valid = false
+        break
+      }
+      if (rule.validator) {
+        const result = rule.validator(value)
+        if (result !== true) {
+          errors.value[prop] = typeof result === 'string' ? result : (rule.message || `${prop} 验证失败`)
+          valid = false
+          break
+        }
+      }
+    }
+  }
+  emit('validate', valid, errors.value)
+  return valid
+}
+
+const resetFields = () => {
+  errors.value = {}
+  if (props.model) {
+    Object.keys(props.model).forEach((key) => {
+      props.model![key] = undefined
+    })
+  }
+}
+
+const clearValidate = () => {
+  errors.value = {}
+}
+
+const handleSubmit = () => {
+  validate().then((valid) => {
+    if (valid) emit('submit', props.model)
+  })
+}
+
+defineExpose({ validate, resetFields, clearValidate })
 </script>
 
 <style scoped>

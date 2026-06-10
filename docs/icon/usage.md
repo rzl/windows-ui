@@ -74,7 +74,7 @@ const customSvg = ref('<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="
 
 ## 内置图标列表
 
-共计 **60** 个内置图标，按功能分组如下：
+共计 **66** 个内置图标，按功能分组如下：
 
 ### 方向箭头
 | 图标名 | 图标名 | 图标名 | 图标名 |
@@ -112,6 +112,12 @@ const customSvg = ref('<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="
 | calendar | clock | mail | phone |
 | link | tag | bookmark | filter |
 | sort | grid | list |
+
+### 后台管理
+| 图标名 | 图标名 | 图标名 | 图标名 |
+|--------|--------|--------|--------|
+| computer | logout | password | cart |
+| pie-chart | bar-chart | setting |
 
 ## API
 

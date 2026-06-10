@@ -9,12 +9,43 @@
 </template>
 
 <script setup lang="ts">
-import { inject, computed } from 'vue'
+import { inject, computed, onMounted } from 'vue'
 
 defineOptions({ name: 'WFormItem' })
 const props = defineProps({ label: String, prop: String })
+
 const errors = inject<Record<string, string>>('formErrors', {})
+const formModel = inject<Record<string, any>>('formModel', {})
+const formRules = inject<Record<string, any[]>>('formRules', {})
+const registerField = inject<(field: any) => void>('formRegisterField', () => {})
+
 const error = computed(() => (props.prop ? errors[props.prop] : ''))
+
+onMounted(() => {
+  if (props.prop) {
+    registerField({
+      prop: props.prop,
+      validate: () => {
+        const rules = formRules[props.prop!]
+        if (!rules) return true
+        const value = formModel[props.prop!]
+        for (const rule of rules) {
+          if (rule.required && (value === undefined || value === '' || value === null)) {
+            return false
+          }
+          if (rule.pattern && !rule.pattern.test(String(value))) {
+            return false
+          }
+          if (rule.validator) {
+            const result = rule.validator(value)
+            if (result !== true) return false
+          }
+        }
+        return true
+      }
+    })
+  }
+})
 </script>
 
 <style scoped>
