@@ -159,7 +159,7 @@ const sizeOptions = [
   { label: "小", value: "small" },
   { label: "默认", value: "default" },
   { label: "大", value: "large" }
-]
+] as const
 
 function switchLang(val: string) {
   locale.value = val
