@@ -70,7 +70,7 @@ const renderedDoc = computed(() => {
 watch(() => props.doc, async (name) => {
   if (!name) return
   try {
-    const res = await fetch(`/docs/${name}/usage.md`)
+    const res = await fetch(`docs/${name}/usage.md`)
     docContent.value = res.ok ? await res.text() : '文档加载失败'
   } catch (e) {
     docContent.value = '文档加载失败'
