@@ -9,10 +9,10 @@
 **Windows UI** 是一个受 Windows XP 经典风格启发的 Vue 3 UI 组件库。
 
 - **技术栈**：Vue 3（Composition API / `<script setup>`）、TypeScript 5.3+、Vite 5.0+、pnpm workspaces
-- **组件数量**：82 个，覆盖基础（Basic）、表单（Form）、数据展示（Data）、导航（Navigation）、反馈（Feedback）、其他（Others）六大类
-- **包名**：`@windows-ui/core`（库）、`@windows-ui/playground`（示例站点）
+- **组件数量**：86 个组件目录，在 `index.ts` 中注册并导出了 88 个组件（含 `WFormItem` 等子组件），覆盖基础（Basic）、表单（Form）、数据展示（Data）、导航（Navigation）、反馈（Feedback）、其他（Others）六大类
+- **包名**：`@windows-ui/core`（库）、`@windows-ui/playground`（示例站点）、`@windows-ui/admin`（后台管理系统模板）
 - **默认前缀**：`w-`（例如 `w-button`），可通过 `WConfigProvider` 自定义
-- **主题系统**：基于 CSS 变量（`--w-*`），易于覆盖主色、背景色、边框色等；同时保留 XP 经典硬编码渐变以保证视觉一致性
+- **主题系统**：基于 CSS 变量（`--w-*`），`WConfigProvider` 支持动态传入主题色并自动计算色阶（lighter / light / dark / darker），同时保留 XP 经典硬编码渐变以保证视觉一致性
 - **原始需求**：见仓库根目录 `1.text`（只读参考）
 
 ---
@@ -33,7 +33,7 @@ windows-ui/
 │   │   │   │   ├── variables.css    # CSS 变量（XP 配色、字体、阴影、尺寸等）
 │   │   │   │   └── base.css         # XP 基础工具类（按钮、输入框、窗口、滚动条等）
 │   │   │   ├── utils/
-│   │   │   │   ├── prefix.ts        # 组件前缀注入 / usePrefix()
+│   │   │   │   ├── prefix.ts        # 组件前缀注入 / usePrefix() / useGlobalSize()
 │   │   │   │   └── types.ts         # 公共类型（ComponentSize、ConfigProviderContext）
 │   │   │   └── components/
 │   │   │       └── <name>/
@@ -42,20 +42,33 @@ windows-ui/
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
-│   └── playground/              # 🎨 示例与文档站点
+│   ├── playground/              # 🎨 示例与文档站点
+│   │   ├── src/
+│   │   │   ├── main.ts          # 入口：createApp + use(WindowsUI) + router
+│   │   │   ├── App.vue
+│   │   │   ├── router/index.ts  # hash 路由，覆盖全部组件独立页面 + 分类首页 + 首页
+│   │   │   ├── views/Layout.vue # 侧边栏 + 内容区布局，含全局尺寸 / 主题色切换控件
+│   │   │   ├── pages/           # 按分类展示组件（BasicPage、FormPage…）
+│   │   │   │   └── components/  # 每个组件的独立演示页面（*ComponentPage.vue）
+│   │   │   └── components/
+│   │   │       ├── DemoSection.vue   # 组件演示区块（标题 + 描述 + 可折叠的 usage.md）
+│   │   │       ├── DemoBlock.vue     # 单个示例卡片（标题 + slot + 代码）
+│   │   │       └── CodeBlock.vue     # 代码高亮展示
+│   │   ├── index.html
+│   │   ├── vite.config.ts       # 开发别名指向库源码；自定义 docsServerPlugin 提供 /docs/*.md
+│   │   └── package.json
+│   │
+│   └── admin/                   # 🏢 后台管理系统模板（基于本组件库构建）
 │       ├── src/
-│       │   ├── main.ts          # 入口：createApp + use(WindowsUI) + router
+│       │   ├── main.ts          # 入口：Pinia + vue-router + vue-i18n + WindowsUI
 │       │   ├── App.vue
-│       │   ├── router/index.ts  # hash 路由，覆盖 82 个组件独立页面 + 6 个分类首页 + 首页
-│       │   ├── views/Layout.vue # 侧边栏 + 内容区布局
-│       │   ├── pages/           # 按分类展示组件（BasicPage、FormPage…）
-│       │   │   └── components/  # 每个组件的独立演示页面（*ComponentPage.vue）
-│       │   └── components/
-│       │       ├── DemoSection.vue   # 组件演示区块（标题 + 描述 + 可折叠的 usage.md）
-│       │       ├── DemoBlock.vue     # 单个示例卡片（标题 + slot + 代码）
-│       │       └── CodeBlock.vue     # 代码高亮展示
-│       ├── index.html
-│       ├── vite.config.ts       # 开发别名指向库源码；自定义 docsServerPlugin 提供 /docs/*.md
+│       │   ├── router/          # 路由配置
+│       │   ├── views/           # 页面视图（dashboard、login、user、order 等）
+│       │   ├── stores/          # Pinia 状态管理
+│       │   ├── i18n/            # vue-i18n 国际化
+│       │   ├── components/      # 业务组件（Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting）
+│       │   └── composables/     # 组合式函数
+│       ├── vite.config.ts       # 端口 5174，别名指向库源码
 │       └── package.json
 │
 ├── docs/                        # 每个组件的使用说明文档（中文 Markdown）
@@ -79,8 +92,10 @@ windows-ui/
 | 命令 | 作用 |
 |------|------|
 | `pnpm dev` | 启动 playground 开发服务器（等价于 `pnpm -C packages/playground dev`） |
+| `pnpm dev:admin` | 启动 admin 后台模板开发服务器（端口 5174） |
 | `pnpm build` | 构建 UI 库（ES + UMD + d.ts），输出到 `packages/windows-ui/dist/` |
 | `pnpm build:playground` | 构建 playground 生产包 |
+| `pnpm build:admin` | 构建 admin 后台模板生产包 |
 
 ### 库构建细节
 
@@ -99,6 +114,13 @@ windows-ui/
 - `vite.config.ts` 中通过 alias 将 `@windows-ui/core` 指向 `../windows-ui/src/index.ts`，开发时修改库源码可直接热更新，无需先构建库。
 - 内置 `docsServerPlugin`：开发服务器拦截 `/docs/<component>/usage.md` 请求，从 `../../docs` 目录读取并返回 Markdown 原文，供 `DemoSection.vue` 动态加载渲染。
 - `DemoSection.vue` 使用 `marked` 将 Markdown 渲染为 HTML，`highlight.js` 用于代码块高亮。
+- `Layout.vue` 顶部提供全局控件：可切换 `small / default / large` 尺寸，以及实时调整主色（primary）、成功色（success）、警告色（warning）、危险色（danger）。
+
+### admin 开发细节
+
+- 独立的 Vite 应用，依赖 `@windows-ui/core`、Pinia、vue-router、vue-i18n、screenfull。
+- 开发服务器固定端口 `5174`，自动打开浏览器。
+- 用于展示组件库在真实后台场景下的使用方式。
 
 ---
 
@@ -107,7 +129,7 @@ windows-ui/
 ### 文件与命名
 
 1. **目录**：每个组件独占一个目录，`packages/windows-ui/src/components/<kebab-case-name>/`
-2. **文件**：目录内只有一个 `<kebab-case-name>.vue`，例如 `button/button.vue`。
+2. **文件**：目录内通常只有一个 `<kebab-case-name>.vue`，例如 `button/button.vue`。部分复杂组件会在同目录下包含子组件（如 `form/form-item.vue`）。
 3. **组件名**：Vue 组件内部必须使用 `defineOptions({ name: 'W<Name>' })`，例如 `WButton`。
 4. **注册前缀**：在 `index.ts` 中统一注册为 `w-<name>`，通过 `usePrefix()` 可支持自定义前缀。
 
@@ -134,6 +156,7 @@ windows-ui/
 
 - 所有主题色、字体、尺寸优先引用 `variables.css` 中的变量，禁止写死硬编码颜色（XP 视觉风格需要的经典渐变除外，需保持视觉一致性）。
 - `base.css` 提供全局工具类（`.w-xp-theme`、`.w-xp-btn-base`、`.w-xp-input-base`、`.w-xp-window-base` 等），供复杂组件组合使用，这些类会全局生效。
+- `WConfigProvider` 接收 `theme` 对象，支持动态修改主色等变量，并会自动推导 lighter / light / dark / darker 四个色阶以及标题栏渐变，直接注入到 `document.documentElement` 的内联样式中。
 - 常用变量：
   - `--w-color-primary` / `--w-color-success` / `--w-color-warning` / `--w-color-danger`
   - `--w-bg-color`（`#ece9d8`，经典 XP 米色背景）
@@ -143,7 +166,7 @@ windows-ui/
 
 ### 公共工具
 
-- **前缀**：`src/utils/prefix.ts` 提供 `usePrefix()`，通过 Vue `provide/inject` 与 `WConfigProvider` 配合实现动态前缀。
+- **前缀**：`src/utils/prefix.ts` 提供 `usePrefix()` 与 `useGlobalSize()`，通过 Vue `provide/inject` 与 `WConfigProvider` 配合实现动态前缀和全局尺寸。
 - **类型**：`src/utils/types.ts` 定义 `ComponentSize = 'large' | 'default' | 'small'` 以及 `ConfigProviderContext`。
 
 ---
@@ -196,7 +219,8 @@ windows-ui/
 6. 在 `packages/playground/src/pages/components/` 新建 `*ComponentPage.vue` 演示页面，使用 `demo-section` / `demo-block` 组织示例。
 7. 在 `packages/playground/src/views/Layout.vue` 的侧边栏 `navItems` 中新增导航项。
 8. 编写 `docs/<name>/usage.md`、`designs/<name>/design.md`、`develops/<name>/progress.md`。
-9. 运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
+9. 若该组件属于后台场景常用组件，视情况在 `packages/admin` 中补充示例页面。
+10. 运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
 
 ---
 
@@ -205,6 +229,7 @@ windows-ui/
 - **SVG 图标**：`WIcon` 组件内部使用 `v-html` 渲染内联 SVG，目前图标为项目内置常量，若未来支持外部传入 SVG 字符串，需防范 XSS（对用户输入做净化）。
 - **样式隔离**：各组件使用 `scoped`，但全局主题变量和 `base.css` 中的工具类（如 `.w-xp-theme`、`.w-xp-btn-base`）会全局生效。
 - **peerDependency**：库仅将 `vue` 标记为 `peerDependency`，发布时务必确保版本兼容 `^3.4.0`。
+- **动态主题副作用**：`WConfigProvider` 会在挂载时将主题变量写入 `document.documentElement.style`，并在卸载时自动清理。多个 `WConfigProvider` 嵌套时，后挂载的实例会覆盖前者写入的变量。
 
 ---
 
@@ -212,7 +237,7 @@ windows-ui/
 
 - 本项目**未配置** CI/CD 流水线（无 `.github/workflows`、无 Docker、无部署脚本）。
 - 库构建产物输出到 `packages/windows-ui/dist/`，可直接作为 npm 包发布。
-- Playground 为静态 Vite 站点，构建后可部署到任意静态托管服务。
+- Playground 与 Admin 均为静态 Vite 站点，构建后可部署到任意静态托管服务。
 
 ---
 
@@ -221,10 +246,11 @@ windows-ui/
 | 问题 | 答案 |
 |------|------|
 | 用什么包管理器？ | pnpm |
-| 怎么启动开发？ | `pnpm dev` |
+| 怎么启动开发？ | `pnpm dev`（playground）或 `pnpm dev:admin`（后台模板） |
 | 怎么构建组件库？ | `pnpm build` |
 | 组件文件放哪？ | `packages/windows-ui/src/components/<name>/<name>.vue` |
 | 怎么导出组件？ | 在 `packages/windows-ui/src/index.ts` import + 加入数组 + named export |
 | 怎么写文档？ | 在 `docs/`、`designs/`、`develops/` 下各建 `<name>/<file>.md` |
-| 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `ConfigProvider` 传前缀 |
+| 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `ConfigProvider` 传 `theme` 对象 |
 | 有测试吗？ | 目前没有；建议引入 Vitest + `@vue/test-utils` |
+| 后台模板在哪？ | `packages/admin/` |
