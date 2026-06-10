@@ -84,6 +84,10 @@ import TooltipPage from '../pages/components/TooltipComponentPage.vue'
 import MessageBoxPage from '../pages/components/MessageBoxComponentPage.vue'
 import DividerPage from '../pages/components/DividerComponentPage.vue'
 import WatermarkPage from '../pages/components/WatermarkComponentPage.vue'
+import AdminLayoutPage from '../pages/components/AdminLayoutComponentPage.vue'
+import SearchFormPage from '../pages/components/SearchFormComponentPage.vue'
+import PageContainerPage from '../pages/components/PageContainerComponentPage.vue'
+import PermissionPage from '../pages/components/PermissionComponentPage.vue'
 
 const routes = [
   {
@@ -175,6 +179,10 @@ const routes = [
       { path: 'feedback/message-box', component: MessageBoxPage },
       { path: 'others/divider', component: DividerPage },
       { path: 'others/watermark', component: WatermarkPage },
+      { path: 'basic/admin-layout', component: AdminLayoutPage },
+      { path: 'form/search-form', component: SearchFormPage },
+      { path: 'others/page-container', component: PageContainerPage },
+      { path: 'others/permission', component: PermissionPage },
     ]
   }
 ]

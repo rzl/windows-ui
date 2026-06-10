@@ -10,6 +10,14 @@
         <h3>Watermark 水印</h3>
         <p>页面内容水印，防止截图泄露</p>
       </router-link>
+      <router-link to="/others/page-container" class="component-card">
+        <h3>PageContainer 页面容器</h3>
+        <p>页面内容容器，带标题和面包屑</p>
+      </router-link>
+      <router-link to="/others/permission" class="component-card">
+        <h3>Permission 权限控制</h3>
+        <p>基于权限码控制内容显示</p>
+      </router-link>
     </div>
   </div>
 </template>

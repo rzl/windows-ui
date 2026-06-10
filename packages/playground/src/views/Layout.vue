@@ -106,6 +106,7 @@ const navItems = [
     { path: '/basic/splitter', label: 'Splitter 分隔面板', indent: true },
     { path: '/basic/typography', label: 'Typography 排版', indent: true },
     { path: '/basic/configprovider', label: 'ConfigProvider 全局配置', indent: true },
+    { path: '/basic/admin-layout', label: 'AdminLayout 后台布局', indent: true },
     { path: '/form', label: '表单组件', icon: 'folder' },
     { path: '/form/input', label: 'Input 输入框', indent: true },
     { path: '/form/input-number', label: 'Input Number 数字输入框', indent: true },
@@ -129,6 +130,7 @@ const navItems = [
     { path: '/form/upload', label: 'Upload 上传器', indent: true },
     { path: '/form/mention', label: 'Mention 提及', indent: true },
     { path: '/form/form', label: 'Form 表单', indent: true },
+    { path: '/form/search-form', label: 'SearchForm 搜索表单', indent: true },
     { path: '/data', label: '数据展示', icon: 'folder' },
     { path: '/data/avatar', label: 'Avatar 头像', indent: true },
     { path: '/data/badge', label: 'Badge 徽章', indent: true },
@@ -174,7 +176,9 @@ const navItems = [
     { path: '/feedback/message-box', label: 'Message Box 消息弹出框', indent: true },
     { path: '/others', label: '其他组件', icon: 'folder' },
     { path: '/others/divider', label: 'Divider 分割线', indent: true },
-    { path: '/others/watermark', label: 'Watermark 水印', indent: true }
+    { path: '/others/watermark', label: 'Watermark 水印', indent: true },
+    { path: '/others/page-container', label: 'PageContainer 页面容器', indent: true },
+    { path: '/others/permission', label: 'Permission 权限控制', indent: true }
 ]
 </script>
 
