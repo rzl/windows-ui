@@ -1,3 +1,4 @@
+<!-- From: e:\RZL\gitee\windows-ui\AGENTS.md -->
 # Windows UI — Agent 项目指南
 
 > 本文档面向 AI 编程助手。如果你从未接触过本项目，请先阅读本文件再修改代码。
@@ -9,8 +10,8 @@
 **Windows UI** 是一个受 Windows XP 经典风格启发的 Vue 3 UI 组件库。
 
 - **技术栈**：Vue 3（Composition API / `<script setup>`）、TypeScript 5.3+、Vite 5.0+、pnpm workspaces
-- **组件数量**：86 个组件目录，在 `index.ts` 中注册并导出了 88 个组件（含 `WFormItem` 等子组件），覆盖基础（Basic）、表单（Form）、数据展示（Data）、导航（Navigation）、反馈（Feedback）、其他（Others）六大类
-- **包名**：`@windows-ui/core`（库）、`@windows-ui/playground`（示例站点）、`@windows-ui/admin`（后台管理系统模板）
+- **组件数量**：`packages/windows-ui/src/components/` 下共有 86 个组件目录，在 `index.ts` 中注册并导出了 88 个组件（含 `WFormItem` 等子组件），覆盖基础（Basic）、表单（Form）、数据展示（Data）、导航（Navigation）、反馈（Feedback）、其他（Others）六大类
+- **包名**：`@windows-ui/core`（库）、`@windows-ui/playground`（示例站点，内含 Admin 后台模板子应用）
 - **默认前缀**：`w-`（例如 `w-button`），可通过 `WConfigProvider` 自定义
 - **主题系统**：基于 CSS 变量（`--w-*`），`WConfigProvider` 支持动态传入主题色并自动计算色阶（lighter / light / dark / darker），同时保留 XP 经典硬编码渐变以保证视觉一致性
 - **原始需求**：见仓库根目录 `1.text`（只读参考）
@@ -35,6 +36,7 @@ windows-ui/
 │   │   │   ├── utils/
 │   │   │   │   ├── prefix.ts        # 组件前缀注入 / usePrefix() / useGlobalSize()
 │   │   │   │   └── types.ts         # 公共类型（ComponentSize、ConfigProviderContext）
+│   │   │   ├── hooks/               # 组合式函数目录（当前为空，预留）
 │   │   │   └── components/
 │   │   │       └── <name>/
 │   │   │           └── <name>.vue   # 单文件组件（SFC），每个组件一个目录一个文件
@@ -42,33 +44,32 @@ windows-ui/
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
-│   ├── playground/              # 🎨 示例与文档站点
-│   │   ├── src/
-│   │   │   ├── main.ts          # 入口：createApp + use(WindowsUI) + router
-│   │   │   ├── App.vue
-│   │   │   ├── router/index.ts  # hash 路由，覆盖全部组件独立页面 + 分类首页 + 首页
-│   │   │   ├── views/Layout.vue # 侧边栏 + 内容区布局，含全局尺寸 / 主题色切换控件
-│   │   │   ├── pages/           # 按分类展示组件（BasicPage、FormPage…）
-│   │   │   │   └── components/  # 每个组件的独立演示页面（*ComponentPage.vue）
-│   │   │   └── components/
-│   │   │       ├── DemoSection.vue   # 组件演示区块（标题 + 描述 + 可折叠的 usage.md）
-│   │   │       ├── DemoBlock.vue     # 单个示例卡片（标题 + slot + 代码）
-│   │   │       └── CodeBlock.vue     # 代码高亮展示
-│   │   ├── index.html
-│   │   ├── vite.config.ts       # 开发别名指向库源码；自定义 docsServerPlugin 提供 /docs/*.md
-│   │   └── package.json
-│   │
-│   └── admin/                   # 🏢 后台管理系统模板（基于本组件库构建）
+│   └── playground/              # 🎨 示例与文档站点（同时包含 Admin 后台模板）
 │       ├── src/
-│       │   ├── main.ts          # 入口：Pinia + vue-router + vue-i18n + WindowsUI
+│       │   ├── main.ts          # 入口：createApp + use(WindowsUI) + router
 │       │   ├── App.vue
-│       │   ├── router/          # 路由配置
-│       │   ├── views/           # 页面视图（dashboard、login、user、order 等）
-│       │   ├── stores/          # Pinia 状态管理
-│       │   ├── i18n/            # vue-i18n 国际化
-│       │   ├── components/      # 业务组件（Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting）
-│       │   └── composables/     # 组合式函数
-│       ├── vite.config.ts       # 端口 5174，别名指向库源码
+│       │   ├── router/index.ts  # hash 路由，覆盖全部组件独立页面 + 分类首页 + 首页
+│       │   ├── views/Layout.vue # 侧边栏 + 内容区布局，含全局尺寸 / 主题色切换控件
+│       │   ├── pages/           # 按分类展示组件（BasicPage、FormPage…）
+│       │   │   └── components/  # 每个组件的独立演示页面（*ComponentPage.vue）
+│       │   ├── components/      # 演示通用组件
+│       │   │   ├── DemoSection.vue   # 组件演示区块（标题 + 描述 + 可折叠的 usage.md）
+│       │   │   ├── DemoBlock.vue     # 单个示例卡片（标题 + slot + 代码）
+│       │   │   └── CodeBlock.vue     # 代码高亮展示
+│       │   └── admin/           # Admin 后台子应用源码
+│       │       ├── main.ts      # Admin 入口：Pinia + vue-router + vue-i18n + WindowsUI
+│       │       ├── App.vue
+│       │       ├── router/      # Admin 路由（含登录、权限守卫）
+│       │       ├── views/       # Admin 页面（dashboard、login、user、order 等）
+│       │       ├── stores/      # Pinia 状态管理（auth 等）
+│       │       ├── i18n/        # vue-i18n 国际化
+│       │       ├── components/  # 业务组件（Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting）
+│       │       ├── composables/ # 组合式函数（useCrud、usePermission）
+│       │       ├── mock/        # 模拟数据（用户、角色、权限）
+│       │       └── types/       # 类型定义
+│       ├── index.html           # Playground 主页面入口
+│       ├── admin.html           # Admin 后台页面入口
+│       ├── vite.config.ts       # 开发别名指向库源码；自定义 docsServerPlugin 提供 /docs/*.md
 │       └── package.json
 │
 ├── docs/                        # 每个组件的使用说明文档（中文 Markdown）
@@ -83,6 +84,8 @@ windows-ui/
     └── gen_docs*.py
 ```
 
+> **注意**：Admin 后台模板**不是**独立的 workspace 包，而是集成在 `packages/playground` 中的一个多入口子应用（通过 `admin.html` 与 `src/admin/` 实现）。根目录的 `dev:admin` 和 `build:admin` 脚本目前与 playground 共用同一命令。
+
 ---
 
 ## 构建与运行命令
@@ -91,11 +94,11 @@ windows-ui/
 
 | 命令 | 作用 |
 |------|------|
-| `pnpm dev` | 启动 playground 开发服务器（等价于 `pnpm -C packages/playground dev`） |
-| `pnpm dev:admin` | 启动 admin 后台模板开发服务器（端口 5174） |
+| `pnpm dev` | 启动 playground 开发服务器（同时承载组件文档站点与 Admin 后台） |
+| `pnpm dev:admin` | 当前等价于 `pnpm dev`（Admin 与 playground 共享同一 Vite 服务） |
 | `pnpm build` | 构建 UI 库（ES + UMD + d.ts），输出到 `packages/windows-ui/dist/` |
-| `pnpm build:playground` | 构建 playground 生产包 |
-| `pnpm build:admin` | 构建 admin 后台模板生产包 |
+| `pnpm build:playground` | 构建 playground 生产包（含 index.html 与 admin.html 双入口） |
+| `pnpm build:admin` | 当前等价于 `pnpm build:playground` |
 
 ### 库构建细节
 
@@ -115,12 +118,15 @@ windows-ui/
 - 内置 `docsServerPlugin`：开发服务器拦截 `/docs/<component>/usage.md` 请求，从 `../../docs` 目录读取并返回 Markdown 原文，供 `DemoSection.vue` 动态加载渲染。
 - `DemoSection.vue` 使用 `marked` 将 Markdown 渲染为 HTML，`highlight.js` 用于代码块高亮。
 - `Layout.vue` 顶部提供全局控件：可切换 `small / default / large` 尺寸，以及实时调整主色（primary）、成功色（success）、警告色（warning）、危险色（danger）。
+- 构建时采用 `rollupOptions.input` 配置多入口：`index.html`（组件文档）与 `admin.html`（后台模板）。
 
-### admin 开发细节
+### Admin 子应用开发细节
 
-- 独立的 Vite 应用，依赖 `@windows-ui/core`、Pinia、vue-router、vue-i18n、screenfull。
-- 开发服务器固定端口 `5174`，自动打开浏览器。
-- 用于展示组件库在真实后台场景下的使用方式。
+- 入口为 `packages/playground/admin.html`，加载 `src/admin/main.ts`。
+- 使用 Pinia、vue-router（hash 模式）、vue-i18n。
+- 内置模拟登录系统（`src/admin/stores/auth.ts`）：支持 `admin/admin`、`editor/editor`、`viewer/viewer` 三个账号，分别对应不同角色与权限。
+- 路由守卫会在未登录时自动跳转 `/login`，`usePermission` 组合式函数用于按钮级权限控制。
+- 业务组件包括：Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting。
 
 ---
 
@@ -145,7 +151,6 @@ windows-ui/
     disabled: Boolean
   })
   ```
-
 - 样式使用 `<style scoped>`，类名遵循简化 BEM：
   - 基础块：`.w-button`
   - 修饰符：`.w-button--primary`、`.w-button--small`
@@ -187,7 +192,7 @@ windows-ui/
 
 ## 测试策略
 
-**现状**：本项目目前没有配置任何测试框架（无 Jest、Vitest、Cypress、Playwright），也没有测试文件。
+**现状**：本项目目前没有配置任何测试框架（无 Jest、Vitest、Cypress、Playwright），也没有测试文件。`packages/windows-ui/src/hooks/` 目录目前为空。
 
 **建议**：
 - 如需补充测试，推荐在 `packages/windows-ui` 中引入 **Vitest** + `@vue/test-utils`，与现有 Vite 工具链保持一致。
@@ -219,7 +224,7 @@ windows-ui/
 6. 在 `packages/playground/src/pages/components/` 新建 `*ComponentPage.vue` 演示页面，使用 `demo-section` / `demo-block` 组织示例。
 7. 在 `packages/playground/src/views/Layout.vue` 的侧边栏 `navItems` 中新增导航项。
 8. 编写 `docs/<name>/usage.md`、`designs/<name>/design.md`、`develops/<name>/progress.md`。
-9. 若该组件属于后台场景常用组件，视情况在 `packages/admin` 中补充示例页面。
+9. 若该组件属于后台场景常用组件，视情况在 `packages/playground/src/admin/` 中补充示例页面。
 10. 运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
 
 ---
@@ -230,6 +235,7 @@ windows-ui/
 - **样式隔离**：各组件使用 `scoped`，但全局主题变量和 `base.css` 中的工具类（如 `.w-xp-theme`、`.w-xp-btn-base`）会全局生效。
 - **peerDependency**：库仅将 `vue` 标记为 `peerDependency`，发布时务必确保版本兼容 `^3.4.0`。
 - **动态主题副作用**：`WConfigProvider` 会在挂载时将主题变量写入 `document.documentElement.style`，并在卸载时自动清理。多个 `WConfigProvider` 嵌套时，后挂载的实例会覆盖前者写入的变量。
+- **Admin 模拟认证**：`src/admin/stores/auth.ts` 使用 `localStorage` 存储 mock token，权限判断基于前端硬编码角色，**不可用于生产环境**。
 
 ---
 
@@ -237,7 +243,7 @@ windows-ui/
 
 - 本项目**未配置** CI/CD 流水线（无 `.github/workflows`、无 Docker、无部署脚本）。
 - 库构建产物输出到 `packages/windows-ui/dist/`，可直接作为 npm 包发布。
-- Playground 与 Admin 均为静态 Vite 站点，构建后可部署到任意静态托管服务。
+- Playground 为静态 Vite 站点，构建后生成双入口（`index.html` + `admin.html`），可部署到任意静态托管服务。
 
 ---
 
@@ -246,11 +252,11 @@ windows-ui/
 | 问题 | 答案 |
 |------|------|
 | 用什么包管理器？ | pnpm |
-| 怎么启动开发？ | `pnpm dev`（playground）或 `pnpm dev:admin`（后台模板） |
+| 怎么启动开发？ | `pnpm dev`（同时启动组件文档站与 Admin 后台） |
 | 怎么构建组件库？ | `pnpm build` |
 | 组件文件放哪？ | `packages/windows-ui/src/components/<name>/<name>.vue` |
 | 怎么导出组件？ | 在 `packages/windows-ui/src/index.ts` import + 加入数组 + named export |
 | 怎么写文档？ | 在 `docs/`、`designs/`、`develops/` 下各建 `<name>/<file>.md` |
 | 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `ConfigProvider` 传 `theme` 对象 |
 | 有测试吗？ | 目前没有；建议引入 Vitest + `@vue/test-utils` |
-| 后台模板在哪？ | `packages/admin/` |
+| Admin 后台在哪？ | `packages/playground/src/admin/`（多入口子应用） |
