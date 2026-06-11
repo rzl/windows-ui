@@ -1,0 +1,1 @@
+import{_ as c,G as n,u as e,D as a,z as t,A as _}from"./vue-router-Dp_SHkyp.js";const r={},d={class:"nested-page"};function l(p,u){const s=t("w-result"),o=t("w-card");return _(),n("div",d,[e(o,{header:"菜单 1"},{default:a(()=>[e(s,{title:"多级菜单示例 - 菜单 1","sub-title":"这是第一级子菜单页面"})]),_:1})])}const i=c(r,[["render",l],["__scopeId","data-v-5f24e8e3"]]);export{i as default};
