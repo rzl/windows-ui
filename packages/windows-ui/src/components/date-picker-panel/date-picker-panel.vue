@@ -1,5 +1,5 @@
 <template>
-  <div class="w-date-picker-panel">
+  <div :class="['w-date-picker-panel', `w-date-picker-panel--${props.size}`]">
     <div class="w-date-picker-panel__header">
       <div class="w-date-picker-panel__header-left">
         <w-button size="small" @click="prevYear">&lt;&lt;</w-button>
@@ -24,7 +24,7 @@
 import { ref, computed } from 'vue'
 import WButton from '../button/button.vue'
 defineOptions({ name: 'WDatePickerPanel' })
-const props = defineProps({ modelValue: String })
+const props = defineProps({ modelValue: String, size: { type: String, default: 'default' } })
 const emit = defineEmits(['update:modelValue', 'change'])
 const now = new Date()
 const currentYear = ref(now.getFullYear())
@@ -61,9 +61,11 @@ const nextYear = () => { currentYear.value++ }
 .w-date-picker-panel__header-right { display: flex; gap: 4px; }
 .w-date-picker-panel__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: var(--w-font-size-small); color: #666; margin-bottom: 4px; }
 .w-date-picker-panel__days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
-.w-date-picker-panel__day { padding: 4px; cursor: pointer; font-size: var(--w-font-size-base); }
+.w-date-picker-panel__day { padding: 4px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-date-picker-panel__day:hover { background: var(--w-xp-blue-light); color: #fff; }
 .w-date-picker-panel__day.is-today { font-weight: bold; color: var(--w-color-primary); }
 .w-date-picker-panel__day.is-selected { background: var(--w-color-primary); color: #fff; }
 .w-date-picker-panel__day:not(.is-current) { color: #a0a0a0; }
+.w-date-picker-panel--small .w-date-picker-panel__day { padding: 2px; font-size: var(--w-font-size-small); }
+.w-date-picker-panel--large .w-date-picker-panel__day { padding: 6px; font-size: var(--w-font-size-medium); }
 </style>

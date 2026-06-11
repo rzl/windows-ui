@@ -2,14 +2,14 @@
   <div class="w-date-time-picker" v-click-outside="close">
     <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-date-time-picker__popper">
-      <w-date-picker-panel v-model="dateValue" @change="handleDateChange" />
+      <w-date-picker-panel v-model="dateValue" :size="size" @change="handleDateChange" />
       <div class="w-date-time-picker__time">
-        <w-input-number v-model="hour" :min="0" :max="23" size="small" />
+        <w-input-number v-model="hour" :min="0" :max="23" :size="size" />
         <span>:</span>
-        <w-input-number v-model="minute" :min="0" :max="59" size="small" />
+        <w-input-number v-model="minute" :min="0" :max="59" :size="size" />
         <span>:</span>
-        <w-input-number v-model="second" :min="0" :max="59" size="small" />
-        <w-button size="small" @click="confirm">确定</w-button>
+        <w-input-number v-model="second" :min="0" :max="59" :size="size" />
+        <w-button :size="size" @click="confirm">确定</w-button>
       </div>
     </div>
   </div>

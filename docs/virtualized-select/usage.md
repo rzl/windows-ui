@@ -24,7 +24,7 @@ const options = Array.from({ length: 1000 }, (_, i) => ({ label: '选项 ' + (i 
 | modelValue | 绑定值（支持 v-model） | string/number | - |
 | options | 选项数据 | array | [] |
 | placeholder | 占位提示文本 | string | 请选择 |
-| itemHeight | 项高度 | number | 28 |
+| itemHeight | 项高度 | number | - |
 | visibleCount | - | number | 8 |
 | clearable | 是否可清空 | boolean | true |
 | size | 尺寸 | string | default（继承全局 size） |

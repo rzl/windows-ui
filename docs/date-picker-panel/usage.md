@@ -21,6 +21,7 @@ const value = ref(new Date())
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | modelValue | 绑定值（支持 v-model） | string | - |
+| size | 尺寸 | string | default |
 
 ### Events
 

@@ -9,9 +9,9 @@
       </div>
     </div>
     <div v-show="open" class="w-virtualized-select__dropdown">
-      <div class="w-virtualized-select__viewport" :style="{ height: `${itemHeight * Math.min(visibleCount, totalItems)}px` }" @scroll="handleScroll">
-        <div class="w-virtualized-select__list" :style="{ height: `${totalItems * itemHeight}px`, transform: `translateY(${startIndex * itemHeight}px)` }">
-          <div v-for="opt in visibleOptions" :key="opt.value" :class="['w-virtualized-select__option', { 'is-selected': modelValue === opt.value }]" :style="{ height: `${itemHeight}px`, lineHeight: `${itemHeight}px` }" @click="select(opt)">{{ opt.label }}</div>
+      <div class="w-virtualized-select__viewport" :style="{ height: `${realItemHeight * Math.min(visibleCount, totalItems)}px` }" @scroll="handleScroll">
+        <div class="w-virtualized-select__list" :style="{ height: `${totalItems * realItemHeight}px`, transform: `translateY(${startIndex * realItemHeight}px)` }">
+          <div v-for="opt in visibleOptions" :key="opt.value" :class="['w-virtualized-select__option', { 'is-selected': modelValue === opt.value }]" :style="{ height: `${realItemHeight}px`, lineHeight: `${realItemHeight}px` }" @click="select(opt)">{{ opt.label }}</div>
         </div>
       </div>
     </div>
@@ -28,7 +28,7 @@ const props = defineProps({
   modelValue: [String, Number] as any,
   options: { type: Array as () => { label: string; value: any }[], default: () => [] },
   placeholder: { type: String, default: '请选择' },
-  itemHeight: { type: Number, default: 28 },
+  itemHeight: { type: Number, default: undefined },
   visibleCount: { type: Number, default: 8 },
   clearable: { type: Boolean, default: true },
   size: { type: String, default: undefined }
@@ -41,8 +41,11 @@ const open = ref(false)
 const scrollTop = ref(0)
 const selectedLabel = computed(() => props.options.find(o => o.value === props.modelValue)?.label)
 const totalItems = computed(() => props.options.length)
-const startIndex = computed(() => Math.floor(scrollTop.value / props.itemHeight))
+const sizeItemHeight = computed(() => ({ small: 22, default: 28, large: 34 }[size.value] || 28))
+const realItemHeight = computed(() => props.itemHeight || sizeItemHeight.value)
+const startIndex = computed(() => Math.floor(scrollTop.value / realItemHeight.value))
 const visibleOptions = computed(() => props.options.slice(startIndex.value, startIndex.value + props.visibleCount + 1))
+
 const select = (opt: any) => { emit('update:modelValue', opt.value); emit('change', opt.value); open.value = false }
 const close = () => { open.value = false }
 const handleClear = () => { emit('update:modelValue', undefined); emit('change', undefined); emit('clear') }
@@ -62,8 +65,10 @@ const vClickOutside = {
 .w-virtualized-select__placeholder { color: var(--w-text-color-placeholder); }
 .w-virtualized-select__dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: var(--w-index-popper); background: var(--w-bg-color); border: 1px solid #808080; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
 .w-virtualized-select__viewport { overflow-y: auto; }
-.w-virtualized-select__option { padding: 0 8px; cursor: pointer; font-size: var(--w-font-size-base); }
+.w-virtualized-select__option { padding: 0 8px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-virtualized-select__option:hover, .w-virtualized-select__option.is-selected { background: var(--w-xp-blue); color: #fff; }
+.w-virtualized-select--small .w-virtualized-select__option { font-size: var(--w-font-size-small); }
+.w-virtualized-select--large .w-virtualized-select__option { font-size: var(--w-font-size-medium); }
 .w-virtualized-select__icons { display: flex; align-items: center; gap: 4px; }
 .w-virtualized-select__clear { cursor: pointer; }
 </style>
