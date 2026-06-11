@@ -64,8 +64,10 @@ const vClickOutside = {
 .w-select--large .w-select__trigger { padding: 4px 6px; height: var(--w-component-size-large); font-size: var(--w-font-size-medium); }
 .w-select__placeholder { color: var(--w-text-color-placeholder); }
 .w-select__dropdown { position: absolute; top: 100%; left: 0; right: 0; z-index: var(--w-index-popper); background: var(--w-bg-color); border: 1px solid #808080; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; }
-.w-select__option { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); }
+.w-select__option { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-select__option:hover, .w-select__option.is-selected { background: var(--w-xp-blue); color: #fff; }
+.w-select--small .w-select__option { padding: 2px 6px; font-size: var(--w-font-size-small); }
+.w-select--large .w-select__option { padding: 6px 10px; font-size: var(--w-font-size-medium); }
 .w-select__icons { display: flex; align-items: center; gap: 4px; }
 .w-select__clear { cursor: pointer; }
 </style>

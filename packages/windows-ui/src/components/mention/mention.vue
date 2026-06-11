@@ -1,5 +1,5 @@
 <template>
-  <div class="w-mention" v-click-outside="close">
+  <div :class="['w-mention', `w-mention--${size}`]" v-click-outside="close">
     <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" :size="size" @input="handleInput" @keydown="handleKeydown" @clear="handleClear" />
     <div v-show="open && filtered.length" class="w-mention__list">
       <div v-for="item in filtered" :key="item.value" :class="['w-mention__item', { 'is-active': item.value === activeValue }]" @click="select(item)">{{ item.label }}</div>
@@ -72,6 +72,8 @@ const vClickOutside = {
 <style scoped>
 .w-mention { position: relative; display: inline-block; }
 .w-mention__list { position: absolute; top: 100%; left: 0; right: 0; z-index: var(--w-index-popper); background: var(--w-bg-color); border: 1px solid #808080; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-.w-mention__item { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); }
+.w-mention__item { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-mention__item:hover, .w-mention__item.is-active { background: var(--w-xp-blue); color: #fff; }
+.w-mention--small .w-mention__item { padding: 2px 6px; font-size: var(--w-font-size-small); }
+.w-mention--large .w-mention__item { padding: 6px 10px; font-size: var(--w-font-size-medium); }
 </style>

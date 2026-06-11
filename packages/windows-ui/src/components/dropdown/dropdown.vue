@@ -1,5 +1,5 @@
 <template>
-  <div class="w-dropdown" v-click-outside="close">
+  <div :class="['w-dropdown', `w-dropdown--${size}`]" v-click-outside="close">
     <div class="w-dropdown__trigger" @click="open = !open">
       <slot name="trigger">
         <w-button :size="size">{{ triggerText }} <w-icon name="arrowDown" :size="size" /></w-button>
@@ -48,7 +48,9 @@ const vClickOutside = {
 <style scoped>
 .w-dropdown { position: relative; display: inline-block; }
 .w-dropdown__menu { position: absolute; top: 100%; left: 0; z-index: var(--w-index-popper); min-width: 120px; background: var(--w-bg-color); border: 1px solid #808080; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); padding: 2px; }
-.w-dropdown__item { display: flex; align-items: center; gap: 6px; padding: 4px 12px; cursor: pointer; font-size: var(--w-font-size-base); }
+.w-dropdown__item { display: flex; align-items: center; gap: 6px; padding: 4px 12px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-dropdown__item:hover { background: var(--w-xp-blue); color: #fff; }
+.w-dropdown--small .w-dropdown__item { padding: 2px 10px; font-size: var(--w-font-size-small); }
+.w-dropdown--large .w-dropdown__item { padding: 6px 14px; font-size: var(--w-font-size-medium); }
 .w-dropdown__item.is-disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

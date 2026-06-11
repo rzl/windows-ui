@@ -1,5 +1,5 @@
 <template>
-  <div class="w-cascader" v-click-outside="close">
+  <div :class="['w-cascader', `w-cascader--${size}`]" v-click-outside="close">
     <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-cascader__dropdown">
       <div class="w-cascader__menu">
@@ -46,6 +46,8 @@ const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: 
 .w-cascader__dropdown { position: absolute; top: 100%; left: 0; z-index: var(--w-index-popper); display: flex; background: var(--w-bg-color); border: 1px solid #808080; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
 .w-cascader__menu { min-width: 140px; border-right: 1px solid #d4d0c8; max-height: 200px; overflow-y: auto; }
 .w-cascader__menu:last-child { border-right: none; }
-.w-cascader__item { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); display: flex; justify-content: space-between; }
+.w-cascader__item { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; display: flex; justify-content: space-between; }
+.w-cascader--small .w-cascader__item { padding: 2px 6px; font-size: var(--w-font-size-small); }
+.w-cascader--large .w-cascader__item { padding: 6px 10px; font-size: var(--w-font-size-medium); }
 .w-cascader__item:hover, .w-cascader__item.is-active { background: var(--w-xp-blue); color: #fff; }
 </style>

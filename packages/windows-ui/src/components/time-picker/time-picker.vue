@@ -1,5 +1,5 @@
 <template>
-  <div class="w-time-picker" v-click-outside="close">
+  <div :class="['w-time-picker', `w-time-picker--${size}`]" v-click-outside="close">
     <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-time-picker__popper">
       <div class="w-time-picker__panel">
@@ -7,7 +7,7 @@
         <div class="w-time-picker__column"><div v-for="m in 60" :key="m" :class="['w-time-picker__cell', { 'is-active': m - 1 === minute }]" @click="minute = m - 1">{{ String(m - 1).padStart(2, '0') }}</div></div>
         <div class="w-time-picker__column"><div v-for="s in 60" :key="s" :class="['w-time-picker__cell', { 'is-active': s - 1 === second }]" @click="second = s - 1">{{ String(s - 1).padStart(2, '0') }}</div></div>
       </div>
-      <div class="w-time-picker__footer"><w-button size="small" @click="confirm">确定</w-button><w-button size="small" @click="open = false">取消</w-button></div>
+      <div class="w-time-picker__footer"><w-button :size="size" @click="confirm">确定</w-button><w-button :size="size" @click="open = false">取消</w-button></div>
     </div>
   </div>
 </template>
@@ -40,8 +40,10 @@ const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: 
 .w-time-picker__panel { display: flex; height: 180px; }
 .w-time-picker__column { flex: 1; overflow-y: auto; border-right: 1px solid #d4d0c8; }
 .w-time-picker__column:last-child { border-right: none; }
-.w-time-picker__cell { padding: 4px 8px; text-align: center; cursor: pointer; font-size: var(--w-font-size-base); }
+.w-time-picker__cell { padding: 4px 8px; text-align: center; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-time-picker__cell:hover { background: var(--w-xp-blue-light); color: #fff; }
+.w-time-picker--small .w-time-picker__cell { padding: 2px 6px; font-size: var(--w-font-size-small); }
+.w-time-picker--large .w-time-picker__cell { padding: 6px 10px; font-size: var(--w-font-size-medium); }
 .w-time-picker__cell.is-active { background: var(--w-color-primary); color: #fff; }
 .w-time-picker__footer { display: flex; justify-content: flex-end; gap: 4px; padding: 6px; border-top: 1px solid #d4d0c8; }
 </style>

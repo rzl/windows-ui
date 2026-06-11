@@ -1,5 +1,5 @@
 <template>
-  <div class="w-autocomplete" v-click-outside="close">
+  <div :class="['w-autocomplete', `w-autocomplete--${size}`]" v-click-outside="close">
     <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" :size="size" @focus="open = true" @input="handleInput" @clear="handleClear" />
     <div v-show="open && filtered.length" class="w-autocomplete__suggestions">
       <div v-for="item in filtered" :key="item.value" class="w-autocomplete__item" @click="select(item)">{{ item.label }}</div>
@@ -32,6 +32,8 @@ const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: 
 <style scoped>
 .w-autocomplete { position: relative; display: inline-block; }
 .w-autocomplete__suggestions { position: absolute; top: 100%; left: 0; right: 0; z-index: var(--w-index-popper); background: var(--w-bg-color); border: 1px solid #808080; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; }
-.w-autocomplete__item { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); }
+.w-autocomplete__item { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-autocomplete__item:hover { background: var(--w-xp-blue); color: #fff; }
+.w-autocomplete--small .w-autocomplete__item { padding: 2px 6px; font-size: var(--w-font-size-small); }
+.w-autocomplete--large .w-autocomplete__item { padding: 6px 10px; font-size: var(--w-font-size-medium); }
 </style>
