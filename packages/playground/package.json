@@ -11,7 +11,10 @@
     "@windows-ui/core": "file:../windows-ui",
     "highlight.js": "^11.11.1",
     "marked": "^18.0.5",
+    "pinia": "^3.0.4",
+    "screenfull": "^6.0.2",
     "vue": "^3.4.0",
+    "vue-i18n": "^11.4.5",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {

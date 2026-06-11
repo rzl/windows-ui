@@ -44,7 +44,16 @@ export default defineConfig({
   plugins: [vue(), docsServerPlugin()],
   resolve: {
     alias: {
-      '@windows-ui/core': resolve(__dirname, '../windows-ui/src/index.ts')
+      '@windows-ui/core': resolve(__dirname, '../windows-ui/src/index.ts'),
+      '@': resolve(__dirname, 'src/admin')
+    }
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, 'admin.html')
+      }
     }
   }
 })
