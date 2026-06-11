@@ -5,6 +5,7 @@
         <h1>🖥️ Windows UI</h1>
         <p>Vue 3 UI Library - Windows XP Style</p>
         <div class="global-controls">
+          <a href="admin.html" class="admin-link" title="进入 Admin 后台">🏢 Admin 后台</a>
           <div class="control-group">
             <span class="control-label">尺寸</span>
             <button
@@ -198,6 +199,8 @@ const navItems = [
 .color-preview { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.6); border-radius: 3px; }
 .reset-btn { padding: 3px 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; font-size: 12px; border-radius: 2px; }
 .reset-btn:hover { background: rgba(255,255,255,0.25); }
+.admin-link { padding: 4px 12px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.15); color: #fff; text-decoration: none; font-size: 12px; border-radius: 2px; margin-right: 8px; }
+.admin-link:hover { background: rgba(255,255,255,0.3); }
 .playground-body { display: flex; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; padding: 16px; gap: 16px; }
 .playground-sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 16px; align-self: flex-start; max-height: calc(100vh - 32px); overflow-y: auto; }
 .sidebar-nav { background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; }
