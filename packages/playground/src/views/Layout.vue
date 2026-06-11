@@ -93,6 +93,7 @@ function resetTheme() {
 
 const navItems = [
     { path: '/', label: '🏠 首页', icon: 'home' },
+    { path: '/all-components', label: '📋 全部组件', icon: 'list' },
     { path: '/basic', label: '基础组件', icon: 'folder' },
     { path: '/basic/button', label: 'Button 按钮', indent: true },
     { path: '/basic/border', label: 'Border 边框', indent: true },

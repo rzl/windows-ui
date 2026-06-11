@@ -7,6 +7,7 @@ import DataPage from '../pages/DataPage.vue'
 import NavPage from '../pages/NavPage.vue'
 import FeedbackPage from '../pages/FeedbackPage.vue'
 import OthersPage from '../pages/OthersPage.vue'
+import AllComponentsPage from '../pages/components/AllComponentsPage.vue'
 import ButtonPage from '../pages/components/ButtonComponentPage.vue'
 import BorderPage from '../pages/components/BorderComponentPage.vue'
 import ColorPage from '../pages/components/ColorComponentPage.vue'
@@ -102,6 +103,7 @@ const routes = [
       { path: 'nav', component: NavPage },
       { path: 'feedback', component: FeedbackPage },
       { path: 'others', component: OthersPage },
+      { path: 'all-components', component: AllComponentsPage },
       { path: 'basic/button', component: ButtonPage },
       { path: 'basic/border', component: BorderPage },
       { path: 'basic/color', component: ColorPage },
