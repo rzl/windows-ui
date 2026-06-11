@@ -23,6 +23,11 @@
             <Breadcrumb />
           </div>
           <div class="header-right">
+            <a href="index.html" title="返回 Playground">
+              <w-button size="small">
+                <w-icon name="home" size="small" />
+              </w-button>
+            </a>
             <Screenfull />
             <w-button size="small" @click="settingVisible = true">
               <w-icon name="setting" size="small" />
