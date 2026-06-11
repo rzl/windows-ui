@@ -21,6 +21,7 @@ const goBack = () => console.log('返回上一页')
 |--------|------|------|--------|
 | title | 标题 | string | - |
 | showBack | - | boolean | true |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
@@ -32,9 +33,9 @@ const goBack = () => console.log('返回上一页')
 
 | 插槽名 | 说明 |
 |--------|------|
+| action | 操作区内容 |
 | extra | 自定义内容 |
-| title | 替换标题文本 |
-| action | 标题右侧操作区，与 extra 插槽并存 |
+| title | 标题插槽 |
 
 ## 主题定制
 

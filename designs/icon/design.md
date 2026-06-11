@@ -22,11 +22,11 @@ Basic
 - 图标默认色: #000 / #808080
 
 ### 尺寸规范
-- 基础尺寸: 16×16 px
-- 小尺寸: 12×12 px
-- 大尺寸: 24×24 px
-- 圆角: 3px (基础)
-- 组件高度: 32px (默认)
+- 尺寸可选：small / default / large
+- 默认高度：32px（default），跟随 CSS 变量 `--w-component-size`
+- 小尺寸：24px（`--w-component-size-small`）
+- 大尺寸：40px（`--w-component-size-large`）
+- 组件内部图标（如有）随组件 size 联动
 
 ### 图标分组
 内置图标按功能分为六大类，便于在文档和示例中分组展示：

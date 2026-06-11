@@ -25,13 +25,14 @@ const value = ref(3)
 | max | 最大值 | number | 5 |
 | disabled | 是否禁用 | boolean | - |
 | showScore | - | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:modelValue | 绑定值更新时触发 | value |
-| change | 用户确认选定的值时触发 | value |
+| update:modelValue | 绑定值更新 | value |
+| change | 值改变时触发 | value |
 
 ## 主题定制
 

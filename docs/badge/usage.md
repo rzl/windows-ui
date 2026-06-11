@@ -30,10 +30,11 @@ import { WBadge, WButton } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| value | 值 | string | - |
+| value | 值 | string/number | - |
 | max | 最大值 | number | 99 |
 | isDot | - | boolean | - |
 | type | 类型 | string | danger |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Slots
 

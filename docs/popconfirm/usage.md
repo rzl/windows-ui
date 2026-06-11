@@ -35,9 +35,9 @@ const handleConfirm = () => console.log('确认删除')
 
 | 插槽名 | 说明 |
 |--------|------|
+| action | 操作区内容 |
 | default | 默认内容 |
-| title | 替换内容区标题文本与图标 |
-| action | 替换底部操作按钮区 |
+| title | 标题插槽 |
 
 ## 主题定制
 

@@ -51,15 +51,15 @@
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| split | 第一个面板所占百分比 | number | 50 |
-| direction | 分隔方向，`horizontal` 为左右，`vertical` 为上下 | string | horizontal |
+| split | - | number | 50 |
+| direction | 方向 | string | horizontal |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
-| first | 第一个面板内容（左/上） |
-| second | 第二个面板内容（右/下） |
+| first | 自定义内容 |
+| second | 自定义内容 |
 
 ## 主题定制
 

@@ -27,7 +27,7 @@ import { WAvatar, WSpace } from '@windows-ui/core'
 | src | 图片地址 | string | - |
 | alt | 替代文本 | string | - |
 | icon | 图标名称 | string | - |
-| size | 尺寸 | - | default |
+| size | 尺寸 | - | default（继承全局 size） |
 | shape | 形状 | string | circle |
 | bgColor | 背景颜色 | string | - |
 | color | 文字颜色 | string | - |

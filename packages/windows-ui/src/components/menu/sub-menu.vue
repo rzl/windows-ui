@@ -18,8 +18,8 @@
     >
       <div class="w-menu__sub-title" @click.stop="handleClick(item, i)">
         <span>{{ item.label }}</span>
-        <w-icon v-if="item.children?.length && !isPopup" :name="isOpen(i) ? 'arrowDown' : 'arrowRight'" size="small" class="w-menu__arrow" />
-        <w-icon v-else-if="item.children?.length" :name="isOpen(i) ? 'arrowDown' : 'arrowRight'" size="small" class="w-menu__arrow" />
+        <w-icon v-if="item.children?.length && !isPopup" :name="isOpen(i) ? 'arrowDown' : 'arrowRight'" :size="size" class="w-menu__arrow" />
+        <w-icon v-else-if="item.children?.length" :name="isOpen(i) ? 'arrowDown' : 'arrowRight'" :size="size" class="w-menu__arrow" />
       </div>
       <SubMenu
         v-if="item.children?.length && isSubmenuVisible(i)"
@@ -29,6 +29,7 @@
         :mode="props.mode"
         :collapse="props.collapse"
         :active-path="props.activePath"
+        :size="size"
         @select="(val: string, path: string) => emit('select', val, path)"
       />
     </li>
@@ -36,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, inject, type Ref } from 'vue'
 import WIcon from '../icon/icon.vue'
 import SubMenu from './sub-menu.vue'
 
@@ -48,8 +49,11 @@ const props = defineProps({
   level: { type: Number, default: 0 },
   mode: { type: String, default: 'vertical' },
   collapse: Boolean,
-  activePath: { type: String, default: '' }
+  activePath: { type: String, default: '' },
+  size: { type: String, default: undefined }
 })
+const injectedSize = inject<Ref<string>>('menuSize')
+const size = computed(() => props.size || injectedSize?.value || 'default')
 
 const emit = defineEmits(['select'])
 

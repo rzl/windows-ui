@@ -1,12 +1,15 @@
 <template>
-  <w-select v-model="innerValue" :options="timeOptions" :placeholder="placeholder" @change="handleChange" @clear="handleClear" />
+  <w-select v-model="innerValue" :options="timeOptions" :placeholder="placeholder" :size="size" @change="handleChange" @clear="handleClear" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import WSelect from '../select/select.vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WTimeSelect' })
-const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择时间' }, start: { type: String, default: '00:00' }, end: { type: String, default: '23:59' }, step: { type: String, default: '00:30' } })
+const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择时间' }, start: { type: String, default: '00:00' }, end: { type: String, default: '23:59' }, step: { type: String, default: '00:30' }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const innerValue = ref(props.modelValue)
 const timeOptions = computed(() => {

@@ -22,6 +22,17 @@ const data = Array.from({ length: 1000 }, (_, i) => ({
 </script>
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| data | 数据 | array | [] |
+| columns | 列配置 | array | [] |
+| rowHeight | - | number | 32 |
+| visibleCount | - | number | 10 |
+
 ### Slots
 
 | 插槽名 | 说明 |

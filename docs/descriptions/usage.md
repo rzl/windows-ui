@@ -16,6 +16,16 @@ import { WDescriptions, WDescriptionsItem } from '@windows-ui/core'
 </script>
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| title | 标题 | string | - |
+| items | 菜单项列表 | array | [] |
+| column | - | number | 3 |
+
 ### Slots
 
 | 插槽名 | 说明 |

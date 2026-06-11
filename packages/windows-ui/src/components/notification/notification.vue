@@ -3,7 +3,7 @@
     <div v-for="n in notifications" :key="n.id" :class="['w-notification', `w-notification--${n.type}`]" :style="{ top: `${n.top}px` }">
       <div class="w-notification__header">
         <span class="w-notification__title">{{ n.title }}</span>
-        <w-icon name="close" size="small" class="w-notification__close" @click="remove(n.id)" />
+        <w-icon name="close" class="w-notification__close" @click="remove(n.id)" />
       </div>
       <div class="w-notification__body">{{ n.message }}</div>
     </div>

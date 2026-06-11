@@ -9,8 +9,8 @@
           :style="{ height: `${rowHeight}px`, top: `${item.index * rowHeight}px`, paddingLeft: `${item.level * 16}px` }"
           @click="handleClick(item.node)"
         >
-          <w-icon v-if="item.node.children?.length" :name="item.expanded ? 'arrowDown' : 'arrowRight'" size="small" />
-          <w-icon v-else name="file" size="small" />
+          <w-icon v-if="item.node.children?.length" :name="item.expanded ? 'arrowDown' : 'arrowRight'" :size="size" />
+          <w-icon v-else name="file" :size="size" />
           <span>{{ item.node.label }}</span>
         </div>
       </div>
@@ -21,13 +21,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WVirtualizedTree' })
 const props = defineProps({
   data: { type: Array as () => any[], default: () => [] },
   rowHeight: { type: Number, default: 28 },
-  visibleCount: { type: Number, default: 10 }
+  visibleCount: { type: Number, default: 10 },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['node-click'])
 
 const scrollTop = ref(0)

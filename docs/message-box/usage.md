@@ -17,6 +17,15 @@ const openConfirm = () => {}
 </script>
 ```
 
+## API
+
+### Slots
+
+| 插槽名 | 说明 |
+|--------|------|
+| action | 操作区内容 |
+| header | 头部内容 |
+
 ### Methods
 
 | 方法名 | 说明 |
@@ -24,13 +33,6 @@ const openConfirm = () => {}
 | open | 组件暴露的方法 |
 | confirm | 组件暴露的方法 |
 | cancel | 组件暴露的方法 |
-
-### Slots
-
-| 插槽名 | 说明 |
-|--------|------|
-| header | 替换标题栏内容，默认显示 title |
-| action | 关闭按钮左侧的自定义操作区 |
 
 ## 主题定制
 

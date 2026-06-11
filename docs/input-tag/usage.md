@@ -25,13 +25,14 @@ const tags = ref(['标签一', '标签二'])
 | disabled | 是否禁用 | boolean | - |
 | max | 最大值 | number | - |
 | clearable | 是否可清空 | boolean | true |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
+| update:modelValue | 绑定值更新 | value |
 | clear | 清空时触发 | - |
-| update:modelValue | 绑定值更新时触发 | value |
 
 ## 主题定制
 

@@ -76,16 +76,17 @@ const items = ref([
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| items | 菜单项列表（支持多级 children） | array | [] |
+| items | 菜单项列表 | array | [] |
 | mode | 菜单模式 | string | vertical |
-| defaultActive | 默认激活项 | string / number | - |
-| collapse | 是否收起（仅垂直模式有效） | boolean | false |
+| defaultActive | 默认激活项 | string/number | - |
+| collapse | 是否水平折叠 | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| select | 选中时触发 | (value) |
+| select | 选中时触发 | (selection, row) |
 
 ## 主题定制
 

@@ -1,6 +1,6 @@
 <template>
   <div class="w-mention" v-click-outside="close">
-    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" @input="handleInput" @keydown="handleKeydown" @clear="handleClear" />
+    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" :size="size" @input="handleInput" @keydown="handleKeydown" @clear="handleClear" />
     <div v-show="open && filtered.length" class="w-mention__list">
       <div v-for="item in filtered" :key="item.value" :class="['w-mention__item', { 'is-active': item.value === activeValue }]" @click="select(item)">{{ item.label }}</div>
     </div>
@@ -10,6 +10,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WMention' })
 const props = defineProps({
@@ -17,8 +18,11 @@ const props = defineProps({
   placeholder: String,
   prefix: { type: String, default: '@' },
   options: { type: Array as () => { label: string; value: string }[], default: () => [] },
-  clearable: { type: Boolean, default: true }
+  clearable: { type: Boolean, default: true },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'select', 'clear'])
 
 const inputValue = ref(props.modelValue || '')

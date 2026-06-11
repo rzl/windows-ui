@@ -9,7 +9,7 @@
             </slot>
             <div class="w-drawer__actions">
               <slot name="action" />
-              <w-icon name="close" size="small" class="w-drawer__close" @click="close" />
+              <w-icon name="close" class="w-drawer__close" @click="close" />
             </div>
           </div>
           <div class="w-drawer__body">

@@ -18,7 +18,7 @@ import { WSkeleton } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| loading | 加载状态插槽 | boolean | true |
+| loading | 是否加载中 | boolean | true |
 | rows | 行数 | number | 3 |
 | animated | - | boolean | true |
 

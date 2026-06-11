@@ -30,7 +30,7 @@ import { WButton, WSpace } from '@windows-ui/core'
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | type | 类型 | string | default |
-| size | 尺寸 | string | default |
+| size | 尺寸 | string | default（继承全局 size） |
 | plain | 是否朴素样式 | boolean | - |
 | round | 是否圆角 | boolean | - |
 | disabled | 是否禁用 | boolean | - |

@@ -1,5 +1,5 @@
 <template>
-  <label :class="['w-checkbox', { 'is-checked': isChecked, 'is-disabled': disabled, 'is-indeterminate': indeterminate }]">
+  <label :class="['w-checkbox', `w-checkbox--${size}`, { 'is-checked': isChecked, 'is-disabled': disabled, 'is-indeterminate': indeterminate }]">
     <span class="w-checkbox__input">
       <input
         type="checkbox"
@@ -16,14 +16,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WCheckbox' })
 const props = defineProps({
   modelValue: { type: [Boolean, Array] as any, default: false },
   label: [String, Number],
   disabled: Boolean,
-  indeterminate: Boolean
+  indeterminate: Boolean,
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const isChecked = computed(() => {
@@ -59,4 +63,14 @@ const handleChange = (e: Event) => {
 .w-checkbox.is-indeterminate .w-checkbox__inner::after { content: ''; position: absolute; left: 2px; top: 5px; width: 7px; height: 2px; background: #fff; border: none; transform: none; }
 .w-checkbox.is-disabled { opacity: 0.5; cursor: not-allowed; }
 .w-checkbox__label { user-select: none; }
+.w-checkbox--small { font-size: var(--w-font-size-small); }
+.w-checkbox--small .w-checkbox__input { width: 11px; height: 11px; }
+.w-checkbox--small .w-checkbox__inner { width: 11px; height: 11px; }
+.w-checkbox--small.is-checked .w-checkbox__inner::after { left: 3px; top: 0px; width: 3px; height: 6px; }
+.w-checkbox--small.is-indeterminate .w-checkbox__inner::after { left: 1px; top: 4px; width: 7px; height: 2px; }
+.w-checkbox--large { font-size: var(--w-font-size-medium); }
+.w-checkbox--large .w-checkbox__input { width: 16px; height: 16px; }
+.w-checkbox--large .w-checkbox__inner { width: 16px; height: 16px; }
+.w-checkbox--large.is-checked .w-checkbox__inner::after { left: 5px; top: 2px; width: 5px; height: 9px; }
+.w-checkbox--large.is-indeterminate .w-checkbox__inner::after { left: 3px; top: 6px; width: 8px; height: 3px; }
 </style>

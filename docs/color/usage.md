@@ -13,6 +13,8 @@ const handleSelect = (color) => console.log(color)
 </script>
 ```
 
+## API
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |

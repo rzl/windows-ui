@@ -25,6 +25,7 @@ import { WAlert } from '@windows-ui/core'
 | type | 类型 | string | info |
 | closable | 是否可关闭 | boolean | - |
 | center | 是否居中 | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
@@ -36,9 +37,9 @@ import { WAlert } from '@windows-ui/core'
 
 | 插槽名 | 说明 |
 |--------|------|
+| action | 操作区内容 |
 | default | 默认内容 |
-| title | 替换标题文本 |
-| action | 关闭按钮左侧的自定义操作区 |
+| title | 标题插槽 |
 
 ## 主题定制
 

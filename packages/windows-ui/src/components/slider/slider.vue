@@ -1,5 +1,5 @@
 <template>
-  <div class="w-slider">
+  <div :class="['w-slider', `w-slider--${size}`]">
     <div ref="trackRef" class="w-slider__track" @click="handleTrackClick">
       <div v-if="rangeMin !== undefined" class="w-slider__range-mask" :style="{ left: '0', width: `${rangePercent.left}%` }" />
       <div v-if="rangeMax !== undefined" class="w-slider__range-mask" :style="{ left: `${rangePercent.left + rangePercent.width}%`, width: `${100 - rangePercent.left - rangePercent.width}%` }" />
@@ -35,8 +35,11 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WSlider' })
-const props = defineProps({ modelValue: { type: Number, default: 0 }, min: { type: Number, default: 0 }, max: { type: Number, default: 100 }, step: { type: Number, default: 1 }, rangeMin: { type: Number, default: undefined }, rangeMax: { type: Number, default: undefined }, showStops: Boolean, showMinMax: Boolean, disabled: Boolean })
+const props = defineProps({ modelValue: { type: Number, default: 0 }, min: { type: Number, default: 0 }, max: { type: Number, default: 100 }, step: { type: Number, default: 1 }, rangeMin: { type: Number, default: undefined }, rangeMax: { type: Number, default: undefined }, showStops: Boolean, showMinMax: Boolean, disabled: Boolean, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 const trackRef = ref<HTMLDivElement>()
 const dragging = ref(false)
@@ -71,4 +74,14 @@ const handleTrackClick = (e: MouseEvent) => updateValue(e.clientX)
 .w-slider__stop-dot { width: 4px; height: 4px; background: #fff; border-radius: 50%; }
 .w-slider__stop-value { margin-top: 2px; font-size: 10px; color: #666; white-space: nowrap; }
 .w-slider__limits { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #666; }
+.w-slider--small .w-slider__track { height: 3px; }
+.w-slider--small .w-slider__thumb { width: 10px; height: 16px; }
+.w-slider--small .w-slider__tooltip { font-size: 9px; padding: 1px 4px; }
+.w-slider--small .w-slider__stop-value { font-size: 9px; }
+.w-slider--small .w-slider__limits { font-size: 9px; }
+.w-slider--large .w-slider__track { height: 6px; }
+.w-slider--large .w-slider__thumb { width: 14px; height: 24px; }
+.w-slider--large .w-slider__tooltip { font-size: 12px; padding: 3px 8px; }
+.w-slider--large .w-slider__stop-value { font-size: 11px; }
+.w-slider--large .w-slider__limits { font-size: 12px; }
 </style>

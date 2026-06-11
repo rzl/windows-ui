@@ -4,7 +4,7 @@
     :disabled="disabled"
     @click="handleClick"
   >
-    <w-icon v-if="icon" :name="icon" />
+    <w-icon v-if="icon" :name="icon" :size="size" />
     <span v-if="$slots.default"><slot /></span>
   </button>
 </template>

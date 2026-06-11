@@ -56,21 +56,30 @@ const resetForm = () => formRef.value.resetFields()
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| model | 表单数据对象 | object | - |
+| model | - | object | - |
 | rules | 验证规则 | object | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| submit | 表单提交时触发 | model |
-| validate | 验证完成时触发 | (valid, errors) |
+| submit | 提交时触发 | - |
+| validate | 验证时触发 | (valid, fields) |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
-| default | 表单内容 |
+| default | 默认内容 |
+
+### Methods
+
+| 方法名 | 说明 |
+|--------|------|
+| validate | 组件暴露的方法 |
+| resetFields | 组件暴露的方法 |
+| clearValidate | 组件暴露的方法 |
 
 ## 主题定制
 

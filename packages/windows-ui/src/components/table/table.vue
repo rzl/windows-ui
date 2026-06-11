@@ -38,12 +38,12 @@
                   >
                     <w-icon
                       name="arrowUp"
-                      size="small"
+                      :size="size"
                       :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'ascending' }"
                     />
                     <w-icon
                       name="arrowDown"
-                      size="small"
+                      :size="size"
                       :class="{ 'is-active': node.prop && sortState.prop === node.prop && sortState.order === 'descending' }"
                     />
                   </span>
@@ -54,7 +54,7 @@
                   >
                     <w-icon
                       name="arrowDown"
-                      size="small"
+                      :size="size"
                       :class="{ 'is-active': node.prop && !!filterState[node.prop]?.length }"
                     />
                     <div
@@ -73,10 +73,10 @@
                         </w-checkbox>
                       </div>
                       <div class="w-table__filter-actions">
-                        <w-button size="small" @click="confirmFilter(node)">
+                        <w-button :size="size" @click="confirmFilter(node)">
                           确定
                         </w-button>
-                        <w-button size="small" @click="resetFilter(node)">
+                        <w-button :size="size" @click="resetFilter(node)">
                           重置
                         </w-button>
                       </div>
@@ -124,12 +124,12 @@
                     >
                       <w-icon
                         name="arrowUp"
-                        size="small"
+                        :size="size"
                         :class="{ 'is-active': col.prop && sortState.prop === col.prop && sortState.order === 'ascending' }"
                       />
                       <w-icon
                         name="arrowDown"
-                        size="small"
+                        :size="size"
                         :class="{ 'is-active': col.prop && sortState.prop === col.prop && sortState.order === 'descending' }"
                       />
                     </span>
@@ -140,7 +140,7 @@
                     >
                       <w-icon
                         name="arrowDown"
-                        size="small"
+                        :size="size"
                         :class="{ 'is-active': col.prop && !!filterState[col.prop]?.length }"
                       />
                       <div
@@ -159,10 +159,10 @@
                           </w-checkbox>
                         </div>
                         <div class="w-table__filter-actions">
-                          <w-button size="small" @click="confirmFilter(col)">
+                          <w-button :size="size" @click="confirmFilter(col)">
                             确定
                           </w-button>
-                          <w-button size="small" @click="resetFilter(col)">
+                          <w-button :size="size" @click="resetFilter(col)">
                             重置
                           </w-button>
                         </div>
@@ -282,6 +282,7 @@ import WEmpty from '../empty/empty.vue'
 import WCheckbox from '../checkbox/checkbox.vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WTable' })
 
@@ -324,7 +325,7 @@ const props = defineProps({
   columns: { type: Array as () => ColumnItem[], default: () => [] },
   stripe: Boolean,
   border: Boolean,
-  size: { type: String as () => 'large' | 'default' | 'small', default: 'default' },
+  size: { type: String as () => 'large' | 'default' | 'small', default: undefined },
   highlightCurrentRow: { type: Boolean, default: true },
   rowClassName: { type: [String, Function] as PropType<string | ((row: any, index: number) => string)>, default: '' },
   emptyText: { type: String, default: '' },
@@ -341,6 +342,8 @@ const props = defineProps({
   height: { type: [String, Number] as PropType<string | number>, default: '' },
   virtualX: Boolean
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 
 const emit = defineEmits([
   'row-click',
@@ -861,7 +864,7 @@ const hasFixedColumn = computed(() => normalizedColumns.value.some((c: any) => c
 const tableClasses = computed(() => {
   return [
     'w-table',
-    `w-table--${props.size}`,
+    `w-table--${size.value}`,
     {
       'is-border': props.border,
       'is-stripe': props.stripe,
@@ -1245,8 +1248,8 @@ const computedFlatRows = computed(() => {
 .w-table.is-scrollable th { position: sticky; top: 0; z-index: 2; }
 
 /* size */
-.w-table--small th, .w-table--small td { padding: 4px 8px; font-size: 11px; }
-.w-table--large th, .w-table--large td { padding: 8px 12px; font-size: 13px; }
+.w-table--small th, .w-table--small td { padding: 4px 8px; font-size: var(--w-font-size-small); }
+.w-table--large th, .w-table--large td { padding: 8px 12px; font-size: var(--w-font-size-base); }
 
 /* border */
 .w-table.is-border { border: 2px solid #919b9c; }

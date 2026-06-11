@@ -125,10 +125,10 @@ const customSvg = ref('<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| name | 内置图标名称（与 `svg` 二选一） | string | - |
-| svg | 自定义 SVG 字符串（与 `name` 二选一） | string | - |
-| size | 尺寸 | string | default |
-| color | 图标颜色，会统一替换 fill 与 stroke | string | - |
+| name | 名称 | string |  |
+| svg | - | string |  |
+| size | 尺寸 | string | default（继承全局 size） |
+| color | 文字颜色 | string | - |
 
 ## 主题定制
 

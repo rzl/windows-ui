@@ -754,67 +754,49 @@ const tableData = [
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| data | 表格数据数组 | `Array` | `[]` |
-| columns | 列配置数组，详见下方 Column 配置 | `Array<ColumnItem>` | `[]` |
-| stripe | 是否显示斑马纹 | `boolean` | `false` |
-| border | 是否显示边框 | `boolean` | `false` |
-| size | 表格尺寸 | `'large' \| 'default' \| 'small'` | `'default'` |
-| highlightCurrentRow | 是否高亮当前行（点击选中） | `boolean` | `false` |
-| rowClassName | 行的自定义类名，可为字符串或函数 | `string \| (row, index) => string` | `''` |
-| emptyText | 空数据时显示的文本 | `string` | `'暂无数据'` |
-| maxHeight | 表格最大高度，超出后表头固定并滚动 | `number \| string` | — |
-| expandRowKeys | 当前已展开行的 key 数组（受控） | `Array<string \| number>` | `[]` |
-| rowKey | 行的唯一标识字段名或自定义函数 | `string \| (row) => string \| number` | `'id'` |
-| treeProps | 树形数据配置 | `{ children?: string, hasChildren?: string }` | `{ children: 'children', hasChildren: 'hasChildren' }` |
-| defaultExpandAll | 是否默认展开所有树节点 | `boolean` | `false` |
-| lazy | 是否开启懒加载 | `boolean` | `false` |
-| load | 懒加载方法，异步获取子节点数据 | `(row, treeNode, resolve) => void` | — |
-| indent | 树节点缩进距离（像素） | `number` | `16` |
-| virtualized | 是否开启虚拟滚动 | `boolean` | `false` |
-| rowHeight | 虚拟滚动时的行高（像素） | `number` | `40` |
-| height | 表格固定高度（虚拟滚动时必须设置） | `number \| string` | — |
-| virtualX | 是否开启横向虚拟滚动（需同时开启 `virtualized`） | `boolean` | `false` |
-
-### Column 配置
-
-| 属性名 | 说明 | 类型 | 默认值 |
-|--------|------|------|--------|
-| prop | 字段名 | `string` | — |
-| label | 表头显示文本 | `string` | — |
-| width | 列宽，支持数字（px）或字符串 | `number \| string` | — |
-| minWidth | 最小列宽 | `number \| string` | — |
-| align | 对齐方式 | `'left' \| 'center' \| 'right'` | `'left'` |
-| className | 列的自定义 CSS 类 | `string` | — |
-| sortable | 是否可排序，`true` 为内部排序，`'custom'` 为仅触发事件 | `boolean \| 'custom'` | `false` |
-| filters | 筛选选项列表 | `Array<{ text: string; value: any }>` | — |
-| filterMethod | 自定义筛选匹配函数，接收当前列已选值数组和行数据 | `(values, row) => boolean` | — |
-| type | 列类型，`'selection'` 为选择列，`'expand'` 为展开列 | `'selection' \| 'expand' \| 'default'` | `'default'` |
-| fixed | 列是否固定在左侧或右侧 | `'left' \| 'right'` | — |
-| children | 子列配置，用于多级表头 | `Array<ColumnItem>` | — |
+| data | 数据 | array | [] |
+| columns | 列配置 | array | [] |
+| stripe | 是否斑马纹 | boolean | - |
+| border | 是否纵向边框 | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
+| highlightCurrentRow | 是否高亮当前行 | boolean | true |
+| rowClassName | 行类名 | - |  |
+| emptyText | 空文本 | string |  |
+| maxHeight | 最大高度 | - |  |
+| expandRowKeys | 展开行 key | array | [] |
+| rowKey | 行 key | - | id |
+| treeProps | 树形配置 | object | {} |
+| defaultExpandAll | 是否默认展开所有节点 | boolean | - |
+| lazy | 是否懒加载 | boolean | - |
+| load | 加载子树数据的方法 | function | null |
+| indent | 缩进 | number | 16 |
+| virtualized | - | boolean | - |
+| rowHeight | - | number | 40 |
+| height | 高度 | - |  |
+| virtualX | - | boolean | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| row-click | 某一行被点击时触发 | `(row, index)` |
-| row-dblclick | 某一行被双击时触发 | `(row, index)` |
-| cell-click | 某个单元格被点击时触发 | `(row, column, cellValue, index)` |
-| selection-change | 选择项发生变化时触发 | `(selection: any[])` |
-| select | 用户手动勾选某一行时触发 | `(selection, row)` |
-| select-all | 用户点击全选复选框时触发 | `(selection: any[])` |
-| sort-change | 列排序状态变化时触发 | `({ prop, order })` |
-| filter-change | 列筛选条件变化时触发 | `({ prop, values })` |
-| current-change | 单选高亮行变化时触发 | `(currentRow, oldCurrentRow)` |
-| expand-change | 展开行状态变化时触发 | `(row, expandedRowKeys: (string \| number)[])` |
+| row-click | 行点击时触发 | (row, column, event) |
+| row-dblclick | 行双击时触发 | (row, column, event) |
+| cell-click | 单元格点击时触发 | (row, column, cell, event) |
+| selection-change | 选中项改变时触发 | selection |
+| select | 选中时触发 | (selection, row) |
+| select-all | 全选时触发 | selection |
+| sort-change | 排序改变时触发 | (column, prop, order) |
+| filter-change | 筛选改变时触发 | filters |
+| current-change | 当前页改变时触发 | currentPage |
+| expand-change | 展开行改变时触发 | (row, expandedRows) |
 
 ### Slots
 
-| 插槽名 | 说明 | 作用域参数 |
-|--------|------|-----------|
-| `[prop]` | 自定义对应列的单元格内容 | `{ row, $index }` |
-| `header-[prop]` | 自定义对应列的表头内容 | `{ column }` |
-| `empty` | 自定义空状态内容 | — |
-| `expand` | 展开行内容 | `{ row, $index }` |
+| 插槽名 | 说明 |
+|--------|------|
+| default | 默认内容 |
+| empty | 空状态插槽 |
+| expand | 展开行内容 |
 
 ## 主题定制
 
@@ -828,12 +810,4 @@ const tableData = [
   --w-border-radius-base: 3px;
   --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
-```
-
-表格内置行状态类也可通过 CSS 覆盖：
-
-```css
-.w-table tr.is-warning td { background: #fff8e1; }
-.w-table tr.is-danger td { background: #ffebee; }
-.w-table tr.is-success td { background: #e8f5e9; }
 ```

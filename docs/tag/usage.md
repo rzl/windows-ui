@@ -27,7 +27,7 @@ const handleClose = () => console.log('关闭标签')
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | type | 类型 | string | default |
-| size | 尺寸 | string | default |
+| size | 尺寸 | string | default（继承全局 size） |
 | closable | 是否可关闭 | boolean | - |
 | hit | - | boolean | - |
 | color | 文字颜色 | string | - |

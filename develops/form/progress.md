@@ -23,3 +23,4 @@
 ## 变更记录
 - 2024-06-01: 初始版本实现
 - 2026-06-08: 增强验证功能（rules、validate、resetFields、clearValidate）
+- 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）

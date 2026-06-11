@@ -21,6 +21,15 @@ const steps = [
 </script>
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| visible | 是否可见 | boolean | - |
+| steps | - | array | [] |
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
@@ -32,8 +41,8 @@ const steps = [
 
 | 插槽名 | 说明 |
 |--------|------|
-| header | 作用域插槽，参数 `{ step, index }`，替换步骤标题 |
-| action | 作用域插槽，参数 `{ step, index }`，标题右侧操作区 |
+| action | 操作区内容 |
+| header | 头部内容 |
 
 ## 主题定制
 

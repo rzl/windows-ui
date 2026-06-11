@@ -1,8 +1,8 @@
 <template>
-  <div class="w-tabs">
+  <div :class="['w-tabs', `w-tabs--${size}`]">
     <div class="w-tabs__header">
       <div v-for="(tab, i) in tabs" :key="i" :class="['w-tabs__item', { 'is-active': activeIndex === i }]" @click="activeIndex = i; emit('change', i)">
-        <w-icon v-if="tab.icon" :name="tab.icon" size="small" />
+        <w-icon v-if="tab.icon" :name="tab.icon" :size="size" />
         {{ tab.label }}
       </div>
     </div>
@@ -11,10 +11,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WTabs' })
-const props = defineProps({ tabs: { type: Array as () => { label: string; icon?: string }[], default: () => [] }, modelValue: { type: Number, default: 0 } })
+const props = defineProps({ tabs: { type: Array as () => { label: string; icon?: string }[], default: () => [] }, modelValue: { type: Number, default: 0 }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 const activeIndex = ref(props.modelValue)
 </script>
@@ -26,4 +29,8 @@ const activeIndex = ref(props.modelValue)
 .w-tabs__item:hover { background: #f0f0f0; }
 .w-tabs__item.is-active { background: var(--w-bg-color); border-bottom: 1px solid var(--w-bg-color); position: relative; top: 1px; font-weight: bold; }
 .w-tabs__content { padding: 12px; background: var(--w-bg-color); }
+.w-tabs--small .w-tabs__item { padding: 4px 12px; font-size: var(--w-font-size-small); }
+.w-tabs--small .w-tabs__content { padding: 8px; }
+.w-tabs--large .w-tabs__item { padding: 8px 20px; font-size: var(--w-font-size-medium); }
+.w-tabs--large .w-tabs__content { padding: 16px; }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <ul :class="['w-menu', `w-menu--${props.mode}`, { 'w-menu--collapsed': props.collapse }]">
+  <ul :class="['w-menu', `w-menu--${props.mode}`, `w-menu--${size}`, { 'w-menu--collapsed': props.collapse }]">
     <li
       v-for="(item, i) in props.items"
       :key="i"
@@ -9,10 +9,10 @@
       @mousemove="handleMouseMove(i)"
     >
       <div class="w-menu__title" @click="handleClick(item, i)">
-        <w-icon v-if="item.icon" :name="item.icon" size="small" />
+        <w-icon v-if="item.icon" :name="item.icon" :size="size" />
         <span v-else class="w-menu__icon-placeholder">{{ item.label.charAt(0) }}</span>
         <span class="w-menu__label">{{ item.label }}</span>
-        <w-icon v-if="item.children?.length && !props.collapse" :name="openSet.has(i) ? 'arrowDown' : 'arrowRight'" size="small" class="w-menu__arrow" />
+        <w-icon v-if="item.children?.length && !props.collapse" :name="openSet.has(i) ? 'arrowDown' : 'arrowRight'" :size="size" class="w-menu__arrow" />
       </div>
       <SubMenu
         v-if="item.children?.length && isSubmenuVisible(i)"
@@ -22,6 +22,7 @@
         :mode="props.mode"
         :collapse="props.collapse"
         :active-path="subActive"
+        :size="size"
         @select="handleSubSelect"
       />
     </li>
@@ -29,17 +30,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, provide } from 'vue'
 import WIcon from '../icon/icon.vue'
 import SubMenu from './sub-menu.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WMenu' })
 const props = defineProps({
   items: { type: Array as () => any[], default: () => [] },
   mode: { type: String, default: 'vertical' },
   defaultActive: [String, Number] as any,
-  collapse: Boolean
+  collapse: Boolean,
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
+provide('menuSize', size)
 const emit = defineEmits(['select'])
 
 const activeIndex = ref<number | null>(null)
@@ -108,4 +114,18 @@ const handleSubSelect = (value: string, path: string) => {
 
 /* vertical 模式下嵌套子菜单缩进 */
 .w-menu--vertical :deep(.w-menu__submenu .w-menu__submenu) { padding-left: 16px; }
+
+/* size */
+.w-menu--small { font-size: var(--w-font-size-small); }
+.w-menu--small .w-menu__title { padding: 2px 6px; }
+.w-menu--small :deep(.w-menu__sub-title) { padding: 2px 6px 2px 24px; }
+.w-menu--small :deep(.w-menu__submenu--popup-h .w-menu__sub-title),
+.w-menu--small :deep(.w-menu__submenu--popup-c .w-menu__sub-title),
+.w-menu--small :deep(.w-menu__submenu--popup .w-menu__sub-title) { padding: 2px 10px; }
+.w-menu--large { font-size: var(--w-font-size-medium); }
+.w-menu--large .w-menu__title { padding: 6px 10px; }
+.w-menu--large :deep(.w-menu__sub-title) { padding: 6px 10px 6px 32px; }
+.w-menu--large :deep(.w-menu__submenu--popup-h .w-menu__sub-title),
+.w-menu--large :deep(.w-menu__submenu--popup-c .w-menu__sub-title),
+.w-menu--large :deep(.w-menu__submenu--popup .w-menu__sub-title) { padding: 6px 14px; }
 </style>

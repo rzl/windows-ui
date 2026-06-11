@@ -33,16 +33,16 @@ const visible = ref(false)
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:modelValue | 绑定值更新时触发 | value |
+| update:modelValue | 绑定值更新 | value |
 | close | 关闭时触发 | - |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
+| action | 操作区内容 |
 | default | 默认内容 |
-| header | 替换标题栏内容，默认显示 title |
-| action | 标题栏右侧、关闭按钮左侧的自定义操作区 |
+| header | 头部内容 |
 
 ## 主题定制
 

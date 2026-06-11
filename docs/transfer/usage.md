@@ -15,12 +15,23 @@ const value = ref([1, 4])
 </script>
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| modelValue | 绑定值（支持 v-model） | array | [] |
+| data | 数据 | array | [] |
+| leftTitle | - | string | 待选 |
+| rightTitle | - | string | 已选 |
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:modelValue | 绑定值更新时触发 | value |
-| change | 用户确认选定的值时触发 | value |
+| update:modelValue | 绑定值更新 | value |
+| change | 值改变时触发 | value |
 
 ## 主题定制
 

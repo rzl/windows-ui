@@ -1,6 +1,6 @@
 <template>
   <div class="w-cascader" v-click-outside="close">
-    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" @click="open = !open" @clear="handleClear" />
+    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-cascader__dropdown">
       <div class="w-cascader__menu">
         <div v-for="opt in currentOptions" :key="opt.value" :class="['w-cascader__item', { 'is-active': selected[0] === opt.value }]" @click="select(opt, 0)">{{ opt.label }}<span v-if="opt.children">&nbsp;&gt;</span></div>
@@ -15,8 +15,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WCascader' })
-const props = defineProps({ modelValue: Array as () => string[], options: { type: Array as () => any[], default: () => [] }, placeholder: String, clearable: { type: Boolean, default: true } })
+const props = defineProps({ modelValue: Array as () => string[], options: { type: Array as () => any[], default: () => [] }, placeholder: String, clearable: { type: Boolean, default: true }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
 const selected = ref<string[]>(props.modelValue || [])

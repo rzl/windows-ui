@@ -23,14 +23,15 @@ const otp = ref('')
 | modelValue | 绑定值（支持 v-model） | string | - |
 | length | 长度 | number | 6 |
 | clearable | 是否可清空 | boolean | true |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| clear | 清空时触发 | - |
-| update:modelValue | 绑定值更新时触发 | value |
+| update:modelValue | 绑定值更新 | value |
 | complete | - | - |
+| clear | 清空时触发 | - |
 
 ## 主题定制
 

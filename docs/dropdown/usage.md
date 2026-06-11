@@ -22,6 +22,16 @@ const handleCommand = (cmd) => console.log(cmd)
 </script>
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| items | 菜单项列表 | array | [] |
+| triggerText | - | string | 下拉菜单 |
+| size | 尺寸 | string | default（继承全局 size） |
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |

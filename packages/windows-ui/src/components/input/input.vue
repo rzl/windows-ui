@@ -1,6 +1,6 @@
 <template>
   <div :class="['w-input', `w-input--${size}`, { 'is-disabled': disabled }]">
-    <w-icon v-if="prefixIcon" :name="prefixIcon" size="small" class="w-input__prefix" />
+    <w-icon v-if="prefixIcon" :name="prefixIcon" :size="size" class="w-input__prefix" />
     <input
       :value="modelValue"
       :type="type"
@@ -11,8 +11,8 @@
       @focus="$emit('focus', $event)"
       @blur="$emit('blur', $event)"
     />
-    <w-icon v-if="suffixIcon" :name="suffixIcon" size="small" class="w-input__suffix" />
-    <w-icon v-if="clearable && modelValue" name="close" size="small" class="w-input__clear" @click="handleClear" />
+    <w-icon v-if="suffixIcon" :name="suffixIcon" :size="size" class="w-input__suffix" />
+    <w-icon v-if="clearable && modelValue" name="close" :size="size" class="w-input__clear" @click="handleClear" />
   </div>
 </template>
 
@@ -46,7 +46,7 @@ const handleClear = () => { emit('update:modelValue', ''); emit('clear') }
 </script>
 
 <style scoped>
-.w-input { display: inline-flex; align-items: center; border: 1px solid #7f9db9; background: #fff; padding: 2px 4px; height: var(--w-component-size); }
+.w-input { display: inline-flex; align-items: center; box-sizing: border-box; border: 1px solid #7f9db9; background: #fff; padding: 2px 4px; height: var(--w-component-size); }
 .w-input input { border: none; outline: none; flex: 1; font-family: var(--w-font-family); font-size: var(--w-font-size-base); background: transparent; }
 .w-input--small { padding: 1px 2px; height: var(--w-component-size-small); }
 .w-input--small input { font-size: var(--w-font-size-small); }

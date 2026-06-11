@@ -13,11 +13,13 @@ const handleChange = (color) => console.log(color)
 </script>
 ```
 
+## API
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| change | 用户确认选定的值时触发 | value |
+| change | 值改变时触发 | value |
 
 ## 主题定制
 

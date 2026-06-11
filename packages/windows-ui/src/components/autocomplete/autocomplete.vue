@@ -1,6 +1,6 @@
 <template>
   <div class="w-autocomplete" v-click-outside="close">
-    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" @focus="open = true" @input="handleInput" @clear="handleClear" />
+    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" :size="size" @focus="open = true" @input="handleInput" @clear="handleClear" />
     <div v-show="open && filtered.length" class="w-autocomplete__suggestions">
       <div v-for="item in filtered" :key="item.value" class="w-autocomplete__item" @click="select(item)">{{ item.label }}</div>
     </div>
@@ -10,8 +10,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WAutocomplete' })
-const props = defineProps({ modelValue: String, placeholder: String, options: { type: Array as () => { label: string; value: string }[], default: () => [] }, clearable: { type: Boolean, default: true } })
+const props = defineProps({ modelValue: String, placeholder: String, options: { type: Array as () => { label: string; value: string }[], default: () => [] }, clearable: { type: Boolean, default: true }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'select', 'clear'])
 const inputValue = ref(props.modelValue || '')
 const open = ref(false)

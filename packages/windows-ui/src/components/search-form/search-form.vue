@@ -5,15 +5,15 @@
         <slot />
       </div>
       <div class="w-search-form__actions">
-        <w-button type="primary" @click="handleSearch">
-          <w-icon name="search" size="small" /> 查询
+        <w-button type="primary" :size="size" @click="handleSearch">
+          <w-icon name="search" :size="size" /> 查询
         </w-button>
-        <w-button @click="handleReset">
-          <w-icon name="refresh" size="small" /> 重置
+        <w-button :size="size" @click="handleReset">
+          <w-icon name="refresh" :size="size" /> 重置
         </w-button>
-        <w-button v-if="collapsible" type="text" @click="expanded = !expanded">
+        <w-button v-if="collapsible" type="text" :size="size" @click="expanded = !expanded">
           {{ expanded ? '收起' : '展开' }}
-          <w-icon :name="expanded ? 'arrowUp' : 'arrowDown'" size="small" />
+          <w-icon :name="expanded ? 'arrowUp' : 'arrowDown'" :size="size" />
         </w-button>
       </div>
     </w-form>
@@ -21,16 +21,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import WForm from '../form/form.vue'
 import WButton from '../button/button.vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WSearchForm' })
 const props = defineProps({
   model: { type: Object as () => Record<string, any>, default: () => ({}) },
-  collapsible: { type: Boolean, default: false }
+  collapsible: { type: Boolean, default: false },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['search', 'reset'])
 
 const expanded = ref(true)

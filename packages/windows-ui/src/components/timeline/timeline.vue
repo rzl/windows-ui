@@ -1,5 +1,5 @@
 <template>
-  <div class="w-timeline">
+  <div :class="['w-timeline', `w-timeline--${size}`]">
     <div v-for="(item, i) in items" :key="i" :class="['w-timeline__item', { 'is-last': i === items.length - 1 }]">
       <div class="w-timeline__node" :style="{ background: item.color || '#c0c0c0' }" />
       <div class="w-timeline__content">
@@ -12,8 +12,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WTimeline' })
-defineProps({ items: { type: Array as () => { time: string; title: string; content?: string; color?: string }[], default: () => [] } })
+const props = defineProps({ items: { type: Array as () => { time: string; title: string; content?: string; color?: string }[], default: () => [] }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 </script>
 
 <style scoped>
@@ -24,4 +28,16 @@ defineProps({ items: { type: Array as () => { time: string; title: string; conte
 .w-timeline__time { font-size: var(--w-font-size-small); color: var(--w-text-color-secondary); }
 .w-timeline__title { font-size: var(--w-font-size-base); font-weight: bold; color: var(--w-text-color-primary); margin-top: 2px; }
 .w-timeline__text { font-size: var(--w-font-size-base); color: var(--w-text-color-secondary); margin-top: 2px; }
+.w-timeline--small .w-timeline__node { width: 8px; height: 8px; top: 3px; }
+.w-timeline--small .w-timeline__item { padding-left: 18px; }
+.w-timeline--small .w-timeline__item:not(.is-last)::before { left: 3px; top: 12px; }
+.w-timeline--small .w-timeline__time { font-size: var(--w-font-size-extra-small); }
+.w-timeline--small .w-timeline__title { font-size: var(--w-font-size-small); }
+.w-timeline--small .w-timeline__text { font-size: var(--w-font-size-small); }
+.w-timeline--large .w-timeline__node { width: 12px; height: 12px; top: 5px; }
+.w-timeline--large .w-timeline__item { padding-left: 22px; }
+.w-timeline--large .w-timeline__item:not(.is-last)::before { left: 5px; top: 16px; }
+.w-timeline--large .w-timeline__time { font-size: var(--w-font-size-base); }
+.w-timeline--large .w-timeline__title { font-size: var(--w-font-size-medium); }
+.w-timeline--large .w-timeline__text { font-size: var(--w-font-size-base); }
 </style>

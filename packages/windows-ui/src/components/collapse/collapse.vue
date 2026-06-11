@@ -1,10 +1,10 @@
 <template>
-  <div class="w-collapse">
+  <div :class="['w-collapse', `w-collapse--${size}`]">
     <div v-for="(item, i) in items" :key="i" :class="['w-collapse__item', { 'is-active': isActive(i) }]">
       <div class="w-collapse__header" @click="toggle(i)">
         <div class="w-collapse__header-content">
           <slot name="header" :item="item" :index="i">
-            <w-icon :name="isActive(i) ? 'arrowDown' : 'arrowRight'" size="small" />
+            <w-icon :name="isActive(i) ? 'arrowDown' : 'arrowRight'" :size="size" />
             <span>{{ item.title }}</span>
           </slot>
         </div>
@@ -20,10 +20,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WCollapse' })
-const props = defineProps({ items: { type: Array as () => { title: string; content?: string }[], default: () => [] }, modelValue: { type: Array as () => number[], default: () => [] }, accordion: Boolean })
+const props = defineProps({ items: { type: Array as () => { title: string; content?: string }[], default: () => [] }, modelValue: { type: Array as () => number[], default: () => [] }, accordion: Boolean, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 const activeSet = ref(new Set(props.modelValue))
 const isActive = (i: number) => activeSet.value.has(i)
@@ -45,4 +48,8 @@ const toggle = (i: number) => {
 .w-collapse__actions { display: flex; align-items: center; gap: 8px; }
 .w-collapse__header:hover { background: linear-gradient(180deg, #fff, #f0f0f0); }
 .w-collapse__content { padding: 8px; background: #fff; font-size: var(--w-font-size-base); }
+.w-collapse--small .w-collapse__header { padding: 4px 6px; font-size: var(--w-font-size-small); }
+.w-collapse--small .w-collapse__content { padding: 6px; font-size: var(--w-font-size-small); }
+.w-collapse--large .w-collapse__header { padding: 8px 10px; font-size: var(--w-font-size-medium); }
+.w-collapse--large .w-collapse__content { padding: 12px; font-size: var(--w-font-size-medium); }
 </style>

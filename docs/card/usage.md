@@ -37,10 +37,10 @@ import { WCard, WButton } from '@windows-ui/core'
 
 | 插槽名 | 说明 |
 |--------|------|
+| action | 操作区内容 |
 | default | 默认内容 |
 | footer | 底部内容 |
 | header | 头部内容 |
-| action | 头部右侧操作区 |
 
 ## 主题定制
 

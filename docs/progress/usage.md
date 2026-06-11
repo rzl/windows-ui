@@ -25,6 +25,7 @@ import { WProgress } from '@windows-ui/core'
 | status | 状态 | string |  |
 | width | 宽度 | number | 200 |
 | showText | - | boolean | true |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ## 主题定制
 

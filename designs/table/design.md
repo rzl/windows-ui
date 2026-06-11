@@ -26,13 +26,11 @@ Data
 - 展开行背景: #f5f5f5
 
 ### 尺寸规范
-- 字体基础大小: 11px（small）、12px（default）、13px（large）
-- 圆角: 3px (基础)
-- 组件高度: 32px (默认)
-- 单元格 padding:
-  - small: 4px 8px
-  - default: 6px 10px
-  - large: 8px 12px
+- 尺寸可选：small / default / large
+- 默认高度：32px（default），跟随 CSS 变量 `--w-component-size`
+- 小尺寸：24px（`--w-component-size-small`）
+- 大尺寸：40px（`--w-component-size-large`）
+- 组件内部图标（如有）随组件 size 联动
 
 ### 行状态色（内置辅助类）
 - `.is-warning`：背景 #fff8e1（浅黄，用于警示行）

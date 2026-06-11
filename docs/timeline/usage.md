@@ -19,6 +19,15 @@ import { WTimeline, WTimelineItem, WCard } from '@windows-ui/core'
 </script>
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| items | 菜单项列表 | array | [] |
+| size | 尺寸 | string | default（继承全局 size） |
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

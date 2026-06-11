@@ -1,6 +1,6 @@
 <template>
-  <div :class="['w-alert', `w-alert--${type}`, { 'is-center': center }]">
-    <w-icon :name="iconName" />
+  <div :class="['w-alert', `w-alert--${type}`, `w-alert--${size}`, { 'is-center': center }]">
+    <w-icon :name="iconName" :size="size" />
     <div class="w-alert__content">
       <div v-if="title || $slots.title" class="w-alert__title">
         <slot name="title">{{ title }}</slot>
@@ -9,7 +9,7 @@
     </div>
     <div class="w-alert__actions">
       <slot name="action" />
-      <w-icon v-if="closable" name="close" size="small" class="w-alert__close" @click="handleClose" />
+      <w-icon v-if="closable" name="close" :size="size" class="w-alert__close" @click="handleClose" />
     </div>
   </div>
 </template>
@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WAlert' })
 const props = defineProps({
@@ -24,8 +25,11 @@ const props = defineProps({
   description: String,
   type: { type: String, default: 'info' },
   closable: Boolean,
-  center: Boolean
+  center: Boolean,
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['close'])
 
 const iconName = computed(() => {
@@ -38,6 +42,8 @@ const handleClose = () => emit('close')
 
 <style scoped>
 .w-alert { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border: 1px solid; font-family: var(--w-font-family); font-size: var(--w-font-size-base); }
+.w-alert--small { padding: 6px 8px; font-size: var(--w-font-size-small); }
+.w-alert--large { padding: 14px 16px; font-size: var(--w-font-size-medium); }
 .w-alert--info { background: #e8f4fd; border-color: var(--w-color-primary); color: var(--w-color-primary); }
 .w-alert--success { background: #e8f8e8; border-color: var(--w-color-success); color: var(--w-color-success); }
 .w-alert--warning { background: #fff8e0; border-color: var(--w-color-warning); color: var(--w-color-warning); }

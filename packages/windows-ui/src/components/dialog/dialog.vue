@@ -21,11 +21,10 @@
               <slot name="action" />
               <w-icon
                 :name="isFullscreen ? 'fullscreen-exit' : 'fullscreen'"
-                size="small"
                 class="w-dialog__fullscreen"
                 @click="toggleFullscreen"
               />
-              <w-icon name="close" size="small" class="w-dialog__close" @click="close" />
+              <w-icon name="close" class="w-dialog__close" @click="close" />
             </div>
           </div>
           <div class="w-dialog__body">

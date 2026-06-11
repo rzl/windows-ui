@@ -31,7 +31,7 @@ const value = ref('')
 | modelValue | 绑定值（支持 v-model） | string | - |
 | type | 类型 | string | text |
 | placeholder | 占位提示文本 | string | - |
-| size | 尺寸 | string | default |
+| size | 尺寸 | string | default（继承全局 size） |
 | disabled | 是否禁用 | boolean | - |
 | readonly | 是否只读 | boolean | - |
 | clearable | 是否可清空 | boolean | true |
@@ -42,7 +42,7 @@ const value = ref('')
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:modelValue | 绑定值更新时触发 | value |
+| update:modelValue | 绑定值更新 | value |
 | input | 输入时触发 | value |
 | focus | 获取焦点时触发 | event |
 | blur | 失去焦点时触发 | event |

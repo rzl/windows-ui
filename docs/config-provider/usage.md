@@ -101,10 +101,10 @@ const theme = {
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| prefix | 组件前缀 | string | w |
-| size | 全局尺寸 | string | default |
-| zIndex | 全局层级 | number | 2000 |
-| theme | 主题色配置 | `Record<string, string>` | `{}` |
+| prefix | 前缀内容 | string | w |
+| size | 尺寸 | string | default |
+| zIndex | 层级 | number | 2000 |
+| theme | - | object | {} |
 
 ### Slots
 
@@ -114,14 +114,11 @@ const theme = {
 
 ## 主题定制
 
-除了通过 `theme` 属性动态修改，也可以直接覆盖 CSS 变量：
+可通过 CSS 变量自定义主题色：
 
 ```css
 :root {
   --w-color-primary: #245edb;
-  --w-color-success: #3a9e3a;
-  --w-color-warning: #e4a010;
-  --w-color-danger: #d92b2b;
   --w-bg-color: #ece9d8;
   --w-text-color-primary: #000;
   --w-border-radius-base: 3px;

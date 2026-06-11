@@ -29,7 +29,7 @@ import { WText, WSpace } from '@windows-ui/core'
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | tag | - | string | span |
-| size | 尺寸 | string | default |
+| size | 尺寸 | string | default（继承全局 size） |
 | type | 类型 | string | default |
 
 ### Slots

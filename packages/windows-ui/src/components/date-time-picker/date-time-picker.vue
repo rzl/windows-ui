@@ -1,6 +1,6 @@
 <template>
   <div class="w-date-time-picker" v-click-outside="close">
-    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" @click="open = !open" @clear="handleClear" />
+    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-date-time-picker__popper">
       <w-date-picker-panel v-model="dateValue" @change="handleDateChange" />
       <div class="w-date-time-picker__time">
@@ -21,8 +21,11 @@ import WInput from '../input/input.vue'
 import WDatePickerPanel from '../date-picker-panel/date-picker-panel.vue'
 import WInputNumber from '../input-number/input-number.vue'
 import WButton from '../button/button.vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WDateTimePicker' })
-const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择日期时间' }, clearable: { type: Boolean, default: true } })
+const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择日期时间' }, clearable: { type: Boolean, default: true }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
 const now = new Date()

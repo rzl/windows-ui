@@ -17,6 +17,8 @@ import { WButton, WSpace } from '@windows-ui/core'
 </script>
 ```
 
+## API
+
 ### Methods
 
 | 方法名 | 说明 |

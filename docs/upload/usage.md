@@ -24,12 +24,13 @@ const handleSuccess = (res, file) => console.log(file.name + ' 上传成功')
 | accept | - | string | - |
 | multiple | 是否多选 | boolean | - |
 | buttonText | - | string | 选择文件 |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| change | 用户确认选定的值时触发 | value |
+| change | 值改变时触发 | value |
 | remove | - | - |
 
 ### Slots

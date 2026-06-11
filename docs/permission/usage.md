@@ -23,15 +23,25 @@ const checkPermission = (code) => {
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| code | 权限码 | string | '' |
-| has | 权限检查函数 | (code: string) => boolean | null |
+| code | 是否代码样式 | string |  |
+| has | - | function | null |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
-| default | 有权限时显示的内容 |
+| default | 默认内容 |
 
-## 注意事项
-- 当 `code` 为空时，默认显示内容
-- 当 `has` 未传入时，默认显示内容（实际项目中应通过全局注入权限函数）
+## 主题定制
+
+可通过 CSS 变量自定义主题色：
+
+```css
+:root {
+  --w-color-primary: #245edb;
+  --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
+}
+```

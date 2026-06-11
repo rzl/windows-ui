@@ -25,3 +25,4 @@
 - 2026-06-08: 新增 38 个常用内置图标，示例页面改为分组展示
 - 2026-06-08: 新增 `svg` Prop，支持传入自定义 SVG 字符串
 - 2026-06-08: 扩充后台管理专用图标（computer、logout、password、cart、pie-chart、bar-chart）及 setting 别名
+- 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）

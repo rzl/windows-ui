@@ -24,20 +24,25 @@ const handleSelect = (item) => console.log(item)
 </script>
 ```
 
+## API
+
 ### Props
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | modelValue | 绑定值（支持 v-model） | string | - |
+| placeholder | 占位提示文本 | string | - |
+| options | 选项数据 | array | [] |
 | clearable | 是否可清空 | boolean | true |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| clear | 清空时触发 | - |
-| update:modelValue | 绑定值更新时触发 | value |
+| update:modelValue | 绑定值更新 | value |
 | select | 选中时触发 | (selection, row) |
+| clear | 清空时触发 | - |
 
 ## 主题定制
 

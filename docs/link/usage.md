@@ -31,6 +31,7 @@ import { WLink, WSpace } from '@windows-ui/core'
 | disabled | 是否禁用 | boolean | - |
 | href | 链接地址 | string | - |
 | icon | 图标名称 | string | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 

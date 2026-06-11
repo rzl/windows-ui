@@ -26,6 +26,7 @@ const handleNodeClick = (data) => console.log(data)
 |--------|------|------|--------|
 | data | 数据 | array | [] |
 | expandAll | - | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 

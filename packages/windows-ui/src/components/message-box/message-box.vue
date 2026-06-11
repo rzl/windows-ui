@@ -9,7 +9,7 @@
             </slot>
             <div class="w-message-box__actions">
               <slot name="action" />
-              <w-icon name="close" size="small" class="w-message-box__close" @click="cancel" />
+              <w-icon name="close" class="w-message-box__close" @click="cancel" />
             </div>
           </div>
           <div class="w-message-box__body">

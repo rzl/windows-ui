@@ -88,14 +88,14 @@ const visible = ref(false)
 | title | 标题 | string | 提示 |
 | width | 宽度 | number | 420 |
 | closeOnClickModal | 点击遮罩是否关闭 | boolean | true |
-| draggable | 头部是否允许拖动 | boolean | true |
-| fullscreen | 是否全屏显示 | boolean | false |
+| draggable | 是否可拖拽 | boolean | true |
+| fullscreen | 是否全屏 | boolean | false |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:modelValue | 绑定值更新时触发 | value |
+| update:modelValue | 绑定值更新 | value |
 | close | 关闭时触发 | - |
 | confirm | 确认时触发 | - |
 
@@ -103,10 +103,10 @@ const visible = ref(false)
 
 | 插槽名 | 说明 |
 |--------|------|
+| action | 操作区内容 |
 | default | 默认内容 |
-| header | 标题内容，覆盖 `title` 属性 |
-| action | 自定义操作按钮，插入在全屏按钮左侧 |
 | footer | 底部内容 |
+| header | 头部内容 |
 
 ## 主题定制
 

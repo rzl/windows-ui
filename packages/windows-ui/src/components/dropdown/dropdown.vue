@@ -2,7 +2,7 @@
   <div class="w-dropdown" v-click-outside="close">
     <div class="w-dropdown__trigger" @click="open = !open">
       <slot name="trigger">
-        <w-button>{{ triggerText }} <w-icon name="arrowDown" size="small" /></w-button>
+        <w-button :size="size">{{ triggerText }} <w-icon name="arrowDown" :size="size" /></w-button>
       </slot>
     </div>
     <div v-show="open" class="w-dropdown__menu">
@@ -12,7 +12,7 @@
         :class="['w-dropdown__item', { 'is-disabled': item.disabled }]"
         @click="handleClick(item)"
       >
-        <w-icon v-if="item.icon" :name="item.icon" size="small" />
+        <w-icon v-if="item.icon" :name="item.icon" :size="size" />
         {{ item.label }}
       </div>
     </div>
@@ -20,15 +20,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import WButton from '../button/button.vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WDropdown' })
-defineProps({
+const props = defineProps({
   items: { type: Array as () => { label: string; value?: any; icon?: string; disabled?: boolean }[], default: () => [] },
-  triggerText: { type: String, default: '下拉菜单' }
+  triggerText: { type: String, default: '下拉菜单' },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['command'])
 
 const open = ref(false)

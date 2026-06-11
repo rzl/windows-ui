@@ -1,6 +1,6 @@
 <template>
   <div class="w-time-picker" v-click-outside="close">
-    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" @click="open = !open" @clear="handleClear" />
+    <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
     <div v-show="open" class="w-time-picker__popper">
       <div class="w-time-picker__panel">
         <div class="w-time-picker__column"><div v-for="h in 24" :key="h" :class="['w-time-picker__cell', { 'is-active': h - 1 === hour }]" @click="hour = h - 1">{{ String(h - 1).padStart(2, '0') }}</div></div>
@@ -16,8 +16,11 @@
 import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
 import WButton from '../button/button.vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WTimePicker' })
-const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择时间' }, clearable: { type: Boolean, default: true } })
+const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择时间' }, clearable: { type: Boolean, default: true }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
 const parts = props.modelValue?.split(':').map(Number) || [0, 0, 0]

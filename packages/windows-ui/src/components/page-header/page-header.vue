@@ -1,5 +1,5 @@
 <template>
-  <div class="w-page-header">
+  <div :class="['w-page-header', `w-page-header--${size}`]">
     <div class="w-page-header__left">
       <span v-if="showBack" class="w-page-header__back" @click="$emit('back')">&larr; 返回</span>
       <div class="w-page-header__title">
@@ -14,8 +14,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
+
 defineOptions({ name: 'WPageHeader' })
-defineProps({ title: String, showBack: { type: Boolean, default: true } })
+const props = defineProps({ title: String, showBack: { type: Boolean, default: true }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 defineEmits(['back'])
 </script>
 
@@ -25,4 +30,10 @@ defineEmits(['back'])
 .w-page-header__back { color: var(--w-color-primary); cursor: pointer; font-size: var(--w-font-size-base); }
 .w-page-header__back:hover { text-decoration: underline; }
 .w-page-header__title { font-size: var(--w-font-size-large); font-weight: bold; color: var(--w-text-color-primary); }
+.w-page-header--small { padding: 8px 12px; }
+.w-page-header--small .w-page-header__back { font-size: var(--w-font-size-small); }
+.w-page-header--small .w-page-header__title { font-size: var(--w-font-size-base); }
+.w-page-header--large { padding: 16px 20px; }
+.w-page-header--large .w-page-header__back { font-size: var(--w-font-size-medium); }
+.w-page-header--large .w-page-header__title { font-size: var(--w-font-size-extra-large); }
 </style>

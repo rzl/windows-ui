@@ -1,5 +1,5 @@
 <template>
-  <div :class="['w-rate', { 'is-disabled': disabled }]">
+  <div :class="['w-rate', `w-rate--${size}`, { 'is-disabled': disabled }]">
     <span
       v-for="i in max"
       :key="i"
@@ -17,14 +17,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WRate' })
 const props = defineProps({
   modelValue: { type: Number, default: 0 },
   max: { type: Number, default: 5 },
   disabled: Boolean,
-  showScore: Boolean
+  showScore: Boolean,
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const hoverValue = ref(props.modelValue)
@@ -40,8 +44,12 @@ const select = (i: number) => {
 
 <style scoped>
 .w-rate { display: inline-flex; align-items: center; gap: 2px; }
-.w-rate__item { cursor: pointer; color: #c0c0c0; }
+.w-rate__item { cursor: pointer; color: #c0c0c0; font-size: 16px; }
 .w-rate__item.is-active { color: var(--w-color-warning); }
 .w-rate.is-disabled .w-rate__item { cursor: not-allowed; }
 .w-rate__score { margin-left: 8px; font-size: var(--w-font-size-base); color: var(--w-text-color-secondary); }
+.w-rate--small .w-rate__item { font-size: 14px; }
+.w-rate--small .w-rate__score { font-size: var(--w-font-size-small); }
+.w-rate--large .w-rate__item { font-size: 20px; }
+.w-rate--large .w-rate__score { font-size: var(--w-font-size-medium); }
 </style>

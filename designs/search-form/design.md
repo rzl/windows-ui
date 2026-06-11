@@ -14,9 +14,11 @@ Form
 - 内边距: 12px
 
 ### 尺寸规范
-- 字段区域: flex 布局，自动换行
-- 收起状态: max-height 44px，overflow hidden
-- 操作按钮: 与字段区域间距 12px
+- 尺寸可选：small / default / large
+- 默认高度：32px（default），跟随 CSS 变量 `--w-component-size`
+- 小尺寸：24px（`--w-component-size-small`）
+- 大尺寸：40px（`--w-component-size-large`）
+- 组件内部图标（如有）随组件 size 联动
 
 ## 交互设计
 - 查询按钮: 触发 search 事件

@@ -17,6 +17,8 @@ import { WTypography } from '@windows-ui/core'
 </script>
 ```
 
+## API
+
 ### Slots
 
 | 插槽名 | 说明 |

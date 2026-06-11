@@ -132,19 +132,34 @@ interface TabItem {
 }
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| collapsed | - | boolean | false |
+| title | 标题 | string | Admin |
+
+### Slots
+
+| 插槽名 | 说明 |
+|--------|------|
+| default | 默认内容 |
+| header | 头部内容 |
+| logo | 自定义内容 |
+| menu | 菜单插槽 |
+
 ## 主题定制
+
+可通过 CSS 变量自定义主题色：
 
 ```css
 :root {
-  --w-bg-color: #ece9d8;
   --w-color-primary: #245edb;
-  --w-xp-blue-light: #316ac5;
+  --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }
 ```
-
-## 注意事项
-
-- AdminLayout 是 Admin 模板的内部布局组件，非库组件，位于 `packages/admin/src/views/layout/AdminLayout.vue`
-- 依赖 Pinia stores：`useAuthStore`、`useAppStore`
-- 依赖 mock 数据：`mockMenus`（来自 `@/mock/data`）
-- 使用 `v-click-outside` 自定义指令处理用户下拉菜单的点击外部关闭

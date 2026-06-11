@@ -1,13 +1,17 @@
 <template>
-  <button :class="['w-switch', { 'is-checked': modelValue, 'is-disabled': disabled }]" :disabled="disabled" @click="toggle">
+  <button :class="['w-switch', `w-switch--${size}`, { 'is-checked': modelValue, 'is-disabled': disabled }]" :disabled="disabled" @click="toggle">
     <span class="w-switch__core"><span class="w-switch__thumb" /></span>
     <span v-if="activeText || inactiveText" class="w-switch__label">{{ modelValue ? activeText : inactiveText }}</span>
   </button>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WSwitch' })
-const props = defineProps({ modelValue: Boolean, disabled: Boolean, activeText: String, inactiveText: String })
+const props = defineProps({ modelValue: Boolean, disabled: Boolean, activeText: String, inactiveText: String, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 const toggle = () => { const v = !props.modelValue; emit('update:modelValue', v); emit('change', v) }
 </script>
@@ -20,4 +24,14 @@ const toggle = () => { const v = !props.modelValue; emit('update:modelValue', v)
 .w-switch.is-checked .w-switch__thumb { left: 19px; }
 .w-switch__label { font-size: var(--w-font-size-base); color: var(--w-text-color-primary); }
 .w-switch.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.w-switch--small { gap: 4px; }
+.w-switch--small .w-switch__core { width: 28px; height: 14px; border-radius: 7px; }
+.w-switch--small .w-switch__thumb { width: 11px; height: 11px; }
+.w-switch--small.is-checked .w-switch__thumb { left: 15px; }
+.w-switch--small .w-switch__label { font-size: var(--w-font-size-small); }
+.w-switch--large { gap: 8px; }
+.w-switch--large .w-switch__core { width: 44px; height: 22px; border-radius: 11px; }
+.w-switch--large .w-switch__thumb { width: 18px; height: 18px; }
+.w-switch--large.is-checked .w-switch__thumb { left: 24px; }
+.w-switch--large .w-switch__label { font-size: var(--w-font-size-medium); }
 </style>

@@ -5,7 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import { provide, ref } from 'vue'
+import { provide, ref, computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 export interface FormRule {
   required?: boolean
@@ -19,13 +20,18 @@ export interface FormRule {
 defineOptions({ name: 'WForm' })
 const props = defineProps({
   model: Object as () => Record<string, any>,
-  rules: Object as () => Record<string, FormRule[]>
+  rules: Object as () => Record<string, FormRule[]>,
+  size: { type: String, default: undefined }
 })
 const emit = defineEmits(['submit', 'validate'])
+
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 
 const errors = ref<Record<string, string>>({})
 const fieldRefs = ref<any[]>([])
 
+provide('formSize', size)
 provide('formErrors', errors)
 provide('formModel', props.model)
 provide('formRules', props.rules)

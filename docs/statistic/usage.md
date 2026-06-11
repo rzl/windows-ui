@@ -26,7 +26,7 @@ import { WStatistic, WRow, WCol } from '@windows-ui/core'
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | title | 标题 | string | - |
-| value | 值 | number | - |
+| value | 值 | number/string | - |
 | prefix | 前缀内容 | string | - |
 | suffix | 后缀内容 | string | - |
 | precision | 精度 | number | - |

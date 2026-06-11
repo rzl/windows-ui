@@ -1,5 +1,5 @@
 <template>
-  <nav class="w-breadcrumb">
+  <nav :class="['w-breadcrumb', `w-breadcrumb--${size}`]">
     <span
       v-for="(item, i) in items"
       :key="i"
@@ -13,11 +13,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
+
 defineOptions({ name: 'WBreadcrumb' })
-defineProps({
+const props = defineProps({
   items: { type: Array as () => { label: string; href?: string }[], default: () => [] },
-  separator: { type: String, default: '>' }
+  separator: { type: String, default: '>' },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 </script>
 
 <style scoped>
@@ -26,4 +32,6 @@ defineProps({
 .w-breadcrumb__item a:hover { text-decoration: underline; }
 .w-breadcrumb__item.is-last { color: var(--w-text-color-primary); font-weight: bold; }
 .w-breadcrumb__separator { margin: 0 6px; color: #c0c0c0; }
+.w-breadcrumb--small { font-size: var(--w-font-size-small); }
+.w-breadcrumb--large { font-size: var(--w-font-size-medium); }
 </style>

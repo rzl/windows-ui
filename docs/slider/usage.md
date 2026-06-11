@@ -71,26 +71,27 @@ const value = ref(50)
 | min | 最小值 | number | 0 |
 | max | 最大值 | number | 100 |
 | step | 步长 | number | 1 |
-| rangeMin | 可选范围最小值 | number | — |
-| rangeMax | 可选范围最大值 | number | — |
-| showStops | 是否显示断点 | boolean | false |
-| showMinMax | 是否显示上下限 | boolean | false |
-| disabled | 是否禁用 | boolean | false |
+| rangeMin | - | number | - |
+| rangeMax | - | number | - |
+| showStops | - | boolean | - |
+| showMinMax | - | boolean | - |
+| disabled | 是否禁用 | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:modelValue | 绑定值更新时触发 | value |
-| change | 用户确认选定的值时触发 | value |
+| update:modelValue | 绑定值更新 | value |
+| change | 值改变时触发 | value |
 
 ### Slots
 
-| 插槽名 | 说明 | 作用域参数 |
-|--------|------|------------|
-| tooltip | 自定义 thumb 悬浮提示内容 | { value } |
-| min | 自定义下限显示内容（需开启 show-min-max） | { value } |
-| max | 自定义上限显示内容（需开启 show-min-max） | { value } |
+| 插槽名 | 说明 |
+|--------|------|
+| max | 自定义内容 |
+| min | 自定义内容 |
+| tooltip | 文字提示插槽 |
 
 ## 主题定制
 

@@ -26,6 +26,7 @@ const data = Array.from({ length: 100 }, (_, i) => ({
 | data | 数据 | array | [] |
 | rowHeight | - | number | 28 |
 | visibleCount | - | number | 10 |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 

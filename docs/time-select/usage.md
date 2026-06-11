@@ -25,15 +25,15 @@ const value = ref('')
 | start | 开始时间 | string | 00:00 |
 | end | 结束时间 | string | 23:59 |
 | step | 步长 | string | 00:30 |
-| clearable | 是否可清空 | boolean | true |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
+| update:modelValue | 绑定值更新 | value |
+| change | 值改变时触发 | value |
 | clear | 清空时触发 | - |
-| update:modelValue | 绑定值更新时触发 | value |
-| change | 用户确认选定的值时触发 | value |
 
 ## 主题定制
 

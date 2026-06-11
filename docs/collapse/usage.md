@@ -21,20 +21,31 @@ const activeNames = ref(['1'])
 </script>
 ```
 
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| items | 菜单项列表 | array | [] |
+| modelValue | 绑定值（支持 v-model） | array | [] |
+| accordion | 是否手风琴模式 | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:modelValue | 绑定值更新时触发 | value |
-| change | 用户确认选定的值时触发 | value |
+| update:modelValue | 绑定值更新 | value |
+| change | 值改变时触发 | value |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
+| action | 操作区内容 |
 | default | 默认内容 |
-| header | 作用域插槽，参数 `{ item, index }`，替换面板标题区 |
-| action | 作用域插槽，参数 `{ item, index }`，面板标题右侧操作区 |
+| header | 头部内容 |
 
 ## 主题定制
 

@@ -29,13 +29,14 @@ const pageSize = ref(10)
 | currentPage | 当前页 | number | 1 |
 | pageSize | 每页条数 | number | 10 |
 | total | 总条数 | number | 0 |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
 | update:currentPage | 当前页更新时触发 | currentPage |
-| change | 用户确认选定的值时触发 | value |
+| change | 值改变时触发 | value |
 
 ## 主题定制
 

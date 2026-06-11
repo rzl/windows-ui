@@ -8,7 +8,7 @@
         </slot>
         <div class="w-tour__actions">
           <slot name="action" :step="steps[current]" :index="current" />
-          <w-icon name="close" size="small" class="w-tour__close" @click="close" />
+          <w-icon name="close" class="w-tour__close" @click="close" />
         </div>
       </div>
       <div class="w-tour__body">{{ steps[current].description }}</div>

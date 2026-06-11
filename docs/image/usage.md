@@ -24,8 +24,8 @@ import { WImage } from '@windows-ui/core'
 |--------|------|------|--------|
 | src | 图片地址 | string | - |
 | alt | 替代文本 | string | - |
-| width | 宽度 | string | - |
-| height | 高度 | string | - |
+| width | 宽度 | string/number | - |
+| height | 高度 | string/number | - |
 | previewable | - | boolean | - |
 
 ## 主题定制

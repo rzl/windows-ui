@@ -17,6 +17,8 @@ const notifySuccess = () => {}
 </script>
 ```
 
+## API
+
 ### Methods
 
 | 方法名 | 说明 |

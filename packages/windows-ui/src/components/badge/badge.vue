@@ -1,5 +1,5 @@
 <template>
-  <div class="w-badge">
+  <div :class="['w-badge', `w-badge--${size}`]">
     <slot />
     <sup v-if="show" :class="['w-badge__content', `w-badge--${type}`, { 'is-dot': isDot }]">{{ displayValue }}</sup>
   </div>
@@ -7,14 +7,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WBadge' })
 const props = defineProps({
   value: [String, Number],
   max: { type: Number, default: 99 },
   isDot: Boolean,
-  type: { type: String, default: 'danger' }
+  type: { type: String, default: 'danger' },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 
 const show = computed(() => props.isDot || props.value !== undefined && props.value !== '')
 const displayValue = computed(() => {
@@ -33,4 +37,8 @@ const displayValue = computed(() => {
 .w-badge--success { background: var(--w-color-success); }
 .w-badge--warning { background: var(--w-color-warning); }
 .w-badge--info { background: var(--w-color-info); }
+.w-badge--small .w-badge__content { height: 14px; line-height: 14px; padding: 0 4px; border-radius: 7px; font-size: 9px; }
+.w-badge--small .w-badge__content.is-dot { width: 7px; height: 7px; }
+.w-badge--large .w-badge__content { height: 20px; line-height: 20px; padding: 0 6px; border-radius: 10px; font-size: var(--w-font-size-small); }
+.w-badge--large .w-badge__content.is-dot { width: 10px; height: 10px; }
 </style>
