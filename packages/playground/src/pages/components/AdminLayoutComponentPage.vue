@@ -1,0 +1,69 @@
+<template>
+  <div class="demo-page">
+    <h1 class="page-title">{{ title }}</h1>
+    <demo-section :title="title" description="后台管理系统布局" id="admin-layout" doc="admin-layout">
+
+      <demo-block title="基础布局" code="&lt;w-admin-layout title=&quot;管理系统&quot;&gt;
+  &lt;template #menu&gt;
+    &lt;w-menu :items=&quot;menuItems&quot; /&gt;
+  &lt;/template&gt;
+  &lt;template #header&gt;
+    &lt;span&gt;顶部栏&lt;/span&gt;
+  &lt;/template&gt;
+  &lt;div&gt;主内容区域&lt;/div&gt;
+&lt;/w-admin-layout&gt;">
+        <div style="height: 300px; overflow: hidden;">
+          <w-admin-layout title="管理系统">
+            <template #menu>
+              <w-menu :items="menuItems" />
+            </template>
+            <template #header>
+              <span>顶部栏</span>
+            </template>
+            <div>主内容区域</div>
+          </w-admin-layout>
+        </div>
+      </demo-block>
+
+      <demo-block title="折叠侧边栏" code="&lt;w-admin-layout title=&quot;管理系统&quot; :collapsed=&quot;true&quot;&gt;
+  &lt;template #menu&gt;
+    &lt;w-menu :items=&quot;menuItems&quot; /&gt;
+  &lt;/template&gt;
+  &lt;template #header&gt;
+    &lt;span&gt;顶部栏&lt;/span&gt;
+  &lt;/template&gt;
+  &lt;div&gt;主内容区域&lt;/div&gt;
+&lt;/w-admin-layout&gt;">
+        <div style="height: 300px; overflow: hidden;">
+          <w-admin-layout title="管理系统" :collapsed="true">
+            <template #menu>
+              <w-menu :items="menuItems" />
+            </template>
+            <template #header>
+              <span>顶部栏</span>
+            </template>
+            <div>主内容区域</div>
+          </w-admin-layout>
+        </div>
+      </demo-block>
+
+    </demo-section>
+  </div>
+</template>
+
+<script setup lang="ts">
+import DemoSection from '../../components/DemoSection.vue'
+import DemoBlock from '../../components/DemoBlock.vue'
+
+const menuItems = [
+  { label: '首页', path: '/' },
+  { label: '用户管理', path: '/user' },
+  { label: '系统设置', path: '/setting' }
+]
+
+const title = 'AdminLayout 后台布局'
+</script>
+
+<style scoped>
+.page-title { font-size: 24px; color: #245edb; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #d4d0c8; }
+</style>

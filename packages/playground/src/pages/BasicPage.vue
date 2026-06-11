@@ -54,6 +54,10 @@
         <h3>ConfigProvider 全局配置</h3>
         <p>统一配置组件前缀等</p>
       </router-link>
+      <router-link to="/basic/admin-layout" class="component-card">
+        <h3>AdminLayout 后台布局</h3>
+        <p>后台管理系统布局容器</p>
+      </router-link>
     </div>
   </div>
 </template>

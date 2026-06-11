@@ -90,6 +90,10 @@
         <h3>Form 表单</h3>
         <p>表单验证与布局</p>
       </router-link>
+      <router-link to="/form/search-form" class="component-card">
+        <h3>SearchForm 搜索表单</h3>
+        <p>带查询和重置的搜索表单</p>
+      </router-link>
     </div>
   </div>
 </template>
