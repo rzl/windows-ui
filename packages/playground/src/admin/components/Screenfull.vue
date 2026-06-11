@@ -6,29 +6,31 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import screenfull from 'screenfull'
 
 const isFullscreen = ref(false)
 
+function isEnabled() {
+  return !!document.documentElement.requestFullscreen
+}
+
 function toggle() {
-  if (screenfull.isEnabled) {
-    screenfull.toggle()
+  if (!isEnabled()) return
+  if (document.fullscreenElement) {
+    document.exitFullscreen()
+  } else {
+    document.documentElement.requestFullscreen()
   }
 }
 
 function onChange() {
-  isFullscreen.value = screenfull.isFullscreen
+  isFullscreen.value = !!document.fullscreenElement
 }
 
 onMounted(() => {
-  if (screenfull.isEnabled) {
-    screenfull.on('change', onChange)
-  }
+  document.addEventListener('fullscreenchange', onChange)
 })
 
 onBeforeUnmount(() => {
-  if (screenfull.isEnabled) {
-    screenfull.off('change', onChange)
-  }
+  document.removeEventListener('fullscreenchange', onChange)
 })
 </script>
