@@ -83,6 +83,7 @@ const globalLocale = ref<'zh-CN' | 'en-US'>(i18n.global.locale.value as 'zh-CN' 
 function switchLang(lang: 'zh-CN' | 'en-US') {
   globalLocale.value = lang
   setPlaygroundLang(lang)
+  window.location.reload()
 }
 
 const translatableNavLabels = ['首页', '全部组件', '基础组件', '表单组件', '数据展示', '导航组件', '反馈组件', '其他组件']
