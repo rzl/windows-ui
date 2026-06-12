@@ -5,9 +5,9 @@
         <h1>🖥️ Windows UI</h1>
         <p>Vue 3 UI Library - Windows XP Style</p>
         <div class="global-controls">
-          <a href="admin.html" class="admin-link" title="进入 Admin 后台">🏢 Admin 后台</a>
+          <a href="admin.html" class="admin-link" title="Admin">🏢 {{ t('Admin后台') }}</a>
           <div class="control-group">
-            <span class="control-label">尺寸</span>
+            <span class="control-label">{{ t('尺寸') }}</span>
             <button
               v-for="s in ['small', 'default', 'large']"
               :key="s"
@@ -18,24 +18,24 @@
             </button>
           </div>
           <div class="control-group">
-            <span class="control-label">语言</span>
+            <span class="control-label">{{ t('语言') }}</span>
             <button
               v-for="lang in [{ k: 'zh-CN', l: '中文' }, { k: 'en-US', l: 'English' }]"
               :key="lang.k"
               :class="['size-btn', { active: globalLocale === lang.k }]"
-              @click="globalLocale = lang.k as any"
+              @click="switchLang(lang.k as 'zh-CN' | 'en-US')"
             >
               {{ lang.l }}
             </button>
           </div>
           <div class="control-group">
-            <span class="control-label">主题色</span>
+            <span class="control-label">{{ t('主题色') }}</span>
             <button class="preset-btn" style="background:#245edb" @click="themeColors.primary = '#245edb'; updateTheme()" />
             <button class="preset-btn" style="background:#ff69b4" @click="themeColors.primary = '#ff69b4'; updateTheme()" />
             <button class="preset-btn" style="background:#d92b2b" @click="themeColors.primary = '#d92b2b'; updateTheme()" />
             <button class="preset-btn" style="background:#3a9e3a" @click="themeColors.primary = '#3a9e3a'; updateTheme()" />
             <input type="color" :value="themeColors.primary" @change="e => { themeColors.primary = (e.target as HTMLInputElement).value; updateTheme() }" class="color-input" title="primary" />
-            <button class="reset-btn" @click="resetTheme">重置</button>
+            <button class="reset-btn" @click="resetTheme">{{ t('重置') }}</button>
             <div class="color-preview" :style="{ backgroundColor: themeColors.primary }"></div>
           </div>
         </div>
@@ -51,7 +51,7 @@
               :class="['sidebar-link', { 'is-active': isActive(item.path) }, { 'is-indented': item.indent }]"
             >
               <w-icon v-if="item.icon && !item.indent" :name="item.icon" size="small" />
-              <span>{{ item.label }}</span>
+              <span>{{ navLabel(item.label) }}</span>
             </router-link>
           </nav>
         </aside>
@@ -67,15 +67,29 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import i18n, { setPlaygroundLang } from '../i18n'
 
 const $route = useRoute()
+const { t } = useI18n()
 
 const isActive = (path: string) => {
   return $route.path === path || (path !== '/' && $route.path.startsWith(path + '/'))
 }
 
 const globalSize = ref<'small' | 'default' | 'large'>('default')
-const globalLocale = ref<'zh-CN' | 'en-US'>('zh-CN')
+const globalLocale = ref<'zh-CN' | 'en-US'>(i18n.global.locale.value as 'zh-CN' | 'en-US')
+
+function switchLang(lang: 'zh-CN' | 'en-US') {
+  globalLocale.value = lang
+  setPlaygroundLang(lang)
+}
+
+const translatableNavLabels = ['首页', '全部组件', '基础组件', '表单组件', '数据展示', '导航组件', '反馈组件', '其他组件']
+function navLabel(label: string) {
+  const text = label.replace(/^[🏠📋]\s*/, '')
+  return translatableNavLabels.includes(text) ? t(text) : label
+}
 
 const defaultColors = {
   primary: '#245edb',

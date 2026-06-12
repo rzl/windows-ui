@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="内置 SVG 图标" id="icon" doc="icon">
+    <demo-section :title="title" :description="t('内置 SVG 图标')" id="icon" doc="icon">
       <demo-block
         v-for="group in iconGroups"
         :key="group.title"
@@ -48,21 +48,23 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
-const title = 'Icon 图标'
+const title = t('Icon 图标')
 
 const customSvg = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l2 5h5l-4 3 1.5 5L8 10l-4.5 4 1.5-5-4-3h5z" fill="currentColor"/></svg>'
 const customSvg2 = '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 8l3 3 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 const iconGroups = [
-  { title: '方向箭头', names: ['arrowUp', 'arrowDown', 'arrowLeft', 'arrowRight', 'chevron-up', 'chevron-down', 'chevron-left', 'chevron-right'] },
-  { title: '操作交互', names: ['close', 'search', 'more', 'delete', 'edit', 'plus', 'minus', 'check', 'refresh', 'settings', 'copy', 'upload', 'download', 'print', 'share', 'zoom-in', 'zoom-out', 'lock', 'unlock', 'eye', 'eye-off'] },
-  { title: '文件系统', names: ['folder', 'file', 'image', 'video', 'music', 'document'] },
-  { title: '状态提示', names: ['info', 'warning', 'error', 'success', 'help', 'loading'] },
-  { title: '通用界面', names: ['user', 'star', 'menu', 'home', 'fullscreen', 'fullscreen-exit', 'heart', 'bell', 'calendar', 'clock', 'mail', 'phone', 'link', 'tag', 'bookmark', 'filter', 'sort', 'grid', 'list'] },
-  { title: '后台管理', names: ['computer', 'logout', 'password', 'cart', 'pie-chart', 'bar-chart', 'setting'] }
+  { title: t('方向箭头'), names: ['arrowUp', 'arrowDown', 'arrowLeft', 'arrowRight', 'chevron-up', 'chevron-down', 'chevron-left', 'chevron-right'] },
+  { title: t('操作交互'), names: ['close', 'search', 'more', 'delete', 'edit', 'plus', 'minus', 'check', 'refresh', 'settings', 'copy', 'upload', 'download', 'print', 'share', 'zoom-in', 'zoom-out', 'lock', 'unlock', 'eye', 'eye-off'] },
+  { title: t('文件系统'), names: ['folder', 'file', 'image', 'video', 'music', 'document'] },
+  { title: t('状态提示'), names: ['info', 'warning', 'error', 'success', 'help', 'loading'] },
+  { title: t('通用界面'), names: ['user', 'star', 'menu', 'home', 'fullscreen', 'fullscreen-exit', 'heart', 'bell', 'calendar', 'clock', 'mail', 'phone', 'link', 'tag', 'bookmark', 'filter', 'sort', 'grid', 'list'] },
+  { title: t('后台管理'), names: ['computer', 'logout', 'password', 'cart', 'pie-chart', 'bar-chart', 'setting'] }
 ]
 
 function getGroupCode(group: { title: string; names: string[] }) {

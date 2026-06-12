@@ -9,7 +9,7 @@
     </div>
     <div v-if="doc" class="demo-section__docs">
       <div class="docs-header" @click="toggleDocs">
-        <span>📄 使用说明</span>
+        <span>📄 {{ t('使用说明') }}</span>
         <span class="docs-icon" :class="{ expanded: showDocs }">▼</span>
       </div>
       <transition name="docs-slide">
@@ -21,6 +21,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, inject, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import hljs from 'highlight.js/lib/core'
 import xml from 'highlight.js/lib/languages/xml'
@@ -45,6 +46,7 @@ const props = defineProps({
   doc: String
 })
 
+const { t } = useI18n()
 const showDocs = ref(true)
 const docContent = ref('')
 const toggleDocs = () => { showDocs.value = !showDocs.value }

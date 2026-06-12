@@ -29,7 +29,7 @@
 
     <w-divider />
 
-    <h2 class="section-title">组件导航</h2>
+    <h2 class="section-title">{{ t('组件导航') }}</h2>
     <div class="nav-grid">
       <router-link v-for="item in navCards" :key="item.path" :to="item.path" class="nav-card">
         <div class="nav-card__icon">{{ item.icon }}</div>
@@ -41,7 +41,7 @@
 
     <w-divider />
 
-    <h2 class="section-title">全部组件列表</h2>
+    <h2 class="section-title">{{ t('全部组件列表') }}</h2>
     <div class="overview-grid">
       <w-card v-for="group in groups" :key="group.name" :header="group.name" class="overview-card">
         <w-space wrap>
@@ -53,22 +53,24 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const navCards = [
-  { path: '/basic', title: '基础组件', icon: '🔧', count: 13, desc: 'Button, Icon, Link, Text 等' },
-  { path: '/form', title: '表单组件', icon: '📝', count: 22, desc: 'Input, Select, DatePicker 等' },
-  { path: '/data', title: '数据展示', icon: '📊', count: 22, desc: 'Table, Card, Tag, Tree 等' },
-  { path: '/nav', title: '导航组件', icon: '🧭', count: 9, desc: 'Menu, Tabs, Breadcrumb 等' },
-  { path: '/feedback', title: '反馈组件', icon: '💬', count: 10, desc: 'Dialog, Alert, Message 等' },
-  { path: '/others', title: '其他组件', icon: '📎', count: 2, desc: 'Divider, Watermark' },
+  { path: '/basic', title: t('基础组件'), icon: '🔧', count: 13, desc: 'Button, Icon, Link, Text' },
+  { path: '/form', title: t('表单组件'), icon: '📝', count: 22, desc: 'Input, Select, DatePicker' },
+  { path: '/data', title: t('数据展示'), icon: '📊', count: 22, desc: 'Table, Card, Tag, Tree' },
+  { path: '/nav', title: t('导航组件'), icon: '🧭', count: 9, desc: 'Menu, Tabs, Breadcrumb' },
+  { path: '/feedback', title: t('反馈组件'), icon: '💬', count: 10, desc: 'Dialog, Alert, Message' },
+  { path: '/others', title: t('其他组件'), icon: '📎', count: 2, desc: 'Divider, Watermark' },
 ]
 
 const groups = [
-  { name: '基础组件 (13)', components: ['Button','Border','Color','Container','Icon','Layout','Link','Text','Scrollbar','Space','Splitter','Typography','ConfigProvider'] },
-  { name: '表单组件 (22)', components: ['Autocomplete','Cascader','Checkbox','ColorPicker','ColorPickerPanel','DatePicker','DatePickerPanel','DateTimePicker','Form','Input','InputNumber','InputTag','InputOTP','Mention','Radio','Rate','Select','VirtualizedSelect','Slider','Switch','TimePicker','TimeSelect','Transfer','TreeSelect','Upload'] },
-  { name: '数据展示 (22)', components: ['Avatar','Badge','Calendar','Card','Carousel','Collapse','Descriptions','Empty','Image','InfiniteScroll','Pagination','Progress','Result','Skeleton','Table','VirtualizedTable','Tag','Timeline','Tour','Tree','VirtualizedTree','Statistic','Segmented'] },
-  { name: '导航组件 (9)', components: ['Affix','Anchor','Backtop','Breadcrumb','Dropdown','Menu','PageHeader','Steps','Tabs'] },
-  { name: '反馈组件 (10)', components: ['Alert','Dialog','Drawer','Loading','Message','MessageBox','Notification','Popconfirm','Popover','Tooltip'] },
-  { name: '其他组件 (2)', components: ['Divider','Watermark'] },
+  { name: t('基础组件') + ' (13)', components: ['Button','Border','Color','Container','Icon','Layout','Link','Text','Scrollbar','Space','Splitter','Typography','ConfigProvider'] },
+  { name: t('表单组件') + ' (22)', components: ['Autocomplete','Cascader','Checkbox','ColorPicker','ColorPickerPanel','DatePicker','DatePickerPanel','DateTimePicker','Form','Input','InputNumber','InputTag','InputOTP','Mention','Radio','Rate','Select','VirtualizedSelect','Slider','Switch','TimePicker','TimeSelect','Transfer','TreeSelect','Upload'] },
+  { name: t('数据展示') + ' (22)', components: ['Avatar','Badge','Calendar','Card','Carousel','Collapse','Descriptions','Empty','Image','InfiniteScroll','Pagination','Progress','Result','Skeleton','Table','VirtualizedTable','Tag','Timeline','Tour','Tree','VirtualizedTree','Statistic','Segmented'] },
+  { name: t('导航组件') + ' (9)', components: ['Affix','Anchor','Backtop','Breadcrumb','Dropdown','Menu','PageHeader','Steps','Tabs'] },
+  { name: t('反馈组件') + ' (10)', components: ['Alert','Dialog','Drawer','Loading','Message','MessageBox','Notification','Popconfirm','Popover','Tooltip'] },
+  { name: t('其他组件') + ' (2)', components: ['Divider','Watermark'] },
 ]
 </script>
 

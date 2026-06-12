@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="后台管理系统布局" id="admin-layout" doc="admin-layout">
+    <demo-section :title="title" :description="t('后台管理系统布局')" id="admin-layout" doc="admin-layout">
 
-      <demo-block title="基础布局" code="&lt;w-admin-layout title=&quot;管理系统&quot;&gt;
+      <demo-block :title="t('基础布局')" code="&lt;w-admin-layout title=&quot;管理系统&quot;&gt;
   &lt;template #menu&gt;
     &lt;w-menu :items=&quot;menuItems&quot; /&gt;
   &lt;/template&gt;
@@ -25,7 +25,7 @@
         </div>
       </demo-block>
 
-      <demo-block title="折叠侧边栏" code="&lt;w-admin-layout title=&quot;管理系统&quot; :collapsed=&quot;true&quot;&gt;
+      <demo-block :title="t('折叠侧边栏')" code="&lt;w-admin-layout title=&quot;管理系统&quot; :collapsed=&quot;true&quot;&gt;
   &lt;template #menu&gt;
     &lt;w-menu :items=&quot;menuItems&quot; /&gt;
   &lt;/template&gt;
@@ -52,16 +52,18 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
 const menuItems = [
-  { label: '首页', path: '/' },
-  { label: '用户管理', path: '/user' },
-  { label: '系统设置', path: '/setting' }
+  { label: t('首页'), path: '/' },
+  { label: t('用户管理'), path: '/user' },
+  { label: t('系统设置'), path: '/setting' }
 ]
 
-const title = 'AdminLayout 后台布局'
+const title = t('AdminLayout 后台布局')
 </script>
 
 <style scoped>

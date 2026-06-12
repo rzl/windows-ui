@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="主题色彩展示板" id="color" doc="color">
+    <demo-section :title="title" :description="t('主题色彩展示板')" id="color" doc="color">
 
-      <demo-block title="色彩面板" code="&lt;w-color /&gt;">
+      <demo-block :title="t('色彩面板')" code="&lt;w-color /&gt;">
         <w-color />
       </demo-block>
 
@@ -12,12 +12,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
 const iconNames = ['info','warning','error','success','close','folder','file','search','user','star','arrowUp','arrowDown','arrowLeft','arrowRight','menu','home','loading']
 
-const title = 'Color 色彩'
+const title = t('Color 色彩')
 </script>
 
 <style scoped>

@@ -1,28 +1,30 @@
 <template>
   <div class="demo-page">
-    <h1 class="page-title">其他组件</h1>
+    <h1 class="page-title">{{ t('其他组件') }}</h1>
     <div class="component-grid">
       <router-link to="/others/divider" class="component-card">
         <h3>Divider 分割线</h3>
-        <p>内容分隔，支持水平和垂直</p>
+        <p>{{ t('内容分隔，支持水平和垂直') }}</p>
       </router-link>
       <router-link to="/others/watermark" class="component-card">
         <h3>Watermark 水印</h3>
-        <p>页面内容水印，防止截图泄露</p>
+        <p>{{ t('页面内容水印，防止截图泄露') }}</p>
       </router-link>
       <router-link to="/others/page-container" class="component-card">
         <h3>PageContainer 页面容器</h3>
-        <p>页面内容容器，带标题和面包屑</p>
+        <p>{{ t('页面内容容器，带标题和面包屑') }}</p>
       </router-link>
       <router-link to="/others/permission" class="component-card">
         <h3>Permission 权限控制</h3>
-        <p>基于权限码控制内容显示</p>
+        <p>{{ t('基于权限码控制内容显示') }}</p>
       </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 </script>
 
 <style scoped>

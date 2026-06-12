@@ -1,30 +1,32 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="层级数据展示" id="tree" doc="tree">
+    <demo-section :title="title" :description="t('层级数据展示')" id="tree" doc="tree">
 
-      <demo-block title="基础用法" code="&lt;w-tree :data=&quot;treeData&quot; /&gt;"><w-tree :data="treeData" /></demo-block>
-      <demo-block title="默认展开" code="&lt;w-tree :data=&quot;treeData&quot; expand-all /&gt;"><w-tree :data="treeData" expand-all /></demo-block>
-      <demo-block title="虚拟化树" code="&lt;w-virtualized-tree :data=&quot;treeData&quot; /&gt;"><w-virtualized-tree :data="treeData" /></demo-block>
+      <demo-block :title="t('基础用法')" code="&lt;w-tree :data=&quot;treeData&quot; /&gt;"><w-tree :data="treeData" /></demo-block>
+      <demo-block :title="t('默认展开')" code="&lt;w-tree :data=&quot;treeData&quot; expand-all /&gt;"><w-tree :data="treeData" expand-all /></demo-block>
+      <demo-block :title="t('虚拟化树')" code="&lt;w-virtualized-tree :data=&quot;treeData&quot; /&gt;"><w-virtualized-tree :data="treeData" /></demo-block>
 
     </demo-section>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
+const { t } = useI18n()
 
 const form = reactive({ date: '', page: 1, segment: 'day' })
 const showTour = ref(false)
 
-const calendarEvents = [{ date: new Date().toISOString().slice(0, 10), title: '今日事件' }]
-const tableData = [{ name: '张三', age: 28, address: '北京' }, { name: '李四', age: 32, address: '上海' }, { name: '王五', age: 24, address: '广州' }]
-const tableColumns = [{ prop: 'name', label: '姓名' }, { prop: 'age', label: '年龄' }, { prop: 'address', label: '地址' }]
-const treeData = [{ label: '节点1', value: '1', children: [{ label: '子节点1-1', value: '1-1' }] }, { label: '节点2', value: '2' }]
+const calendarEvents = [{ date: new Date().toISOString().slice(0, 10), title: t('今日事件') }]
+const tableData = [{ name: t('张三'), age: 28, address: t('北京') }, { name: t('李四'), age: 32, address: t('上海') }, { name: t('王五'), age: 24, address: t('广州') }]
+const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label: t('年龄') }, { prop: 'address', label: t('地址') }]
+const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
-const title = 'Tree 树形控件'
+const title = t('Tree 树形控件')
 </script>
 
 <style scoped>

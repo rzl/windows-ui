@@ -1,17 +1,17 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="导航菜单" id="menu" doc="menu">
+    <demo-section :title="title" :description="t('导航菜单')" id="menu" doc="menu">
 
-      <demo-block title="垂直菜单" :code="verticalCode">
+      <demo-block :title="t('垂直菜单')" :code="verticalCode">
         <w-menu :items="menuItems" />
       </demo-block>
 
-      <demo-block title="水平菜单" :code="horizontalCode">
+      <demo-block :title="t('水平菜单')" :code="horizontalCode">
         <w-menu mode="horizontal" :items="menuItems" />
       </demo-block>
 
-      <demo-block title="收起模式" :code="collapseCode">
+      <demo-block :title="t('收起模式')" :code="collapseCode">
         <w-menu collapse :items="menuItems" />
       </demo-block>
 
@@ -20,41 +20,43 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
 const menuItems = [
-  { label: '首页', icon: 'home' },
+  { label: t('首页'), icon: 'home' },
   {
-    label: '产品中心',
+    label: t('产品中心'),
     icon: 'folder',
     children: [
-      { label: '产品A' },
+      { label: t('产品A') },
       {
-        label: '产品B',
+        label: t('产品B'),
         children: [
-          { label: 'B-基础版' },
+          { label: t('B-基础版') },
           {
-            label: 'B-专业版',
+            label: t('B-专业版'),
             children: [
-              { label: '专业版-详情1' },
-              { label: '专业版-详情2' },
-              { label: '专业版-详情3' }
+              { label: t('专业版-详情1') },
+              { label: t('专业版-详情2') },
+              { label: t('专业版-详情3') }
             ]
           },
-          { label: 'B-企业版' }
+          { label: t('B-企业版') }
         ]
       },
-      { label: '产品C' },
+      { label: t('产品C') },
       {
-        label: '产品D',
+        label: t('产品D'),
         children: [
-          { label: 'D-标准版' },
+          { label: t('D-标准版') },
           {
-            label: 'D-高级版',
+            label: t('D-高级版'),
             children: [
-              { label: '高级版-功能1' },
-              { label: '高级版-功能2' }
+              { label: t('高级版-功能1') },
+              { label: t('高级版-功能2') }
             ]
           }
         ]
@@ -62,57 +64,57 @@ const menuItems = [
     ]
   },
   {
-    label: '解决方案',
+    label: t('解决方案'),
     icon: 'folder',
     children: [
-      { label: '金融行业' },
+      { label: t('金融行业') },
       {
-        label: '互联网行业',
+        label: t('互联网行业'),
         children: [
-          { label: '电商' },
+          { label: t('电商') },
           {
-            label: '社交',
+            label: t('社交'),
             children: [
-              { label: '即时通讯' },
-              { label: '社区论坛' },
-              { label: '直播互动' }
+              { label: t('即时通讯') },
+              { label: t('社区论坛') },
+              { label: t('直播互动') }
             ]
           },
-          { label: '教育' }
+          { label: t('教育') }
         ]
       },
-      { label: '制造行业' }
+      { label: t('制造行业') }
     ]
   },
   {
-    label: '服务支持',
+    label: t('服务支持'),
     icon: 'folder',
     children: [
-      { label: '在线文档' },
-      { label: '视频教程' },
+      { label: t('在线文档') },
+      { label: t('视频教程') },
       {
-        label: '技术社区',
+        label: t('技术社区'),
         children: [
-          { label: '问答区' },
+          { label: t('问答区') },
           {
-            label: '博客',
+            label: t('博客'),
             children: [
-              { label: '前端技术' },
-              { label: '后端架构' }
+              { label: t('前端技术') },
+              { label: t('后端架构') }
             ]
           }
         ]
       }
     ]
   },
-  { label: '关于我们', icon: 'user' }
+  { label: t('关于我们'), icon: 'user' }
 ]
 
 const verticalCode = `<w-menu :items="[...]" />`
 const horizontalCode = `<w-menu mode="horizontal" :items="[...]" />`
 const collapseCode = `<w-menu collapse :items="[...]" />`
 
-const title = 'Menu 菜单'
+const title = t('Menu 菜单')
 </script>
 
 <style scoped>

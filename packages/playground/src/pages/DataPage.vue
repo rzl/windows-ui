@@ -1,96 +1,98 @@
 <template>
   <div class="demo-page">
-    <h1 class="page-title">数据展示</h1>
+    <h1 class="page-title">{{ t('数据展示') }}</h1>
     <div class="component-grid">
       <router-link to="/data/avatar" class="component-card">
         <h3>Avatar 头像</h3>
-        <p>用户头像展示</p>
+        <p>{{ t('用户头像展示') }}</p>
       </router-link>
       <router-link to="/data/badge" class="component-card">
         <h3>Badge 徽章</h3>
-        <p>徽标数字/状态</p>
+        <p>{{ t('徽标数字/状态') }}</p>
       </router-link>
       <router-link to="/data/calendar" class="component-card">
         <h3>Calendar 日历</h3>
-        <p>日历展示</p>
+        <p>{{ t('日历展示') }}</p>
       </router-link>
       <router-link to="/data/card" class="component-card">
         <h3>Card 卡片</h3>
-        <p>内容容器</p>
+        <p>{{ t('内容容器') }}</p>
       </router-link>
       <router-link to="/data/carousel" class="component-card">
         <h3>Carousel 走马灯</h3>
-        <p>轮播图</p>
+        <p>{{ t('轮播图') }}</p>
       </router-link>
       <router-link to="/data/collapse" class="component-card">
         <h3>Collapse 折叠面板</h3>
-        <p>内容折叠展开</p>
+        <p>{{ t('内容折叠展开') }}</p>
       </router-link>
       <router-link to="/data/descriptions" class="component-card">
         <h3>Descriptions 描述列表</h3>
-        <p>键值对信息展示</p>
+        <p>{{ t('键值对信息展示') }}</p>
       </router-link>
       <router-link to="/data/empty" class="component-card">
         <h3>Empty 空状态</h3>
-        <p>无数据展示</p>
+        <p>{{ t('无数据展示') }}</p>
       </router-link>
       <router-link to="/data/image" class="component-card">
         <h3>Image 图片</h3>
-        <p>图片展示与预览</p>
+        <p>{{ t('图片展示与预览') }}</p>
       </router-link>
       <router-link to="/data/pagination" class="component-card">
         <h3>Pagination 分页</h3>
-        <p>分页导航</p>
+        <p>{{ t('分页导航') }}</p>
       </router-link>
       <router-link to="/data/progress" class="component-card">
         <h3>Progress 进度条</h3>
-        <p>进度指示</p>
+        <p>{{ t('进度指示') }}</p>
       </router-link>
       <router-link to="/data/result" class="component-card">
         <h3>Result 结果</h3>
-        <p>操作结果反馈</p>
+        <p>{{ t('操作结果反馈') }}</p>
       </router-link>
       <router-link to="/data/skeleton" class="component-card">
         <h3>Skeleton 骨架屏</h3>
-        <p>加载占位</p>
+        <p>{{ t('加载占位') }}</p>
       </router-link>
       <router-link to="/data/table" class="component-card">
         <h3>Table 表格</h3>
-        <p>数据表格</p>
+        <p>{{ t('数据表格') }}</p>
       </router-link>
       <router-link to="/data/tag" class="component-card">
         <h3>Tag 标签</h3>
-        <p>标记与分类</p>
+        <p>{{ t('标记与分类') }}</p>
       </router-link>
       <router-link to="/data/timeline" class="component-card">
         <h3>Timeline 时间线</h3>
-        <p>时间轴展示</p>
+        <p>{{ t('时间轴展示') }}</p>
       </router-link>
       <router-link to="/data/tree" class="component-card">
         <h3>Tree 树形控件</h3>
-        <p>层级数据展示</p>
+        <p>{{ t('层级数据展示') }}</p>
       </router-link>
       <router-link to="/data/statistic" class="component-card">
         <h3>Statistic 统计组件</h3>
-        <p>数值展示</p>
+        <p>{{ t('数值展示') }}</p>
       </router-link>
       <router-link to="/data/segmented" class="component-card">
         <h3>Segmented 分段控制器</h3>
-        <p>分段选项</p>
+        <p>{{ t('分段选项') }}</p>
       </router-link>
       <router-link to="/data/tour" class="component-card">
         <h3>Tour 漫游式引导</h3>
-        <p>新用户引导</p>
+        <p>{{ t('新用户引导') }}</p>
       </router-link>
       <router-link to="/data/infinite-scroll" class="component-card">
         <h3>Infinite Scroll 无限滚动</h3>
-        <p>滚动加载更多</p>
+        <p>{{ t('滚动加载更多') }}</p>
       </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 </script>
 
 <style scoped>

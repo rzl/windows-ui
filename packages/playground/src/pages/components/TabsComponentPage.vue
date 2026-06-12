@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="内容切换" id="tabs" doc="tabs">
+    <demo-section :title="title" :description="t('内容切换')" id="tabs" doc="tabs">
 
-            <demo-block title="基础用法" code="&lt;w-tabs :tabs=&quot;[{ label: '标签1' }, { label: '标签2' }, { label: '标签3' }]&quot;&gt;
+            <demo-block :title="t('基础用法')" code="&lt;w-tabs :tabs=&quot;[{ label: '标签1' }, { label: '标签2' }, { label: '标签3' }]&quot;&gt;
         &lt;template #default=&quot;{ active }&quot;&gt;&lt;div v-if=&quot;active === 0&quot;&gt;内容1&lt;/div&gt;&lt;div v-if=&quot;active === 1&quot;&gt;内容2&lt;/div&gt;&lt;div v-if=&quot;active === 2&quot;&gt;内容3&lt;/div&gt;&lt;/template&gt;
       &lt;/w-tabs&gt;">
               <w-tabs :tabs="[{ label: '标签1' }, { label: '标签2' }, { label: '标签3' }]">
@@ -16,12 +16,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
 const alert = (msg: string) => window.alert(msg)
 
-const title = 'Tabs 标签页'
+const title = t('Tabs 标签页')
 </script>
 
 <style scoped>

@@ -1,48 +1,50 @@
 <template>
   <div class="demo-page">
-    <h1 class="page-title">导航组件</h1>
+    <h1 class="page-title">{{ t('导航组件') }}</h1>
     <div class="component-grid">
       <router-link to="/nav/breadcrumb" class="component-card">
         <h3>Breadcrumb 面包屑</h3>
-        <p>路径导航</p>
+        <p>{{ t('路径导航') }}</p>
       </router-link>
       <router-link to="/nav/dropdown" class="component-card">
         <h3>Dropdown 下拉菜单</h3>
-        <p>下拉操作菜单</p>
+        <p>{{ t('下拉操作菜单') }}</p>
       </router-link>
       <router-link to="/nav/menu" class="component-card">
         <h3>Menu 菜单</h3>
-        <p>导航菜单</p>
+        <p>{{ t('导航菜单') }}</p>
       </router-link>
       <router-link to="/nav/page-header" class="component-card">
         <h3>Page Header 页头</h3>
-        <p>页面标题区</p>
+        <p>{{ t('页面标题区') }}</p>
       </router-link>
       <router-link to="/nav/steps" class="component-card">
         <h3>Steps 步骤条</h3>
-        <p>流程步骤</p>
+        <p>{{ t('流程步骤') }}</p>
       </router-link>
       <router-link to="/nav/tabs" class="component-card">
         <h3>Tabs 标签页</h3>
-        <p>内容切换</p>
+        <p>{{ t('内容切换') }}</p>
       </router-link>
       <router-link to="/nav/backtop" class="component-card">
         <h3>Backtop 回到顶部</h3>
-        <p>滚动返回顶部</p>
+        <p>{{ t('滚动返回顶部') }}</p>
       </router-link>
       <router-link to="/nav/anchor" class="component-card">
         <h3>Anchor 锚点</h3>
-        <p>页面内跳转</p>
+        <p>{{ t('页面内跳转') }}</p>
       </router-link>
       <router-link to="/nav/affix" class="component-card">
         <h3>Affix 固钉</h3>
-        <p>固定元素</p>
+        <p>{{ t('固定元素') }}</p>
       </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 </script>
 
 <style scoped>

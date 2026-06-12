@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="表单验证与布局" id="form" doc="form">
+    <demo-section :title="title" :description="t('表单验证与布局')" id="form" doc="form">
 
-            <demo-block title="基础表单" code="&lt;w-form&gt;
+            <demo-block :title="t('基础表单')" code="&lt;w-form&gt;
         &lt;w-form-item label=&quot;用户名&quot;&gt;&lt;w-input v-model=&quot;form.name&quot; /&gt;&lt;/w-form-item&gt;
         &lt;w-form-item label=&quot;邮箱&quot;&gt;&lt;w-input v-model=&quot;form.email&quot; /&gt;&lt;/w-form-item&gt;
         &lt;w-form-item label=&quot;性别&quot;&gt;
@@ -17,17 +17,17 @@
         &lt;w-form-item&gt;&lt;w-button type=&quot;primary&quot;&gt;提交&lt;/w-button&gt;&lt;/w-form-item&gt;
       &lt;/w-form&gt;">
               <w-form>
-                <w-form-item label="用户名"><w-input v-model="form.name" /></w-form-item>
-                <w-form-item label="邮箱"><w-input v-model="form.email" /></w-form-item>
-                <w-form-item label="性别">
+                <w-form-item :label="t('用户名')"><w-input v-model="form.name" /></w-form-item>
+                <w-form-item :label="t('邮箱')"><w-input v-model="form.email" /></w-form-item>
+                <w-form-item :label="t('性别')">
                   <w-radio v-model="form.gender" label="male">男</w-radio>
                   <w-radio v-model="form.gender" label="female">女</w-radio>
                 </w-form-item>
-                <w-form-item label="爱好">
+                <w-form-item :label="t('爱好')">
                   <w-checkbox v-model="form.hobbies" label="reading">阅读</w-checkbox>
                   <w-checkbox v-model="form.hobbies" label="sports">运动</w-checkbox>
                 </w-form-item>
-                <w-form-item><w-button type="primary">提交</w-button></w-form-item>
+                <w-form-item><w-button type="primary">{{ t('提交') }}</w-button></w-form-item>
               </w-form>
             </demo-block>
 
@@ -36,12 +36,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive } from 'vue'
+const { t } = useI18n()
 
 const form = reactive({
-  input: '', input2: '', number: 0, tags: ['标签1', '标签2'], otp: '', otp2: '',
+  input: '', input2: '', number: 0, tags: [t('标签1'), t('标签2')], otp: '', otp2: '',
   auto: '', cascader: [] as string[], checkbox: [] as string[], color: '#245edb',
   date: '', date2: '', datetime: '', radio: 'A', rate: 3, select: '', slider: 30,
   switch: true, time: '', timeselect: '', transfer: [] as string[], treeselect: '',
@@ -49,15 +51,15 @@ const form = reactive({
 })
 
 const autocompleteOptions = [{ label: 'Apple', value: 'apple' }, { label: 'Banana', value: 'banana' }, { label: 'Cherry', value: 'cherry' }, { label: 'Date', value: 'date' }]
-const cascaderOptions = [{ label: '北京', value: 'beijing', children: [{ label: '朝阳区', value: 'chaoyang' }, { label: '海淀区', value: 'haidian' }] }, { label: '上海', value: 'shanghai', children: [{ label: '浦东新区', value: 'pudong' }] }]
-const selectOptions = [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }, { label: '选项3', value: '3' }]
-const transferData = [{ key: '1', label: '项目1' }, { key: '2', label: '项目2' }, { key: '3', label: '项目3' }, { key: '4', label: '项目4' }]
-const treeData = [{ label: '节点1', value: '1', children: [{ label: '子节点1-1', value: '1-1' }] }, { label: '节点2', value: '2' }]
-const mentionOptions = [{ label: '张三', value: 'zhangsan' }, { label: '李四', value: 'lisi' }, { label: '王五', value: 'wangwu' }]
+const cascaderOptions = [{ label: t('北京'), value: 'beijing', children: [{ label: t('朝阳区'), value: 'chaoyang' }, { label: t('海淀区'), value: 'haidian' }] }, { label: t('上海'), value: 'shanghai', children: [{ label: t('浦东新区'), value: 'pudong' }] }]
+const selectOptions = [{ label: t('选项1'), value: '1' }, { label: t('选项2'), value: '2' }, { label: t('选项3'), value: '3' }]
+const transferData = [{ key: '1', label: t('项目1') }, { key: '2', label: t('项目2') }, { key: '3', label: t('项目3') }, { key: '4', label: t('项目4') }]
+const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
+const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('李四'), value: 'lisi' }, { label: t('王五'), value: 'wangwu' }]
 
 const message = (msg: string) => alert(msg)
 
-const title = 'Form 表单'
+const title = t('Form 表单')
 </script>
 
 <style scoped>

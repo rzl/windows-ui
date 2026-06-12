@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="文本样式组件" id="text" doc="text">
+    <demo-section :title="title" :description="t('文本样式组件')" id="text" doc="text">
 
-            <demo-block title="文本尺寸" code="&lt;w-space direction=&quot;vertical&quot;&gt;
+            <demo-block :title="t('文本尺寸')" code="&lt;w-space direction=&quot;vertical&quot;&gt;
         &lt;w-text size=&quot;large&quot;&gt;大号文本&lt;/w-text&gt;
         &lt;w-text&gt;默认文本&lt;/w-text&gt;
         &lt;w-text size=&quot;small&quot;&gt;小号文本&lt;/w-text&gt;
@@ -14,7 +14,7 @@
                 <w-text size="small">小号文本</w-text>
               </w-space>
             </demo-block>
-            <demo-block title="文本类型" code="&lt;w-space direction=&quot;vertical&quot;&gt;
+            <demo-block :title="t('文本类型')" code="&lt;w-space direction=&quot;vertical&quot;&gt;
         &lt;w-text type=&quot;primary&quot;&gt;主要文本&lt;/w-text&gt;
         &lt;w-text type=&quot;success&quot;&gt;成功文本&lt;/w-text&gt;
         &lt;w-text type=&quot;warning&quot;&gt;警告文本&lt;/w-text&gt;
@@ -35,12 +35,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
 const iconNames = ['info','warning','error','success','close','folder','file','search','user','star','arrowUp','arrowDown','arrowLeft','arrowRight','menu','home','loading']
 
-const title = 'Text 文本'
+const title = t('Text 文本')
 </script>
 
 <style scoped>

@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="文章排版样式" id="typography" doc="typography">
+    <demo-section :title="title" :description="t('文章排版样式')" id="typography" doc="typography">
 
-            <demo-block title="排版示例" code="&lt;w-typography&gt;
+            <demo-block :title="t('排版示例')" code="&lt;w-typography&gt;
         &lt;h1&gt;一级标题&lt;/h1&gt;
         &lt;h2&gt;二级标题&lt;/h2&gt;
         &lt;h3&gt;三级标题&lt;/h3&gt;
@@ -24,12 +24,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
 const iconNames = ['info','warning','error','success','close','folder','file','search','user','star','arrowUp','arrowDown','arrowLeft','arrowRight','menu','home','loading']
 
-const title = 'Typography 排版'
+const title = t('Typography 排版')
 </script>
 
 <style scoped>

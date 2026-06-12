@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="可拖拽分隔的面板" id="splitter" doc="splitter">
+    <demo-section :title="title" :description="t('可拖拽分隔的面板')" id="splitter" doc="splitter">
 
-      <demo-block title="左右分隔" code="&lt;w-splitter :split=&quot;40&quot; style=&quot;height:120px&quot;&gt;
+      <demo-block :title="t('左右分隔')" code="&lt;w-splitter :split=&quot;40&quot; style=&quot;height:120px&quot;&gt;
   &lt;template #first&gt;&lt;div style=&quot;padding:8px&quot;&gt;左侧面板 (40%)&lt;/div&gt;&lt;/template&gt;
   &lt;template #second&gt;&lt;div style=&quot;padding:8px&quot;&gt;右侧面板 (60%)&lt;/div&gt;&lt;/template&gt;
 &lt;/w-splitter&gt;">
@@ -13,7 +13,7 @@
         </w-splitter>
       </demo-block>
 
-      <demo-block title="上下分隔" code="&lt;w-splitter direction=&quot;vertical&quot; :split=&quot;30&quot; style=&quot;height:180px&quot;&gt;
+      <demo-block :title="t('上下分隔')" code="&lt;w-splitter direction=&quot;vertical&quot; :split=&quot;30&quot; style=&quot;height:180px&quot;&gt;
   &lt;template #first&gt;&lt;div style=&quot;padding:8px&quot;&gt;上面板 (30%)&lt;/div&gt;&lt;/template&gt;
   &lt;template #second&gt;&lt;div style=&quot;padding:8px&quot;&gt;下面板 (70%)&lt;/div&gt;&lt;/template&gt;
 &lt;/w-splitter&gt;">
@@ -23,7 +23,7 @@
         </w-splitter>
       </demo-block>
 
-      <demo-block title="上下左右组合分隔" code="&lt;w-splitter direction=&quot;vertical&quot; :split=&quot;50&quot; style=&quot;height:240px&quot;&gt;
+      <demo-block :title="t('上下左右组合分隔')" code="&lt;w-splitter direction=&quot;vertical&quot; :split=&quot;50&quot; style=&quot;height:240px&quot;&gt;
   &lt;template #first&gt;
     &lt;w-splitter :split=&quot;50&quot; style=&quot;height:100%&quot;&gt;
       &lt;template #first&gt;&lt;div style=&quot;padding:8px&quot;&gt;左上&lt;/div&gt;&lt;/template&gt;
@@ -58,10 +58,12 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
-const title = 'Splitter 分隔面板'
+const title = t('Splitter 分隔面板')
 </script>
 
 <style scoped>

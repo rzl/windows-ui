@@ -1,9 +1,9 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" description="元素间距容器" id="space" doc="space">
+    <demo-section :title="title" :description="t('元素间距容器')" id="space" doc="space">
 
-            <demo-block title="水平间距" code="&lt;w-space&gt;
+            <demo-block :title="t('水平间距')" code="&lt;w-space&gt;
         &lt;w-tag&gt;标签1&lt;/w-tag&gt;
         &lt;w-tag&gt;标签2&lt;/w-tag&gt;
         &lt;w-tag&gt;标签3&lt;/w-tag&gt;
@@ -14,7 +14,7 @@
                 <w-tag>标签3</w-tag>
               </w-space>
             </demo-block>
-            <demo-block title="垂直间距" code="&lt;w-space direction=&quot;vertical&quot;&gt;
+            <demo-block :title="t('垂直间距')" code="&lt;w-space direction=&quot;vertical&quot;&gt;
         &lt;w-tag&gt;标签1&lt;/w-tag&gt;
         &lt;w-tag&gt;标签2&lt;/w-tag&gt;
         &lt;w-tag&gt;标签3&lt;/w-tag&gt;
@@ -25,16 +25,16 @@
                 <w-tag>标签3</w-tag>
               </w-space>
             </demo-block>
-            <demo-block title="自定义间距" code="&lt;w-space :size=&quot;24&quot;&gt;
+            <demo-block :title="t('自定义间距')" code="&lt;w-space :size=&quot;24&quot;&gt;
         &lt;w-button&gt;按钮1&lt;/w-button&gt;
         &lt;w-button&gt;按钮2&lt;/w-button&gt;
       &lt;/w-space&gt;">
               <w-space :size="24">
-                <w-button>按钮1</w-button>
-                <w-button>按钮2</w-button>
+                <w-button>{{ t('按钮1') }}</w-button>
+                <w-button>{{ t('按钮2') }}</w-button>
               </w-space>
             </demo-block>
-            <demo-block title="自动换行" code="&lt;w-space wrap&gt;
+            <demo-block :title="t('自动换行')" code="&lt;w-space wrap&gt;
         &lt;w-tag v-for=&quot;i in 10&quot; :key=&quot;i&quot;&gt;标签{{ i }}&lt;/w-tag&gt;
       &lt;/w-space&gt;">
               <w-space wrap>
@@ -47,12 +47,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+const { t } = useI18n()
 
 const iconNames = ['info','warning','error','success','close','folder','file','search','user','star','arrowUp','arrowDown','arrowLeft','arrowRight','menu','home','loading']
 
-const title = 'Space 间距'
+const title = t('Space 间距')
 </script>
 
 <style scoped>
