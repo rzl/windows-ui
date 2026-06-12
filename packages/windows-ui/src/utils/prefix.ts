@@ -1,6 +1,14 @@
 import { inject, computed, type InjectionKey, type Ref } from 'vue'
+import type { LocaleType, LocaleMessages } from '../locale'
 
-export const configProviderContextKey: InjectionKey<Ref<{ prefix: string; size: string; zIndex: number }>> = Symbol('configProviderContextKey')
+export interface ConfigProviderConfig {
+  prefix: string
+  size: string
+  zIndex: number
+  locale: LocaleType | LocaleMessages
+}
+
+export const configProviderContextKey: InjectionKey<Ref<ConfigProviderConfig>> = Symbol('configProviderContextKey')
 
 let globalPrefix = 'w'
 

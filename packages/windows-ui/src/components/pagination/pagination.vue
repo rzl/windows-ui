@@ -1,14 +1,14 @@
 <template>
   <div :class="['w-pagination', `w-pagination--${size}`]">
-    <w-button :size="size" :disabled="currentPage <= 1" @click="prev">上一页</w-button>
+    <w-button :size="size" :disabled="currentPage <= 1" @click="prev">{{ t('上一页') }}</w-button>
     <span
       v-for="p in pages"
       :key="p"
       :class="['w-pagination__page', { 'is-active': p === currentPage }]"
       @click="goTo(p)"
     >{{ p }}</span>
-    <w-button :size="size" :disabled="currentPage >= totalPages" @click="next">下一页</w-button>
-    <span class="w-pagination__total">共 {{ total }} 条</span>
+    <w-button :size="size" :disabled="currentPage >= totalPages" @click="next">{{ t('下一页') }}</w-button>
+    <span class="w-pagination__total">{{ totalText }}</span>
   </div>
 </template>
 
@@ -16,6 +16,7 @@
 import { computed } from 'vue'
 import WButton from '../button/button.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { useLocale } from '../../locale'
 
 defineOptions({ name: 'WPagination' })
 const props = defineProps({
@@ -25,7 +26,9 @@ const props = defineProps({
   size: { type: String, default: undefined }
 })
 const globalSize = useGlobalSize()
+const { t } = useLocale()
 const size = computed(() => props.size || globalSize.value)
+const totalText = computed(() => t('共多少条', { total: props.total }))
 
 const emit = defineEmits(['update:currentPage', 'change'])
 

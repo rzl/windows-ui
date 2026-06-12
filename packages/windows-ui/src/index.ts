@@ -1,6 +1,7 @@
 import type { App } from 'vue'
 import './styles/variables.css'
 import './styles/base.css'
+import { setGlobalLocale, registerLocale } from './locale'
 
 // Components
 import WButton from './components/button/button.vue'
@@ -182,10 +183,21 @@ const components = [
   WPermission
 ]
 
-function install(app: App) {
+export interface WindowsUIOptions {
+  locale?: string
+  messages?: Record<string, string>
+}
+
+function install(app: App, options?: WindowsUIOptions) {
   components.forEach((component) => {
     app.component(component.name as string, component)
   })
+  if (options?.locale) {
+    if (options.messages) {
+      registerLocale(options.locale, options.messages)
+    }
+    setGlobalLocale(options.locale)
+  }
 }
 
 export {
@@ -280,6 +292,16 @@ export {
 }
 
 export type { FormRule } from './components/form/form.vue'
+export {
+  useLocale,
+  setGlobalLocale,
+  registerLocale,
+  getGlobalLocale,
+  getLocaleMessages,
+  zhCN,
+  enUS
+} from './locale'
+export type { LocaleType, LocaleMessages, LocaleContext } from './locale'
 
 export default {
   install

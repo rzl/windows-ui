@@ -14,6 +14,7 @@
 - **包名**：`@windows-ui/core`（库）、`@windows-ui/playground`（示例站点，内含 Admin 后台模板子应用）
 - **默认前缀**：`w-`（例如 `w-button`），可通过 `WConfigProvider` 自定义
 - **主题系统**：基于 CSS 变量（`--w-*`），`WConfigProvider` 支持动态传入主题色并自动计算色阶（lighter / light / dark / darker），同时保留 XP 经典硬编码渐变以保证视觉一致性
+- **国际化**：内置 `zh-CN` / `en-US` 语言包，语言文件为单层键值对；支持通过 `WConfigProvider` 局部配置或 `app.use(WindowsUI, { locale, messages })` 全局配置，组件内部通过 `useLocale()` 获取翻译函数
 - **原始需求**：见仓库根目录 `1.text`（只读参考）
 
 ---
@@ -37,6 +38,9 @@ windows-ui/
 │   │   │   │   ├── prefix.ts        # 组件前缀注入 / usePrefix() / useGlobalSize()
 │   │   │   │   └── types.ts         # 公共类型（ComponentSize、ConfigProviderContext）
 │   │   │   ├── hooks/               # 组合式函数目录（当前为空，预留）
+│   │   │   ├── locale/              # 国际化：语言包 / useLocale() / setGlobalLocale() / registerLocale()
+│   │   │   │   ├── lang/            # 内置语言文件（单层键值对）
+│   │   │   │   └── index.ts         # locale 上下文注入与 API 导出
 │   │   │   └── components/
 │   │   │       └── <name>/
 │   │   │           └── <name>.vue   # 单文件组件（SFC），每个组件一个目录一个文件
@@ -172,6 +176,7 @@ windows-ui/
 ### 公共工具
 
 - **前缀**：`src/utils/prefix.ts` 提供 `usePrefix()` 与 `useGlobalSize()`，通过 Vue `provide/inject` 与 `WConfigProvider` 配合实现动态前缀和全局尺寸。
+- **国际化**：`src/locale/index.ts` 提供 `useLocale()`、`setGlobalLocale()`、`registerLocale()`，语言包为单层键值对（键使用中文，值为对应语言译文），通过 `WConfigProvider` 或 `app.use(WindowsUI, options)` 注入配置。
 - **类型**：`src/utils/types.ts` 定义 `ComponentSize = 'large' | 'default' | 'small'` 以及 `ConfigProviderContext`。
 
 ---
@@ -258,5 +263,6 @@ windows-ui/
 | 怎么导出组件？ | 在 `packages/windows-ui/src/index.ts` import + 加入数组 + named export |
 | 怎么写文档？ | 在 `docs/`、`designs/`、`develops/` 下各建 `<name>/<file>.md` |
 | 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `ConfigProvider` 传 `theme` 对象 |
+| 多语言怎么配？ | `app.use(WindowsUI, { locale: 'en-US' })` 或 `<w-config-provider locale="en-US">`，也支持传入自定义单层语言对象 |
 | 有测试吗？ | 目前没有；建议引入 Vitest + `@vue/test-utils` |
 | Admin 后台在哪？ | `packages/playground/src/admin/`（多入口子应用） |

@@ -23,6 +23,7 @@ Config
 - 支持通过 `theme` 属性动态覆盖主色、成功色、警告色、危险色、信息色、背景色、文字色等
 - 深浅衍生色（lighter / light / dark / darker）通过 JS 颜色混合算法自动生成，不再依赖 CSS `color-mix`，保证在旧版浏览器中也能正常渲染
 - 标题栏渐变 `--w-xp-title-bar` 随主色动态计算，统一应用于 Card、Dialog、Drawer、MessageBox、Tour 等组件的头部
+- 支持通过 `locale` 属性配置全局语言，内置 `zh-CN` / `en-US`，同时支持传入自定义单层语言对象实现多语言扩展
 
 ### 尺寸规范
 - 尺寸可选：small / default / large

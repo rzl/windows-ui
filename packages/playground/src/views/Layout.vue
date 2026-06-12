@@ -1,5 +1,5 @@
 <template>
-  <w-config-provider prefix="w" :size="globalSize" :theme="globalTheme">
+  <w-config-provider prefix="w" :size="globalSize" :theme="globalTheme" :locale="globalLocale">
     <div class="playground">
       <header class="playground-header">
         <h1>🖥️ Windows UI</h1>
@@ -15,6 +15,17 @@
               @click="globalSize = s as any"
             >
               {{ s }}
+            </button>
+          </div>
+          <div class="control-group">
+            <span class="control-label">语言</span>
+            <button
+              v-for="lang in [{ k: 'zh-CN', l: '中文' }, { k: 'en-US', l: 'English' }]"
+              :key="lang.k"
+              :class="['size-btn', { active: globalLocale === lang.k }]"
+              @click="globalLocale = lang.k as any"
+            >
+              {{ lang.l }}
             </button>
           </div>
           <div class="control-group">
@@ -64,6 +75,7 @@ const isActive = (path: string) => {
 }
 
 const globalSize = ref<'small' | 'default' | 'large'>('default')
+const globalLocale = ref<'zh-CN' | 'en-US'>('zh-CN')
 
 const defaultColors = {
   primary: '#245edb',

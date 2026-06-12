@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { provide, ref, watch, computed, onUnmounted } from 'vue'
 import { configProviderContextKey } from '../../utils/prefix'
+import { localeContextKey, getLocaleMessages, type LocaleType, type LocaleMessages } from '../../locale'
 
 defineOptions({ name: 'WConfigProvider' })
 
@@ -14,14 +15,26 @@ const props = defineProps({
   prefix: { type: String, default: 'w' },
   size: { type: String, default: 'default' },
   zIndex: { type: Number, default: 2000 },
-  theme: { type: Object, default: () => ({}) }
+  theme: { type: Object, default: () => ({}) },
+  locale: { type: [String, Object], default: 'zh-CN' }
 })
 
-const config = ref({ prefix: props.prefix, size: props.size, zIndex: props.zIndex })
-watch(() => [props.prefix, props.size, props.zIndex], ([p, s, z]) => {
-  config.value = { prefix: p as string, size: s as string, zIndex: z as number }
+const config = ref({ prefix: props.prefix, size: props.size, zIndex: props.zIndex, locale: props.locale })
+watch(() => [props.prefix, props.size, props.zIndex, props.locale], ([p, s, z, l]) => {
+  config.value = { prefix: p as string, size: s as string, zIndex: z as number, locale: l as string | LocaleMessages }
 }, { immediate: true })
 provide(configProviderContextKey, config)
+
+const localeKey = computed<LocaleType>(() => {
+  if (typeof props.locale === 'string') return props.locale as LocaleType
+  return 'zh-CN'
+})
+const localeMessages = computed<LocaleMessages>(() => {
+  if (typeof props.locale === 'object' && props.locale !== null) return props.locale as LocaleMessages
+  return getLocaleMessages(localeKey.value)
+})
+
+provide(localeContextKey, { locale: localeKey, messages: localeMessages })
 
 const themeVarMap: Record<string, string> = {
   primary: '--w-color-primary',

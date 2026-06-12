@@ -97,6 +97,68 @@ const theme = {
 
 ## API
 
+## 国际化配置
+
+通过 `locale` 属性可统一设置旗下组件的语言。支持传入内置语言键（`zh-CN` / `en-US`）或自定义语言对象，语言对象必须是**单层键值对**。
+
+### 使用内置语言
+
+```vue
+<template>
+  <w-config-provider locale="en-US">
+    <w-pagination :total="100" />
+    <w-empty />
+  </w-config-provider>
+</template>
+```
+
+### 使用自定义语言包
+
+```vue
+<template>
+  <w-config-provider :locale="messages">
+    <w-pagination :total="100" />
+    <w-empty />
+  </w-config-provider>
+</template>
+
+<script setup>
+const messages = {
+  确认: '確定',
+  取消: '取消',
+  暂无数据: '沒有資料',
+  上一页: '上一頁',
+  下一页: '下一頁',
+  共多少条: '共 {total} 筆'
+}
+</script>
+```
+
+### 全局配置语言
+
+在 `app.use(WindowsUI, options)` 时传入 `locale` 与 `messages`，即可在全局生效：
+
+```ts
+import { createApp } from 'vue'
+import WindowsUI, { enUS } from '@windows-ui/core'
+import App from './App.vue'
+
+const app = createApp(App)
+app.use(WindowsUI, { locale: 'en-US' })
+// 或使用自定义语言包
+// app.use(WindowsUI, { locale: 'custom', messages: { 确认: 'OK' } })
+app.mount('#app')
+```
+
+也可以通过 `setGlobalLocale` 动态切换：
+
+```ts
+import { setGlobalLocale, registerLocale } from '@windows-ui/core'
+
+registerLocale('ja-JP', { 确认: '確認', 取消: 'キャンセル' })
+setGlobalLocale('ja-JP')
+```
+
 ### Props
 
 | 属性名 | 说明 | 类型 | 默认值 |
@@ -104,7 +166,8 @@ const theme = {
 | prefix | 前缀内容 | string | w |
 | size | 尺寸 | string | default |
 | zIndex | 层级 | number | 2000 |
-| theme | - | object | {} |
+| theme | 主题配置对象 | object | {} |
+| locale | 语言，支持内置语言键或自定义单层语言对象 | string / object | zh-CN |
 
 ### Slots
 

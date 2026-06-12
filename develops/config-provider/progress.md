@@ -15,9 +15,10 @@
 - [ ] 单元测试覆盖
 - [ ] 性能优化
 - [ ] 无障碍支持完善
-- [ ] 国际化支持
+- [x] 国际化支持
 
 ## 变更记录
+- 2026-06-12: 新增国际化支持。内置 `zh-CN` / `en-US` 语言包，语言文件为单层键值对；`WConfigProvider` 新增 `locale` prop，支持全局/局部配置；`app.use(WindowsUI, { locale, messages })` 支持全局注入；导出 `useLocale`、`setGlobalLocale`、`registerLocale` 等 API
 - 2024-06-01: 初始版本实现
 - 2026-06-06: 新增 `size` 全局配置支持，旗下组件（Button、Input、Tag、Text、Avatar、Icon）未传入 `size` 时将自动继承全局尺寸
 - 2026-06-06: 新增 `theme` 全局主题配置支持，可通过 `primary`、`success`、`warning`、`danger`、`info`、`bgColor`、`textColor` 等键动态修改主题色；同步将 Button、Link、Progress、Rate、Card、Dialog、MessageBox、Tour、Drawer 等组件的硬编码主题色替换为 CSS 变量
