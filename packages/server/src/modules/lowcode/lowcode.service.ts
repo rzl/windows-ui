@@ -1,5 +1,6 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import * as dashboardService from '../dashboard/dashboard.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -527,6 +528,46 @@ export async function generateCode(ruleCode: string) {
   const dateStr = formatDate(new Date(), rule.date_format)
   const seqStr = String(nextSeq).padStart(rule.seq_length, '0')
   return `${rule.prefix || ''}${dateStr}${seqStr}`
+}
+
+export async function executeFieldOptions(config: any, ctx: any = {}) {
+  const { type } = config
+
+  if (type === 'dict') {
+    if (!config.dictCode) throw new AppError('字典编码不能为空', 400)
+    const dict = await db('dicts').where({ code: config.dictCode, status: 1 }).first()
+    if (!dict) throw new AppError('字典不存在', 404)
+    const items = await db('dict_items')
+      .where({ dict_id: dict.id, status: 1 })
+      .orderBy('sort', 'asc')
+    return items.map((item) => ({ label: item.label, value: item.value }))
+  }
+
+  const dataSource: dashboardService.DataSourceConfig = {
+    type,
+    sql: config.sql,
+    script: config.script,
+    api: config.api,
+    option: config.option
+  }
+  const result = await dashboardService.executeDataSource(dataSource, ctx)
+  return normalizeOptions(result)
+}
+
+function normalizeOptions(data: any): { label: string; value: any }[] {
+  if (!data) return []
+  if (Array.isArray(data)) {
+    return data.map((item) => {
+      if (typeof item === 'object' && item !== null) {
+        return {
+          label: item.label ?? item.name ?? item.text ?? String(item.value ?? ''),
+          value: item.value ?? item.id ?? item.key ?? item.label ?? item.name
+        }
+      }
+      return { label: String(item), value: item }
+    })
+  }
+  return []
 }
 
 function formatDate(date: Date, format: string) {

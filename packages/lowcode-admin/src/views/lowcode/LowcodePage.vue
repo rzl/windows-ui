@@ -44,6 +44,7 @@
         :fields="formFields"
         :columns="2"
         :validate-rules="validateRules"
+        :load-options="loadFieldOptions"
       />
       <template #footer>
         <w-button @click="closeDialog">取消</w-button>
@@ -188,6 +189,10 @@ function closeDialog() {
 async function validateRules(items: { code: string; value: any }[]) {
   if (!items.length) return []
   return lowcodeApi.validateBatch(items)
+}
+
+async function loadFieldOptions(config: any, model: any) {
+  return lowcodeApi.executeFieldOptions(config, model)
 }
 
 async function handleSave() {

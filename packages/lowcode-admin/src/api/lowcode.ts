@@ -173,3 +173,7 @@ export function deleteValidationRule(id: number) {
 export function validateBatch(items: { code: string; value: any }[]) {
   return request.post('/lowcode/validation-rules/batch', { items })
 }
+
+export function executeFieldOptions(config: any, ctx?: any) {
+  return request.post('/lowcode/options/execute', { config, ctx })
+}

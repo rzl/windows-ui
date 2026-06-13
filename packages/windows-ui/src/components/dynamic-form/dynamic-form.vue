@@ -41,7 +41,7 @@
         <w-select
           v-else-if="field.type === 'select'"
           v-model="model[field.prop]"
-          :options="field.options || []"
+          :options="getFieldOptions(field)"
           :placeholder="field.placeholder"
           :disabled="isDisabled(field)"
           :clearable="field.clearable"
@@ -50,7 +50,7 @@
         <!-- 单选框 -->
         <w-space v-else-if="field.type === 'radio'">
           <w-radio
-            v-for="opt in field.options"
+            v-for="opt in getFieldOptions(field)"
             :key="opt.value"
             v-model="model[field.prop]"
             :label="opt.value"
@@ -63,7 +63,7 @@
         <!-- 多选框 -->
         <w-space v-else-if="field.type === 'checkbox'">
           <w-checkbox
-            v-for="opt in field.options"
+            v-for="opt in getFieldOptions(field)"
             :key="opt.value"
             v-model="model[field.prop]"
             :label="opt.value"
@@ -110,7 +110,7 @@
         <w-cascader
           v-else-if="field.type === 'cascader'"
           v-model="model[field.prop]"
-          :options="field.options || []"
+          :options="getFieldOptions(field)"
           :placeholder="field.placeholder"
           :disabled="isDisabled(field)"
           :clearable="field.clearable"
@@ -135,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import WForm from '../form/form.vue'
 import WFormItem from '../form/form-item.vue'
 import WInput from '../input/input.vue'
@@ -168,6 +168,15 @@ export interface DynamicField {
     value?: any
     operator?: 'eq' | 'ne' | 'empty' | 'notEmpty'
   }
+  dynamicOptions?: {
+    type: 'dict' | 'sql' | 'api' | 'script'
+    dependsOn?: string
+    dictCode?: string
+    sql?: string
+    api?: { method?: string; url?: string; params?: any; body?: any }
+    script?: string
+    option?: any
+  }
   clearable?: boolean
   min?: number
   max?: number
@@ -188,6 +197,10 @@ const props = defineProps({
   columns: { type: Number, default: 1 },
   validateRules: {
     type: Function as () => (items: ValidateRuleItem[]) => Promise<ValidateRuleResult[]>,
+    default: undefined
+  },
+  loadOptions: {
+    type: Function as () => (config: DynamicField['dynamicOptions'], model: Record<string, any>) => Promise<{ label: string; value: any }[]>,
     default: undefined
   }
 })
@@ -221,6 +234,51 @@ function isDependsOnHidden(field: DynamicField): boolean {
 
 const formRef = ref<any>(null)
 const validationErrors = reactive<Record<string, string>>({})
+const fieldOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
+
+function getFieldOptions(field: DynamicField) {
+  if (fieldOptionsMap[field.prop]) return fieldOptionsMap[field.prop]
+  return field.options || []
+}
+
+async function loadFieldOptions(field: DynamicField) {
+  if (!field.dynamicOptions || !props.loadOptions) return
+  try {
+    const options = await props.loadOptions(field.dynamicOptions, props.model)
+    fieldOptionsMap[field.prop] = options || []
+  } catch (error) {
+    console.error(`加载字段 ${field.prop} 选项失败`, error)
+    fieldOptionsMap[field.prop] = []
+  }
+}
+
+// 监听依赖字段变化，自动加载动态选项
+watch(
+  () => props.fields,
+  (fields) => {
+    fields.forEach((field) => {
+      if (field.dynamicOptions) {
+        loadFieldOptions(field)
+      }
+    })
+  },
+  { immediate: true, deep: true }
+)
+
+watch(
+  () => props.model,
+  (model, oldModel) => {
+    props.fields.forEach((field) => {
+      if (field.dynamicOptions?.dependsOn) {
+        const depField = field.dynamicOptions.dependsOn
+        if (model[depField] !== oldModel?.[depField]) {
+          loadFieldOptions(field)
+        }
+      }
+    })
+  },
+  { deep: true }
+)
 
 const rules = computed(() => {
   const result: Record<string, FormRule[]> = {}

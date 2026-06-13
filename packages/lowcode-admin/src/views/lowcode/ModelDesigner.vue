@@ -58,6 +58,11 @@
                 />
               </div>
             </template>
+            <template #dynamicOptions="{ row }">
+              <w-button size="small" @click="openOptionDialog(row.field_name)">
+                {{ formConfigMap[row.field_name].dynamicOptions?.type ? '已配置' : '配置' }}
+              </w-button>
+            </template>
           </w-table>
         </w-tab-pane>
 
@@ -122,6 +127,38 @@
         <w-button type="primary" @click="handleSaveField">确定</w-button>
       </template>
     </w-dialog>
+
+    <!-- 动态选项配置弹窗 -->
+    <w-dialog v-model="optionDialogVisible" title="动态选项配置" width="480">
+      <w-form :model="optionForm">
+        <w-form-item label="数据源类型">
+          <w-select v-model="optionForm.type" :options="optionTypeOptions" />
+        </w-form-item>
+        <w-form-item label="依赖字段">
+          <w-select v-model="optionForm.dependsOn" :options="dependFieldOptions" style="width: 200px" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'dict'" label="字典编码">
+          <w-select v-model="optionForm.dictCode" :options="dictOptions" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'sql'" label="SQL">
+          <textarea v-model="optionForm.sql" class="w-xp-textarea" rows="3" placeholder="SELECT label, value FROM ... WHERE parent_id = ${ctx.依赖字段}" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'api'" label="请求方式">
+          <w-select v-model="optionForm.api.method" :options="httpMethodOptions" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'api'" label="接口地址">
+          <w-input v-model="optionForm.api.url" placeholder="例如 /lowcode/options/execute" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'script'" label="执行脚本">
+          <textarea v-model="optionForm.script" class="w-xp-textarea" rows="4" placeholder="return await db.raw('SELECT ... WHERE parent_id = ?', [ctx.依赖字段])" />
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="closeOptionDialog">取消</w-button>
+        <w-button type="danger" @click="clearOptionConfig">清除</w-button>
+        <w-button type="primary" @click="saveOptionConfig">确定</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -146,6 +183,29 @@ const dicts = ref<any[]>([])
 
 const fieldDialogVisible = ref(false)
 const fieldForm = reactive<any>({})
+const optionDialogVisible = ref(false)
+const optionForm = reactive<any>({
+  fieldName: '',
+  type: '',
+  dependsOn: '',
+  dictCode: '',
+  sql: '',
+  api: { method: 'GET', url: '', params: {}, body: {} },
+  script: ''
+})
+
+const optionTypeOptions = [
+  { label: '无', value: '' },
+  { label: '系统字典', value: 'dict' },
+  { label: 'SQL', value: 'sql' },
+  { label: '内部接口', value: 'api' },
+  { label: '脚本', value: 'script' }
+]
+
+const httpMethodOptions = [
+  { label: 'GET', value: 'GET' },
+  { label: 'POST', value: 'POST' }
+]
 
 const fieldTypeOptions = [
   { label: '字符串', value: 'string' },
@@ -180,6 +240,11 @@ function getDependFieldOptions(currentFieldName: string) {
   ]
 }
 
+const dependFieldOptions = computed(() => [
+  { label: '无', value: '' },
+  ...fields.value.map((f) => ({ label: f.display_name || f.field_name, value: f.field_name }))
+])
+
 const formTypeOptions = [
   { label: '输入框', value: 'input' },
   { label: '文本域', value: 'textarea' },
@@ -212,7 +277,8 @@ const formDesignColumns = [
   { prop: 'formType', label: '表单类型', width: 140 },
   { prop: 'formRequired', label: '必填', width: 80 },
   { prop: 'validationRule', label: '校验规则', width: 150 },
-  { prop: 'dependsOn', label: '联动显示', width: 180 }
+  { prop: 'dependsOn', label: '联动显示', width: 180 },
+  { prop: 'dynamicOptions', label: '动态选项', width: 100 }
 ]
 
 const tableDesignColumns = [
@@ -241,7 +307,15 @@ function syncConfigMaps() {
         required: field.required === 1,
         validationRule: field.validation_rule || '',
         dependsOn: { field: '', value: '', operator: 'eq' },
+        dynamicOptions: { type: '' },
         options: field.options ? JSON.parse(field.options) : undefined
+      }
+    } else {
+      if (!formConfigMap[field.field_name].dependsOn) {
+        formConfigMap[field.field_name].dependsOn = { field: '', value: '', operator: 'eq' }
+      }
+      if (!formConfigMap[field.field_name].dynamicOptions) {
+        formConfigMap[field.field_name].dynamicOptions = { type: '' }
       }
     }
     if (!tableConfigMap[field.field_name]) {
@@ -334,6 +408,46 @@ function closeFieldDialog() {
   fieldDialogVisible.value = false
 }
 
+function openOptionDialog(fieldName: string) {
+  Object.keys(optionForm).forEach((k) => delete optionForm[k])
+  const existing = formConfigMap[fieldName].dynamicOptions || { type: '' }
+  Object.assign(optionForm, {
+    fieldName,
+    type: existing.type || '',
+    dependsOn: existing.dependsOn || '',
+    dictCode: existing.dictCode || '',
+    sql: existing.sql || '',
+    api: { method: 'GET', url: '', params: {}, body: {}, ...(existing.api || {}) },
+    script: existing.script || ''
+  })
+  optionDialogVisible.value = true
+}
+
+function closeOptionDialog() {
+  optionDialogVisible.value = false
+}
+
+function saveOptionConfig() {
+  const config: any = { type: optionForm.type || '' }
+  if (!config.type) {
+    formConfigMap[optionForm.fieldName].dynamicOptions = { type: '' }
+    closeOptionDialog()
+    return
+  }
+  if (optionForm.dependsOn) config.dependsOn = optionForm.dependsOn
+  if (config.type === 'dict') config.dictCode = optionForm.dictCode || ''
+  if (config.type === 'sql') config.sql = optionForm.sql || ''
+  if (config.type === 'api') config.api = optionForm.api || { method: 'GET', url: '' }
+  if (config.type === 'script') config.script = optionForm.script || ''
+  formConfigMap[optionForm.fieldName].dynamicOptions = config
+  closeOptionDialog()
+}
+
+function clearOptionConfig() {
+  formConfigMap[optionForm.fieldName].dynamicOptions = { type: '' }
+  closeOptionDialog()
+}
+
 async function handleSaveField() {
   const data = JSON.parse(JSON.stringify(fieldForm))
   data.modelId = modelId
@@ -387,6 +501,9 @@ async function saveFormConfig() {
       const config = { ...formConfigMap[f.field_name] }
       if (!config.dependsOn || !config.dependsOn.field) {
         delete config.dependsOn
+      }
+      if (!config.dynamicOptions || !config.dynamicOptions.type) {
+        delete config.dynamicOptions
       }
       return config
     })

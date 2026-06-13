@@ -14,7 +14,8 @@
 | required | boolean | 是否必填 |
 | validationRule | string | 后端校验规则编码 |
 | dependsOn | object | 联动显示条件 |
-| options | array | 选项（`select/radio` 使用） |
+| options | array | 静态选项（`select/radio/checkbox` 使用） |
+| dynamicOptions | object | 动态选项配置 |
 
 ### dependsOn 结构
 
@@ -68,10 +69,31 @@
         { "label": "男", "value": "1" },
         { "label": "女", "value": "2" }
       ]
+    },
+    {
+      "field": "city",
+      "label": "城市",
+      "type": "select",
+      "dynamicOptions": {
+        "type": "dict",
+        "dependsOn": "province",
+        "dictCode": "city"
+      }
     }
   ]
 }
 ```
+
+### dynamicOptions 结构
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| type | string | 数据源类型：`dict` / `sql` / `api` / `script` |
+| dependsOn | string | 依赖字段名，依赖值变化时重新加载 |
+| dictCode | string | `dict` 类型使用的字典编码 |
+| sql | string | `sql` 类型使用的只读查询 |
+| api | object | `api` 类型的接口配置 |
+| script | string | `script` 类型的执行脚本 |
 
 ## 列表设计器
 

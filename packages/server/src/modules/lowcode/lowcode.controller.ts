@@ -152,3 +152,8 @@ export async function validateBatch(req: Request, res: Response) {
   const result = await lowcodeService.validateBatch(req.body.items || [])
   res.json(success(result))
 }
+
+export async function executeFieldOptions(req: Request, res: Response) {
+  const result = await lowcodeService.executeFieldOptions(req.body.config || {}, req.body.ctx || {})
+  res.json(success(result))
+}

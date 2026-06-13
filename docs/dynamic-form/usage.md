@@ -49,7 +49,8 @@ const fields = [
 | label | string | 标签 |
 | type | string | 字段类型 |
 | placeholder | string | 占位提示 |
-| options | {label,value}[] | 选项（select/radio/checkbox） |
+| options | {label,value}[] | 静态选项（select/radio/checkbox） |
+| dynamicOptions | object | 动态选项配置（见下文） |
 | required | boolean | 是否必填 |
 | disabled | boolean / function | 是否禁用 |
 | hidden | boolean / function | 是否隐藏 |
@@ -66,6 +67,7 @@ const fields = [
 | fields | DynamicField[] | [] | 字段配置 |
 | columns | number | 1 | 列数 |
 | validateRules | (items) => Promise | - | 后端校验函数，用于校验绑定了 `validationRule` 的字段 |
+| loadOptions | (config, model) => Promise | - | 动态选项加载函数，用于加载 `dynamicOptions` 配置的选项 |
 
 ## 方法
 
@@ -106,3 +108,44 @@ const fields = [
 | ne | 依赖字段值不等于 `value` 时显示 |
 | empty | 依赖字段值为空时显示 |
 | notEmpty | 依赖字段值非空时显示 |
+
+## 动态选项
+
+字段支持通过 `dynamicOptions` 从字典、SQL、接口或脚本动态加载选项。当配置了 `dependsOn` 时，依赖字段值变化会自动重新加载。
+
+```ts
+const fields = [
+  { prop: 'province', label: '省份', type: 'select', options: [{ label: '北京', value: 'bj' }] },
+  {
+    prop: 'city',
+    label: '城市',
+    type: 'select',
+    dynamicOptions: {
+      type: 'sql',
+      dependsOn: 'province',
+      sql: "SELECT name AS label, code AS value FROM city WHERE province_code = '${ctx.province}'"
+    }
+  }
+]
+```
+
+`dynamicOptions.type` 支持：
+
+| 类型 | 字段 | 说明 |
+|------|------|------|
+| dict | dictCode | 系统字典编码 |
+| sql | sql | 只读 SELECT 查询，结果需包含 label/value |
+| api | api.method / api.url | 调用内部接口 |
+| script | script | 在线脚本，可访问 `ctx`、`db`、`http` |
+
+使用动态选项时需要传入 `loadOptions` 函数：
+
+```vue
+<w-dynamic-form v-model="form" :fields="fields" :load-options="loadOptions" />
+
+<script setup>
+async function loadOptions(config, model) {
+  return request.post('/lowcode/options/execute', { config, ctx: model })
+}
+</script>
+```

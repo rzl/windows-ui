@@ -38,6 +38,9 @@ router.delete('/validation-rules/:id', lowcodeController.deleteValidationRule)
 router.post('/validation-rules/:ruleCode/validate', lowcodeController.validateField)
 router.post('/validation-rules/batch', lowcodeController.validateBatch)
 
+// 字段选项动态加载
+router.post('/options/execute', lowcodeController.executeFieldOptions)
+
 // 动态 CRUD（放在最后避免路径冲突）
 router.get('/:modelCode', lowcodeController.dynamicList)
 router.post('/:modelCode/import', lowcodeController.dynamicImport)
