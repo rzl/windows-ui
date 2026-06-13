@@ -30,8 +30,9 @@
         </template>
         <template #action="{ row }">
           <w-space>
-            <w-button size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+            <w-button v-if="canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
+            <w-button v-if="canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+            <w-tag v-if="row.__flow_status" :type="flowStatusType(row.__flow_status)">{{ flowStatusText(row.__flow_status) }}</w-tag>
           </w-space>
         </template>
       </w-crud-table>
@@ -148,6 +149,28 @@ async function loadModel() {
   }
 
   await loadData()
+}
+
+function canEdit(row: any) {
+  return !row.__flow_status || row.__flow_status === 'rejected'
+}
+
+function flowStatusText(status: string) {
+  const map: Record<string, string> = {
+    running: '审批中',
+    completed: '已通过',
+    rejected: '已驳回'
+  }
+  return map[status] || status
+}
+
+function flowStatusType(status: string) {
+  const map: Record<string, string> = {
+    running: 'warning',
+    completed: 'success',
+    rejected: 'danger'
+  }
+  return map[status] || 'info'
 }
 
 function mapType(type: string) {

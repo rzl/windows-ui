@@ -5,6 +5,7 @@ import systemRoutes from '../modules/system/system.routes'
 import lowcodeRoutes from '../modules/lowcode/lowcode.routes'
 import monitorRoutes from '../modules/monitor/monitor.routes'
 import dashboardRoutes from '../modules/dashboard/dashboard.routes'
+import flowRoutes from '../modules/flow/flow.routes'
 
 const router: RouterType = Router()
 
@@ -14,5 +15,6 @@ router.use('/system', systemRoutes)
 router.use('/lowcode', lowcodeRoutes)
 router.use('/monitor', monitorRoutes)
 router.use('/dashboard', dashboardRoutes)
+router.use('/flow', flowRoutes)
 
 export default router

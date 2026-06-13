@@ -80,6 +80,18 @@ const routes = [
         meta: { title: '校验规则', permission: 'lowcode:validate' }
       },
       {
+        path: 'flow/list',
+        name: 'FlowList',
+        component: () => import('@/views/flow/FlowList.vue'),
+        meta: { title: '流程定义', permission: 'flow:list' }
+      },
+      {
+        path: 'flow/pending',
+        name: 'PendingTaskList',
+        component: () => import('@/views/flow/PendingTaskList.vue'),
+        meta: { title: '我的待办', permission: 'flow:task' }
+      },
+      {
         path: 'message/list',
         name: 'MessageList',
         component: () => import('@/views/monitor/MessageList.vue'),

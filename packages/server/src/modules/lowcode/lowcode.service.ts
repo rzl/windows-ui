@@ -1,6 +1,7 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import * as dashboardService from '../dashboard/dashboard.service'
+import * as flowService from '../flow/flow.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -392,6 +393,29 @@ export async function dynamicList(modelCode: string, query: any) {
     .offset((Number(page) - 1) * Number(pageSize))
     .limit(Number(pageSize))
 
+  // 附加流程状态
+  const flowDef = await flowService.getFlowDefinitionByModelCode(modelCode)
+  if (flowDef && list.length) {
+    const businessKeys = list.map((r: any) => r.id)
+    const instances = await db('flow_instances')
+      .where({ flow_code: flowDef.code })
+      .whereIn('business_key', businessKeys)
+    const instanceIds = instances.map((i) => i.id)
+    const tasks = instanceIds.length
+      ? await db('flow_tasks').whereIn('instance_id', instanceIds).where('status', 'pending')
+      : []
+    const instanceMap = new Map(instances.map((i) => [i.business_key, i]))
+    const taskMap = new Map(tasks.map((t) => [t.instance_id, t]))
+    for (const row of list) {
+      const instance = instanceMap.get(row.id)
+      if (instance) {
+        const task = taskMap.get(instance.id)
+        row.__flow_status = instance.status
+        row.__flow_task_id = task?.id || null
+      }
+    }
+  }
+
   return {
     list,
     total: Number(total?.count || 0),
@@ -412,6 +436,17 @@ export async function dynamicCreate(modelCode: string, data: any) {
   await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
   const [id] = await db(model.table_name).insert(cleanData)
+
+  // 如果模型绑定了启用状态的流程，自动启动流程实例
+  try {
+    const flowDef = await flowService.getFlowDefinitionByModelCode(modelCode)
+    if (flowDef) {
+      await flowService.startFlowInstance(flowDef.code, id)
+    }
+  } catch (error) {
+    console.error('启动流程失败', error)
+  }
+
   return db(model.table_name).where({ id }).first()
 }
 

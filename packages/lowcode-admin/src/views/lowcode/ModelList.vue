@@ -13,6 +13,7 @@
           <w-space>
             <w-button size="small" @click="goDesign(row)">设计</w-button>
             <w-button size="small" @click="goRun(row)">运行</w-button>
+            <w-button size="small" @click="openFlowDialog(row)">流程</w-button>
             <w-button size="small" @click="openDialog(row)">编辑</w-button>
             <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
           </w-space>
@@ -43,6 +44,27 @@
         <w-button type="primary" @click="handleSave">确定</w-button>
       </template>
     </w-dialog>
+
+    <w-dialog v-model="flowDialogVisible" title="流程配置" width="520">
+      <w-form :model="flowForm">
+        <w-form-item label="流程编码">
+          <w-input v-model="flowForm.code" placeholder="英文编码" />
+        </w-form-item>
+        <w-form-item label="流程名称">
+          <w-input v-model="flowForm.name" />
+        </w-form-item>
+        <w-form-item label="状态">
+          <w-switch v-model="flowForm.status" active-text="启用" inactive-text="禁用" />
+        </w-form-item>
+        <w-form-item label="节点配置（JSON）">
+          <textarea v-model="flowForm.configText" class="w-xp-textarea" rows="10" placeholder='{"nodes":[],"transitions":[]}' />
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="closeFlowDialog">取消</w-button>
+        <w-button type="primary" @click="handleSaveFlow">确定</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -50,11 +72,14 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
+import * as flowApi from '@/api/flow'
 
 const router = useRouter()
 const models = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
+const flowDialogVisible = ref(false)
+const flowForm = reactive<any>({})
 
 const columns = [
   { prop: 'id', label: 'ID', width: 60 },
@@ -112,6 +137,63 @@ function goDesign(row: any) {
 
 function goRun(row: any) {
   router.push(`/lowcode/run/${row.code}`)
+}
+
+async function openFlowDialog(row: any) {
+  Object.keys(flowForm).forEach((k) => delete flowForm[k])
+  flowForm.modelCode = row.code
+  flowForm.code = `${row.code}_flow`
+  flowForm.name = `${row.name}审批流程`
+  flowForm.status = true
+  flowForm.configText = JSON.stringify({
+    nodes: [
+      { id: 'start', type: 'start', name: '开始' },
+      { id: 'approve', type: 'approve', name: '审批', assigneeType: 'role', assigneeValue: '' },
+      { id: 'end', type: 'end', name: '结束' }
+    ],
+    transitions: [
+      { from: 'start', to: 'approve', condition: 'submit' },
+      { from: 'approve', to: 'end', condition: 'approve' },
+      { from: 'approve', to: 'start', condition: 'reject' }
+    ]
+  }, null, 2)
+
+  try {
+    const existing = await flowApi.getFlowDefinitionByModel(row.code)
+    if (existing) {
+      flowForm.code = existing.code
+      flowForm.name = existing.name
+      flowForm.status = existing.status === 1
+      flowForm.configText = typeof existing.config === 'string'
+        ? existing.config
+        : JSON.stringify(existing.config || { nodes: [], transitions: [] }, null, 2)
+    }
+  } catch {
+    // ignore
+  }
+  flowDialogVisible.value = true
+}
+
+function closeFlowDialog() {
+  flowDialogVisible.value = false
+}
+
+async function handleSaveFlow() {
+  let config: any
+  try {
+    config = JSON.parse(flowForm.configText)
+  } catch {
+    alert('JSON 格式错误')
+    return
+  }
+  await flowApi.saveFlowDefinition({
+    code: flowForm.code,
+    name: flowForm.name,
+    modelCode: flowForm.modelCode,
+    config,
+    status: flowForm.status ? 1 : 0
+  })
+  closeFlowDialog()
 }
 </script>
 

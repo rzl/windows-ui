@@ -10,7 +10,8 @@ lowcode_models
   ├── lowcode_forms
   ├── lowcode_tables
   ├── lowcode_coding_rules
-  └── lowcode_validation_rules
+  ├── lowcode_validation_rules
+  └── flow_definitions
 ```
 
 ## 数据模型（lowcode_models）
@@ -127,3 +128,53 @@ lowcode_models
 | message | 校验失败提示 |
 
 通过后端接口 `/lowcode/validation-rules/:code/validate` 可校验字段值。
+
+## 流程定义（flow_definitions）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| code | 流程编码 |
+| name | 流程名称 |
+| model_code | 关联的低代码模型编码 |
+| config | 流程配置 JSON（节点、流转） |
+| status | 状态：1 启用，0 禁用 |
+
+`config` 示例：
+
+```json
+{
+  "nodes": [
+    { "id": "start", "type": "start", "name": "开始" },
+    { "id": "approve", "type": "approve", "name": "审批", "assigneeType": "role", "assigneeValue": "2" },
+    { "id": "end", "type": "end", "name": "结束" }
+  ],
+  "transitions": [
+    { "from": "start", "to": "approve", "condition": "submit" },
+    { "from": "approve", "to": "end", "condition": "approve" },
+    { "from": "approve", "to": "start", "condition": "reject" }
+  ]
+}
+```
+
+## 流程实例（flow_instances）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| flow_code | 流程编码 |
+| business_key | 业务主键（动态表记录 ID） |
+| status | 状态：`running` / `completed` / `rejected` |
+| current_node_id | 当前节点 ID |
+
+## 流程任务（flow_tasks）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| instance_id | 所属流程实例 ID |
+| node_id / node_name | 节点 ID 与名称 |
+| assignee_type | 处理人类型：`role` / `user` |
+| assignee_value | 处理人值（角色 ID 或用户 ID） |
+| status | 状态：`pending` / `approved` / `rejected` |
+| comment | 审批意见 |
