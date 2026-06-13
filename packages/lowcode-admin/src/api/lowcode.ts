@@ -124,6 +124,14 @@ export function deleteDynamic(modelCode: string, id: number) {
   return request.delete(`/lowcode/${modelCode}/${id}`)
 }
 
+export function deleteDynamicBatch(modelCode: string, ids: (string | number)[]) {
+  return request.delete(`/lowcode/${modelCode}/batch`, { data: { ids } })
+}
+
+export function importDynamic(modelCode: string, rows: any[]) {
+  return request.post(`/lowcode/${modelCode}/import`, { rows })
+}
+
 // 编码规则
 export function getCodingRules() {
   return request.get('/lowcode/coding-rules')

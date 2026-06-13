@@ -72,6 +72,9 @@
             <template #searchable="{ row }">
               <w-switch v-model="tableConfigMap[row.field_name].searchable" />
             </template>
+            <template #sortable="{ row }">
+              <w-switch v-model="tableConfigMap[row.field_name].sortable" />
+            </template>
             <template #width="{ row }">
               <w-input-number v-model="tableConfigMap[row.field_name].width" style="width: 90px" />
             </template>
@@ -217,6 +220,7 @@ const tableDesignColumns = [
   { prop: 'display_name', label: '显示名称' },
   { prop: 'inTable', label: '列表显示', width: 100 },
   { prop: 'searchable', label: '可查询', width: 90 },
+  { prop: 'sortable', label: '可排序', width: 90 },
   { prop: 'width', label: '列宽', width: 110 }
 ]
 
@@ -246,6 +250,7 @@ function syncConfigMaps() {
         label: field.display_name,
         inTable: true,
         searchable: field.type === 'string' || field.type === 'text',
+        sortable: false,
         width: undefined
       }
     }

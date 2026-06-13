@@ -16,9 +16,17 @@
         :page-size="query.pageSize"
         :searchable="false"
         @page-change="handlePageChange"
+        @sort-change="handleSortChange"
+        @selection-change="handleSelectionChange"
       >
         <template #toolbar>
-          <w-button type="primary" @click="openDialog()">+ 新增</w-button>
+          <w-space>
+            <w-button type="primary" @click="openDialog()">+ 新增</w-button>
+            <w-button :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
+            <w-button @click="handleExport">导出</w-button>
+            <w-button @click="triggerImport">导入</w-button>
+            <input ref="fileInput" type="file" accept=".csv" style="display: none" @change="handleFileChange" />
+          </w-space>
         </template>
         <template #action="{ row }">
           <w-space>
@@ -58,11 +66,13 @@ const formConfig = reactive<any>({ fields: [] })
 const tableConfig = reactive<any>({ fields: [] })
 const list = ref<any[]>([])
 const total = ref(0)
-const query = reactive({ page: 1, pageSize: 10, filters: '' })
+const query = reactive({ page: 1, pageSize: 10, filters: '', sortBy: '', sortOrder: '' })
+const selectedRows = ref<any[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增')
 const formModel = reactive<any>({})
 const dynamicFormRef = ref<any>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 
 const formFields = computed(() => {
   return formConfig.fields.map((f: any) => ({
@@ -77,11 +87,17 @@ const formFields = computed(() => {
 })
 
 const tableColumns = computed(() => {
-  return tableConfig.fields.map((f: any) => ({
+  const columns = tableConfig.fields.map((f: any) => ({
     prop: f.field,
     label: f.label,
-    width: f.width
+    width: f.width,
+    sortable: f.sortable ? 'custom' : false
   }))
+  return [
+    { type: 'selection', width: 48 },
+    ...columns,
+    { prop: 'action', label: '操作', width: 140, fixed: 'right' }
+  ]
 })
 
 const queryFields = computed(() => {
@@ -210,6 +226,109 @@ async function handleQueryReset() {
 async function handlePageChange(page: number) {
   query.page = page
   await loadData()
+}
+
+function handleSortChange({ prop, order }: { prop: string; order: 'ascending' | 'descending' | null }) {
+  query.sortBy = order ? prop : ''
+  query.sortOrder = order || ''
+  query.page = 1
+  loadData()
+}
+
+function handleSelectionChange(rows: any[]) {
+  selectedRows.value = rows
+}
+
+async function handleBatchDelete() {
+  if (!selectedRows.value.length) return
+  if (confirm(`确定删除选中的 ${selectedRows.value.length} 条记录吗？`)) {
+    await lowcodeApi.deleteDynamicBatch(modelCode.value, selectedRows.value.map((r) => r.id))
+    selectedRows.value = []
+    await loadData()
+  }
+}
+
+function handleExport() {
+  const headers = tableConfig.fields.map((f: any) => f.label)
+  const keys = tableConfig.fields.map((f: any) => f.field)
+  const rows = list.value.map((row: any) => keys.map((k: string) => row[k] ?? ''))
+  const csv = [headers.join(','), ...rows.map((r: any[]) => r.map(escapeCsv).join(','))].join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `${modelCode.value}.csv`
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
+function escapeCsv(value: any) {
+  const str = String(value ?? '')
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"'
+  }
+  return str
+}
+
+function triggerImport() {
+  fileInput.value?.click()
+}
+
+async function handleFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  const text = await file.text()
+  const rows = parseCsv(text)
+  if (!rows.length) {
+    alert('CSV 文件为空或格式错误')
+    return
+  }
+  try {
+    await lowcodeApi.importDynamic(modelCode.value, rows)
+    alert(`成功导入 ${rows.length} 条记录`)
+    target.value = ''
+    await loadData()
+  } catch (err: any) {
+    alert(err.message || '导入失败')
+  }
+}
+
+function parseCsv(text: string) {
+  const lines = text.trim().split('\n')
+  if (lines.length < 2) return []
+  const headers = parseCsvLine(lines[0])
+  return lines.slice(1).map((line) => {
+    const values = parseCsvLine(line)
+    const row: any = {}
+    headers.forEach((h, i) => {
+      row[h] = values[i] ?? ''
+    })
+    return row
+  })
+}
+
+function parseCsvLine(line: string) {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"'
+        i++
+      } else {
+        inQuotes = !inQuotes
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current)
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  result.push(current)
+  return result
 }
 </script>
 

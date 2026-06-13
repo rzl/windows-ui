@@ -310,10 +310,11 @@ async function alterPhysicalColumn(tableName: string, columnName: string, fieldD
 
 export async function dynamicList(modelCode: string, query: any) {
   const model = await getModelByCode(modelCode)
-  const { keyword, filters, page = 1, pageSize = 10 } = query
+  const { keyword, filters, page = 1, pageSize = 10, sortBy, sortOrder } = query
 
   const builder = db(model.table_name)
   const fields = model.fields.filter((f: any) => f.status === 1)
+  const fieldNames = fields.map((f: any) => f.field_name)
 
   // 关键词模糊搜索
   if (keyword && fields.length) {
@@ -377,8 +378,16 @@ export async function dynamicList(modelCode: string, query: any) {
   })
 
   const total = await builder.clone().count({ count: '*' }).first()
+
+  // 排序
+  if (sortBy && fieldNames.includes(sortBy)) {
+    const order = sortOrder === 'ascending' ? 'asc' : 'desc'
+    builder.orderBy(sortBy, order)
+  } else {
+    builder.orderBy('id', 'desc')
+  }
+
   const list = await builder
-    .orderBy('id', 'desc')
     .offset((Number(page) - 1) * Number(pageSize))
     .limit(Number(pageSize))
 
@@ -418,6 +427,21 @@ export async function dynamicDelete(modelCode: string, id: number) {
   const model = await getModelByCode(modelCode)
   await db(model.table_name).where({ id }).del()
   return true
+}
+
+export async function dynamicBatchDelete(modelCode: string, ids: (string | number)[]) {
+  const model = await getModelByCode(modelCode)
+  if (!ids || !ids.length) throw new AppError('未选择记录', 400)
+  await db(model.table_name).whereIn('id', ids).del()
+  return true
+}
+
+export async function dynamicImport(modelCode: string, rows: any[]) {
+  const model = await getModelByCode(modelCode)
+  if (!rows || !rows.length) throw new AppError('导入数据不能为空', 400)
+  const cleanRows = rows.map((row) => sanitizeData(model.fields, row))
+  await db(model.table_name).insert(cleanRows)
+  return { count: cleanRows.length }
 }
 
 async function validateDynamicData(fields: any[], data: any) {

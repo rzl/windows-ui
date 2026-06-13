@@ -83,6 +83,7 @@
 | label | string | 表头名称 |
 | inTable | boolean | 是否在表格中显示 |
 | searchable | boolean | 是否可在查询区使用 |
+| sortable | boolean | 是否支持点击表头排序 |
 | width | number | 列宽 |
 
 ### 示例
@@ -95,6 +96,7 @@
       "label": "姓名",
       "inTable": true,
       "searchable": true,
+      "sortable": true,
       "width": 120
     },
     {
@@ -102,6 +104,7 @@
       "label": "年龄",
       "inTable": true,
       "searchable": true,
+      "sortable": true,
       "width": 80
     }
   ]

@@ -86,6 +86,16 @@ export async function dynamicDelete(req: Request, res: Response) {
   res.json(success(null, '删除成功'))
 }
 
+export async function dynamicBatchDelete(req: Request, res: Response) {
+  await lowcodeService.dynamicBatchDelete(req.params.modelCode, req.body.ids || [])
+  res.json(success(null, '批量删除成功'))
+}
+
+export async function dynamicImport(req: Request, res: Response) {
+  const result = await lowcodeService.dynamicImport(req.params.modelCode, req.body.rows || [])
+  res.json(success(result, '导入成功'))
+}
+
 // 编码规则
 export async function getCodingRules(_req: Request, res: Response) {
   const result = await lowcodeService.getCodingRules()

@@ -40,6 +40,8 @@ router.post('/validation-rules/batch', lowcodeController.validateBatch)
 
 // 动态 CRUD（放在最后避免路径冲突）
 router.get('/:modelCode', lowcodeController.dynamicList)
+router.post('/:modelCode/import', lowcodeController.dynamicImport)
+router.delete('/:modelCode/batch', lowcodeController.dynamicBatchDelete)
 router.get('/:modelCode/:id', lowcodeController.dynamicDetail)
 router.post('/:modelCode', lowcodeController.dynamicCreate)
 router.put('/:modelCode/:id', lowcodeController.dynamicUpdate)

@@ -23,6 +23,7 @@
       :highlight-current-row="highlightCurrentRow"
       @selection-change="handleSelectionChange"
       @row-click="(...args: any[]) => $emit('row-click', ...args)"
+      @sort-change="(...args: any[]) => $emit('sort-change', ...args)"
     >
       <template v-for="slot in tableSlots" :key="slot" #[slot]="scope">
         <slot :name="slot" v-bind="scope" />
@@ -72,7 +73,8 @@ const emit = defineEmits([
   'page-change',
   'size-change',
   'selection-change',
-  'row-click'
+  'row-click',
+  'sort-change'
 ])
 
 const globalSize = useGlobalSize()
