@@ -15,6 +15,7 @@ import { reactive } from 'vue'
 const form = reactive({})
 const fields = [
   { prop: 'username', label: '用户名', type: 'input', required: true },
+  { prop: 'phone', label: '手机号', type: 'input', validationRule: 'phone' },
   { prop: 'age', label: '年龄', type: 'number' },
   { prop: 'gender', label: '性别', type: 'select', options: [{ label: '男', value: 1 }, { label: '女', value: 2 }] },
   { prop: 'status', label: '状态', type: 'switch', activeText: '启用', inactiveText: '禁用' }
@@ -50,6 +51,7 @@ const fields = [
 | disabled | boolean / function | 是否禁用 |
 | hidden | boolean / function | 是否隐藏 |
 | rules | FormRule[] | 自定义校验规则 |
+| validationRule | string | - | 后端校验规则编码 |
 | span | number | 占位列数（预留） |
 
 ## Props
@@ -59,3 +61,24 @@ const fields = [
 | model | Record<string, any> | {} | 表单数据 |
 | fields | DynamicField[] | [] | 字段配置 |
 | columns | number | 1 | 列数 |
+| validateRules | (items) => Promise | - | 后端校验函数，用于校验绑定了 `validationRule` 的字段 |
+
+## 方法
+
+通过 `ref` 调用：
+
+| 方法 | 说明 |
+|------|------|
+| validate | 执行本地校验 + 后端校验规则校验，返回 Promise<boolean> |
+
+## 后端校验规则
+
+配置字段的 `validationRule` 后，表单提交时会调用 `validateRules` 函数进行异步校验。`validateRules` 接收校验项数组，返回每项的校验结果：
+
+```ts
+validateRules([
+  { code: 'phone', value: '13800138000' },
+  { code: 'email', value: 'test@example.com' }
+])
+// 返回：[{ code: 'phone', valid: true, message: '' }, { code: 'email', valid: false, message: '邮箱格式不正确' }]
+```

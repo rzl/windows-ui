@@ -1,4 +1,4 @@
-<!-- From: e:\RZL\gitee\windows-ui\AGENTS.md -->
+<!-- From: /data/data/com.termux/files/home/git/windows-ui/AGENTS.md -->
 # Windows UI — Agent 项目指南
 
 > 本文档面向 AI 编程助手。如果你从未接触过本项目，请先阅读本文件再修改代码。
@@ -7,11 +7,19 @@
 
 ## 项目概览
 
-**Windows UI** 是一个受 Windows XP 经典风格启发的 Vue 3 UI 组件库。
+**Windows UI** 是一个受 Windows XP 经典风格启发的 Vue 3 UI 组件库，并围绕该组件库搭建了示例站点、Admin 后台模板、低代码管理平台前端及其配套后端服务。
 
-- **技术栈**：Vue 3（Composition API / `<script setup>`）、TypeScript 5.3+、Vite 5.0+、pnpm workspaces
-- **组件数量**：`packages/windows-ui/src/components/` 下共有 86 个组件目录，在 `index.ts` 中注册并导出了 88 个组件（含 `WFormItem` 等子组件），覆盖基础（Basic）、表单（Form）、数据展示（Data）、导航（Navigation）、反馈（Feedback）、其他（Others）六大类
-- **包名**：`@windows-ui/core`（库）、`@windows-ui/playground`（示例站点，内含 Admin 后台模板子应用）
+- **技术栈**：
+  - UI 库 / 前端：Vue 3（Composition API / `<script setup>`）、TypeScript 5.3+、Vite 5.0+
+  - 状态管理：Pinia
+  - 后端：Node.js + Express 4 + TypeScript + Knex + SQLite3
+  - 包管理：pnpm workspaces
+- **工作区包**：
+  - `@windows-ui/core`：组件库源码，位于 `packages/windows-ui`
+  - `@windows-ui/playground`：组件文档与示例站点，内部同时包含一个 Admin 后台模板子应用
+  - `@windows-ui/lowcode-admin`：低代码管理平台前端
+  - `@windows-ui/server`：低代码管理平台后端服务
+- **组件数量**：`packages/windows-ui/src/components/` 下共有 **89 个组件目录**，在 `packages/windows-ui/src/index.ts` 中注册并导出了 **90 个组件**（`WFormItem` 与 `WForm` 共用 `form/` 目录）
 - **默认前缀**：`w-`（例如 `w-button`），可通过 `WConfigProvider` 自定义
 - **主题系统**：基于 CSS 变量（`--w-*`），`WConfigProvider` 支持动态传入主题色并自动计算色阶（lighter / light / dark / darker），同时保留 XP 经典硬编码渐变以保证视觉一致性
 - **国际化**：内置 `zh-CN` / `en-US` 语言包，语言文件为单层键值对；支持通过 `WConfigProvider` 局部配置或 `app.use(WindowsUI, { locale, messages })` 全局配置，组件内部通过 `useLocale()` 获取翻译函数
@@ -28,7 +36,7 @@ windows-ui/
 ├── 1.text                       # 原始需求文档（只读参考）
 │
 ├── packages/
-│   ├── windows-ui/              # 📦 UI 库源码
+│   ├── windows-ui/              # 📦 UI 库源码（@windows-ui/core）
 │   │   ├── src/
 │   │   │   ├── index.ts         # 统一入口：注册全部组件 + install 方法 + 按需导出
 │   │   │   ├── styles/
@@ -48,47 +56,89 @@ windows-ui/
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
-│   └── playground/              # 🎨 示例与文档站点（同时包含 Admin 后台模板）
-│       ├── src/
-│       │   ├── main.ts          # 入口：createApp + use(WindowsUI) + router
-│       │   ├── App.vue
-│       │   ├── router/index.ts  # hash 路由，覆盖全部组件独立页面 + 分类首页 + 首页
-│       │   ├── views/Layout.vue # 侧边栏 + 内容区布局，含全局尺寸 / 主题色切换控件
-│       │   ├── pages/           # 按分类展示组件（BasicPage、FormPage…）
-│       │   │   └── components/  # 每个组件的独立演示页面（*ComponentPage.vue）
-│       │   ├── components/      # 演示通用组件
-│       │   │   ├── DemoSection.vue   # 组件演示区块（标题 + 描述 + 可折叠的 usage.md）
-│       │   │   ├── DemoBlock.vue     # 单个示例卡片（标题 + slot + 代码）
-│       │   │   └── CodeBlock.vue     # 代码高亮展示
-│       │   └── admin/           # Admin 后台子应用源码
-│       │       ├── main.ts      # Admin 入口：Pinia + vue-router + vue-i18n + WindowsUI
-│       │       ├── App.vue
-│       │       ├── router/      # Admin 路由（含登录、权限守卫）
-│       │       ├── views/       # Admin 页面（dashboard、login、user、order 等）
-│       │       ├── stores/      # Pinia 状态管理（auth 等）
-│       │       ├── i18n/        # vue-i18n 国际化
-│       │       ├── components/  # 业务组件（Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting）
-│       │       ├── composables/ # 组合式函数（useCrud、usePermission）
-│       │       ├── mock/        # 模拟数据（用户、角色、权限）
-│       │       └── types/       # 类型定义
-│       ├── index.html           # Playground 主页面入口
-│       ├── admin.html           # Admin 后台页面入口
-│       ├── vite.config.ts       # 开发别名指向库源码；自定义 docsServerPlugin 提供 /docs/*.md
-│       └── package.json
+│   ├── playground/              # 🎨 示例与文档站点（同时包含 Admin 后台模板子应用）
+│   │   ├── src/
+│   │   │   ├── main.ts          # 入口：createApp + use(WindowsUI) + router + vue-i18n
+│   │   │   ├── App.vue
+│   │   │   ├── router/index.ts  # hash 路由，覆盖全部组件独立页面 + 分类首页 + 首页
+│   │   │   ├── views/Layout.vue # 侧边栏 + 内容区布局，含全局尺寸 / 主题色 / 语言切换控件
+│   │   │   ├── pages/           # 按分类展示组件（BasicPage、FormPage…）
+│   │   │   │   └── components/  # 每个组件的独立演示页面（*ComponentPage.vue）
+│   │   │   ├── components/      # 演示通用组件
+│   │   │   │   ├── DemoSection.vue   # 组件演示区块（标题 + 描述 + 可折叠的 usage.md）
+│   │   │   │   ├── DemoBlock.vue     # 单个示例卡片（标题 + slot + 代码）
+│   │   │   │   ├── CodeBlock.vue     # 代码高亮展示
+│   │   │   │   └── PageToc.vue       # 页面目录
+│   │   │   ├── i18n/            # playground 站点级国际化（vue-i18n）
+│   │   │   └── admin/           # Admin 后台子应用源码
+│   │   │       ├── main.ts      # Admin 入口：Pinia + vue-router + vue-i18n + WindowsUI
+│   │   │       ├── App.vue
+│   │   │       ├── router/      # Admin 路由（含登录、权限守卫）
+│   │   │       ├── views/       # Admin 页面（dashboard、login、user、order 等）
+│   │   │       ├── stores/      # Pinia 状态管理（auth 等）
+│   │   │       ├── i18n/        # vue-i18n 国际化
+│   │   │       ├── components/  # 业务组件（Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting）
+│   │   │       ├── composables/ # 组合式函数（useCrud、usePermission）
+│   │   │       ├── mock/        # 模拟数据（用户、角色、权限）
+│   │   │       └── types/       # 类型定义
+│   │   ├── index.html           # Playground 主页面入口
+│   │   ├── admin.html           # Admin 后台页面入口
+│   │   ├── vite.config.ts       # 开发别名指向库源码；自定义 docsServerPlugin 提供 /docs/*.md
+│   │   └── package.json
+│   │
+│   ├── lowcode-admin/           # 🧩 低代码管理平台前端（@windows-ui/lowcode-admin）
+│   │   ├── src/
+│   │   │   ├── main.ts          # 入口：Pinia + vue-router + WindowsUI
+│   │   │   ├── App.vue
+│   │   │   ├── router/index.ts  # hash 路由 + 登录权限守卫
+│   │   │   ├── api/             # axios 封装 + 各模块接口
+│   │   │   ├── stores/          # Pinia（auth、app、menu、user）
+│   │   │   ├── views/           # 页面（system、lowcode、monitor、dashboard、login 等）
+│   │   │   ├── components/      # 业务组件
+│   │   │   ├── composables/     # useWebSocket 等
+│   │   │   └── types/           # 类型定义
+│   │   ├── index.html
+│   │   ├── vite.config.ts       # 端口 5174，代理 /api 到 http://localhost:3001
+│   │   └── package.json
+│   │
+│   ├── server/                  # 🔧 低代码管理平台后端（@windows-ui/server）
+│   │   ├── src/
+│   │   │   ├── index.ts         # 服务启动入口（http + WebSocket）
+│   │   │   ├── app.ts           # Express 应用配置
+│   │   │   ├── config/index.ts  # 环境变量与配置读取
+│   │   │   ├── db/index.ts      # Knex + SQLite 数据库实例
+│   │   │   ├── routes/index.ts  # API 路由总线
+│   │   │   ├── modules/         # 业务模块
+│   │   │   │   ├── auth/        # 登录 / 刷新 / 登出 / 个人信息
+│   │   │   │   ├── rbac/        # 用户 / 角色 / 菜单 / 部门
+│   │   │   │   ├── system/      # 字典等系统模块
+│   │   │   │   ├── lowcode/     # 数据模型 / 字段 / 表单 / 列表 / 编码规则 / 校验规则 / 动态 CRUD
+│   │   │   │   ├── monitor/     # 消息 / 模板 / 操作日志 / 服务器监控
+│   │   │   │   └── dashboard/   # 仪表盘 / 首页配置
+│   │   │   ├── middleware/      # auth、error、requestLog
+│   │   │   └── utils/           # logger、response、websocket
+│   │   ├── migrations/          # Knex 迁移文件
+│   │   ├── seeds/               # Knex 种子数据
+│   │   ├── data/lowcode.sqlite  # SQLite 数据文件（开发默认）
+│   │   ├── .env.example         # 环境变量示例
+│   │   ├── knexfile.js
+│   │   └── package.json
+│   │
+│   └── admin/                   # 历史 Admin 构建产物（仅 dist / node_modules，无源码，不参与脚本）
 │
-├── docs/                        # 每个组件的使用说明文档（中文 Markdown）
+├── docs/                        # 每个组件的使用说明文档
 │   └── <component>/usage.md
-├── designs/                     # 每个组件的设计文档（视觉、交互、可访问性）
+├── designs/                     # 每个组件的设计文档
 │   └── <component>/design.md
 ├── develops/                    # 每个组件的开发进度跟踪
 │   └── <component>/progress.md
-└── scripts/                     # Python 辅助脚本（生成文档示例、提取 Props 等）
+└── scripts/                     # Python 辅助脚本
     ├── add_examples*.py
-    ├── examples.json
-    └── gen_docs*.py
+    ├── examples.json            # 组件示例代码库
+    ├── gen_docs.py              # 根据 SFC 生成 usage.md 模板
+    ├── gen_docs_v2.py
+    └── sync_docs.py
 ```
-
-> **注意**：Admin 后台模板**不是**独立的 workspace 包，而是集成在 `packages/playground` 中的一个多入口子应用（通过 `admin.html` 与 `src/admin/` 实现）。根目录的 `dev:admin` 和 `build:admin` 脚本目前与 playground 共用同一命令。
 
 ---
 
@@ -96,13 +146,22 @@ windows-ui/
 
 > 根目录使用 `pnpm`（非 npm / yarn）。若尚未安装依赖，请先执行 `pnpm install`。
 
+### 根目录脚本
+
 | 命令 | 作用 |
 |------|------|
 | `pnpm dev` | 启动 playground 开发服务器（同时承载组件文档站点与 Admin 后台） |
-| `pnpm dev:admin` | 当前等价于 `pnpm dev`（Admin 与 playground 共享同一 Vite 服务） |
+| `pnpm dev:admin` | 当前等价于 `pnpm dev`（Admin 与 playground 共享同一 Vite 服务，访问 `/admin.html`） |
+| `pnpm dev:lowcode` | 启动低代码管理平台前端（默认端口 `5174`，代理 `/api` 到 `localhost:3001`） |
+| `pnpm dev:server` | 启动后端服务（默认监听 `127.0.0.1:3001`，热重载） |
 | `pnpm build` | 构建 UI 库（ES + UMD + d.ts），输出到 `packages/windows-ui/dist/` |
-| `pnpm build:playground` | 构建 playground 生产包（含 index.html 与 admin.html 双入口） |
+| `pnpm build:playground` | 构建 playground 生产包（含 `index.html` 与 `admin.html` 双入口） |
 | `pnpm build:admin` | 当前等价于 `pnpm build:playground` |
+| `pnpm build:lowcode` | 构建低代码管理平台前端 |
+| `pnpm build:server` | 编译后端 TypeScript 到 `packages/server/dist/` |
+| `pnpm db:migrate` | 执行后端数据库迁移 |
+| `pnpm db:migrate:rollback` | 回滚最近一次数据库迁移 |
+| `pnpm db:seed` | 执行后端数据库种子（会清空并写入初始账号 `admin/admin`） |
 
 ### 库构建细节
 
@@ -116,12 +175,12 @@ windows-ui/
 - **构建前置检查**：`vue-tsc --noEmit` 类型检查通过后才会执行 Vite 构建
 - **tsconfig 关键选项**：`strict: true`、`noUnusedLocals: true`、`noUnusedParameters: true`、`moduleResolution: bundler`
 
-### playground 开发细节
+### Playground 开发细节
 
 - `vite.config.ts` 中通过 alias 将 `@windows-ui/core` 指向 `../windows-ui/src/index.ts`，开发时修改库源码可直接热更新，无需先构建库。
 - 内置 `docsServerPlugin`：开发服务器拦截 `/docs/<component>/usage.md` 请求，从 `../../docs` 目录读取并返回 Markdown 原文，供 `DemoSection.vue` 动态加载渲染。
 - `DemoSection.vue` 使用 `marked` 将 Markdown 渲染为 HTML，`highlight.js` 用于代码块高亮。
-- `Layout.vue` 顶部提供全局控件：可切换 `small / default / large` 尺寸，以及实时调整主色（primary）、成功色（success）、警告色（warning）、危险色（danger）。
+- `Layout.vue` 顶部提供全局控件：可切换 `small / default / large` 尺寸，切换 `zh-CN / en-US` 语言，以及实时调整主色（primary）、成功色（success）、警告色（warning）、危险色（danger）。
 - 构建时采用 `rollupOptions.input` 配置多入口：`index.html`（组件文档）与 `admin.html`（后台模板）。
 
 ### Admin 子应用开发细节
@@ -131,6 +190,14 @@ windows-ui/
 - 内置模拟登录系统（`src/admin/stores/auth.ts`）：支持 `admin/admin`、`editor/editor`、`viewer/viewer` 三个账号，分别对应不同角色与权限。
 - 路由守卫会在未登录时自动跳转 `/login`，`usePermission` 组合式函数用于按钮级权限控制。
 - 业务组件包括：Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting。
+
+### 低代码平台开发细节
+
+- 前端入口 `packages/lowcode-admin/src/main.ts`；后端入口 `packages/server/src/index.ts`。
+- 前端开发服务器默认端口 `5174`，并通过 `proxy` 将 `/api` 转发到后端 `http://localhost:3001`。
+- 后端默认监听 `127.0.0.1:3001`，默认使用 SQLite（`packages/server/data/lowcode.sqlite`）。
+- 后端数据库迁移位于 `packages/server/migrations/`，种子位于 `packages/server/seeds/`。
+- 低代码核心能力：数据模型设计 → 字段管理 → 表单/列表配置 → 自动创建物理表 → 通过 `/:modelCode` 动态 CRUD 接口运行。
 
 ---
 
@@ -151,7 +218,7 @@ windows-ui/
   ```ts
   defineProps({
     type: { type: String, default: 'default' },
-    size: { type: String, default: 'default' },
+    size: { type: String, default: undefined },
     disabled: Boolean
   })
   ```
@@ -191,7 +258,7 @@ windows-ui/
 | `designs/<component>/` | `design.md` | 组件分类、视觉设计（色彩、尺寸、圆角）、交互设计、可访问性 |
 | `develops/<component>/` | `progress.md` | 状态（已完成/进行中）、实现清单、待优化项、变更记录 |
 
-> 当前项目尚未配置自动化文档生成工具，文档为纯 Markdown 手工维护。`scripts/` 下的 Python 脚本（如 `gen_docs.py`、`add_examples*.py`）用于辅助提取组件 Props / 生成示例模板，但产出的内容仍需人工校对。
+> 当前项目尚未配置自动化文档生成工具，文档为纯 Markdown 手工维护。`scripts/` 下的 Python 脚本（如 `gen_docs.py`、`sync_docs.py`、`add_examples*.py`）用于辅助提取组件 Props / 生成示例模板，但产出的内容仍需人工校对。`scripts/examples.json` 中维护了一批可直接写入 usage.md 的组件示例代码。
 
 ---
 
@@ -213,6 +280,7 @@ windows-ui/
 - **引号**：单引号
 - **语言**：注释与文档以 **中文** 为主；代码中的字符串常量若为 UI 展示文本，也用中文
 - **无 linter**：当前未安装 ESLint / Prettier，提交前请人工保持风格一致
+- **TypeScript**：启用 `strict: true` 与 `noUnusedLocals: true`，禁止未使用变量/参数
 
 ---
 
@@ -229,18 +297,21 @@ windows-ui/
 6. 在 `packages/playground/src/pages/components/` 新建 `*ComponentPage.vue` 演示页面，使用 `demo-section` / `demo-block` 组织示例。
 7. 在 `packages/playground/src/views/Layout.vue` 的侧边栏 `navItems` 中新增导航项。
 8. 编写 `docs/<name>/usage.md`、`designs/<name>/design.md`、`develops/<name>/progress.md`。
-9. 若该组件属于后台场景常用组件，视情况在 `packages/playground/src/admin/` 中补充示例页面。
+9. 若该组件属于后台场景常用组件，视情况在 `packages/playground/src/admin/` 或 `packages/lowcode-admin/src/views/` 中补充示例页面。
 10. 运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
 
 ---
 
 ## 安全与注意事项
 
-- **SVG 图标**：`WIcon` 组件内部使用 `v-html` 渲染内联 SVG，目前图标为项目内置常量，若未来支持外部传入 SVG 字符串，需防范 XSS（对用户输入做净化）。
+- **SVG 图标**：`WIcon` 组件内部使用 `v-html` 渲染内联 SVG，目前图标为项目内置常量；`svg` prop 支持外部传入 SVG 字符串，若使用外部输入需防范 XSS（对用户输入做净化）。
 - **样式隔离**：各组件使用 `scoped`，但全局主题变量和 `base.css` 中的工具类（如 `.w-xp-theme`、`.w-xp-btn-base`）会全局生效。
 - **peerDependency**：库仅将 `vue` 标记为 `peerDependency`，发布时务必确保版本兼容 `^3.4.0`。
 - **动态主题副作用**：`WConfigProvider` 会在挂载时将主题变量写入 `document.documentElement.style`，并在卸载时自动清理。多个 `WConfigProvider` 嵌套时，后挂载的实例会覆盖前者写入的变量。
 - **Admin 模拟认证**：`src/admin/stores/auth.ts` 使用 `localStorage` 存储 mock token，权限判断基于前端硬编码角色，**不可用于生产环境**。
+- **低代码后端认证**：后端使用 JWT（secret 来自 `.env`），token 黑名单为内存 `Set`；开发默认账号为 `admin/admin`（由 seed 写入），**生产环境必须修改 JWT_SECRET 与默认密码**。
+- **动态 SQL 风险**：低代码模块通过 Knex 拼接动态表名/字段名进行 CRUD，字段过滤与关键字搜索已使用参数化查询，但 `filters` 中的 `field` 字段未做白名校验，若直接暴露给不可信用户需谨慎加固。
+- **SQL 字段变更限制**：后端低代码字段删除目前仅删除元数据，未从 SQLite 物理表中删除列（SQLite 不支持 `DROP COLUMN`），生产环境如需完整字段同步需自行实现表重建逻辑。
 
 ---
 
@@ -249,6 +320,8 @@ windows-ui/
 - 本项目**未配置** CI/CD 流水线（无 `.github/workflows`、无 Docker、无部署脚本）。
 - 库构建产物输出到 `packages/windows-ui/dist/`，可直接作为 npm 包发布。
 - Playground 为静态 Vite 站点，构建后生成双入口（`index.html` + `admin.html`），可部署到任意静态托管服务。
+- 低代码前端构建产物输出到 `packages/lowcode-admin/dist/`，可单独部署。
+- 后端编译产物输出到 `packages/server/dist/`，生产环境可执行 `pnpm --filter @windows-ui/server start`（即 `node dist/index.js`）启动；首次部署需执行 `pnpm db:migrate` 与 `pnpm db:seed`。
 
 ---
 
@@ -257,7 +330,7 @@ windows-ui/
 | 问题 | 答案 |
 |------|------|
 | 用什么包管理器？ | pnpm |
-| 怎么启动开发？ | `pnpm dev`（同时启动组件文档站与 Admin 后台） |
+| 怎么启动开发？ | `pnpm dev`（组件文档站 + Admin），`pnpm dev:lowcode`（低代码前端），`pnpm dev:server`（后端） |
 | 怎么构建组件库？ | `pnpm build` |
 | 组件文件放哪？ | `packages/windows-ui/src/components/<name>/<name>.vue` |
 | 怎么导出组件？ | 在 `packages/windows-ui/src/index.ts` import + 加入数组 + named export |
@@ -265,4 +338,5 @@ windows-ui/
 | 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `ConfigProvider` 传 `theme` 对象 |
 | 多语言怎么配？ | `app.use(WindowsUI, { locale: 'en-US' })` 或 `<w-config-provider locale="en-US">`，也支持传入自定义单层语言对象 |
 | 有测试吗？ | 目前没有；建议引入 Vitest + `@vue/test-utils` |
-| Admin 后台在哪？ | `packages/playground/src/admin/`（多入口子应用） |
+| Admin 后台在哪？ | playground 内的多入口子应用：`packages/playground/src/admin/`（访问 `/admin.html`） |
+| 低代码平台在哪？ | `packages/lowcode-admin/` + `packages/server/` |

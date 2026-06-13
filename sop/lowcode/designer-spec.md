@@ -12,6 +12,7 @@
 | label | string | 显示名称 |
 | type | string | 组件类型 |
 | required | boolean | 是否必填 |
+| validationRule | string | 后端校验规则编码 |
 | options | array | 选项（`select/radio` 使用） |
 
 ### 支持的组件类型
