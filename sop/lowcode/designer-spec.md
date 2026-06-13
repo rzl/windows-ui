@@ -13,7 +13,24 @@
 | type | string | 组件类型 |
 | required | boolean | 是否必填 |
 | validationRule | string | 后端校验规则编码 |
+| dependsOn | object | 联动显示条件 |
 | options | array | 选项（`select/radio` 使用） |
+
+### dependsOn 结构
+
+```json
+{
+  "field": "gender",
+  "value": "2",
+  "operator": "eq"
+}
+```
+
+| 属性 | 说明 |
+|------|------|
+| field | 依赖字段名 |
+| value | 依赖值 |
+| operator | 条件操作符：`eq` / `ne` / `empty` / `notEmpty` |
 
 ### 支持的组件类型
 

@@ -71,6 +71,7 @@ const formFields = computed(() => {
     type: f.type || 'input',
     required: f.required,
     validationRule: f.validationRule,
+    dependsOn: f.dependsOn,
     options: f.options
   }))
 })

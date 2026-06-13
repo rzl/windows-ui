@@ -134,6 +134,11 @@ export interface DynamicField {
   required?: boolean
   validationRule?: string
   rules?: FormRule[]
+  dependsOn?: {
+    field: string
+    value?: any
+    operator?: 'eq' | 'ne' | 'empty' | 'notEmpty'
+  }
   clearable?: boolean
   min?: number
   max?: number
@@ -161,16 +166,36 @@ const props = defineProps({
 const visibleFields = computed(() => {
   return props.fields.filter((field) => {
     if (typeof field.hidden === 'function') return !field.hidden(props.model)
-    return !field.hidden
+    if (field.hidden) return false
+    return !isDependsOnHidden(field)
   })
 })
+
+function isDependsOnHidden(field: DynamicField): boolean {
+  if (!field.dependsOn || !field.dependsOn.field) return false
+  const targetValue = props.model[field.dependsOn.field]
+  const operator = field.dependsOn.operator || 'eq'
+
+  switch (operator) {
+    case 'eq':
+      return targetValue !== field.dependsOn.value
+    case 'ne':
+      return targetValue === field.dependsOn.value
+    case 'empty':
+      return targetValue !== undefined && targetValue !== '' && targetValue !== null
+    case 'notEmpty':
+      return targetValue === undefined || targetValue === '' || targetValue === null
+    default:
+      return false
+  }
+}
 
 const formRef = ref<any>(null)
 const validationErrors = reactive<Record<string, string>>({})
 
 const rules = computed(() => {
   const result: Record<string, FormRule[]> = {}
-  props.fields.forEach((field) => {
+  visibleFields.value.forEach((field) => {
     const list: FormRule[] = []
     if (field.required) {
       list.push({ required: true, message: `${field.label} 不能为空` })

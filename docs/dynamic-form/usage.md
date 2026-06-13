@@ -52,6 +52,7 @@ const fields = [
 | hidden | boolean / function | 是否隐藏 |
 | rules | FormRule[] | 自定义校验规则 |
 | validationRule | string | - | 后端校验规则编码 |
+| dependsOn | object | - | 字段联动配置 |
 | span | number | 占位列数（预留） |
 
 ## Props
@@ -82,3 +83,23 @@ validateRules([
 ])
 // 返回：[{ code: 'phone', valid: true, message: '' }, { code: 'email', valid: false, message: '邮箱格式不正确' }]
 ```
+
+## 字段联动
+
+通过 `dependsOn` 配置字段显示条件：
+
+```ts
+const fields = [
+  { prop: 'gender', label: '性别', type: 'select', options: [{ label: '男', value: '1' }, { label: '女', value: '2' }] },
+  { prop: 'husbandName', label: '丈夫姓名', type: 'input', dependsOn: { field: 'gender', value: '2', operator: 'eq' } }
+]
+```
+
+`operator` 支持：
+
+| 操作符 | 说明 |
+|--------|------|
+| eq | 依赖字段值等于 `value` 时显示 |
+| ne | 依赖字段值不等于 `value` 时显示 |
+| empty | 依赖字段值为空时显示 |
+| notEmpty | 依赖字段值非空时显示 |

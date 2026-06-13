@@ -42,6 +42,22 @@
             <template #validationRule="{ row }">
               <w-select v-model="formConfigMap[row.field_name].validationRule" :options="validationRuleOptions" style="width: 130px" />
             </template>
+            <template #dependsOn="{ row }">
+              <div style="display: flex; gap: 4px">
+                <w-select
+                  v-model="formConfigMap[row.field_name].dependsOn.field"
+                  :options="getDependFieldOptions(row.field_name)"
+                  style="width: 90px"
+                  @change="(val: any) => handleDependsOnFieldChange(row.field_name, val)"
+                />
+                <w-input
+                  v-if="formConfigMap[row.field_name].dependsOn.field"
+                  v-model="formConfigMap[row.field_name].dependsOn.value"
+                  placeholder="依赖值"
+                  style="width: 70px"
+                />
+              </div>
+            </template>
           </w-table>
         </w-tab-pane>
 
@@ -149,6 +165,15 @@ const dictOptions = computed(() => [
   ...(dicts.value || []).map((d: any) => ({ label: `${d.name}（${d.code}）`, value: d.code }))
 ])
 
+function getDependFieldOptions(currentFieldName: string) {
+  return [
+    { label: '无', value: '' },
+    ...fields.value
+      .filter((f) => f.field_name !== currentFieldName)
+      .map((f) => ({ label: f.display_name || f.field_name, value: f.field_name }))
+  ]
+}
+
 const formTypeOptions = [
   { label: '输入框', value: 'input' },
   { label: '文本域', value: 'textarea' },
@@ -177,7 +202,8 @@ const formDesignColumns = [
   { prop: 'inForm', label: '表单显示', width: 100 },
   { prop: 'formType', label: '表单类型', width: 140 },
   { prop: 'formRequired', label: '必填', width: 80 },
-  { prop: 'validationRule', label: '校验规则', width: 150 }
+  { prop: 'validationRule', label: '校验规则', width: 150 },
+  { prop: 'dependsOn', label: '联动显示', width: 180 }
 ]
 
 const tableDesignColumns = [
@@ -204,6 +230,7 @@ function syncConfigMaps() {
         type: mapFieldTypeToFormType(field.type),
         required: field.required === 1,
         validationRule: field.validation_rule || '',
+        dependsOn: { field: '', value: '', operator: 'eq' },
         options: field.options ? JSON.parse(field.options) : undefined
       }
     }
@@ -325,6 +352,14 @@ async function handleSaveField() {
   await loadData()
 }
 
+function handleDependsOnFieldChange(fieldName: string, val: any) {
+  if (!val) {
+    formConfigMap[fieldName].dependsOn = { field: '', value: '', operator: 'eq' }
+  } else if (!formConfigMap[fieldName].dependsOn) {
+    formConfigMap[fieldName].dependsOn = { field: val, value: '', operator: 'eq' }
+  }
+}
+
 async function handleDeleteField(row: any) {
   if (confirm(`确定删除字段 ${row.display_name} 吗？`)) {
     await lowcodeApi.deleteField(row.id)
@@ -334,7 +369,13 @@ async function handleDeleteField(row: any) {
 
 async function saveFormConfig() {
   const configFields = fields.value
-    .map((f) => formConfigMap[f.field_name])
+    .map((f) => {
+      const config = { ...formConfigMap[f.field_name] }
+      if (!config.dependsOn || !config.dependsOn.field) {
+        delete config.dependsOn
+      }
+      return config
+    })
     .filter((f) => f && f.inForm)
   await lowcodeApi.saveForm({
     modelId,

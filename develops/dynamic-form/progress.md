@@ -10,6 +10,7 @@
 - [x] 支持 required/rules 校验
 - [x] 支持后端校验规则（validationRule + validateRules）
 - [x] 暴露 validate 方法供父组件调用
+- [x] 支持字段联动（dependsOn）动态显示/隐藏
 - [x] 支持 disabled/hidden 动态函数
 - [x] 支持 custom 类型插槽
 - [x] 在 windows-ui/src/index.ts 注册并导出
@@ -25,3 +26,4 @@
 
 - 2026-06-13：初始实现
 - 2026-06-13：新增后端校验规则支持（validationRule + validateRules），暴露 validate 方法
+- 2026-06-13：新增字段联动支持（dependsOn），支持 eq/ne/empty/notEmpty 四种条件
