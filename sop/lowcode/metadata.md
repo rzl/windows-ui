@@ -43,6 +43,8 @@ lowcode_models
 | required | 是否必填：1 / 0 |
 | default_value | 默认值 |
 | options | 选项 JSON 字符串 |
+| dict_code | 关联字典编码。`select/radio` 类型可配置，运行时自动从字典表读取选项 |
+| validation_rule | 后端校验规则编码 |
 | sort | 排序 |
 | status | 状态 |
 
@@ -51,6 +53,10 @@ lowcode_models
 - 新增字段时自动 `ALTER TABLE` 添加列。
 - 编辑字段时尝试修改列类型（SQLite 支持有限）。
 - 删除字段时目前仅删除元数据，未重建物理表（SQLite 限制）。
+
+**字典选项**：
+
+当字段类型为 `select` 或 `radio` 且 `dict_code` 不为空时，后端在返回模型详情时会自动从 `dicts` / `dict_items` 表读取启用的字典项，并填充到字段的 `options` 字段。前端无需额外调用字典接口。
 
 ## 表单配置（lowcode_forms）
 

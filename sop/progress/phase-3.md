@@ -7,7 +7,7 @@
 ## 功能清单
 
 - 数据模型管理：业务模型（对应物理表）增删改查
-- 字段管理：为模型定义字段（类型、长度、必填、默认值、选项）
+- 字段管理：为模型定义字段（类型、长度、必填、默认值、选项/关联字典）
 - 表单设计器：配置表单字段与规则，生成表单 JSON
 - 列表设计器：配置展示列、查询条件、操作按钮
 - 动态 CRUD：根据模型配置自动生成增删改查 API
@@ -31,7 +31,7 @@
 | 表名 | 说明 |
 |------|------|
 | lowcode_models | 数据模型：code/name/table_name/status |
-| lowcode_fields | 模型字段：model_id/field_name/display_name/type/length/required/default/options/sort |
+| lowcode_fields | 模型字段：model_id/field_name/display_name/type/length/required/default/options/dict_code/validation_rule/sort |
 | lowcode_forms | 表单配置：model_id/name/config(JSON) |
 | lowcode_tables | 列表配置：model_id/name/config(JSON) |
 | lowcode_coding_rules | 编码规则：code/name/prefix/date_format/seq_length/current_seq |
@@ -62,3 +62,4 @@
 - 2026-06-13：完成 ModelList / ModelDesigner / LowcodePage 前端页面
 - 2026-06-13：完成编码规则、校验规则前后端页面
 - 2026-06-13：联调通过：创建 customer 模型 → 添加 name/phone 字段 → 保存表单/列表 → 动态新增/查询数据
+- 2026-06-13：字段支持关联系统字典，select/radio 类型字段可自动从字典读取选项

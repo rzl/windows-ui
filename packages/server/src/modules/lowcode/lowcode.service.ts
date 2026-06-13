@@ -20,9 +20,10 @@ export async function getModels() {
 export async function getModelById(id: number) {
   const model = await db('lowcode_models').where({ id }).first()
   if (!model) throw new AppError('模型不存在', 404)
-  const fields = await db('lowcode_fields')
+  let fields = await db('lowcode_fields')
     .where({ model_id: id })
     .orderBy('sort', 'asc')
+  fields = await fillDictOptions(fields)
   const forms = await db('lowcode_forms').where({ model_id: id })
   const tables = await db('lowcode_tables').where({ model_id: id })
   return { ...model, fields, forms, tables }
@@ -31,12 +32,48 @@ export async function getModelById(id: number) {
 export async function getModelByCode(code: string) {
   const model = await db('lowcode_models').where({ code }).first()
   if (!model) throw new AppError('模型不存在', 404)
-  const fields = await db('lowcode_fields')
+  let fields = await db('lowcode_fields')
     .where({ model_id: model.id })
     .orderBy('sort', 'asc')
+  fields = await fillDictOptions(fields)
   const forms = await db('lowcode_forms').where({ model_id: model.id })
   const tables = await db('lowcode_tables').where({ model_id: model.id })
   return { ...model, fields, forms, tables }
+}
+
+async function fillDictOptions(fields: any[]) {
+  const dictCodes = fields
+    .filter((f) => f.dict_code && ['select', 'radio'].includes(f.type))
+    .map((f) => f.dict_code)
+
+  if (!dictCodes.length) return fields
+
+  const dicts = await db('dicts')
+    .whereIn('code', [...new Set(dictCodes)])
+    .where('status', 1)
+
+  if (!dicts.length) return fields
+
+  const dictIds = dicts.map((d) => d.id)
+  const items = await db('dict_items')
+    .whereIn('dict_id', dictIds)
+    .where('status', 1)
+    .orderBy('sort', 'asc')
+
+  const dictMap = new Map()
+  dicts.forEach((d) => {
+    dictMap.set(d.code, items.filter((item) => item.dict_id === d.id).map((item) => ({
+      label: item.label,
+      value: item.value
+    })))
+  })
+
+  return fields.map((f) => {
+    if (f.dict_code && dictMap.has(f.dict_code)) {
+      return { ...f, options: JSON.stringify(dictMap.get(f.dict_code)) }
+    }
+    return f
+  })
 }
 
 export async function createModel(data: any) {
@@ -113,6 +150,7 @@ export async function createField(data: any) {
     default_value: data.defaultValue,
     options: data.options ? JSON.stringify(data.options) : null,
     validation_rule: data.validationRule || null,
+    dict_code: data.dictCode || null,
     sort: data.sort ?? 0,
     status: data.status ?? 1
   })
@@ -138,6 +176,7 @@ export async function updateField(id: number, data: any) {
     default_value: data.defaultValue,
     options: data.options ? JSON.stringify(data.options) : null,
     validation_rule: data.validationRule || null,
+    dict_code: data.dictCode || null,
     sort: data.sort,
     status: data.status
   })

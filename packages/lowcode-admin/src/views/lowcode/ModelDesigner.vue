@@ -85,7 +85,10 @@
         <w-form-item label="默认值">
           <w-input v-model="fieldForm.defaultValue" />
         </w-form-item>
-        <w-form-item label="选项（JSON）">
+        <w-form-item v-if="['select', 'radio'].includes(fieldForm.type)" label="关联字典">
+          <w-select v-model="fieldForm.dictCode" :options="dictOptions" />
+        </w-form-item>
+        <w-form-item v-if="['select', 'radio'].includes(fieldForm.type) && !fieldForm.dictCode" label="选项（JSON）">
           <w-input v-model="fieldForm.optionsText" type="textarea" placeholder='[{"label":"男","value":"1"}]' />
         </w-form-item>
         <w-form-item label="排序">
@@ -107,6 +110,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
+import * as dictApi from '@/api/dict'
 
 const route = useRoute()
 const modelId = Number(route.params.id)
@@ -119,6 +123,7 @@ const tableConfig = reactive<any>({ fields: [] })
 const formConfigMap = reactive<Record<string, any>>({})
 const tableConfigMap = reactive<Record<string, any>>({})
 const validationRules = ref<any[]>([])
+const dicts = ref<any[]>([])
 
 const fieldDialogVisible = ref(false)
 const fieldForm = reactive<any>({})
@@ -137,6 +142,11 @@ const fieldTypeOptions = [
 const validationRuleOptions = computed(() => [
   { label: '无', value: '' },
   ...(validationRules.value || []).map((r: any) => ({ label: r.name, value: r.code }))
+])
+
+const dictOptions = computed(() => [
+  { label: '不使用字典', value: '' },
+  ...(dicts.value || []).map((d: any) => ({ label: `${d.name}（${d.code}）`, value: d.code }))
 ])
 
 const formTypeOptions = [
@@ -228,13 +238,15 @@ function typeLabel(type: string) {
 }
 
 async function loadData() {
-  const [data, rules] = await Promise.all([
+  const [data, rules, dictList] = await Promise.all([
     lowcodeApi.getModel(modelId),
-    lowcodeApi.getValidationRules()
+    lowcodeApi.getValidationRules(),
+    dictApi.getDicts()
   ])
   Object.assign(model, data)
   fields.value = data.fields || []
   validationRules.value = rules || []
+  dicts.value = dictList || []
 
   if (data.forms?.length) {
     const saved = typeof data.forms[0].config === 'string'
@@ -263,13 +275,15 @@ function openFieldDialog(row?: any) {
     Object.assign(fieldForm, JSON.parse(JSON.stringify(row)))
     fieldForm.required = row.required === 1
     fieldForm.status = row.status === 1
-    fieldForm.optionsText = row.options ? JSON.stringify(JSON.parse(row.options)) : ''
+    fieldForm.dictCode = row.dict_code || ''
+    fieldForm.optionsText = row.options && !row.dict_code ? JSON.stringify(JSON.parse(row.options)) : ''
   } else {
     fieldForm.modelId = modelId
     fieldForm.type = 'string'
     fieldForm.length = 255
     fieldForm.required = false
     fieldForm.status = true
+    fieldForm.dictCode = ''
     fieldForm.sort = 0
   }
   fieldDialogVisible.value = true
@@ -284,11 +298,21 @@ async function handleSaveField() {
   data.modelId = modelId
   data.required = data.required ? 1 : 0
   data.status = data.status ? 1 : 0
-  try {
-    data.options = data.optionsText ? JSON.parse(data.optionsText) : undefined
-  } catch {
-    alert('选项 JSON 格式错误')
-    return
+  data.dictCode = data.dictCode || ''
+  if (['select', 'radio'].includes(data.type)) {
+    if (data.dictCode) {
+      data.options = undefined
+    } else {
+      try {
+        data.options = data.optionsText ? JSON.parse(data.optionsText) : undefined
+      } catch {
+        alert('选项 JSON 格式错误')
+        return
+      }
+    }
+  } else {
+    data.options = undefined
+    data.dictCode = ''
   }
   delete data.optionsText
 
