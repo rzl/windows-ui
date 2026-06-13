@@ -6,9 +6,16 @@
   "scripts": {
     "dev": "pnpm -C packages/playground dev",
     "dev:admin": "pnpm -C packages/playground dev",
+    "dev:lowcode": "pnpm -C packages/lowcode-admin dev",
+    "dev:server": "pnpm -C packages/server dev",
     "build": "pnpm -C packages/windows-ui build",
     "build:playground": "pnpm -C packages/playground build",
-    "build:admin": "pnpm -C packages/playground build"
+    "build:admin": "pnpm -C packages/playground build",
+    "build:lowcode": "pnpm -C packages/lowcode-admin build",
+    "build:server": "pnpm -C packages/server build",
+    "db:migrate": "pnpm -C packages/server migrate",
+    "db:migrate:rollback": "pnpm -C packages/server migrate:rollback",
+    "db:seed": "pnpm -C packages/server seed"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
