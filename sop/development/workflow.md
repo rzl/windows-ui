@@ -86,11 +86,18 @@
 提交前必须执行：
 
 ```bash
-pnpm build:lowcode   # 验证低代码前端构建
-pnpm build:server    # 验证后端 TypeScript 编译
+pnpm build:lowcode              # 验证低代码前端构建
+pnpm build:server               # 验证后端 TypeScript 编译
+pnpm --filter @windows-ui/core test  # 验证 UI 库单元测试
 ```
 
 如有条件，再启动 `pnpm dev:server` 与 `pnpm dev:lowcode` 进行功能联调。
+
+### 测试规范
+
+- UI 库组件使用 Vitest + `@vue/test-utils` 编写单元测试。
+- 测试文件与组件同目录，命名为 `<component>.spec.ts`。
+- 每新增通用组件必须同步编写测试，覆盖渲染、Props、事件、关键交互。
 
 ### 7. Git 提交
 
@@ -137,4 +144,5 @@ pnpm build:server    # 验证后端 TypeScript 编译
 - [ ] 后端 API / 数据库变更已记录到 SOP
 - [ ] `pnpm build:lowcode` 通过
 - [ ] `pnpm build:server` 通过
+- [ ] `pnpm --filter @windows-ui/core test` 通过
 - [ ] 已提交 git 并推送远程

@@ -264,12 +264,19 @@ windows-ui/
 
 ## 测试策略
 
-**现状**：本项目目前没有配置任何测试框架（无 Jest、Vitest、Cypress、Playwright），也没有测试文件。`packages/windows-ui/src/hooks/` 目录目前为空。
+**现状**：已在 `packages/windows-ui` 中配置 **Vitest** + `@vue/test-utils` + `jsdom`，测试脚本为 `pnpm --filter @windows-ui/core test`。
 
-**建议**：
-- 如需补充测试，推荐在 `packages/windows-ui` 中引入 **Vitest** + `@vue/test-utils`，与现有 Vite 工具链保持一致。
+**测试范围**：
 - 组件以单元测试为主：验证 Props 渲染、事件触发、CSS 类名切换。
 - 复杂交互组件（如 `date-picker`、`table`、`virtualized-*`）建议补充集成测试。
+
+**测试文件位置**：与组件 SFC 同目录，命名为 `<component>.spec.ts`。
+
+**新增组件要求**：每新增一个通用组件，应同步编写对应的 `.spec.ts` 单元测试，覆盖：
+- 基础渲染
+- Props 变化
+- 事件触发
+- 关键交互路径
 
 ---
 
