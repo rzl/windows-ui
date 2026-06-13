@@ -28,6 +28,26 @@
               <w-form-item v-if="widget.type === 'stat'" label="统计字段">
                 <w-select v-model="widget.field" :options="statFieldOptions" />
               </w-form-item>
+              <template v-if="widget.type === 'stat'">
+                <w-form-item label="数据源类型">
+                  <w-select v-model="widget.dataSource.type" :options="dataSourceTypeOptions" />
+                </w-form-item>
+                <w-form-item v-if="widget.dataSource.type === 'static'" label="静态值">
+                  <w-input v-model="widget.dataSource.value" />
+                </w-form-item>
+                <w-form-item v-if="widget.dataSource.type === 'sql'" label="SQL">
+                  <textarea v-model="widget.dataSource.sql" class="w-xp-textarea" rows="3" placeholder="仅支持 SELECT 查询" />
+                </w-form-item>
+                <w-form-item v-if="widget.dataSource.type === 'api'" label="请求方式">
+                  <w-select v-model="widget.dataSource.api.method" :options="httpMethodOptions" />
+                </w-form-item>
+                <w-form-item v-if="widget.dataSource.type === 'api'" label="接口地址">
+                  <w-input v-model="widget.dataSource.api.url" placeholder="例如 /lowcode/users/count" />
+                </w-form-item>
+                <w-form-item v-if="widget.dataSource.type === 'script'" label="执行脚本">
+                  <textarea v-model="widget.dataSource.script" class="w-xp-textarea" rows="4" placeholder="return await db.raw('SELECT count(*) FROM users')" />
+                </w-form-item>
+              </template>
               <w-form-item v-if="widget.type === 'link'" label="链接路径">
                 <w-input v-model="widget.path" />
               </w-form-item>
@@ -82,11 +102,27 @@ const colorOptions = [
   { label: '危险', value: 'danger' }
 ]
 
+const dataSourceTypeOptions = [
+  { label: '无', value: '' },
+  { label: '静态值', value: 'static' },
+  { label: 'SQL', value: 'sql' },
+  { label: '内部接口', value: 'api' },
+  { label: '脚本', value: 'script' }
+]
+
+const httpMethodOptions = [
+  { label: 'GET', value: 'GET' },
+  { label: 'POST', value: 'POST' }
+]
+
 onMounted(() => loadData())
 
 async function loadData() {
   const data = await dashboardApi.getHomepageConfig('default')
   Object.assign(config, data)
+  for (const widget of config.widgets) {
+    ensureDataSource(widget)
+  }
 }
 
 function addWidget() {
@@ -95,8 +131,29 @@ function addWidget() {
     title: '新组件',
     field: 'userCount',
     icon: 'star',
-    color: 'primary'
+    color: 'primary',
+    dataSource: createEmptyDataSource()
   })
+}
+
+function createEmptyDataSource() {
+  return {
+    type: '',
+    value: '',
+    sql: '',
+    api: { method: 'GET', url: '', params: {}, body: {} },
+    script: ''
+  }
+}
+
+function ensureDataSource(widget: any) {
+  if (!widget.dataSource) {
+    widget.dataSource = createEmptyDataSource()
+  } else {
+    if (!widget.dataSource.api) {
+      widget.dataSource.api = { method: 'GET', url: '', params: {}, body: {} }
+    }
+  }
 }
 
 function removeWidget(index: number) {

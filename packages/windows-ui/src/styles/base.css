@@ -63,6 +63,27 @@
   color: #a0a0a0;
 }
 
+/* XP Textarea Base */
+.w-xp-textarea {
+  font-family: var(--w-font-family);
+  font-size: var(--w-font-size-base);
+  padding: 4px;
+  border: 1px solid #7f9db9;
+  border-radius: 0;
+  background: #ffffff;
+  color: var(--w-text-color-primary);
+  outline: none;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.w-xp-textarea:focus {
+  border-color: #0078d7;
+  outline: 1px solid #a5c2e8;
+  outline-offset: -2px;
+}
+
 /* XP Window Base */
 .w-xp-window-base {
   background: var(--w-bg-color);

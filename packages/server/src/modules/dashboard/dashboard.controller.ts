@@ -2,8 +2,9 @@ import type { Request, Response } from 'express'
 import { success } from '../../utils/response'
 import * as dashboardService from './dashboard.service'
 
-export async function getStats(_req: Request, res: Response) {
-  const result = await dashboardService.getStats()
+export async function getStats(req: Request, res: Response) {
+  const widgets = Array.isArray(req.body?.widgets) ? req.body.widgets : []
+  const result = await dashboardService.getStats(widgets)
   res.json(success(result))
 }
 

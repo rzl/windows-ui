@@ -39,17 +39,59 @@ export async function saveHomepageConfig(data: any) {
   return getHomepageConfig(code)
 }
 
-export async function getStats() {
+export async function getStats(widgets: any[] = []) {
   const [userCount, modelCount, messageCount] = await Promise.all([
     db('users').where('status', 1).count({ count: '*' }).first(),
     db('lowcode_models').where('status', 1).count({ count: '*' }).first(),
     db('messages').where('status', 1).count({ count: '*' }).first()
   ])
-  return {
+  const stats: Record<string, any> = {
     userCount: Number(userCount?.count || 0),
     modelCount: Number(modelCount?.count || 0),
     messageCount: Number(messageCount?.count || 0)
   }
+
+  const statWidgets = widgets.filter((w) => w.type === 'stat' && w.dataSource)
+  const dynamicEntries = await Promise.all(
+    statWidgets.map(async (widget) => {
+      try {
+        const value = await executeDataSource(widget.dataSource)
+        return { field: widget.field, value: resolveStatValue(value) }
+      } catch {
+        return { field: widget.field, value: 0 }
+      }
+    })
+  )
+
+  for (const entry of dynamicEntries) {
+    if (entry.field) {
+      stats[entry.field] = entry.value
+    }
+  }
+
+  return stats
+}
+
+function resolveStatValue(data: any): any {
+  if (data === null || data === undefined) return 0
+  if (typeof data === 'number' || typeof data === 'boolean') return data
+  if (typeof data === 'string') return data
+  if (Array.isArray(data)) {
+    if (data.length === 0) return 0
+    const first = data[0]
+    if (typeof first === 'object' && first !== null) {
+      const values = Object.values(first)
+      const numeric = values.find((v) => typeof v === 'number')
+      return numeric !== undefined ? numeric : String(values[0] ?? '')
+    }
+    return first
+  }
+  if (typeof data === 'object') {
+    const values = Object.values(data)
+    const numeric = values.find((v) => typeof v === 'number')
+    return numeric !== undefined ? numeric : String(values[0] ?? '')
+  }
+  return String(data)
 }
 
 function getDefaultHomepageConfig() {
@@ -57,9 +99,9 @@ function getDefaultHomepageConfig() {
     code: 'default',
     name: '默认首页',
     widgets: [
-      { type: 'stat', title: '用户数量', value: 0, icon: 'user', color: 'primary' },
-      { type: 'stat', title: '数据模型', value: 0, icon: 'model', color: 'success' },
-      { type: 'stat', title: '消息', value: 0, icon: 'message', color: 'warning' }
+      { type: 'stat', title: '用户数量', field: 'userCount', icon: 'user', color: 'primary', dataSource: { type: '' } },
+      { type: 'stat', title: '数据模型', field: 'modelCount', icon: 'model', color: 'success', dataSource: { type: '' } },
+      { type: 'stat', title: '消息', field: 'messageCount', icon: 'message', color: 'warning', dataSource: { type: '' } }
     ],
     status: 1
   }

@@ -6,8 +6,9 @@ const router: RouterType = Router()
 
 router.use(authMiddleware)
 
-// 统计数据
+// 统计数据（GET 返回默认统计，POST 可传入 widgets 计算动态统计）
 router.get('/stats', dashboardController.getStats)
+router.post('/stats', dashboardController.getStats)
 
 // 首页配置
 router.get('/homepage', dashboardController.getHomepageConfig)

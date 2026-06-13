@@ -108,7 +108,47 @@
 }
 ```
 
-## 扩展规范
+## 首页组件配置
+
+### 组件（widget）结构
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| type | string | 组件类型：`stat` / `link` / `dashboard` / `notice` |
+| title | string | 卡片标题 |
+| icon | string | 图标名 |
+| color | string | 颜色：`primary` / `success` / `warning` / `danger` |
+| field | string | `stat` 类型使用，对应统计字段名 |
+| dataSource | object | `stat` 类型的数据源配置，可选 |
+
+### 统计卡片数据源
+
+当 `type` 为 `stat` 时，可通过 `dataSource` 动态获取统计值。未配置数据源时，优先使用后端默认统计（`userCount` / `modelCount` / `messageCount`）。
+
+```json
+{
+  "type": "stat",
+  "title": "今日订单",
+  "field": "orderCount",
+  "icon": "order",
+  "color": "primary",
+  "dataSource": {
+    "type": "sql",
+    "sql": "SELECT count(*) as count FROM orders WHERE date(create_time) = date('now')"
+  }
+}
+```
+
+`dataSource.type` 支持：
+
+| 类型 | 字段 | 说明 |
+|------|------|------|
+| `static` | `value` | 固定值 |
+| `sql` | `sql` | 只读 SELECT 查询，结果取首条数据的第一个数字或首个字段 |
+| `api` | `api.method` / `api.url` | 调用内部接口，返回 data 字段 |
+| `script` | `script` | 在线 JS 脚本，可调用 `db.raw()` 与 `http()` |
+
+### 扩展规范
 
 新增组件类型时：
 
@@ -118,3 +158,9 @@
    - `docs/dynamic-form/usage.md`
    - `sop/lowcode/designer-spec.md`
    - `sop/manuals/lowcode/form-designer.md`
+
+扩展首页统计数据源类型时：
+
+1. 在 `dashboard.service.ts` 的 `executeDataSource` 或 `resolveStatValue` 中处理新类型。
+2. 在 `HomepageConfig.vue` 中增加对应配置项。
+3. 同步更新 `sop/manuals/lowcode/homepage-config.md`。

@@ -8,7 +8,7 @@
 |---|---|
 | [metadata.md](./metadata.md) | 元数据模型设计（模型、字段、表单、列表、编码规则、校验规则） |
 | [dynamic-api.md](./dynamic-api.md) | 动态 CRUD API 约定与实现机制 |
-| [designer-spec.md](./designer-spec.md) | 表单设计器与列表设计器配置规范 |
+| [designer-spec.md](./designer-spec.md) | 表单设计器、列表设计器与首页组件配置规范 |
 
 ## 核心流程
 

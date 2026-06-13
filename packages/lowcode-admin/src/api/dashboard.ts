@@ -1,7 +1,9 @@
 import request from './request'
 
-export function getStats() {
-  return request.get('/dashboard/stats')
+export function getStats(widgets?: any[]) {
+  return widgets
+    ? request.post('/dashboard/stats', { widgets })
+    : request.get('/dashboard/stats')
 }
 
 export function getHomepageConfig(code = 'default') {

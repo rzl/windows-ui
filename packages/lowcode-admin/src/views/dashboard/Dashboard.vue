@@ -50,11 +50,10 @@ const stats = reactive<any>({})
 onMounted(() => loadData())
 
 async function loadData() {
-  const [configData, statsData] = await Promise.all([
-    dashboardApi.getHomepageConfig('default'),
-    dashboardApi.getStats()
-  ])
+  const configData = await dashboardApi.getHomepageConfig('default')
   Object.assign(config, configData)
+
+  const statsData = await dashboardApi.getStats(config.widgets || [])
   Object.assign(stats, statsData)
 
   // 为仪表盘组件生成 iframe blob URL
