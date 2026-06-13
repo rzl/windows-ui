@@ -112,6 +112,7 @@ export async function createField(data: any) {
     required: data.required ? 1 : 0,
     default_value: data.defaultValue,
     options: data.options ? JSON.stringify(data.options) : null,
+    validation_rule: data.validationRule || null,
     sort: data.sort ?? 0,
     status: data.status ?? 1
   })
@@ -136,6 +137,7 @@ export async function updateField(id: number, data: any) {
     required: data.required ? 1 : 0,
     default_value: data.defaultValue,
     options: data.options ? JSON.stringify(data.options) : null,
+    validation_rule: data.validationRule || null,
     sort: data.sort,
     status: data.status
   })
@@ -351,6 +353,7 @@ export async function dynamicDetail(modelCode: string, id: number) {
 
 export async function dynamicCreate(modelCode: string, data: any) {
   const model = await getModelByCode(modelCode)
+  await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
   const [id] = await db(model.table_name).insert(cleanData)
   return db(model.table_name).where({ id }).first()
@@ -358,6 +361,7 @@ export async function dynamicCreate(modelCode: string, data: any) {
 
 export async function dynamicUpdate(modelCode: string, id: number, data: any) {
   const model = await getModelByCode(modelCode)
+  await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
   cleanData.update_time = db.fn.now()
   await db(model.table_name).where({ id }).update(cleanData)
@@ -368,6 +372,22 @@ export async function dynamicDelete(modelCode: string, id: number) {
   const model = await getModelByCode(modelCode)
   await db(model.table_name).where({ id }).del()
   return true
+}
+
+async function validateDynamicData(fields: any[], data: any) {
+  const ruleFields = fields.filter((f: any) => f.validation_rule && data[f.field_name] !== undefined && data[f.field_name] !== '' && data[f.field_name] !== null)
+  if (!ruleFields.length) return
+
+  const items = ruleFields.map((f: any) => ({
+    code: f.validation_rule,
+    value: String(data[f.field_name])
+  }))
+
+  const results = await validateBatch(items)
+  const errors = results.filter((r) => !r.valid)
+  if (errors.length) {
+    throw new AppError(errors.map((e) => e.message).join('；'), 400)
+  }
 }
 
 function sanitizeData(fields: any[], data: any) {
@@ -490,4 +510,24 @@ export async function validateField(ruleCode: string, value: any) {
 
   const regex = new RegExp(rule.pattern)
   return regex.test(value)
+}
+
+export async function validateBatch(items: { code: string; value: any }[]) {
+  if (!items.length) return []
+  const rules = await db('lowcode_validation_rules').whereIn('code', items.map((i) => i.code))
+  const ruleMap = new Map(rules.map((r) => [r.code, r]))
+
+  return items.map((item) => {
+    const rule = ruleMap.get(item.code)
+    if (!rule) {
+      return { code: item.code, valid: false, message: '校验规则不存在' }
+    }
+    try {
+      const regex = new RegExp(rule.pattern)
+      const valid = regex.test(item.value)
+      return { code: item.code, valid, message: valid ? '' : rule.message }
+    } catch {
+      return { code: item.code, valid: false, message: '校验规则表达式错误' }
+    }
+  })
 }

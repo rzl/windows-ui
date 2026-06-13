@@ -161,3 +161,7 @@ export function updateValidationRule(id: number, data: ValidationRuleForm) {
 export function deleteValidationRule(id: number) {
   return request.delete(`/lowcode/validation-rules/${id}`)
 }
+
+export function validateBatch(items: { code: string; value: any }[]) {
+  return request.post('/lowcode/validation-rules/batch', { items })
+}

@@ -1,5 +1,5 @@
 <template>
-  <w-form :model="model" :rules="rules">
+  <w-form ref="formRef" :model="model" :rules="rules">
     <div class="w-dynamic-form" :style="gridStyle">
       <w-form-item
         v-for="field in visibleFields"
@@ -100,13 +100,16 @@
 
         <!-- 自定义 -->
         <slot v-else :name="field.prop" :field="field" :model="model" />
+        <div v-if="validationErrors[field.prop]" class="w-dynamic-form__error">
+          {{ validationErrors[field.prop] }}
+        </div>
       </w-form-item>
     </div>
   </w-form>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import WForm from '../form/form.vue'
 import WFormItem from '../form/form-item.vue'
 import WInput from '../input/input.vue'
@@ -129,6 +132,7 @@ export interface DynamicField {
   disabled?: boolean | ((model: Record<string, any>) => boolean)
   hidden?: boolean | ((model: Record<string, any>) => boolean)
   required?: boolean
+  validationRule?: string
   rules?: FormRule[]
   clearable?: boolean
   min?: number
@@ -141,10 +145,17 @@ export interface DynamicField {
 
 defineOptions({ name: 'WDynamicForm' })
 
+export type ValidateRuleItem = { code: string; value: any }
+export type ValidateRuleResult = { code: string; valid: boolean; message?: string }
+
 const props = defineProps({
   model: { type: Object as () => Record<string, any>, default: () => ({}) },
   fields: { type: Array as () => DynamicField[], default: () => [] },
-  columns: { type: Number, default: 1 }
+  columns: { type: Number, default: 1 },
+  validateRules: {
+    type: Function as () => (items: ValidateRuleItem[]) => Promise<ValidateRuleResult[]>,
+    default: undefined
+  }
 })
 
 const visibleFields = computed(() => {
@@ -153,6 +164,9 @@ const visibleFields = computed(() => {
     return !field.hidden
   })
 })
+
+const formRef = ref<any>(null)
+const validationErrors = reactive<Record<string, string>>({})
 
 const rules = computed(() => {
   const result: Record<string, FormRule[]> = {}
@@ -183,8 +197,48 @@ function isDisabled(field: DynamicField): boolean {
   if (typeof field.disabled === 'function') return field.disabled(props.model)
   return !!field.disabled
 }
+
+async function validate(): Promise<boolean> {
+  // 清空历史后端校验错误
+  Object.keys(validationErrors).forEach((k) => delete validationErrors[k])
+
+  // 本地校验
+  const localValid = formRef.value ? await formRef.value.validate() : true
+  if (!localValid) return false
+
+  // 后端校验规则
+  const ruleFields = visibleFields.value.filter(
+    (f) => f.validationRule && props.model[f.prop] !== undefined && props.model[f.prop] !== '' && props.model[f.prop] !== null
+  )
+
+  if (!ruleFields.length || !props.validateRules) return true
+
+  const items: ValidateRuleItem[] = ruleFields.map((f) => ({
+    code: f.validationRule as string,
+    value: props.model[f.prop]
+  }))
+
+  try {
+    const results = await props.validateRules(items)
+    let valid = true
+    results.forEach((result, index) => {
+      const field = ruleFields[index]
+      if (!result.valid) {
+        valid = false
+        validationErrors[field.prop] = result.message || `${field.label} 校验失败`
+      }
+    })
+    return valid
+  } catch (error) {
+    console.error('校验规则调用失败', error)
+    return false
+  }
+}
+
+defineExpose({ validate })
 </script>
 
 <style scoped>
 .w-dynamic-form { }
+.w-dynamic-form__error { color: var(--w-color-danger); font-size: var(--w-font-size-small); margin-top: 2px; }
 </style>

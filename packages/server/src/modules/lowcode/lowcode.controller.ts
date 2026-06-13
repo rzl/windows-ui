@@ -137,3 +137,8 @@ export async function validateField(req: Request, res: Response) {
   const result = await lowcodeService.validateField(req.params.ruleCode, req.body.value)
   res.json(success(result))
 }
+
+export async function validateBatch(req: Request, res: Response) {
+  const result = await lowcodeService.validateBatch(req.body.items || [])
+  res.json(success(result))
+}

@@ -39,6 +39,9 @@
             <template #formRequired="{ row }">
               <w-switch v-model="formConfigMap[row.field_name].required" />
             </template>
+            <template #validationRule="{ row }">
+              <w-select v-model="formConfigMap[row.field_name].validationRule" :options="validationRuleOptions" style="width: 130px" />
+            </template>
           </w-table>
         </w-tab-pane>
 
@@ -101,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 
@@ -115,6 +118,7 @@ const formConfig = reactive<any>({ fields: [] })
 const tableConfig = reactive<any>({ fields: [] })
 const formConfigMap = reactive<Record<string, any>>({})
 const tableConfigMap = reactive<Record<string, any>>({})
+const validationRules = ref<any[]>([])
 
 const fieldDialogVisible = ref(false)
 const fieldForm = reactive<any>({})
@@ -129,6 +133,11 @@ const fieldTypeOptions = [
   { label: '下拉选择', value: 'select' },
   { label: '单选', value: 'radio' }
 ]
+
+const validationRuleOptions = computed(() => [
+  { label: '无', value: '' },
+  ...(validationRules.value || []).map((r: any) => ({ label: r.name, value: r.code }))
+])
 
 const formTypeOptions = [
   { label: '输入框', value: 'input' },
@@ -157,7 +166,8 @@ const formDesignColumns = [
   { prop: 'display_name', label: '显示名称' },
   { prop: 'inForm', label: '表单显示', width: 100 },
   { prop: 'formType', label: '表单类型', width: 140 },
-  { prop: 'formRequired', label: '必填', width: 80 }
+  { prop: 'formRequired', label: '必填', width: 80 },
+  { prop: 'validationRule', label: '校验规则', width: 150 }
 ]
 
 const tableDesignColumns = [
@@ -183,6 +193,7 @@ function syncConfigMaps() {
         inForm: true,
         type: mapFieldTypeToFormType(field.type),
         required: field.required === 1,
+        validationRule: field.validation_rule || '',
         options: field.options ? JSON.parse(field.options) : undefined
       }
     }
@@ -217,9 +228,13 @@ function typeLabel(type: string) {
 }
 
 async function loadData() {
-  const data = await lowcodeApi.getModel(modelId)
+  const [data, rules] = await Promise.all([
+    lowcodeApi.getModel(modelId),
+    lowcodeApi.getValidationRules()
+  ])
   Object.assign(model, data)
   fields.value = data.fields || []
+  validationRules.value = rules || []
 
   if (data.forms?.length) {
     const saved = typeof data.forms[0].config === 'string'

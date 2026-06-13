@@ -36,6 +36,7 @@ router.post('/validation-rules', lowcodeController.createValidationRule)
 router.put('/validation-rules/:id', lowcodeController.updateValidationRule)
 router.delete('/validation-rules/:id', lowcodeController.deleteValidationRule)
 router.post('/validation-rules/:ruleCode/validate', lowcodeController.validateField)
+router.post('/validation-rules/batch', lowcodeController.validateBatch)
 
 // 动态 CRUD（放在最后避免路径冲突）
 router.get('/:modelCode', lowcodeController.dynamicList)

@@ -30,7 +30,13 @@
     </w-card>
 
     <w-dialog v-model="dialogVisible" :title="dialogTitle" width="560">
-      <w-dynamic-form v-model="formModel" :fields="formFields" :columns="2" />
+      <w-dynamic-form
+        ref="dynamicFormRef"
+        v-model="formModel"
+        :fields="formFields"
+        :columns="2"
+        :validate-rules="validateRules"
+      />
       <template #footer>
         <w-button @click="closeDialog">取消</w-button>
         <w-button type="primary" @click="handleSave">确定</w-button>
@@ -56,6 +62,7 @@ const query = reactive({ page: 1, pageSize: 10, filters: '' })
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增')
 const formModel = reactive<any>({})
+const dynamicFormRef = ref<any>(null)
 
 const formFields = computed(() => {
   return formConfig.fields.map((f: any) => ({
@@ -63,6 +70,7 @@ const formFields = computed(() => {
     label: f.label,
     type: f.type || 'input',
     required: f.required,
+    validationRule: f.validationRule,
     options: f.options
   }))
 })
@@ -102,6 +110,7 @@ async function loadModel() {
       label: f.display_name,
       type: mapType(f.type),
       required: f.required === 1,
+      validationRule: f.validation_rule || '',
       options: f.options ? JSON.parse(f.options) : undefined
     }))
   }
@@ -156,7 +165,15 @@ function closeDialog() {
   dialogVisible.value = false
 }
 
+async function validateRules(items: { code: string; value: any }[]) {
+  if (!items.length) return []
+  return lowcodeApi.validateBatch(items)
+}
+
 async function handleSave() {
+  const valid = dynamicFormRef.value ? await dynamicFormRef.value.validate() : true
+  if (!valid) return
+
   const data = JSON.parse(JSON.stringify(formModel))
   if (data.id) {
     await lowcodeApi.updateDynamic(modelCode.value, data.id, data)
