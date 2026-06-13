@@ -44,6 +44,9 @@
 | datetime | WDatePicker | 日期时间选择 |
 | select | WSelect | 下拉选择 |
 | radio | WRadioGroup | 单选组 |
+| upload | WUpload | 文件上传 |
+| cascader | WCascader | 级联选择 |
+| rich-text | WRichText | 富文本编辑器 |
 
 ### 示例
 

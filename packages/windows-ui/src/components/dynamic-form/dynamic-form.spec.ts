@@ -63,4 +63,17 @@ describe('DynamicForm', () => {
     expect(valid).toBe(true)
     expect(validateRules).toHaveBeenCalledWith([{ code: 'phone', value: '13800138000' }])
   })
+
+  it('应渲染 upload / cascader / rich-text 字段', () => {
+    const model = reactive({})
+    const fields = [
+      { prop: 'file', label: '文件', type: 'upload' as const },
+      { prop: 'city', label: '城市', type: 'cascader' as const },
+      { prop: 'desc', label: '描述', type: 'rich-text' as const }
+    ]
+    const wrapper = mountDynamicForm({ model, fields })
+    expect(wrapper.findComponent({ name: 'WUpload' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'WCascader' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'WRichText' }).exists()).toBe(true)
+  })
 })

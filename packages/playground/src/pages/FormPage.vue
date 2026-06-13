@@ -82,6 +82,10 @@
         <h3>Upload 上传器</h3>
         <p>{{ t('文件上传') }}</p>
       </router-link>
+      <router-link to="/form/rich-text" class="component-card">
+        <h3>RichText 富文本</h3>
+        <p>{{ t('轻量富文本编辑器') }}</p>
+      </router-link>
       <router-link to="/form/mention" class="component-card">
         <h3>Mention 提及</h3>
         <p>{{ t('@提及功能') }}</p>

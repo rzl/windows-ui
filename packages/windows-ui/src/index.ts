@@ -43,6 +43,7 @@ import WTimeSelect from './components/time-select/time-select.vue'
 import WTransfer from './components/transfer/transfer.vue'
 import WTreeSelect from './components/tree-select/tree-select.vue'
 import WUpload from './components/upload/upload.vue'
+import WRichText from './components/rich-text/rich-text.vue'
 import WAvatar from './components/avatar/avatar.vue'
 import WBadge from './components/badge/badge.vue'
 import WCalendar from './components/calendar/calendar.vue'
@@ -136,6 +137,7 @@ const components = [
   WTransfer,
   WTreeSelect,
   WUpload,
+  WRichText,
   WAvatar,
   WBadge,
   WCalendar,
@@ -246,6 +248,7 @@ export {
   WTransfer,
   WTreeSelect,
   WUpload,
+  WRichText,
   WAvatar,
   WBadge,
   WCalendar,

@@ -36,6 +36,9 @@ const fields = [
 | switch | 开关 |
 | date | 日期选择 |
 | datetime | 日期时间选择 |
+| upload | 文件上传（保存文件名） |
+| cascader | 级联选择 |
+| rich-text | 富文本编辑器 |
 | custom | 自定义插槽 |
 
 ## 字段配置

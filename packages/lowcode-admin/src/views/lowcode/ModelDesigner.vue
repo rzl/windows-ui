@@ -152,7 +152,10 @@ const fieldTypeOptions = [
   { label: '日期', value: 'date' },
   { label: '日期时间', value: 'datetime' },
   { label: '下拉选择', value: 'select' },
-  { label: '单选', value: 'radio' }
+  { label: '单选', value: 'radio' },
+  { label: '文件上传', value: 'upload' },
+  { label: '级联选择', value: 'cascader' },
+  { label: '富文本', value: 'rich-text' }
 ]
 
 const validationRuleOptions = computed(() => [
@@ -182,7 +185,10 @@ const formTypeOptions = [
   { label: '日期', value: 'date' },
   { label: '日期时间', value: 'datetime' },
   { label: '下拉', value: 'select' },
-  { label: '单选', value: 'radio' }
+  { label: '单选', value: 'radio' },
+  { label: '文件上传', value: 'upload' },
+  { label: '级联选择', value: 'cascader' },
+  { label: '富文本', value: 'rich-text' }
 ]
 
 const fieldColumns = [
@@ -255,7 +261,10 @@ function mapFieldTypeToFormType(type: string) {
     date: 'date',
     datetime: 'datetime',
     select: 'select',
-    radio: 'radio'
+    radio: 'radio',
+    upload: 'upload',
+    cascader: 'cascader',
+    'rich-text': 'rich-text'
   }
   return map[type] || 'input'
 }

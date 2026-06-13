@@ -41,6 +41,7 @@ import TimeSelectPage from '../pages/components/TimeSelectComponentPage.vue'
 import TransferPage from '../pages/components/TransferComponentPage.vue'
 import TreeSelectPage from '../pages/components/TreeSelectComponentPage.vue'
 import UploadPage from '../pages/components/UploadComponentPage.vue'
+import RichTextPage from '../pages/components/RichTextComponentPage.vue'
 import MentionPage from '../pages/components/MentionComponentPage.vue'
 import FormComponentPage from '../pages/components/FormComponentPage.vue'
 import AvatarPage from '../pages/components/AvatarComponentPage.vue'
@@ -140,6 +141,7 @@ const routes = [
       { path: 'form/transfer', component: TransferPage },
       { path: 'form/tree-select', component: TreeSelectPage },
       { path: 'form/upload', component: UploadPage },
+      { path: 'form/rich-text', component: RichTextPage },
       { path: 'form/mention', component: MentionPage },
       { path: 'form/form', component: FormComponentPage },
       { path: 'data/avatar', component: AvatarPage },

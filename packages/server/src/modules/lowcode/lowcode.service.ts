@@ -287,6 +287,13 @@ async function addPhysicalColumn(tableName: string, columnName: string, fieldDat
       case 'datetime':
         table.datetime(columnName)
         break
+      case 'upload':
+      case 'cascader':
+        table.string(columnName, 255)
+        break
+      case 'rich-text':
+        table.text(columnName)
+        break
       default:
         table.string(columnName, 255)
     }

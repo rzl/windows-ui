@@ -98,6 +98,32 @@
           :disabled="isDisabled(field)"
         />
 
+        <!-- 文件上传 -->
+        <w-upload
+          v-else-if="field.type === 'upload'"
+          :button-text="field.placeholder || '选择文件'"
+          :disabled="isDisabled(field)"
+          @change="model[field.prop] = $event?.name || ''"
+        />
+
+        <!-- 级联选择 -->
+        <w-cascader
+          v-else-if="field.type === 'cascader'"
+          v-model="model[field.prop]"
+          :options="field.options || []"
+          :placeholder="field.placeholder"
+          :disabled="isDisabled(field)"
+          :clearable="field.clearable"
+        />
+
+        <!-- 富文本 -->
+        <w-rich-text
+          v-else-if="field.type === 'rich-text'"
+          v-model="model[field.prop]"
+          :placeholder="field.placeholder"
+          :disabled="isDisabled(field)"
+        />
+
         <!-- 自定义 -->
         <slot v-else :name="field.prop" :field="field" :model="model" />
         <div v-if="validationErrors[field.prop]" class="w-dynamic-form__error">
@@ -120,12 +146,15 @@ import WCheckbox from '../checkbox/checkbox.vue'
 import WSwitch from '../switch/switch.vue'
 import WDatePicker from '../date-picker/date-picker.vue'
 import WDateTimePicker from '../date-time-picker/date-time-picker.vue'
+import WUpload from '../upload/upload.vue'
+import WCascader from '../cascader/cascader.vue'
+import WRichText from '../rich-text/rich-text.vue'
 import type { FormRule } from '../form/form.vue'
 
 export interface DynamicField {
   prop: string
   label: string
-  type: 'input' | 'text' | 'number' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'switch' | 'date' | 'datetime' | 'custom'
+  type: 'input' | 'text' | 'number' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'switch' | 'date' | 'datetime' | 'upload' | 'cascader' | 'rich-text' | 'custom'
   inputType?: string
   placeholder?: string
   options?: { label: string; value: any }[]

@@ -142,7 +142,10 @@ function mapType(type: string) {
     date: 'date',
     datetime: 'datetime',
     select: 'select',
-    radio: 'radio'
+    radio: 'radio',
+    upload: 'upload',
+    cascader: 'cascader',
+    'rich-text': 'rich-text'
   }
   return map[type] || 'input'
 }
