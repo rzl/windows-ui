@@ -92,6 +92,9 @@ import WAdminLayout from './components/admin-layout/admin-layout.vue'
 import WSearchForm from './components/search-form/search-form.vue'
 import WPageContainer from './components/page-container/page-container.vue'
 import WPermission from './components/permission/permission.vue'
+import WCrudTable from './components/crud-table/crud-table.vue'
+import WDynamicForm from './components/dynamic-form/dynamic-form.vue'
+import WQueryBuilder from './components/query-builder/query-builder.vue'
 
 const components = [
   WButton,
@@ -180,7 +183,10 @@ const components = [
   WAdminLayout,
   WSearchForm,
   WPageContainer,
-  WPermission
+  WPermission,
+  WCrudTable,
+  WDynamicForm,
+  WQueryBuilder
 ]
 
 export interface WindowsUIOptions {
@@ -288,10 +294,15 @@ export {
   WAdminLayout,
   WSearchForm,
   WPageContainer,
-  WPermission
+  WPermission,
+  WCrudTable,
+  WDynamicForm,
+  WQueryBuilder
 }
 
 export type { FormRule } from './components/form/form.vue'
+export type { DynamicField } from './components/dynamic-form/dynamic-form.vue'
+export type { QueryField, QueryCondition } from './components/query-builder/query-builder.vue'
 export {
   useLocale,
   setGlobalLocale,
