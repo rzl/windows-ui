@@ -15,6 +15,12 @@ export interface AuthRequest extends Request {
 }
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+  // 仪表盘服务内部调用放行（仅限本机）
+  const clientIp = req.ip || req.socket.remoteAddress || ''
+  if (req.headers['x-dashboard-service'] && (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp.includes('127.0.0.1'))) {
+    return next()
+  }
+
   const authHeader = req.headers.authorization
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

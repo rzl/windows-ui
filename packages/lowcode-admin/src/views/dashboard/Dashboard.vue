@@ -62,13 +62,22 @@ async function loadData() {
     if (widget.type === 'dashboard' && widget.dashboardCode) {
       try {
         const dashboard = await dashboardApi.getDashboard(widget.dashboardCode)
-        const option = dashboard.config?.option || {}
+        const option = await resolveDashboardOption(dashboard)
         widget.dashboardUrl = generateDashboardBlobUrl(option)
       } catch {
         widget.dashboardUrl = ''
       }
     }
   }
+}
+
+async function resolveDashboardOption(dashboard: any) {
+  const config = dashboard.config || {}
+  const dataSource = config.dataSource
+  if (!dataSource || dataSource.type === 'static' || !dataSource.type) {
+    return config.option || {}
+  }
+  return dashboardApi.executeDataSource(dataSource)
 }
 
 function generateDashboardBlobUrl(option: any) {

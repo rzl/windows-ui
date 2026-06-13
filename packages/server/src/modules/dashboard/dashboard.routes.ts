@@ -20,4 +20,7 @@ router.post('/dashboards', dashboardController.createDashboard)
 router.put('/dashboards/:id', dashboardController.updateDashboard)
 router.delete('/dashboards/:id', dashboardController.deleteDashboard)
 
+// 数据源执行
+router.post('/dashboards/data-source/execute', dashboardController.executeDataSource)
+
 export default router

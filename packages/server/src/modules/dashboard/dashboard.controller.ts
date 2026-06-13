@@ -41,3 +41,8 @@ export async function deleteDashboard(req: Request, res: Response) {
   await dashboardService.deleteDashboard(Number(req.params.id))
   res.json(success(null, '删除成功'))
 }
+
+export async function executeDataSource(req: Request, res: Response) {
+  const result = await dashboardService.executeDataSource(req.body.dataSource || {}, req.body.ctx || {})
+  res.json(success(result))
+}

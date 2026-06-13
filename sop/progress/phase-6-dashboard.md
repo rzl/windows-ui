@@ -13,12 +13,13 @@
 
 ## 任务清单
 
-- [ ] 设计并实现首页配置与仪表盘配置数据表
-- [ ] 实现后端首页配置与仪表盘设计 API
-- [ ] 实现 lowcode-admin 仪表盘设计器（iframe ECharts）
-- [ ] 实现可配置的首页展示
-- [ ] 更新路由、菜单与种子数据
-- [ ] 构建与联调验证
+- [x] 设计并实现首页配置与仪表盘配置数据表
+- [x] 实现后端首页配置与仪表盘设计 API
+- [x] 实现 lowcode-admin 仪表盘设计器（iframe ECharts）
+- [x] 实现可配置的首页展示
+- [x] 支持仪表盘数据源动态化（SQL / API / 在线脚本）
+- [x] 更新路由、菜单与种子数据
+- [x] 构建与联调验证
 
 ## 数据表设计
 
@@ -27,6 +28,15 @@
 | homepage_configs | 首页配置：widgets 数组（JSON） |
 | dashboards | 仪表盘：code/name/config(JSON)/status |
 
+## 数据源类型
+
+| 类型 | 说明 |
+|------|------|
+| static | 静态 ECharts option |
+| sql | 执行 SELECT 查询，通过转换脚本生成 option |
+| api | 调用内部 API，通过转换脚本生成 option |
+| script | 在线编写 JavaScript，直接返回 option |
+
 ## 验收标准
 
 - 可在首页配置中添加快捷入口、统计卡片、公告
@@ -34,3 +44,8 @@
 - 仪表盘通过 iframe 嵌入并渲染 ECharts
 - 首页根据配置动态展示内容
 - `pnpm build:server` 与 `pnpm build:lowcode` 通过
+
+## 运行记录
+
+- 2026-06-13：完成首页配置与仪表盘设计器基础版本
+- 2026-06-13：完成仪表盘数据源动态化，支持 SQL / API / 在线脚本三种数据源

@@ -31,3 +31,7 @@ export function updateDashboard(id: number, data: any) {
 export function deleteDashboard(id: number) {
   return request.delete(`/dashboard/dashboards/${id}`)
 }
+
+export function executeDataSource(dataSource: any, ctx?: any) {
+  return request.post('/dashboard/dashboards/data-source/execute', { dataSource, ctx })
+}

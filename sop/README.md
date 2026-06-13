@@ -42,6 +42,7 @@ sop/
 | [architecture/overview.md](./architecture/overview.md) | 系统架构总览 |
 | [database/schema.md](./database/schema.md) | 数据库设计 |
 | [manuals/README.md](./manuals/README.md) | 用户操作手册总览 |
+| [manuals/monitor/dashboard-designer.md](./manuals/monitor/dashboard-designer.md) | 仪表盘设计器使用手册 |
 
 ## 常用命令
 

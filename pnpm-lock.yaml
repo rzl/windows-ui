@@ -98,6 +98,9 @@ importers:
 
   packages/server:
     dependencies:
+      axios:
+        specifier: ^1.17.0
+        version: 1.17.0
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -132,6 +135,9 @@ importers:
         specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
+      '@types/axios':
+        specifier: ^0.14.4
+        version: 0.14.4
       '@types/bcryptjs':
         specifier: ^2.4.6
         version: 2.4.6
@@ -719,6 +725,10 @@ packages:
 
   '@types/argparse@1.0.38':
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
+
+  '@types/axios@0.14.4':
+    resolution: {integrity: sha512-9JgOaunvQdsQ/qW2OPmE5+hCeUB52lQSolecrFrthct55QekhmXEwT203s20RL+UHtCQc15y3VXpby9E7Kkh/g==}
+    deprecated: This is a stub types definition. axios provides its own type definitions, so you do not need this installed.
 
   '@types/bcryptjs@2.4.6':
     resolution: {integrity: sha512-9xlo6R2qDs5uixm0bcIqCeMCE6HiQsIyel9KQySStiyqNl2tnj2mP3DX1Nf56MD6KMenNNlBBsy3LJ7gUEQPXQ==}
@@ -2522,6 +2532,13 @@ snapshots:
     optional: true
 
   '@types/argparse@1.0.38': {}
+
+  '@types/axios@0.14.4':
+    dependencies:
+      axios: 1.17.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
 
   '@types/bcryptjs@2.4.6': {}
 
