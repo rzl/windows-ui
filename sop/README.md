@@ -23,11 +23,25 @@ sop/
 ├── architecture/     # 系统架构文档
 ├── backend/          # 后端开发规范
 ├── frontend/         # 前端开发规范
+├── development/      # 开发工作流程与规范
 ├── database/         # 数据库设计文档
 ├── lowcode/          # 低代码平台设计
 ├── progress/         # 开发进度跟踪
 └── manuals/          # 用户操作手册（交付给用户）
 ```
+
+## 文档索引
+
+| 文档 | 说明 |
+|---|---|
+| [development/workflow.md](./development/workflow.md) | 低代码平台开发工作流程、组件扩展规范、Git 提交规范 |
+| [lowcode/README.md](./lowcode/README.md) | 低代码平台核心设计文档索引 |
+| [lowcode/metadata.md](./lowcode/metadata.md) | 元数据模型设计 |
+| [lowcode/dynamic-api.md](./lowcode/dynamic-api.md) | 动态 CRUD API 约定 |
+| [lowcode/designer-spec.md](./lowcode/designer-spec.md) | 表单/列表设计器配置规范 |
+| [architecture/overview.md](./architecture/overview.md) | 系统架构总览 |
+| [database/schema.md](./database/schema.md) | 数据库设计 |
+| [manuals/README.md](./manuals/README.md) | 用户操作手册总览 |
 
 ## 常用命令
 
