@@ -262,11 +262,12 @@ async function alterPhysicalColumn(tableName: string, columnName: string, fieldD
 
 export async function dynamicList(modelCode: string, query: any) {
   const model = await getModelByCode(modelCode)
-  const { keyword, page = 1, pageSize = 10, ...filters } = query
+  const { keyword, filters, page = 1, pageSize = 10 } = query
 
   const builder = db(model.table_name)
   const fields = model.fields.filter((f: any) => f.status === 1)
 
+  // 关键词模糊搜索
   if (keyword && fields.length) {
     const stringFields = fields
       .filter((f: any) => ['string', 'text', 'textarea'].includes(f.type))
@@ -285,10 +286,45 @@ export async function dynamicList(modelCode: string, query: any) {
     }
   }
 
-  // 字段精确筛选
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== '' && value !== null) {
-      builder.where(key, value)
+  // 高级查询条件
+  let filterList: any[] = []
+  if (filters) {
+    try {
+      filterList = JSON.parse(filters)
+      if (!Array.isArray(filterList)) filterList = []
+    } catch {
+      filterList = []
+    }
+  }
+
+  filterList.forEach((condition: any) => {
+    const { field, operator, value } = condition
+    if (value === undefined || value === '' || value === null || !field) return
+
+    switch (operator) {
+      case 'eq':
+        builder.where(field, value)
+        break
+      case 'ne':
+        builder.whereNot(field, value)
+        break
+      case 'like':
+        builder.where(field, 'like', `%${value}%`)
+        break
+      case 'gt':
+        builder.where(field, '>', value)
+        break
+      case 'lt':
+        builder.where(field, '<', value)
+        break
+      case 'gte':
+        builder.where(field, '>=', value)
+        break
+      case 'lte':
+        builder.where(field, '<=', value)
+        break
+      default:
+        builder.where(field, value)
     }
   })
 

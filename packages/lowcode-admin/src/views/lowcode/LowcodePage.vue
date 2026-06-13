@@ -1,6 +1,12 @@
 <template>
   <div class="list-page">
     <w-card :header="model.name || model.code || '低代码页面'">
+      <w-query-builder
+        v-if="queryFields.length"
+        :fields="queryFields"
+        @search="handleQuerySearch"
+        @reset="handleQueryReset"
+      />
       <w-crud-table
         :data="list"
         :columns="tableColumns"
@@ -8,15 +14,9 @@
         :total="total"
         :current-page="query.page"
         :page-size="query.pageSize"
-        @search="handleSearch"
-        @reset="handleReset"
+        :searchable="false"
         @page-change="handlePageChange"
       >
-        <template #search>
-          <w-form-item v-if="searchableFields.length" label="关键词">
-            <w-input v-model="query.keyword" placeholder="多字段模糊搜索" />
-          </w-form-item>
-        </template>
         <template #toolbar>
           <w-button type="primary" @click="openDialog()">+ 新增</w-button>
         </template>
@@ -52,7 +52,7 @@ const formConfig = reactive<any>({ fields: [] })
 const tableConfig = reactive<any>({ fields: [] })
 const list = ref<any[]>([])
 const total = ref(0)
-const query = reactive({ keyword: '', page: 1, pageSize: 10 })
+const query = reactive({ page: 1, pageSize: 10, filters: '' })
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增')
 const formModel = reactive<any>({})
@@ -75,8 +75,10 @@ const tableColumns = computed(() => {
   }))
 })
 
-const searchableFields = computed(() => {
-  return tableConfig.fields.filter((f: any) => f.searchable)
+const queryFields = computed(() => {
+  return tableConfig.fields
+    .filter((f: any) => f.searchable)
+    .map((f: any) => ({ prop: f.field, label: f.label }))
 })
 
 watch(modelCode, () => loadModel(), { immediate: true })
@@ -172,14 +174,15 @@ async function handleDelete(row: any) {
   }
 }
 
-async function handleSearch() {
+async function handleQuerySearch(conditions: any[]) {
   query.page = 1
+  query.filters = JSON.stringify(conditions)
   await loadData()
 }
 
-async function handleReset() {
-  query.keyword = ''
+async function handleQueryReset() {
   query.page = 1
+  query.filters = ''
   await loadData()
 }
 

@@ -36,6 +36,21 @@ function handleSearch(conditions) {
 | search | QueryCondition[] | 查询条件数组 |
 | reset | - | 重置 |
 
+## 低代码场景
+
+在低代码平台中，`WQueryBuilder` 已集成到动态业务页面。设计列表时，将字段标记为「可查询」，运行业务页面即可对该字段进行多条件筛选。
+
+查询条件会以 JSON 数组格式提交到后端，例如：
+
+```json
+[
+  { "field": "name", "operator": "like", "value": "张" },
+  { "field": "age", "operator": "gte", "value": "18" }
+]
+```
+
+后端根据操作符解析为对应 SQL 条件（`like`、`=`、`!=`、`>`、`<`、`>=`、`<=`）。
+
 ## 操作符
 
 | 操作符 | 说明 |
