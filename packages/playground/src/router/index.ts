@@ -89,6 +89,9 @@ import AdminLayoutPage from '../pages/components/AdminLayoutComponentPage.vue'
 import SearchFormPage from '../pages/components/SearchFormComponentPage.vue'
 import PageContainerPage from '../pages/components/PageContainerComponentPage.vue'
 import PermissionPage from '../pages/components/PermissionComponentPage.vue'
+import CrudTablePage from '../pages/components/CrudTableComponentPage.vue'
+import DynamicFormPage from '../pages/components/DynamicFormComponentPage.vue'
+import QueryBuilderPage from '../pages/components/QueryBuilderComponentPage.vue'
 
 const routes = [
   {
@@ -185,6 +188,9 @@ const routes = [
       { path: 'form/search-form', component: SearchFormPage },
       { path: 'others/page-container', component: PageContainerPage },
       { path: 'others/permission', component: PermissionPage },
+      { path: 'others/crud-table', component: CrudTablePage },
+      { path: 'others/dynamic-form', component: DynamicFormPage },
+      { path: 'others/query-builder', component: QueryBuilderPage },
     ]
   }
 ]

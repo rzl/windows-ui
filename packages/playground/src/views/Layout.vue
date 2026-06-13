@@ -207,7 +207,10 @@ const navItems = [
     { path: '/others/divider', label: 'Divider 分割线', indent: true },
     { path: '/others/watermark', label: 'Watermark 水印', indent: true },
     { path: '/others/page-container', label: 'PageContainer 页面容器', indent: true },
-    { path: '/others/permission', label: 'Permission 权限控制', indent: true }
+    { path: '/others/permission', label: 'Permission 权限控制', indent: true },
+    { path: '/others/crud-table', label: 'CrudTable 高级表格', indent: true },
+    { path: '/others/dynamic-form', label: 'DynamicForm 动态表单', indent: true },
+    { path: '/others/query-builder', label: 'QueryBuilder 高级查询', indent: true }
 ]
 </script>
 
