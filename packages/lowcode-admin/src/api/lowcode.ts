@@ -69,6 +69,10 @@ export function getModelByCode(code: string) {
   return request.get(`/lowcode/models/code/${code}`)
 }
 
+export function getModelPermission(code: string) {
+  return request.get(`/lowcode/models/code/${code}/permission`)
+}
+
 export function createModel(data: ModelForm) {
   return request.post('/lowcode/models', data)
 }

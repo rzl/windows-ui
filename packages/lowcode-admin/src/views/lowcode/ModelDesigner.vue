@@ -4,7 +4,8 @@
       <w-tabs v-model="activeTab">
         <w-tab-pane label="字段管理" name="fields">
           <div class="toolbar">
-            <w-button type="primary" size="small" @click="openFieldDialog()">+ 新增字段</w-button>
+            <w-button v-if="isAdmin" type="primary" size="small" @click="openFieldDialog()">+ 新增字段</w-button>
+            <w-tag v-else type="warning">只读模式</w-tag>
           </div>
           <w-table :data="fields" :columns="fieldColumns" stripe border>
             <template #type="{ row }">
@@ -18,8 +19,9 @@
             </template>
             <template #action="{ row }">
               <w-space>
-                <w-button size="small" @click="openFieldDialog(row)">编辑</w-button>
-                <w-button size="small" type="danger" @click="handleDeleteField(row)">删除</w-button>
+                <w-button v-if="isAdmin" size="small" @click="openFieldDialog(row)">编辑</w-button>
+                <w-button v-if="isAdmin" size="small" type="danger" @click="handleDeleteField(row)">删除</w-button>
+                <w-tag v-else type="info">无权限</w-tag>
               </w-space>
             </template>
           </w-table>
@@ -27,7 +29,8 @@
 
         <w-tab-pane label="表单设计" name="form">
           <div class="toolbar">
-            <w-button type="primary" size="small" @click="saveFormConfig">保存表单配置</w-button>
+            <w-button v-if="isAdmin" type="primary" size="small" @click="saveFormConfig">保存表单配置</w-button>
+            <w-tag v-else type="warning">只读模式</w-tag>
           </div>
           <w-table :data="fields" :columns="formDesignColumns" stripe border>
             <template #inForm="{ row }">
@@ -71,7 +74,8 @@
 
         <w-tab-pane label="列表设计" name="table">
           <div class="toolbar">
-            <w-button type="primary" size="small" @click="saveTableConfig">保存列表配置</w-button>
+            <w-button v-if="isAdmin" type="primary" size="small" @click="saveTableConfig">保存列表配置</w-button>
+            <w-tag v-else type="warning">只读模式</w-tag>
           </div>
           <w-form :inline="true" style="margin-bottom: 12px">
             <w-form-item label="工具栏">
@@ -205,8 +209,11 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.userInfo?.roleId === 1 || authStore.permissions?.includes('*'))
 const modelId = Number(route.params.id)
 
 const activeTab = ref('fields')
@@ -605,6 +612,7 @@ function clearOptionConfig() {
 }
 
 async function handleSaveField() {
+  if (!checkDesignPermission()) return
   const data = JSON.parse(JSON.stringify(fieldForm))
   data.modelId = modelId
   data.required = data.required ? 1 : 0
@@ -653,13 +661,23 @@ function handleDependsOnFieldChange(fieldName: string, val: any) {
 }
 
 async function handleDeleteField(row: any) {
+  if (!checkDesignPermission()) return
   if (confirm(`确定删除字段 ${row.display_name} 吗？`)) {
     await lowcodeApi.deleteField(row.id)
     await loadData()
   }
 }
 
+function checkDesignPermission() {
+  if (!isAdmin.value) {
+    alert('您没有模型设计权限')
+    return false
+  }
+  return true
+}
+
 async function saveFormConfig() {
+  if (!checkDesignPermission()) return
   const configFields = fields.value
     .map((f) => {
       const config = { ...formConfigMap[f.field_name] }
@@ -689,6 +707,7 @@ async function saveFormConfig() {
 }
 
 async function saveTableConfig() {
+  if (!checkDesignPermission()) return
   const configFields = fields.value
     .map((f) => {
       const config = { ...tableConfigMap[f.field_name] }

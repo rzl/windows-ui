@@ -206,6 +206,25 @@
 }
 ```
 
+### 数据权限
+
+模型级数据权限在「模型信息」中配置：
+
+| 权限范围 | 说明 |
+|----------|------|
+| `all` | 全部可见 |
+| `self` | 仅本人创建的数据 |
+| `dept` | 本部门数据 |
+| `dept_and_child` | 本部门及子部门数据 |
+
+前端 `LowcodePage` 会根据 `/lowcode/models/code/:code/permission` 返回的权限控制页面元素：
+
+- `none`：显示无权限提示，不渲染列表
+- 操作权限：`canCreate`、`canEdit`、`canDelete`、`canExport`、`canImport`
+- 设计权限：`canDesign`（仅管理员）
+
+`ModelList` 对普通用户自动过滤掉 `data_permission = 'none'` 的模型；模型设计器仅管理员可保存配置。
+
 ### 列表设计
 
 列表配置支持以下字段级属性：

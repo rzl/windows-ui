@@ -15,8 +15,13 @@ function safeFieldName(name: string) {
 
 // ---------- 数据模型 ----------
 
-export async function getModels() {
-  return db('lowcode_models').orderBy('id', 'desc')
+export async function getModels(user?: any) {
+  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
+  const builder = db('lowcode_models').orderBy('id', 'desc')
+  if (!isAdmin) {
+    builder.whereNot('data_permission', 'none')
+  }
+  return builder
 }
 
 export async function getModelById(id: number) {
@@ -329,6 +334,50 @@ async function alterPhysicalColumn(tableName: string, columnName: string, fieldD
   // SQLite 对 alter column 支持有限，这里仅做占位
   // 生产环境建议根据数据库类型做迁移
   return true
+}
+
+// ---------- 权限 ----------
+
+export async function getModelPermission(modelCode: string, user?: any) {
+  const model = await getModelByCode(modelCode)
+  const permission = model.data_permission || 'all'
+
+  // 管理员拥有全部权限
+  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
+  if (isAdmin) {
+    return {
+      dataScope: 'all',
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+      canExport: true,
+      canImport: true,
+      canDesign: true
+    }
+  }
+
+  // 根据数据权限范围决定操作权限
+  if (permission === 'none') {
+    return {
+      dataScope: 'none',
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canExport: false,
+      canImport: false,
+      canDesign: false
+    }
+  }
+
+  return {
+    dataScope: permission,
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true,
+    canImport: true,
+    canDesign: false
+  }
 }
 
 // ---------- 动态 CRUD ----------

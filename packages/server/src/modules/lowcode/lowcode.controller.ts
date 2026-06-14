@@ -4,8 +4,8 @@ import type { AuthRequest } from '../../middleware/auth'
 import * as lowcodeService from './lowcode.service'
 
 // 模型
-export async function getModels(_req: Request, res: Response) {
-  const result = await lowcodeService.getModels()
+export async function getModels(req: Request, res: Response) {
+  const result = await lowcodeService.getModels((req as AuthRequest).user)
   res.json(success(result))
 }
 
@@ -16,6 +16,11 @@ export async function getModel(req: Request, res: Response) {
 
 export async function getModelByCode(req: Request, res: Response) {
   const result = await lowcodeService.getModelByCode(req.params.code)
+  res.json(success(result))
+}
+
+export async function getModelPermission(req: Request, res: Response) {
+  const result = await lowcodeService.getModelPermission(req.params.code, (req as AuthRequest).user)
   res.json(success(result))
 }
 

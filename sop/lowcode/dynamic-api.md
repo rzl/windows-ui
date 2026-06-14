@@ -41,6 +41,7 @@ GET /api/lowcode/:modelCode
 | eq | `=` |
 | ne | `!=` |
 | like | `LIKE '%value%'` |
+| between | `BETWEEN value[0] AND value[1]` |
 | gt | `>` |
 | lt | `<` |
 | gte | `>=` |
@@ -100,3 +101,38 @@ DELETE /api/lowcode/:modelCode/:id
 - 其他 → 原值
 
 保留字段 `id`、`create_time`、`update_time` 不允许由前端传入修改。
+
+## 模型权限
+
+```http
+GET /api/lowcode/models/code/:code/permission
+```
+
+返回当前登录用户对该模型的数据权限与操作权限：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "dataScope": "all",
+    "canCreate": true,
+    "canEdit": true,
+    "canDelete": true,
+    "canExport": true,
+    "canImport": true,
+    "canDesign": true
+  }
+}
+```
+
+`dataScope` 取值：
+
+| 值 | 说明 |
+|---|------|
+| `all` | 全部数据 |
+| `self` | 仅本人数据 |
+| `dept` | 本部门数据 |
+| `dept_and_child` | 本部门及子部门数据 |
+| `none` | 无权限，前端应阻止访问 |
+
+管理员（`roleId === 1` 或拥有 `*` 权限）自动拥有全部权限。

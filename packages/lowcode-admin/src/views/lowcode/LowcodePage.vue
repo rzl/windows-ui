@@ -7,7 +7,9 @@
         @search="handleQuerySearch"
         @reset="handleQueryReset"
       />
+      <w-alert v-if="!canAccess" type="error" title="无权限访问" description="您没有该数据模型的访问权限，请联系管理员。" :closable="false" />
       <w-crud-table
+        v-else
         :data="list"
         :columns="tableColumns"
         :query="query"
@@ -21,11 +23,11 @@
       >
         <template #toolbar>
           <w-space>
-            <w-button v-if="tableConfig.toolbar.includes('create')" type="primary" @click="openDialog()">+ 新增</w-button>
-            <w-button v-if="tableConfig.toolbar.includes('batchDelete')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
-            <w-button v-if="tableConfig.toolbar.includes('export')" @click="handleExport">导出</w-button>
-            <w-button v-if="tableConfig.toolbar.includes('import')" @click="triggerImport">导入</w-button>
-            <input v-if="tableConfig.toolbar.includes('import')" ref="fileInput" type="file" accept=".csv" style="display: none" @change="handleFileChange" />
+            <w-button v-if="permission.canCreate && tableConfig.toolbar.includes('create')" type="primary" @click="openDialog()">+ 新增</w-button>
+            <w-button v-if="permission.canDelete && tableConfig.toolbar.includes('batchDelete')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
+            <w-button v-if="permission.canExport && tableConfig.toolbar.includes('export')" @click="handleExport">导出</w-button>
+            <w-button v-if="permission.canImport && tableConfig.toolbar.includes('import')" @click="triggerImport">导入</w-button>
+            <input v-if="permission.canImport && tableConfig.toolbar.includes('import')" ref="fileInput" type="file" accept=".csv" style="display: none" @change="handleFileChange" />
           </w-space>
         </template>
         <template v-for="col in formattedColumns" :key="col.prop" #[col.prop]="{ row }">
@@ -33,8 +35,8 @@
         </template>
         <template #action="{ row }">
           <w-space>
-            <w-button v-if="tableConfig.rowActions.includes('edit') && canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="tableConfig.rowActions.includes('delete') && canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+            <w-button v-if="permission.canEdit && tableConfig.rowActions.includes('edit') && canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
+            <w-button v-if="permission.canDelete && tableConfig.rowActions.includes('delete') && canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
             <w-button v-if="tableConfig.rowActions.includes('view')" size="small" @click="openDialog(row)">查看</w-button>
             <w-tag v-if="row.__flow_status" :type="flowStatusType(row.__flow_status)">{{ flowStatusText(row.__flow_status) }}</w-tag>
           </w-space>
@@ -76,6 +78,15 @@ const dictMap = reactive<Record<string, { label: string; value: string }[]>>({})
 const model = reactive<any>({})
 const formConfig = reactive<any>({ fields: [] })
 const tableConfig = reactive<any>({ fields: [], toolbar: ['create', 'batchDelete', 'export', 'import'], rowActions: ['edit', 'delete'] })
+const permission = reactive<any>({
+  dataScope: 'all',
+  canCreate: true,
+  canEdit: true,
+  canDelete: true,
+  canExport: true,
+  canImport: true,
+  canDesign: false
+})
 const list = ref<any[]>([])
 const total = ref(0)
 const query = reactive({ page: 1, pageSize: 10, filters: '', sortBy: '', sortOrder: '' })
@@ -99,6 +110,8 @@ const formFields = computed(() => {
     refDisplayField: f.refDisplayField
   }))
 })
+
+const canAccess = computed(() => permission.dataScope !== 'none')
 
 const tableColumns = computed(() => {
   const columns = tableConfig.fields.map((f: any) => {
@@ -144,8 +157,12 @@ watch(modelCode, () => loadModel(), { immediate: true })
 
 async function loadModel() {
   if (!modelCode.value) return
-  const data = await lowcodeApi.getModelByCode(modelCode.value)
+  const [data, perm] = await Promise.all([
+    lowcodeApi.getModelByCode(modelCode.value),
+    lowcodeApi.getModelPermission(modelCode.value)
+  ])
   Object.assign(model, data)
+  Object.assign(permission, perm)
   formConfig.fields = []
   tableConfig.fields = []
 

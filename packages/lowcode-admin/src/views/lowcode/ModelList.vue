@@ -2,7 +2,7 @@
   <div class="list-page">
     <w-card header="数据模型">
       <div class="toolbar">
-        <w-button type="primary" @click="openDialog()">+ 新增模型</w-button>
+        <w-button v-if="isAdmin" type="primary" @click="openDialog()">+ 新增模型</w-button>
       </div>
 
       <w-table :data="models" :columns="columns" stripe border>
@@ -11,11 +11,11 @@
         </template>
         <template #action="{ row }">
           <w-space>
-            <w-button size="small" @click="goDesign(row)">设计</w-button>
+            <w-button v-if="isAdmin" size="small" @click="goDesign(row)">设计</w-button>
             <w-button size="small" @click="goRun(row)">运行</w-button>
-            <w-button size="small" @click="openFlowDialog(row)">流程</w-button>
-            <w-button size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+            <w-button v-if="isAdmin" size="small" @click="openFlowDialog(row)">流程</w-button>
+            <w-button v-if="isAdmin" size="small" @click="openDialog(row)">编辑</w-button>
+            <w-button v-if="isAdmin" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
           </w-space>
         </template>
       </w-table>
@@ -72,12 +72,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as flowApi from '@/api/flow'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.userInfo?.roleId === 1 || authStore.permissions?.includes('*'))
 const models = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
