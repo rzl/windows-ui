@@ -46,6 +46,7 @@
         :columns="2"
         :validate-rules="validateRules"
         :load-options="loadFieldOptions"
+        :upload-request="uploadFile"
       />
       <template #footer>
         <w-button @click="closeDialog">取消</w-button>
@@ -59,6 +60,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
+import request from '@/api/request'
 
 const route = useRoute()
 const modelCode = computed(() => route.params.modelCode as string)
@@ -216,6 +218,15 @@ async function validateRules(items: { code: string; value: any }[]) {
 
 async function loadFieldOptions(config: any, model: any) {
   return lowcodeApi.executeFieldOptions(config, model)
+}
+
+async function uploadFile(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  const { data } = await request.post('/common/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+  return data
 }
 
 async function handleSave() {

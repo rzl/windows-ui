@@ -5,6 +5,10 @@
 
       <demo-block :title="t('单文件')" code="&lt;w-upload /&gt;"><w-upload /></demo-block>
       <demo-block :title="t('多文件')" code="&lt;w-upload multiple /&gt;"><w-upload multiple /></demo-block>
+      <demo-block :title="t('自定义上传')" code="&lt;w-upload :http-request='customUpload' v-model='url' /&gt;">
+        <div>url: {{ uploadUrl }}</div>
+        <w-upload :http-request="customUpload" v-model="uploadUrl" />
+      </demo-block>
 
     </demo-section>
   </div>
@@ -14,7 +18,7 @@
 import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 const { t } = useI18n()
 
 const form = reactive({
@@ -33,6 +37,18 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('李四'), value: 'lisi' }, { label: t('王五'), value: 'wangwu' }]
 
 const message = (msg: string) => alert(msg)
+
+const uploadUrl = ref('')
+
+async function customUpload(file: File) {
+  return new Promise<{ url: string; name: string; size: number }>((resolve) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      resolve({ url: reader.result as string, name: file.name, size: file.size })
+    }
+    reader.readAsDataURL(file)
+  })
+}
 
 const title = t('Upload 上传器')
 </script>

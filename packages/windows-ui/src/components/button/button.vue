@@ -1,10 +1,11 @@
 <template>
   <button
-    :class="['w-button', `w-button--${type}`, `w-button--${size}`, { 'is-plain': plain, 'is-round': round, 'is-disabled': disabled }]"
-    :disabled="disabled"
+    :class="['w-button', `w-button--${type}`, `w-button--${size}`, { 'is-plain': plain, 'is-round': round, 'is-disabled': disabled || loading, 'is-loading': loading }]"
+    :disabled="disabled || loading"
     @click="handleClick"
   >
-    <w-icon v-if="icon" :name="icon" :size="size" />
+    <w-icon v-if="loading" name="loading" :size="size" class="w-button__loading" />
+    <w-icon v-else-if="icon" :name="icon" :size="size" />
     <span v-if="$slots.default"><slot /></span>
   </button>
 </template>
@@ -21,6 +22,7 @@ const props = defineProps({
   plain: Boolean,
   round: Boolean,
   disabled: Boolean,
+  loading: Boolean,
   icon: String
 })
 const emit = defineEmits(['click'])
@@ -56,6 +58,8 @@ const handleClick = (e: MouseEvent) => { if (!props.disabled) emit('click', e) }
 .w-button.is-plain { background: #fff; color: #000; border-color: #003c74; }
 .w-button.is-round { border-radius: 16px; }
 .w-button.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.w-button__loading { animation: w-spin 1s linear infinite; }
+@keyframes w-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .w-button--small { padding: 2px 8px; font-size: var(--w-font-size-small); height: var(--w-component-size-small); }
 .w-button--large { padding: 5px 16px; font-size: var(--w-font-size-medium); height: var(--w-component-size-large); }
 </style>

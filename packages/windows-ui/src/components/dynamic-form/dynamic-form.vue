@@ -103,7 +103,8 @@
           v-else-if="field.type === 'upload'"
           :button-text="field.placeholder || '选择文件'"
           :disabled="isDisabled(field)"
-          @change="model[field.prop] = $event?.name || ''"
+          :http-request="props.uploadRequest"
+          @change="model[field.prop] = $event"
         />
 
         <!-- 级联选择 -->
@@ -201,6 +202,10 @@ const props = defineProps({
   },
   loadOptions: {
     type: Function as () => (config: DynamicField['dynamicOptions'], model: Record<string, any>) => Promise<{ label: string; value: any }[]>,
+    default: undefined
+  },
+  uploadRequest: {
+    type: Function as () => (file: File) => Promise<{ url: string; name: string; size?: number }>,
     default: undefined
   }
 })

@@ -19,6 +19,9 @@ app.use(requestLogMiddleware)
 // 静态资源（生产环境前端构建产物）
 app.use(express.static(path.resolve(__dirname, '../../public')))
 
+// 上传文件静态访问
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')))
+
 // API 路由
 app.use('/api', routes)
 

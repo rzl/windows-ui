@@ -36,7 +36,7 @@ const fields = [
 | switch | 开关 |
 | date | 日期选择 |
 | datetime | 日期时间选择 |
-| upload | 文件上传（保存文件名） |
+| upload | 文件上传（保存 URL，需配置 uploadRequest） |
 | cascader | 级联选择 |
 | rich-text | 富文本编辑器 |
 | custom | 自定义插槽 |
@@ -68,6 +68,7 @@ const fields = [
 | columns | number | 1 | 列数 |
 | validateRules | (items) => Promise | - | 后端校验函数，用于校验绑定了 `validationRule` 的字段 |
 | loadOptions | (config, model) => Promise | - | 动态选项加载函数，用于加载 `dynamicOptions` 配置的选项 |
+| uploadRequest | (file) => Promise | - | 文件上传函数，用于 `upload` 字段真实上传文件并返回 URL |
 
 ## 方法
 
