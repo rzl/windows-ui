@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('日历展示')" id="calendar" doc="calendar">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-calendar v-model=&quot;form.date&quot; :events=&quot;calendarEvents&quot; /&gt;"><w-calendar v-model="form.date" :events="calendarEvents" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="CalendarCode1"><w-calendar v-model="form.date" :events="calendarEvents" /></demo-block>
 
     </demo-section>
   </div>
@@ -22,6 +22,8 @@ const calendarEvents = [
   { date: '2024-01-01', title: t('元旦') },
   { date: '2024-01-15', title: t('会议') },
 ]
+
+const CalendarCode1 = `<w-calendar v-model="form.date" :events="calendarEvents" />`
 </script>
 
 <style scoped>

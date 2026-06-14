@@ -3,11 +3,11 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('标记与分类')" id="tag" doc="tag">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-space&gt;&lt;w-tag&gt;默认&lt;/w-tag&gt;&lt;w-tag type=&quot;primary&quot;&gt;主要&lt;/w-tag&gt;&lt;w-tag type=&quot;success&quot;&gt;成功&lt;/w-tag&gt;&lt;w-tag type=&quot;warning&quot;&gt;警告&lt;/w-tag&gt;&lt;w-tag type=&quot;danger&quot;&gt;危险&lt;/w-tag&gt;&lt;w-tag type=&quot;info&quot;&gt;信息&lt;/w-tag&gt;&lt;/w-space&gt;">
+      <demo-block :title="t('基础用法')" :code="TagCode1">
         <w-space><w-tag>默认</w-tag><w-tag type="primary">主要</w-tag><w-tag type="success">成功</w-tag><w-tag type="warning">警告</w-tag><w-tag type="danger">危险</w-tag><w-tag type="info">信息</w-tag></w-space>
       </demo-block>
-      <demo-block :title="t('可关闭')" code="&lt;w-tag closable @close=&quot;alert('关闭')&quot;&gt;可关闭&lt;/w-tag&gt;"><w-tag closable @close="alert('关闭')">可关闭</w-tag></demo-block>
-      <demo-block :title="t('尺寸')" code="&lt;w-space&gt;&lt;w-tag size=&quot;small&quot;&gt;小&lt;/w-tag&gt;&lt;w-tag&gt;中&lt;/w-tag&gt;&lt;w-tag size=&quot;large&quot;&gt;大&lt;/w-tag&gt;&lt;/w-space&gt;"><w-space><w-tag size="small">小</w-tag><w-tag>中</w-tag><w-tag size="large">大</w-tag></w-space></demo-block>
+      <demo-block :title="t('可关闭')" :code="TagCode2"><w-tag closable @close="alert('关闭')">可关闭</w-tag></demo-block>
+      <demo-block :title="t('尺寸')" :code="TagCode3"><w-space><w-tag size="small">小</w-tag><w-tag>中</w-tag><w-tag size="large">大</w-tag></w-space></demo-block>
 
     </demo-section>
   </div>
@@ -30,6 +30,10 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Tag 标签')
+
+const TagCode1 = `<w-space><w-tag>默认</w-tag><w-tag type="primary">主要</w-tag><w-tag type="success">成功</w-tag><w-tag type="warning">警告</w-tag><w-tag type="danger">危险</w-tag><w-tag type="info">信息</w-tag></w-space>`
+const TagCode2 = `<w-tag closable @close="alert('关闭')">可关闭</w-tag>`
+const TagCode3 = `<w-space><w-tag size="small">小</w-tag><w-tag>中</w-tag><w-tag size="large">大</w-tag></w-space>`
 </script>
 
 <style scoped>

@@ -3,10 +3,10 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('内容容器')" id="card" doc="card">
 
-      <demo-block :title="t('基础卡片')" code="&lt;w-card header=&quot;卡片标题&quot;&gt;&lt;p&gt;卡片内容区域&lt;/p&gt;&lt;/w-card&gt;"><w-card :header="t('卡片标题')"><p>卡片内容区域</p></w-card></demo-block>
-      <demo-block :title="t('悬停阴影')" code="&lt;w-card header=&quot;悬停卡片&quot; hover&gt;&lt;p&gt;鼠标悬停查看效果&lt;/p&gt;&lt;/w-card&gt;"><w-card :header="t('悬停卡片')" hover><p>鼠标悬停查看效果</p></w-card></demo-block>
-      <demo-block :title="t('带底部')" code="&lt;w-card header=&quot;标题&quot;&gt;&lt;p&gt;内容&lt;/p&gt;&lt;template #footer&gt;&lt;w-button size=&quot;small&quot;&gt;操作&lt;/w-button&gt;&lt;/template&gt;&lt;/w-card&gt;"><w-card :header="t('标题')"><p>内容</p><template #footer><w-button size="small">{{ t('操作') }}</w-button></template></w-card></demo-block>
-      <demo-block :title="t('头部自定义操作')" code="&lt;w-card header=&quot;卡片标题&quot;&gt;&lt;p&gt;使用 action 插槽在标题右侧插入自定义操作。&lt;/p&gt;&lt;template #action&gt;&lt;w-icon name=&quot;more&quot; size=&quot;small&quot; style=&quot;cursor:pointer&quot; /&gt;&lt;/template&gt;&lt;/w-card&gt;"><w-card header="卡片标题"><p>使用 action 插槽在标题右侧插入自定义操作。</p><template #action><w-icon name="more" size="small" style="cursor:pointer" /></template></w-card></demo-block>
+      <demo-block :title="t('基础卡片')" :code="CardCode1"><w-card :header="t('卡片标题')"><p>卡片内容区域</p></w-card></demo-block>
+      <demo-block :title="t('悬停阴影')" :code="CardCode2"><w-card :header="t('悬停卡片')" hover><p>鼠标悬停查看效果</p></w-card></demo-block>
+      <demo-block :title="t('带底部')" :code="CardCode3"><w-card :header="t('标题')"><p>内容</p><template #footer><w-button size="small">{{ t('操作') }}</w-button></template></w-card></demo-block>
+      <demo-block :title="t('头部自定义操作')" :code="CardCode4"><w-card header="卡片标题"><p>使用 action 插槽在标题右侧插入自定义操作。</p><template #action><w-icon name="more" size="small" style="cursor:pointer" /></template></w-card></demo-block>
 
     </demo-section>
   </div>
@@ -28,6 +28,11 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Card 卡片')
+
+const CardCode1 = `<w-card header="卡片标题"><p>卡片内容区域</p></w-card>`
+const CardCode2 = `<w-card header="悬停卡片" hover><p>鼠标悬停查看效果</p></w-card>`
+const CardCode3 = `<w-card header="标题"><p>内容</p><template #footer><w-button size="small">操作</w-button></template></w-card>`
+const CardCode4 = `<w-card header="卡片标题"><p>使用 action 插槽在标题右侧插入自定义操作。</p><template #action><w-icon name="more" size="small" style="cursor:pointer" /></template></w-card>`
 </script>
 
 <style scoped>

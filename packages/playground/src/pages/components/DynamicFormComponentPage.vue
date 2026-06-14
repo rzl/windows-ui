@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('通过 JSON 字段配置动态渲染表单')" id="dynamic-form" doc="dynamic-form">
 
-      <demo-block :title="t('基础用法')" :code="codeBasic">
+      <demo-block :title="t('基础用法')" ::code="DynamicFormCode1">
         <w-dynamic-form v-model="formModel" :fields="fields" />
         <div class="demo-actions">
           <w-button type="primary" @click="handleSubmit">{{ t('提交') }}</w-button>
@@ -12,11 +12,11 @@
         <p class="demo-note">{{ t('当前表单值：') }}{{ JSON.stringify(formModel) }}</p>
       </demo-block>
 
-      <demo-block :title="t('两列布局')" :code="codeColumns">
+      <demo-block :title="t('两列布局')" ::code="DynamicFormCode2">
         <w-dynamic-form v-model="formModel2" :fields="fields2" :columns="2" />
       </demo-block>
 
-      <demo-block :title="t('字段联动')" :code="codeLinkage">
+      <demo-block :title="t('字段联动')" ::code="DynamicFormCode3">
         <w-dynamic-form v-model="formModel3" :fields="fields3" />
         <p class="demo-note">{{ t('选择「其他」来源后，备注字段会显示') }}</p>
       </demo-block>
@@ -82,6 +82,10 @@ const fields = [
   { prop: 'source', label: '来源', type: 'select', options: [...] },
   { prop: 'remark', label: '备注', type: 'textarea', hidden: (model) => model.source !== 'other' }
 ]`
+
+const DynamicFormCode1 = `codeBasic`
+const DynamicFormCode2 = `codeColumns`
+const DynamicFormCode3 = `codeLinkage`
 </script>
 
 <style scoped>

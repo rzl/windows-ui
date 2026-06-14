@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, type PropType } from 'vue'
 import WForm from '../form/form.vue'
 import WFormItem from '../form/form-item.vue'
 import WInput from '../input/input.vue'
@@ -197,15 +197,15 @@ const props = defineProps({
   fields: { type: Array as () => DynamicField[], default: () => [] },
   columns: { type: Number, default: 1 },
   validateRules: {
-    type: Function as () => (items: ValidateRuleItem[]) => Promise<ValidateRuleResult[]>,
+    type: Function as PropType<(items: ValidateRuleItem[]) => Promise<ValidateRuleResult[]>>,
     default: undefined
   },
   loadOptions: {
-    type: Function as () => (config: DynamicField['dynamicOptions'], model: Record<string, any>) => Promise<{ label: string; value: any }[]>,
+    type: Function as PropType<(config: DynamicField['dynamicOptions'], model: Record<string, any>) => Promise<{ label: string; value: any }[]>>,
     default: undefined
   },
   uploadRequest: {
-    type: Function as () => (file: File) => Promise<{ url: string; name: string; size?: number }>,
+    type: Function as PropType<(file: File) => Promise<{ url: string; name: string; size?: number }>>,
     default: undefined
   }
 })

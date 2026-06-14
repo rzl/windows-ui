@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('树形结构选择')" id="tree-select" doc="tree-select">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-tree-select v-model=&quot;form.treeselect&quot; :data=&quot;treeData&quot; /&gt;"><w-tree-select v-model="form.treeselect" :data="treeData" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="TreeSelectCode1"><w-tree-select v-model="form.treeselect" :data="treeData" /></demo-block>
 
     </demo-section>
   </div>
@@ -34,6 +34,8 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Tree Select 树形选择')
+
+const TreeSelectCode1 = `<w-tree-select v-model="form.treeselect" :data="treeData" />`
 </script>
 
 <style scoped>

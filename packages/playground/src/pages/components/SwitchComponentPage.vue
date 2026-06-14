@@ -3,9 +3,9 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('布尔状态切换')" id="switch" doc="switch">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-switch v-model=&quot;form.switch&quot; /&gt;"><w-switch v-model="form.switch" /></demo-block>
-      <demo-block :title="t('文字描述')" code="&lt;w-switch v-model=&quot;form.switch&quot; active-text=&quot;开&quot; inactive-text=&quot;关&quot; /&gt;"><w-switch v-model="form.switch" active-text="开" inactive-text="关" /></demo-block>
-      <demo-block :title="t('禁用')" code="&lt;w-switch v-model=&quot;form.switch&quot; disabled /&gt;"><w-switch v-model="form.switch" disabled /></demo-block>
+      <demo-block :title="t('基础用法')" :code="SwitchCode1"><w-switch v-model="form.switch" /></demo-block>
+      <demo-block :title="t('文字描述')" :code="SwitchCode2"><w-switch v-model="form.switch" active-text="开" inactive-text="关" /></demo-block>
+      <demo-block :title="t('禁用')" :code="SwitchCode3"><w-switch v-model="form.switch" disabled /></demo-block>
 
     </demo-section>
   </div>
@@ -36,6 +36,10 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Switch 开关')
+
+const SwitchCode1 = `<w-switch v-model="form.switch" />`
+const SwitchCode2 = `<w-switch v-model="form.switch" active-text="开" inactive-text="关" />`
+const SwitchCode3 = `<w-switch v-model="form.switch" disabled />`
 </script>
 
 <style scoped>

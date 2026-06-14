@@ -3,10 +3,10 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('星级评分')" id="rate" doc="rate">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-rate v-model=&quot;form.rate&quot; /&gt;"><w-rate v-model="form.rate" /></demo-block>
-      <demo-block :title="t('显示分数')" code="&lt;w-rate v-model=&quot;form.rate&quot; show-score /&gt;"><w-rate v-model="form.rate" show-score /></demo-block>
-      <demo-block :title="t('禁用')" code="&lt;w-rate v-model=&quot;form.rate&quot; disabled /&gt;"><w-rate v-model="form.rate" disabled /></demo-block>
-      <demo-block :title="t('最大数量')" code="&lt;w-rate v-model=&quot;form.rateMax&quot; :max=&quot;10&quot; show-score /&gt;"><w-rate v-model="form.rateMax" :max="10" show-score /></demo-block>
+      <demo-block :title="t('基础用法')" :code="RateCode1"><w-rate v-model="form.rate" /></demo-block>
+      <demo-block :title="t('显示分数')" :code="RateCode2"><w-rate v-model="form.rate" show-score /></demo-block>
+      <demo-block :title="t('禁用')" :code="RateCode3"><w-rate v-model="form.rate" disabled /></demo-block>
+      <demo-block :title="t('最大数量')" :code="RateCode4"><w-rate v-model="form.rateMax" :max="10" show-score /></demo-block>
 
     </demo-section>
   </div>
@@ -37,6 +37,11 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Rate 评分')
+
+const RateCode1 = `<w-rate v-model="form.rate" />`
+const RateCode2 = `<w-rate v-model="form.rate" show-score />`
+const RateCode3 = `<w-rate v-model="form.rate" disabled />`
+const RateCode4 = `<w-rate v-model="form.rateMax" :max="10" show-score />`
 </script>
 
 <style scoped>

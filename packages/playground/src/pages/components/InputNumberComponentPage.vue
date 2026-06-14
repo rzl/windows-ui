@@ -3,9 +3,9 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('数字输入与步进控制')" id="input-number" doc="input-number">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-input-number v-model=&quot;form.number&quot; :min=&quot;0&quot; :max=&quot;100&quot; /&gt;"><w-input-number v-model="form.number" :min="0" :max="100" /></demo-block>
-      <demo-block :title="t('步进')" code="&lt;w-input-number v-model=&quot;form.number&quot; :step=&quot;5&quot; /&gt;"><w-input-number v-model="form.number" :step="5" /></demo-block>
-      <demo-block :title="t('禁用')" code="&lt;w-input-number v-model=&quot;form.number&quot; disabled /&gt;"><w-input-number v-model="form.number" disabled /></demo-block>
+      <demo-block :title="t('基础用法')" :code="InputNumberCode1"><w-input-number v-model="form.number" :min="0" :max="100" /></demo-block>
+      <demo-block :title="t('步进')" :code="InputNumberCode2"><w-input-number v-model="form.number" :step="5" /></demo-block>
+      <demo-block :title="t('禁用')" :code="InputNumberCode3"><w-input-number v-model="form.number" disabled /></demo-block>
 
     </demo-section>
   </div>
@@ -36,6 +36,10 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Input Number 数字输入框')
+
+const InputNumberCode1 = `<w-input-number v-model="form.number" :min="0" :max="100" />`
+const InputNumberCode2 = `<w-input-number v-model="form.number" :step="5" />`
+const InputNumberCode3 = `<w-input-number v-model="form.number" disabled />`
 </script>
 
 <style scoped>

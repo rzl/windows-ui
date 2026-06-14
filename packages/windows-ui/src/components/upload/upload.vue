@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, type PropType } from 'vue'
 import WButton from '../button/button.vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
@@ -32,9 +32,9 @@ const props = defineProps({
   size: { type: String, default: undefined },
   action: { type: String, default: '' },
   headers: { type: Object, default: () => ({}) },
-  modelValue: { type: [String, Array] as () => string | string[], default: '' },
+  modelValue: { type: [String, Array] as PropType<string | string[]>, default: () => '' },
   httpRequest: {
-    type: Function as () => (file: File) => Promise<{ url: string; name: string; size?: number }>,
+    type: Function as PropType<(file: File) => Promise<{ url: string; name: string; size?: number }>>,
     default: undefined
   }
 })
@@ -76,7 +76,7 @@ const handleChange = async (e: Event) => {
 }
 
 async function uploadFile(file: File) {
-  const item = { file, name: file.name, size: file.size, loading: true }
+  const item = { file, name: file.name, size: file.size, loading: true, url: undefined as string | undefined }
   fileList.value.push(item)
 
   try {

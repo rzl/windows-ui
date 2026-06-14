@@ -3,12 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('全局轻量消息通知，从顶部滑入')" id="message" doc="message">
 
-            <demo-block :title="t('四种类型')" code="&lt;w-space&gt;
-        &lt;w-button @click=&quot;msgRef?.info('这是一条信息消息')&quot;&gt;信息&lt;/w-button&gt;
-        &lt;w-button @click=&quot;msgRef?.success('操作成功完成！')&quot;&gt;成功&lt;/w-button&gt;
-        &lt;w-button @click=&quot;msgRef?.warning('请注意此警告')&quot;&gt;警告&lt;/w-button&gt;
-        &lt;w-button @click=&quot;msgRef?.error('发生错误，请重试')&quot;&gt;错误&lt;/w-button&gt;
-      &lt;/w-space&gt;">
+            <demo-block :title="t('四种类型')" :code="MessageCode1">
               <w-space>
                 <w-button @click="msgRef?.info('这是一条信息消息')">{{ t('信息') }}</w-button>
                 <w-button @click="msgRef?.success('操作成功完成！')">{{ t('成功') }}</w-button>
@@ -16,19 +11,13 @@
                 <w-button @click="msgRef?.error('发生错误，请重试')">{{ t('错误') }}</w-button>
               </w-space>
             </demo-block>
-            <demo-block :title="t('长文本消息')" code="&lt;w-space&gt;
-        &lt;w-button @click=&quot;msgRef?.info('这是一个比较长的消息文本，用于测试消息框的宽度自适应能力')&quot;&gt;长文本&lt;/w-button&gt;
-        &lt;w-button @click=&quot;msgRef?.success('数据保存成功！共保存了 128 条记录')&quot;&gt;带数据&lt;/w-button&gt;
-      &lt;/w-space&gt;">
+            <demo-block :title="t('长文本消息')" :code="MessageCode2">
               <w-space>
                 <w-button @click="msgRef?.info('这是一个比较长的消息文本，用于测试消息框的宽度自适应能力')">{{ t('长文本') }}</w-button>
                 <w-button @click="msgRef?.success('数据保存成功！共保存了 128 条记录')">{{ t('带数据') }}</w-button>
               </w-space>
             </demo-block>
-            <demo-block :title="t('自定义时长')" code="&lt;w-space&gt;
-        &lt;w-button @click=&quot;msgRef?.show('2秒后消失', 'info', 2000)&quot;&gt;2秒消失&lt;/w-button&gt;
-        &lt;w-button @click=&quot;msgRef?.show('5秒后消失', 'success', 5000)&quot;&gt;5秒消失&lt;/w-button&gt;
-      &lt;/w-space&gt;">
+            <demo-block :title="t('自定义时长')" :code="MessageCode3">
               <w-space>
                 <w-button @click="msgRef?.show('2秒后消失', 'info', 2000)">{{ t('2秒消失') }}</w-button>
                 <w-button @click="msgRef?.show('5秒后消失', 'success', 5000)">{{ t('5秒消失') }}</w-button>
@@ -57,6 +46,21 @@ const msgBoxRef = ref<any>(null)
 const alert = (msg: string) => window.alert(msg)
 
 const title = t('Message 消息提示')
+
+const MessageCode1 = `<w-space>
+        <w-button @click="msgRef?.info('这是一条信息消息')">信息</w-button>
+        <w-button @click="msgRef?.success('操作成功完成！')">成功</w-button>
+        <w-button @click="msgRef?.warning('请注意此警告')">警告</w-button>
+        <w-button @click="msgRef?.error('发生错误，请重试')">错误</w-button>
+      </w-space>`
+const MessageCode2 = `<w-space>
+        <w-button @click="msgRef?.info('这是一个比较长的消息文本，用于测试消息框的宽度自适应能力')">长文本</w-button>
+        <w-button @click="msgRef?.success('数据保存成功！共保存了 128 条记录')">带数据</w-button>
+      </w-space>`
+const MessageCode3 = `<w-space>
+        <w-button @click="msgRef?.show('2秒后消失', 'info', 2000)">2秒消失</w-button>
+        <w-button @click="msgRef?.show('5秒后消失', 'success', 5000)">5秒消失</w-button>
+      </w-space>`
 </script>
 
 <style scoped>

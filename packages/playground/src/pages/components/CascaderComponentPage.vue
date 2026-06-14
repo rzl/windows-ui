@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('多级联动选择')" id="cascader" doc="cascader">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-cascader v-model=&quot;form.cascader&quot; :options=&quot;cascaderOptions&quot; placeholder=&quot;选择地址&quot; /&gt;"><w-cascader v-model="form.cascader" :options="cascaderOptions" :placeholder="t('选择地址')" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="CascaderCode1"><w-cascader v-model="form.cascader" :options="cascaderOptions" :placeholder="t('选择地址')" /></demo-block>
 
     </demo-section>
   </div>
@@ -34,6 +34,8 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Cascader 级联选择器')
+
+const CascaderCode1 = `<w-cascader v-model="form.cascader" :options="cascaderOptions" placeholder="选择地址" />`
 </script>
 
 <style scoped>

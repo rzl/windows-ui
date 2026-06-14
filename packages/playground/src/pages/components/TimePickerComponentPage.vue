@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('时间选择')" id="time-picker" doc="time-picker">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-time-picker v-model=&quot;form.time&quot; /&gt;"><w-time-picker v-model="form.time" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="TimePickerCode1"><w-time-picker v-model="form.time" /></demo-block>
 
     </demo-section>
   </div>
@@ -34,6 +34,8 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Time Picker 时间选择器')
+
+const TimePickerCode1 = `<w-time-picker v-model="form.time" />`
 </script>
 
 <style scoped>

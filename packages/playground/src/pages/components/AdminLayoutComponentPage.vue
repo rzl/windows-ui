@@ -3,15 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('后台管理系统布局')" id="admin-layout" doc="admin-layout">
 
-      <demo-block :title="t('基础布局')" code="&lt;w-admin-layout title=&quot;管理系统&quot;&gt;
-  &lt;template #menu&gt;
-    &lt;w-menu :items=&quot;menuItems&quot; /&gt;
-  &lt;/template&gt;
-  &lt;template #header&gt;
-    &lt;span&gt;顶部栏&lt;/span&gt;
-  &lt;/template&gt;
-  &lt;div&gt;主内容区域&lt;/div&gt;
-&lt;/w-admin-layout&gt;">
+      <demo-block :title="t('基础布局')" :code="AdminLayoutCode1">
         <div style="height: 300px; overflow: hidden;">
           <w-admin-layout title="管理系统">
             <template #menu>
@@ -25,15 +17,7 @@
         </div>
       </demo-block>
 
-      <demo-block :title="t('折叠侧边栏')" code="&lt;w-admin-layout title=&quot;管理系统&quot; :collapsed=&quot;true&quot;&gt;
-  &lt;template #menu&gt;
-    &lt;w-menu :items=&quot;menuItems&quot; /&gt;
-  &lt;/template&gt;
-  &lt;template #header&gt;
-    &lt;span&gt;顶部栏&lt;/span&gt;
-  &lt;/template&gt;
-  &lt;div&gt;主内容区域&lt;/div&gt;
-&lt;/w-admin-layout&gt;">
+      <demo-block :title="t('折叠侧边栏')" :code="AdminLayoutCode2">
         <div style="height: 300px; overflow: hidden;">
           <w-admin-layout title="管理系统" :collapsed="true">
             <template #menu>
@@ -64,6 +48,25 @@ const menuItems = [
 ]
 
 const title = t('AdminLayout 后台布局')
+
+const AdminLayoutCode1 = `<w-admin-layout title="管理系统">
+  <template #menu>
+    <w-menu :items="menuItems" />
+  </template>
+  <template #header>
+    <span>顶部栏</span>
+  </template>
+  <div>主内容区域</div>
+</w-admin-layout>`
+const AdminLayoutCode2 = `<w-admin-layout title="管理系统" :collapsed="true">
+  <template #menu>
+    <w-menu :items="menuItems" />
+  </template>
+  <template #header>
+    <span>顶部栏</span>
+  </template>
+  <div>主内容区域</div>
+</w-admin-layout>`
 </script>
 
 <style scoped>

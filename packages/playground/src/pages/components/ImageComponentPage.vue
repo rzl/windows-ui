@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('图片展示与预览')" id="image" doc="image">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-image src=&quot;https://via.placeholder.com/200x100/245edb/ffffff?text=Image&quot; alt=&quot;示例&quot; width=&quot;200&quot; /&gt;"><w-image src="https://via.placeholder.com/200x100/245edb/ffffff?text=Image" :alt="t('示例')" width="200" /></demo-block>
-      <demo-block :title="t('可预览')" code="&lt;w-image src=&quot;https://via.placeholder.com/200x100/3a9e3a/ffffff?text=Preview&quot; alt=&quot;预览&quot; width=&quot;200&quot; previewable /&gt;"><w-image src="https://via.placeholder.com/200x100/3a9e3a/ffffff?text=Preview" :alt="t('预览')" width="200" previewable /></demo-block>
+      <demo-block :title="t('基础用法')" :code="ImageCode1"><w-image src="https://via.placeholder.com/200x100/245edb/ffffff?text=Image" :alt="t('示例')" width="200" /></demo-block>
+      <demo-block :title="t('可预览')" :code="ImageCode2"><w-image src="https://via.placeholder.com/200x100/3a9e3a/ffffff?text=Preview" :alt="t('预览')" width="200" previewable /></demo-block>
 
     </demo-section>
   </div>
@@ -26,6 +26,9 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Image 图片')
+
+const ImageCode1 = `<w-image src="https://via.placeholder.com/200x100/245edb/ffffff?text=Image" alt="示例" width="200" />`
+const ImageCode2 = `<w-image src="https://via.placeholder.com/200x100/3a9e3a/ffffff?text=Preview" alt="预览" width="200" previewable />`
 </script>
 
 <style scoped>

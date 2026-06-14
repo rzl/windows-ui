@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('下拉选择')" id="select" doc="select">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-select v-model=&quot;form.select&quot; :options=&quot;selectOptions&quot; /&gt;"><w-select v-model="form.select" :options="selectOptions" /></demo-block>
-      <demo-block :title="t('虚拟化选择器')" code="&lt;w-virtualized-select v-model=&quot;form.select&quot; :options=&quot;selectOptions&quot; /&gt;"><w-virtualized-select v-model="form.select" :options="selectOptions" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="SelectCode1"><w-select v-model="form.select" :options="selectOptions" /></demo-block>
+      <demo-block :title="t('虚拟化选择器')" :code="SelectCode2"><w-virtualized-select v-model="form.select" :options="selectOptions" /></demo-block>
 
     </demo-section>
   </div>
@@ -35,6 +35,9 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Select 选择器')
+
+const SelectCode1 = `<w-select v-model="form.select" :options="selectOptions" />`
+const SelectCode2 = `<w-virtualized-select v-model="form.select" :options="selectOptions" />`
 </script>
 
 <style scoped>

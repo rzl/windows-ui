@@ -3,15 +3,15 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('导航菜单')" id="menu" doc="menu">
 
-      <demo-block :title="t('垂直菜单')" :code="verticalCode">
+      <demo-block :title="t('垂直菜单')" ::code="MenuCode1">
         <w-menu :items="menuItems" />
       </demo-block>
 
-      <demo-block :title="t('水平菜单')" :code="horizontalCode">
+      <demo-block :title="t('水平菜单')" ::code="MenuCode2">
         <w-menu mode="horizontal" :items="menuItems" />
       </demo-block>
 
-      <demo-block :title="t('收起模式')" :code="collapseCode">
+      <demo-block :title="t('收起模式')" ::code="MenuCode3">
         <w-menu collapse :items="menuItems" />
       </demo-block>
 
@@ -115,6 +115,10 @@ const horizontalCode = `<w-menu mode="horizontal" :items="[...]" />`
 const collapseCode = `<w-menu collapse :items="[...]" />`
 
 const title = t('Menu 菜单')
+
+const MenuCode1 = `verticalCode`
+const MenuCode2 = `horizontalCode`
+const MenuCode3 = `collapseCode`
 </script>
 
 <style scoped>

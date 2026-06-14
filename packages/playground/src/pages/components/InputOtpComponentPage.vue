@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('一次性密码输入')" id="input-otp" doc="input-otp">
 
-      <demo-block :title="t('6位验证码')" code="&lt;w-input-otp v-model=&quot;form.otp&quot; :length=&quot;6&quot; /&gt;"><w-input-otp v-model="form.otp" :length="6" /></demo-block>
-      <demo-block :title="t('4位验证码')" code="&lt;w-input-otp v-model=&quot;form.otp2&quot; :length=&quot;4&quot; /&gt;"><w-input-otp v-model="form.otp2" :length="4" /></demo-block>
+      <demo-block :title="t('6位验证码')" :code="InputOtpCode1"><w-input-otp v-model="form.otp" :length="6" /></demo-block>
+      <demo-block :title="t('4位验证码')" :code="InputOtpCode2"><w-input-otp v-model="form.otp2" :length="4" /></demo-block>
 
     </demo-section>
   </div>
@@ -35,6 +35,9 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Input OTP 验证码')
+
+const InputOtpCode1 = `<w-input-otp v-model="form.otp" :length="6" />`
+const InputOtpCode2 = `<w-input-otp v-model="form.otp2" :length="4" />`
 </script>
 
 <style scoped>

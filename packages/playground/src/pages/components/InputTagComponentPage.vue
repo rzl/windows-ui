@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('输入生成标签')" id="input-tag" doc="input-tag">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-input-tag v-model=&quot;form.tags&quot; placeholder=&quot;输入后按回车&quot; /&gt;"><w-input-tag v-model="form.tags" :placeholder="t('输入后按回车')" /></demo-block>
-      <demo-block :title="t('最大数量')" code="&lt;w-input-tag v-model=&quot;form.tags&quot; :max=&quot;3&quot; placeholder=&quot;最多3个标签&quot; /&gt;"><w-input-tag v-model="form.tags" :max="3" :placeholder="t('最多3个标签')" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="InputTagCode1"><w-input-tag v-model="form.tags" :placeholder="t('输入后按回车')" /></demo-block>
+      <demo-block :title="t('最大数量')" :code="InputTagCode2"><w-input-tag v-model="form.tags" :max="3" :placeholder="t('最多3个标签')" /></demo-block>
 
     </demo-section>
   </div>
@@ -35,6 +35,9 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Input Tag 标签输入框')
+
+const InputTagCode1 = `<w-input-tag v-model="form.tags" placeholder="输入后按回车" />`
+const InputTagCode2 = `<w-input-tag v-model="form.tags" :max="3" placeholder="最多3个标签" />`
 </script>
 
 <style scoped>

@@ -3,11 +3,11 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('基础文本输入')" id="input" doc="input">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-input v-model=&quot;form.input&quot; placeholder=&quot;请输入内容&quot; /&gt;"><w-input v-model="form.input" :placeholder="t('请输入内容')" /></demo-block>
-      <demo-block :title="t('前缀/后缀图标')" code="&lt;w-input v-model=&quot;form.input&quot; prefix-icon=&quot;search&quot; suffix-icon=&quot;close&quot; /&gt;"><w-input v-model="form.input" prefix-icon="search" suffix-icon="close" /></demo-block>
-      <demo-block :title="t('可清空')" code="&lt;w-input v-model=&quot;form.input2&quot; clearable placeholder=&quot;输入后可清空&quot; /&gt;"><w-input v-model="form.input2" clearable :placeholder="t('输入后可清空')" /></demo-block>
-      <demo-block :title="t('禁用状态')" code="&lt;w-input v-model=&quot;form.input&quot; disabled /&gt;"><w-input v-model="form.input" disabled /></demo-block>
-      <demo-block :title="t('尺寸')" code="&lt;w-space&gt;&lt;w-input v-model=&quot;form.input&quot; size=&quot;small&quot; placeholder=&quot;small&quot; /&gt;&lt;w-input v-model=&quot;form.input&quot; placeholder=&quot;default&quot; /&gt;&lt;w-input v-model=&quot;form.input&quot; size=&quot;large&quot; placeholder=&quot;large&quot; /&gt;&lt;/w-space&gt;"><w-space><w-input v-model="form.input" size="small" placeholder="small" /><w-input v-model="form.input" placeholder="default" /><w-input v-model="form.input" size="large" placeholder="large" /></w-space></demo-block>
+      <demo-block :title="t('基础用法')" :code="InputCode1"><w-input v-model="form.input" :placeholder="t('请输入内容')" /></demo-block>
+      <demo-block :title="t('前缀/后缀图标')" :code="InputCode2"><w-input v-model="form.input" prefix-icon="search" suffix-icon="close" /></demo-block>
+      <demo-block :title="t('可清空')" :code="InputCode3"><w-input v-model="form.input2" clearable :placeholder="t('输入后可清空')" /></demo-block>
+      <demo-block :title="t('禁用状态')" :code="InputCode4"><w-input v-model="form.input" disabled /></demo-block>
+      <demo-block :title="t('尺寸')" :code="InputCode5"><w-space><w-input v-model="form.input" size="small" placeholder="small" /><w-input v-model="form.input" placeholder="default" /><w-input v-model="form.input" size="large" placeholder="large" /></w-space></demo-block>
 
     </demo-section>
   </div>
@@ -38,6 +38,12 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Input 输入框')
+
+const InputCode1 = `<w-input v-model="form.input" placeholder="请输入内容" />`
+const InputCode2 = `<w-input v-model="form.input" prefix-icon="search" suffix-icon="close" />`
+const InputCode3 = `<w-input v-model="form.input2" clearable placeholder="输入后可清空" />`
+const InputCode4 = `<w-input v-model="form.input" disabled />`
+const InputCode5 = `<w-space><w-input v-model="form.input" size="small" placeholder="small" /><w-input v-model="form.input" placeholder="default" /><w-input v-model="form.input" size="large" placeholder="large" /></w-space>`
 </script>
 
 <style scoped>

@@ -3,24 +3,14 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('文本样式组件')" id="text" doc="text">
 
-            <demo-block :title="t('文本尺寸')" code="&lt;w-space direction=&quot;vertical&quot;&gt;
-        &lt;w-text size=&quot;large&quot;&gt;大号文本&lt;/w-text&gt;
-        &lt;w-text&gt;默认文本&lt;/w-text&gt;
-        &lt;w-text size=&quot;small&quot;&gt;小号文本&lt;/w-text&gt;
-      &lt;/w-space&gt;">
+            <demo-block :title="t('文本尺寸')" :code="TextCode1">
               <w-space direction="vertical">
                 <w-text size="large">大号文本</w-text>
                 <w-text>默认文本</w-text>
                 <w-text size="small">小号文本</w-text>
               </w-space>
             </demo-block>
-            <demo-block :title="t('文本类型')" code="&lt;w-space direction=&quot;vertical&quot;&gt;
-        &lt;w-text type=&quot;primary&quot;&gt;主要文本&lt;/w-text&gt;
-        &lt;w-text type=&quot;success&quot;&gt;成功文本&lt;/w-text&gt;
-        &lt;w-text type=&quot;warning&quot;&gt;警告文本&lt;/w-text&gt;
-        &lt;w-text type=&quot;danger&quot;&gt;危险文本&lt;/w-text&gt;
-        &lt;w-text type=&quot;info&quot;&gt;信息文本&lt;/w-text&gt;
-      &lt;/w-space&gt;">
+            <demo-block :title="t('文本类型')" :code="TextCode2">
               <w-space direction="vertical">
                 <w-text type="primary">主要文本</w-text>
                 <w-text type="success">成功文本</w-text>
@@ -43,6 +33,19 @@ const { t } = useI18n()
 const iconNames = ['info','warning','error','success','close','folder','file','search','user','star','arrowUp','arrowDown','arrowLeft','arrowRight','menu','home','loading']
 
 const title = t('Text 文本')
+
+const TextCode1 = `<w-space direction="vertical">
+        <w-text size="large">大号文本</w-text>
+        <w-text>默认文本</w-text>
+        <w-text size="small">小号文本</w-text>
+      </w-space>`
+const TextCode2 = `<w-space direction="vertical">
+        <w-text type="primary">主要文本</w-text>
+        <w-text type="success">成功文本</w-text>
+        <w-text type="warning">警告文本</w-text>
+        <w-text type="danger">危险文本</w-text>
+        <w-text type="info">信息文本</w-text>
+      </w-space>`
 </script>
 
 <style scoped>

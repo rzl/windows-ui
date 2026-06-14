@@ -3,9 +3,9 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('文件上传')" id="upload" doc="upload">
 
-      <demo-block :title="t('单文件')" code="&lt;w-upload /&gt;"><w-upload /></demo-block>
-      <demo-block :title="t('多文件')" code="&lt;w-upload multiple /&gt;"><w-upload multiple /></demo-block>
-      <demo-block :title="t('自定义上传')" code="&lt;w-upload :http-request='customUpload' v-model='url' /&gt;">
+      <demo-block :title="t('单文件')" :code="UploadCode1"><w-upload /></demo-block>
+      <demo-block :title="t('多文件')" :code="UploadCode2"><w-upload multiple /></demo-block>
+      <demo-block :title="t('自定义上传')" :code="UploadCode3">
         <div>url: {{ uploadUrl }}</div>
         <w-upload :http-request="customUpload" v-model="uploadUrl" />
       </demo-block>
@@ -51,6 +51,10 @@ async function customUpload(file: File) {
 }
 
 const title = t('Upload 上传器')
+
+const UploadCode1 = `<w-upload />`
+const UploadCode2 = `<w-upload multiple />`
+const UploadCode3 = `<w-upload :http-request='customUpload' v-model='url' />`
 </script>
 
 <style scoped>

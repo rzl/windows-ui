@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('基于 WTable + WPagination + WSearchForm 的 CRUD 封装')" id="crud-table" doc="crud-table">
 
-      <demo-block :title="t('基础用法')" :code="codeBasic">
+      <demo-block :title="t('基础用法')" ::code="CrudTableCode1">
         <w-crud-table
           :data="tableData"
           :columns="columns"
@@ -154,6 +154,8 @@ const codeBasic = `&lt;w-crud-table
     &lt;w-tag&gt;{{ row.status }}&lt;/w-tag&gt;
   &lt;/template&gt;
 &lt;/w-crud-table&gt;`
+
+const CrudTableCode1 = `codeBasic`
 </script>
 
 <style scoped>

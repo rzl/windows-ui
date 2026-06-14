@@ -3,9 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('滚动加载更多')" id="infinite-scroll" doc="infinite-scroll">
 
-            <demo-block :title="t('基础用法')" code="&lt;w-infinite-scroll :loading=&quot;false&quot; :no-more=&quot;true&quot;&gt;
-        &lt;div v-for=&quot;i in 5&quot; :key=&quot;i&quot; style=&quot;padding:8px;border-bottom:1px solid #e0e0e0&quot;&gt;项目 {{ i }}&lt;/div&gt;
-      &lt;/w-infinite-scroll&gt;">
+            <demo-block :title="t('基础用法')" :code="InfiniteScrollCode1">
               <w-infinite-scroll :loading="false" :no-more="true">
                 <div v-for="i in 5" :key="i" style="padding:8px;border-bottom:1px solid #e0e0e0">项目 {{ i }}</div>
               </w-infinite-scroll>
@@ -31,6 +29,10 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Infinite Scroll 无限滚动')
+
+const InfiniteScrollCode1 = `<w-infinite-scroll :loading="false" :no-more="true">
+        <div v-for="i in 5" :key="i" style="padding:8px;border-bottom:1px solid #e0e0e0">项目 {{ i }}</div>
+      </w-infinite-scroll>`
 </script>
 
 <style scoped>

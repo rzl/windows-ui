@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('固定间隔时间选择')" id="time-select" doc="time-select">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-time-select v-model=&quot;form.timeselect&quot; /&gt;"><w-time-select v-model="form.timeselect" /></demo-block>
-      <demo-block :title="t('自定义步长')" code="&lt;w-time-select v-model=&quot;form.timeselect&quot; step=&quot;01:00&quot; /&gt;"><w-time-select v-model="form.timeselect" step="01:00" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="TimeSelectCode1"><w-time-select v-model="form.timeselect" /></demo-block>
+      <demo-block :title="t('自定义步长')" :code="TimeSelectCode2"><w-time-select v-model="form.timeselect" step="01:00" /></demo-block>
 
     </demo-section>
   </div>
@@ -35,6 +35,9 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Time Select 时间选择')
+
+const TimeSelectCode1 = `<w-time-select v-model="form.timeselect" />`
+const TimeSelectCode2 = `<w-time-select v-model="form.timeselect" step="01:00" />`
 </script>
 
 <style scoped>

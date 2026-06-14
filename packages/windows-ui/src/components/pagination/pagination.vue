@@ -44,7 +44,7 @@ const pages = computed(() => {
 
 const prev = () => { if (props.currentPage > 1) goTo(props.currentPage - 1) }
 const next = () => { if (props.currentPage < totalPages.value) goTo(props.currentPage + 1) }
-const goTo = (p: number) => { emit('update:currentPage', p); emit('change', p) }
+const goTo = (p: number) => { emit('update:current-page', p); emit('change', p) }
 </script>
 
 <style scoped>

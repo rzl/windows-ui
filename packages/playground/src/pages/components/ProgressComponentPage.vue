@@ -3,19 +3,15 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('进度指示')" id="progress" doc="progress">
 
-            <demo-block :title="t('基础用法')" code="&lt;w-progress :percentage=&quot;30&quot; /&gt;"><w-progress :percentage="30" /></demo-block>
-            <demo-block :title="t('不同状态')" code="&lt;w-space direction=&quot;vertical&quot;&gt;
-        &lt;w-progress :percentage=&quot;100&quot; status=&quot;success&quot; /&gt;
-        &lt;w-progress :percentage=&quot;80&quot; status=&quot;warning&quot; /&gt;
-        &lt;w-progress :percentage=&quot;60&quot; status=&quot;danger&quot; /&gt;
-      &lt;/w-space&gt;">
+            <demo-block :title="t('基础用法')" :code="ProgressCode1"><w-progress :percentage="30" /></demo-block>
+            <demo-block :title="t('不同状态')" :code="ProgressCode2">
               <w-space direction="vertical">
                 <w-progress :percentage="100" status="success" />
                 <w-progress :percentage="80" status="warning" />
                 <w-progress :percentage="60" status="danger" />
               </w-space>
             </demo-block>
-            <demo-block :title="t('不显示文字')" code="&lt;w-progress :percentage=&quot;50&quot; :show-text=&quot;false&quot; /&gt;"><w-progress :percentage="50" :show-text="false" /></demo-block>
+            <demo-block :title="t('不显示文字')" :code="ProgressCode3"><w-progress :percentage="50" :show-text="false" /></demo-block>
 
     </demo-section>
   </div>
@@ -37,6 +33,14 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Progress 进度条')
+
+const ProgressCode1 = `<w-progress :percentage="30" />`
+const ProgressCode2 = `<w-space direction="vertical">
+        <w-progress :percentage="100" status="success" />
+        <w-progress :percentage="80" status="warning" />
+        <w-progress :percentage="60" status="danger" />
+      </w-space>`
+const ProgressCode3 = `<w-progress :percentage="50" :show-text="false" />`
 </script>
 
 <style scoped>

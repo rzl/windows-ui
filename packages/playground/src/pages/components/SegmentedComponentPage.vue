@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('分段选项')" id="segmented" doc="segmented">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-segmented v-model=&quot;form.segment&quot; :options=&quot;[{ label: '日', value: 'day' }, { label: '周', value: 'week' }, { label: '月', value: 'month' }]&quot; /&gt;"><w-segmented v-model="form.segment" :options="[{ label: '日', value: 'day' }, { label: '周', value: 'week' }, { label: '月', value: 'month' }]" /></demo-block>
-      <demo-block :title="t('带图标')" code="&lt;w-segmented v-model=&quot;form.segment&quot; :options=&quot;[{ label: '列表', value: 'list', icon: 'menu' }, { label: '网格', value: 'grid', icon: 'folder' }]&quot; /&gt;"><w-segmented v-model="form.segment" :options="[{ label: '列表', value: 'list', icon: 'menu' }, { label: '网格', value: 'grid', icon: 'folder' }]" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="SegmentedCode1"><w-segmented v-model="form.segment" :options="[{ label: '日', value: 'day' }, { label: '周', value: 'week' }, { label: '月', value: 'month' }]" /></demo-block>
+      <demo-block :title="t('带图标')" :code="SegmentedCode2"><w-segmented v-model="form.segment" :options="[{ label: '列表', value: 'list', icon: 'menu' }, { label: '网格', value: 'grid', icon: 'folder' }]" /></demo-block>
 
     </demo-section>
   </div>
@@ -26,6 +26,9 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Segmented 分段控制器')
+
+const SegmentedCode1 = `<w-segmented v-model="form.segment" :options="[{ label: '日', value: 'day' }, { label: '周', value: 'week' }, { label: '月', value: 'month' }]" />`
+const SegmentedCode2 = `<w-segmented v-model="form.segment" :options="[{ label: '列表', value: 'list', icon: 'menu' }, { label: '网格', value: 'grid', icon: 'folder' }]" />`
 </script>
 
 <style scoped>

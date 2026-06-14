@@ -158,6 +158,7 @@ const navItems = [
     { path: '/form/tree-select', label: 'Tree Select 树形选择', indent: true },
     { path: '/form/upload', label: 'Upload 上传器', indent: true },
     { path: '/form/rich-text', label: 'RichText 富文本', indent: true },
+    { path: '/form/monaco-editor', label: 'Monaco Editor 在线编辑器', indent: true },
     { path: '/form/mention', label: 'Mention 提及', indent: true },
     { path: '/form/form', label: 'Form 表单', indent: true },
     { path: '/form/search-form', label: 'SearchForm 搜索表单', indent: true },

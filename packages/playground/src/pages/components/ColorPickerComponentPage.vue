@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('颜色拾取')" id="color-picker" doc="color-picker">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-color-picker v-model=&quot;form.color&quot; /&gt;"><w-color-picker v-model="form.color" /></demo-block>
-      <demo-block :title="t('颜色面板')" code="&lt;w-color-picker-panel @change=&quot;val =&gt; message('选择颜色: ' + val)&quot; /&gt;"><w-color-picker-panel @change="(val: string) => message('选择颜色: ' + val)" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="ColorPickerCode1"><w-color-picker v-model="form.color" /></demo-block>
+      <demo-block :title="t('颜色面板')" :code="ColorPickerCode2"><w-color-picker-panel @change="(val: string) => message('选择颜色: ' + val)" /></demo-block>
 
     </demo-section>
   </div>
@@ -35,6 +35,9 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Color Picker 颜色选择器')
+
+const ColorPickerCode1 = `<w-color-picker v-model="form.color" />`
+const ColorPickerCode2 = `<w-color-picker-panel @change="val => message('选择颜色: ' + val)" />`
 </script>
 
 <style scoped>

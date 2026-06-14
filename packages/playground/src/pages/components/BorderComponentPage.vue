@@ -3,11 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('XP 风格的边框样式')" id="border" doc="border">
 
-            <demo-block :title="t('边框类型')" code="&lt;w-space&gt;
-        &lt;w-border type=&quot;raised&quot; style=&quot;padding:16px&quot;&gt;凸起边框 (Raised)&lt;/w-border&gt;
-        &lt;w-border type=&quot;sunken&quot; style=&quot;padding:16px&quot;&gt;凹陷边框 (Sunken)&lt;/w-border&gt;
-        &lt;w-border type=&quot;field&quot; style=&quot;padding:16px&quot;&gt;字段边框 (Field)&lt;/w-border&gt;
-      &lt;/w-space&gt;">
+            <demo-block :title="t('边框类型')" :code="BorderCode1">
               <w-space>
                 <w-border type="raised" style="padding:16px">凸起边框 (Raised)</w-border>
                 <w-border type="sunken" style="padding:16px">凹陷边框 (Sunken)</w-border>
@@ -28,6 +24,12 @@ const { t } = useI18n()
 const iconNames = ['info','warning','error','success','close','folder','file','search','user','star','arrowUp','arrowDown','arrowLeft','arrowRight','menu','home','loading']
 
 const title = t('Border 边框')
+
+const BorderCode1 = `<w-space>
+        <w-border type="raised" style="padding:16px">凸起边框 (Raised)</w-border>
+        <w-border type="sunken" style="padding:16px">凹陷边框 (Sunken)</w-border>
+        <w-border type="field" style="padding:16px">字段边框 (Field)</w-border>
+      </w-space>`
 </script>
 
 <style scoped>

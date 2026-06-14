@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('加载占位')" id="skeleton" doc="skeleton">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-skeleton :rows=&quot;3&quot; /&gt;"><w-skeleton :rows="3" /></demo-block>
-      <demo-block :title="t('非加载状态')" code="&lt;w-skeleton :loading=&quot;false&quot;&gt;&lt;w-card header=&quot;内容已加载&quot;&gt;&lt;p&gt;真实内容区域&lt;/p&gt;&lt;/w-card&gt;&lt;/w-skeleton&gt;"><w-skeleton :loading="false"><w-card :header="t('内容已加载')"><p>真实内容区域</p></w-card></w-skeleton></demo-block>
+      <demo-block :title="t('基础用法')" :code="SkeletonCode1"><w-skeleton :rows="3" /></demo-block>
+      <demo-block :title="t('非加载状态')" :code="SkeletonCode2"><w-skeleton :loading="false"><w-card :header="t('内容已加载')"><p>真实内容区域</p></w-card></w-skeleton></demo-block>
 
     </demo-section>
   </div>
@@ -26,6 +26,9 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Skeleton 骨架屏')
+
+const SkeletonCode1 = `<w-skeleton :rows="3" />`
+const SkeletonCode2 = `<w-skeleton :loading="false"><w-card header="内容已加载"><p>真实内容区域</p></w-card></w-skeleton>`
 </script>
 
 <style scoped>

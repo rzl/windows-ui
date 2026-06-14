@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('轻量富文本编辑器')" id="rich-text" doc="rich-text">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-rich-text v-model=\"content\" /&gt;">
+      <demo-block :title="t('基础用法')" :code="RichTextCode1">
         <w-rich-text v-model="content" />
         <p style="margin-top: 8px; font-size: 12px; color: #666;">HTML: {{ content }}</p>
       </demo-block>
@@ -21,6 +21,8 @@ const { t } = useI18n()
 
 const content = ref('<p>Hello <b>World</b></p>')
 const title = t('RichText 富文本')
+
+const RichTextCode1 = `<w-rich-text v-model=\\"content\\" />`
 </script>
 
 <style scoped>

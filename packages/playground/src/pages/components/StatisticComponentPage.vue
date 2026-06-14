@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('数值展示')" id="statistic" doc="statistic">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-space&gt;&lt;w-statistic title=&quot;用户总数&quot; :value=&quot;12345&quot; suffix=&quot;人&quot; /&gt;&lt;w-statistic title=&quot;增长率&quot; :value=&quot;12.5&quot; suffix=&quot;%&quot; :precision=&quot;1&quot; /&gt;&lt;/w-space&gt;"><w-space><w-statistic title="用户总数" :value="12345" suffix="人" /><w-statistic title="增长率" :value="12.5" suffix="%" :precision="1" /></w-space></demo-block>
-      <demo-block :title="t('自定义样式')" code="&lt;w-statistic title=&quot;销售额&quot; :value=&quot;888888&quot; prefix=&quot;¥&quot; :value-style=&quot;{ color: '#d92b2b' }&quot; /&gt;"><w-statistic title="销售额" :value="888888" prefix="¥" :value-style="{ color: '#d92b2b' }" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="StatisticCode1"><w-space><w-statistic title="用户总数" :value="12345" suffix="人" /><w-statistic title="增长率" :value="12.5" suffix="%" :precision="1" /></w-space></demo-block>
+      <demo-block :title="t('自定义样式')" :code="StatisticCode2"><w-statistic title="销售额" :value="888888" prefix="¥" :value-style="{ color: '#d92b2b' }" /></demo-block>
 
     </demo-section>
   </div>
@@ -26,6 +26,9 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Statistic 统计组件')
+
+const StatisticCode1 = `<w-space><w-statistic title="用户总数" :value="12345" suffix="人" /><w-statistic title="增长率" :value="12.5" suffix="%" :precision="1" /></w-space>`
+const StatisticCode2 = `<w-statistic title="销售额" :value="888888" prefix="¥" :value-style="{ color: '#d92b2b' }" />`
 </script>
 
 <style scoped>

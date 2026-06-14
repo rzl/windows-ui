@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('输入联想补全')" id="autocomplete" doc="autocomplete">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-autocomplete v-model=&quot;form.auto&quot; :options=&quot;autocompleteOptions&quot; placeholder=&quot;输入水果名称&quot; /&gt;"><w-autocomplete v-model="form.auto" :options="autocompleteOptions" :placeholder="t('输入水果名称')" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="AutocompleteCode1"><w-autocomplete v-model="form.auto" :options="autocompleteOptions" :placeholder="t('输入水果名称')" /></demo-block>
 
     </demo-section>
   </div>
@@ -23,6 +23,8 @@ const autocompleteOptions = [
   { value: t('香蕉'), label: t('香蕉') },
   { value: t('橙子'), label: t('橙子') },
 ]
+
+const AutocompleteCode1 = `<w-autocomplete v-model="form.auto" :options="autocompleteOptions" placeholder="输入水果名称" />`
 </script>
 
 <style scoped>

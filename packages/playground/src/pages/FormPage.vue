@@ -86,6 +86,10 @@
         <h3>RichText 富文本</h3>
         <p>{{ t('轻量富文本编辑器') }}</p>
       </router-link>
+      <router-link to="/form/monaco-editor" class="component-card">
+        <h3>Monaco Editor 在线编辑器</h3>
+        <p>{{ t('在线代码编辑器') }}</p>
+      </router-link>
       <router-link to="/form/mention" class="component-card">
         <h3>Mention 提及</h3>
         <p>{{ t('@提及功能') }}</p>

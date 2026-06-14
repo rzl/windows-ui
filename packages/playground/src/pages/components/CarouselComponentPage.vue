@@ -3,13 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('轮播图')" id="carousel" doc="carousel">
 
-            <demo-block :title="t('基础用法')" code="&lt;w-carousel :items=&quot;[{ color: '#245edb' }, { color: '#3a9e3a' }, { color: '#e4a010' }]&quot;&gt;
-        &lt;template #default=&quot;{ item }&quot;&gt;
-          &lt;div :style=&quot;{ background: item.color, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }&quot;&gt;
-            &lt;span style=&quot;color:#fff;font-size:20px&quot;&gt;Slide&lt;/span&gt;
-          &lt;/div&gt;
-        &lt;/template&gt;
-      &lt;/w-carousel&gt;">
+            <demo-block :title="t('基础用法')" :code="CarouselCode1">
               <w-carousel :items="[{ color: '#245edb' }, { color: '#3a9e3a' }, { color: '#e4a010' }]">
                 <template #default="{ item }">
                   <div :style="{ background: item.color, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
@@ -39,6 +33,14 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Carousel 走马灯')
+
+const CarouselCode1 = `<w-carousel :items="[{ color: '#245edb' }, { color: '#3a9e3a' }, { color: '#e4a010' }]">
+        <template #default="{ item }">
+          <div :style="{ background: item.color, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+            <span style="color:#fff;font-size:20px">Slide</span>
+          </div>
+        </template>
+      </w-carousel>`
 </script>
 
 <style scoped>

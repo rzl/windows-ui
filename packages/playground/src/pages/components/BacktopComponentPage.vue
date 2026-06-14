@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('滚动返回顶部')" id="backtop" doc="backtop">
 
-      <demo-block :title="t('用法说明')" code="&lt;p&gt;页面滚动超过 200px 后，右下角显示回到顶部按钮&lt;/p&gt;&lt;w-backtop /&gt;"><p>页面滚动超过 200px 后，右下角显示回到顶部按钮</p><w-backtop /></demo-block>
+      <demo-block :title="t('用法说明')" :code="BacktopCode1"><p>页面滚动超过 200px 后，右下角显示回到顶部按钮</p><w-backtop /></demo-block>
 
     </demo-section>
   </div>
@@ -18,6 +18,8 @@ const { t } = useI18n()
 const alert = (msg: string) => window.alert(msg)
 
 const title = t('Backtop 回到顶部')
+
+const BacktopCode1 = `<p>页面滚动超过 200px 后，右下角显示回到顶部按钮</p><w-backtop />`
 </script>
 
 <style scoped>

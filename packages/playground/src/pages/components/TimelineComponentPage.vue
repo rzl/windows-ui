@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('时间轴展示')" id="timeline" doc="timeline">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-timeline :items=&quot;[{ time: '2024-01', title: '开始' }, { time: '2024-02', title: '开发', content: '核心功能', color: '#245edb' }, { time: '2024-03', title: '上线' }]&quot; /&gt;"><w-timeline :items="[{ time: '2024-01', title: '开始' }, { time: '2024-02', title: '开发', content: '核心功能', color: '#245edb' }, { time: '2024-03', title: '上线' }]" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="TimelineCode1"><w-timeline :items="[{ time: '2024-01', title: '开始' }, { time: '2024-02', title: '开发', content: '核心功能', color: '#245edb' }, { time: '2024-03', title: '上线' }]" /></demo-block>
 
     </demo-section>
   </div>
@@ -25,6 +25,8 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Timeline 时间线')
+
+const TimelineCode1 = `<w-timeline :items="[{ time: '2024-01', title: '开始' }, { time: '2024-02', title: '开发', content: '核心功能', color: '#245edb' }, { time: '2024-03', title: '上线' }]" />`
 </script>
 
 <style scoped>

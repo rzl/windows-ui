@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('@提及功能')" id="mention" doc="mention">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-mention v-model=&quot;form.mention&quot; :options=&quot;mentionOptions&quot; placeholder=&quot;输入 @ 触发&quot; /&gt;"><w-mention v-model="form.mention" :options="mentionOptions" :placeholder="t('输入 @ 触发')" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="MentionCode1"><w-mention v-model="form.mention" :options="mentionOptions" :placeholder="t('输入 @ 触发')" /></demo-block>
 
     </demo-section>
   </div>
@@ -34,6 +34,8 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Mention 提及')
+
+const MentionCode1 = `<w-mention v-model="form.mention" :options="mentionOptions" placeholder="输入 @ 触发" />`
 </script>
 
 <style scoped>

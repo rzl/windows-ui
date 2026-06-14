@@ -6,7 +6,7 @@
         v-for="group in iconGroups"
         :key="group.title"
         :title="group.title"
-        :code="getGroupCode(group)"
+        ::code="IconCode1"
       >
         <w-space wrap>
           <div v-for="name in group.names" :key="name" class="icon-demo">
@@ -18,11 +18,7 @@
 
       <demo-block
         title="图标尺寸"
-        code="<w-space>
-  <w-icon name=&quot;search&quot; size=&quot;small&quot; />
-  <w-icon name=&quot;search&quot; />
-  <w-icon name=&quot;search&quot; size=&quot;large&quot; />
-</w-space>"
+        :code="IconCode2"
       >
         <w-space>
           <w-icon name="search" size="small" />
@@ -72,6 +68,13 @@ function getGroupCode(group: { title: string; names: string[] }) {
 ${group.names.map(n => `  <w-icon name="${n}" />`).join('\n')}
 </w-space>`
 }
+
+const IconCode1 = `getGroupCode(group)`
+const IconCode2 = `<w-space>
+  <w-icon name="search" size="small" />
+  <w-icon name="search" />
+  <w-icon name="search" size="large" />
+</w-space>`
 </script>
 
 <style scoped>

@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('无数据展示')" id="empty" doc="empty">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-empty /&gt;"><w-empty /></demo-block>
-      <demo-block :title="t('自定义描述')" code="&lt;w-empty description=&quot;暂无搜索结果&quot; /&gt;"><w-empty :description="t('暂无搜索结果')" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="EmptyCode1"><w-empty /></demo-block>
+      <demo-block :title="t('自定义描述')" :code="EmptyCode2"><w-empty :description="t('暂无搜索结果')" /></demo-block>
 
     </demo-section>
   </div>
@@ -26,6 +26,9 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Empty 空状态')
+
+const EmptyCode1 = `<w-empty />`
+const EmptyCode2 = `<w-empty description="暂无搜索结果" />`
 </script>
 
 <style scoped>

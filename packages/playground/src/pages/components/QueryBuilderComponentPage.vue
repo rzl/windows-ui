@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('多条件组合高级查询')" id="query-builder" doc="query-builder">
 
-      <demo-block :title="t('基础用法')" :code="codeBasic">
+      <demo-block :title="t('基础用法')" ::code="QueryBuilderCode1">
         <w-query-builder :fields="fields" @search="handleSearch" @reset="handleReset" />
         <p class="demo-note">{{ t('当前条件：') }}{{ JSON.stringify(conditions) }}</p>
       </demo-block>
@@ -45,6 +45,8 @@ const fields = [
   { prop: 'age', label: '年龄' },
   { prop: 'email', label: '邮箱' }
 ]`
+
+const QueryBuilderCode1 = `codeBasic`
 </script>
 
 <style scoped>

@@ -3,14 +3,14 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('悬浮内容面板，比 Tooltip 更丰富')" id="popover" doc="popover">
 
-      <demo-block :title="t('基础弹出框')" code="&lt;w-popover title=&quot;用户信息&quot; content=&quot;这是用户详细信息面板&quot;&gt;&lt;w-button&gt;查看用户&lt;/w-button&gt;&lt;/w-popover&gt;"><w-popover title="用户信息" :content="t('这是用户详细信息面板')"><w-button>{{ t('查看用户') }}</w-button></w-popover></demo-block>
-      <demo-block :title="t('hover 触发')" code="&lt;w-popover title=&quot;快捷操作&quot; content=&quot;鼠标悬停触发&quot; trigger=&quot;hover&quot;&gt;&lt;w-button&gt;hover 触发&lt;/w-button&gt;&lt;/w-popover&gt;"><w-popover title="快捷操作" :content="t('鼠标悬停触发')" trigger="hover"><w-button>{{ t('hover 触发') }}</w-button></w-popover></demo-block>
-      <demo-block :title="t('自定义宽度')" code="&lt;w-popover title=&quot;宽面板&quot; content=&quot;这是一个比较宽的内容面板&quot; :width=&quot;300&quot;&gt;&lt;w-button&gt;宽面板&lt;/w-button&gt;&lt;/w-popover&gt;"><w-popover title="宽面板" :content="t('这是一个比较宽的内容面板')" :width="300"><w-button>{{ t('宽面板') }}</w-button></w-popover></demo-block>
-      <demo-block :title="t('嵌套内容')" code="&lt;w-popover title=&quot;操作菜单&quot;&gt;&lt;template #content&gt;&lt;w-space direction=&quot;vertical&quot;&gt;&lt;w-link&gt;编辑&lt;/w-link&gt;&lt;w-link type=&quot;danger&quot;&gt;删除&lt;/w-link&gt;&lt;/w-space&gt;&lt;/template&gt;&lt;w-button&gt;操作&lt;/w-button&gt;&lt;/w-popover&gt;"><w-popover title="操作菜单"><template #content><w-space direction="vertical"><w-link>编辑</w-link><w-link type="danger">删除</w-link></w-space></template><w-button>操作</w-button></w-popover></demo-block>
-      <demo-block :title="t('自定义标题')" code="&lt;w-popover&gt;&lt;template #header&gt;&lt;w-icon name=&quot;warning&quot; size=&quot;small&quot; /&gt;&lt;span style=&quot;margin-left:4px&quot;&gt;警告&lt;/span&gt;&lt;/template&gt;&lt;template #content&gt;使用 header 插槽自定义标题区。&lt;/template&gt;&lt;w-button&gt;自定义标题&lt;/w-button&gt;&lt;/w-popover&gt;">
+      <demo-block :title="t('基础弹出框')" :code="PopoverCode1"><w-popover title="用户信息" :content="t('这是用户详细信息面板')"><w-button>{{ t('查看用户') }}</w-button></w-popover></demo-block>
+      <demo-block :title="t('hover 触发')" :code="PopoverCode2"><w-popover title="快捷操作" :content="t('鼠标悬停触发')" trigger="hover"><w-button>{{ t('hover 触发') }}</w-button></w-popover></demo-block>
+      <demo-block :title="t('自定义宽度')" :code="PopoverCode3"><w-popover title="宽面板" :content="t('这是一个比较宽的内容面板')" :width="300"><w-button>{{ t('宽面板') }}</w-button></w-popover></demo-block>
+      <demo-block :title="t('嵌套内容')" :code="PopoverCode4"><w-popover title="操作菜单"><template #content><w-space direction="vertical"><w-link>编辑</w-link><w-link type="danger">删除</w-link></w-space></template><w-button>操作</w-button></w-popover></demo-block>
+      <demo-block :title="t('自定义标题')" :code="PopoverCode5">
         <w-popover><template #header><w-icon name="warning" size="small" /><span style="margin-left:4px">警告</span></template><template #content>使用 header 插槽自定义标题区。</template><w-button>自定义标题</w-button></w-popover>
       </demo-block>
-      <demo-block :title="t('自定义操作')" code="&lt;w-popover title=&quot;操作面板&quot;&gt;&lt;template #action&gt;&lt;w-icon name=&quot;close&quot; size=&quot;small&quot; style=&quot;cursor:pointer&quot; /&gt;&lt;/template&gt;&lt;template #content&gt;使用 action 插槽在标题右侧插入操作。&lt;/template&gt;&lt;w-button&gt;自定义操作&lt;/w-button&gt;&lt;/w-popover&gt;">
+      <demo-block :title="t('自定义操作')" :code="PopoverCode6">
         <w-popover title="操作面板"><template #action><w-icon name="close" size="small" style="cursor:pointer" /></template><template #content>使用 action 插槽在标题右侧插入操作。</template><w-button>自定义操作</w-button></w-popover>
       </demo-block>
 
@@ -34,6 +34,13 @@ const msgBoxRef = ref<any>(null)
 const alert = (msg: string) => window.alert(msg)
 
 const title = t('Popover 弹出框')
+
+const PopoverCode1 = `<w-popover title="用户信息" content="这是用户详细信息面板"><w-button>查看用户</w-button></w-popover>`
+const PopoverCode2 = `<w-popover title="快捷操作" content="鼠标悬停触发" trigger="hover"><w-button>hover 触发</w-button></w-popover>`
+const PopoverCode3 = `<w-popover title="宽面板" content="这是一个比较宽的内容面板" :width="300"><w-button>宽面板</w-button></w-popover>`
+const PopoverCode4 = `<w-popover title="操作菜单"><template #content><w-space direction="vertical"><w-link>编辑</w-link><w-link type="danger">删除</w-link></w-space></template><w-button>操作</w-button></w-popover>`
+const PopoverCode5 = `<w-popover><template #header><w-icon name="warning" size="small" /><span style="margin-left:4px">警告</span></template><template #content>使用 header 插槽自定义标题区。</template><w-button>自定义标题</w-button></w-popover>`
+const PopoverCode6 = `<w-popover title="操作面板"><template #action><w-icon name="close" size="small" style="cursor:pointer" /></template><template #content>使用 action 插槽在标题右侧插入操作。</template><w-button>自定义操作</w-button></w-popover>`
 </script>
 
 <style scoped>

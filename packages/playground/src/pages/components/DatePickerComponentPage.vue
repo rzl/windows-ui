@@ -3,8 +3,8 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('日期选择')" id="date-picker" doc="date-picker">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-date-picker v-model=&quot;form.date&quot; /&gt;"><w-date-picker v-model="form.date" /></demo-block>
-      <demo-block :title="t('日期面板')" code="&lt;w-date-picker-panel v-model=&quot;form.date2&quot; /&gt;"><w-date-picker-panel v-model="form.date2" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="DatePickerCode1"><w-date-picker v-model="form.date" /></demo-block>
+      <demo-block :title="t('日期面板')" :code="DatePickerCode2"><w-date-picker-panel v-model="form.date2" /></demo-block>
 
     </demo-section>
   </div>
@@ -35,6 +35,9 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Date Picker 日期选择器')
+
+const DatePickerCode1 = `<w-date-picker v-model="form.date" />`
+const DatePickerCode2 = `<w-date-picker-panel v-model="form.date2" />`
 </script>
 
 <style scoped>

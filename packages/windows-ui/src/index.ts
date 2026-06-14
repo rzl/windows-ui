@@ -96,6 +96,7 @@ import WPermission from './components/permission/permission.vue'
 import WCrudTable from './components/crud-table/crud-table.vue'
 import WDynamicForm from './components/dynamic-form/dynamic-form.vue'
 import WQueryBuilder from './components/query-builder/query-builder.vue'
+import WMonacoEditor from './components/monaco-editor/monaco-editor.vue'
 
 const components = [
   WButton,
@@ -188,7 +189,8 @@ const components = [
   WPermission,
   WCrudTable,
   WDynamicForm,
-  WQueryBuilder
+  WQueryBuilder,
+  WMonacoEditor
 ]
 
 export interface WindowsUIOptions {
@@ -300,7 +302,8 @@ export {
   WPermission,
   WCrudTable,
   WDynamicForm,
-  WQueryBuilder
+  WQueryBuilder,
+  WMonacoEditor
 }
 
 export type { FormRule } from './components/form/form.vue'

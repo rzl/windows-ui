@@ -3,9 +3,9 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('层级数据展示')" id="tree" doc="tree">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-tree :data=&quot;treeData&quot; /&gt;"><w-tree :data="treeData" /></demo-block>
-      <demo-block :title="t('默认展开')" code="&lt;w-tree :data=&quot;treeData&quot; expand-all /&gt;"><w-tree :data="treeData" expand-all /></demo-block>
-      <demo-block :title="t('虚拟化树')" code="&lt;w-virtualized-tree :data=&quot;treeData&quot; /&gt;"><w-virtualized-tree :data="treeData" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="TreeCode1"><w-tree :data="treeData" /></demo-block>
+      <demo-block :title="t('默认展开')" :code="TreeCode2"><w-tree :data="treeData" expand-all /></demo-block>
+      <demo-block :title="t('虚拟化树')" :code="TreeCode3"><w-virtualized-tree :data="treeData" /></demo-block>
 
     </demo-section>
   </div>
@@ -27,6 +27,10 @@ const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
 const title = t('Tree 树形控件')
+
+const TreeCode1 = `<w-tree :data="treeData" />`
+const TreeCode2 = `<w-tree :data="treeData" expand-all />`
+const TreeCode3 = `<w-virtualized-tree :data="treeData" />`
 </script>
 
 <style scoped>

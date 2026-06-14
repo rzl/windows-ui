@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('左右数据转移')" id="transfer" doc="transfer">
 
-      <demo-block :title="t('基础用法')" code="&lt;w-transfer v-model=&quot;form.transfer&quot; :data=&quot;transferData&quot; /&gt;"><w-transfer v-model="form.transfer" :data="transferData" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="TransferCode1"><w-transfer v-model="form.transfer" :data="transferData" /></demo-block>
 
     </demo-section>
   </div>
@@ -34,6 +34,8 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 const message = (msg: string) => alert(msg)
 
 const title = t('Transfer 穿梭框')
+
+const TransferCode1 = `<w-transfer v-model="form.transfer" :data="transferData" />`
 </script>
 
 <style scoped>
