@@ -79,6 +79,30 @@ const fields = [
 | generateCode | (ruleCode) => Promise<string> | - | 编码规则生成函数，用于 `codingRule` 字段自动生成编码 |
 | userInfo | object | - | 当前用户信息，用于 `currentUser` / `currentDept` 默认值 |
 
+## 列表设计
+
+动态表单常与 `WCrudTable` / `WTable` 配合使用。列表字段支持 `format`、`align`、`fixed`、`searchMode` 等配置：
+
+```ts
+const tableFields = [
+  { field: 'amount', label: '金额', format: 'money', align: 'right' },
+  { field: 'status', label: '状态', format: 'dict', align: 'center' },
+  { field: 'createTime', label: '创建时间', format: 'datetime', searchMode: 'between' }
+]
+```
+
+支持的 `format`：
+
+| 值 | 说明 |
+|---|------|
+| `date` | 显示日期部分 |
+| `datetime` | 显示日期时间 |
+| `number` | 千分位数字 |
+| `money` | 金额 `¥xx.xx` |
+| `percent` | 百分比 |
+| `boolean` | `是` / `否` |
+| `dict` | 根据字段绑定的字典编码转换显示 |
+
 ## 方法
 
 通过 `ref` 调用：

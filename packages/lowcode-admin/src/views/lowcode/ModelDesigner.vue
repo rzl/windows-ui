@@ -73,12 +73,32 @@
           <div class="toolbar">
             <w-button type="primary" size="small" @click="saveTableConfig">保存列表配置</w-button>
           </div>
+          <w-form :inline="true" style="margin-bottom: 12px">
+            <w-form-item label="工具栏">
+              <w-checkbox-group v-model="tableConfig.toolbar" :options="toolbarActionOptions" />
+            </w-form-item>
+            <w-form-item label="行操作">
+              <w-checkbox-group v-model="tableConfig.rowActions" :options="rowActionOptions" />
+            </w-form-item>
+          </w-form>
           <w-table :data="fields" :columns="tableDesignColumns" stripe border>
             <template #inTable="{ row }">
               <w-switch v-model="tableConfigMap[row.field_name].inTable" />
             </template>
+            <template #format="{ row }">
+              <w-select v-model="tableConfigMap[row.field_name].format" :options="formatOptions" style="width: 100px" />
+            </template>
+            <template #align="{ row }">
+              <w-select v-model="tableConfigMap[row.field_name].align" :options="alignOptions" style="width: 80px" />
+            </template>
+            <template #fixed="{ row }">
+              <w-select v-model="tableConfigMap[row.field_name].fixed" :options="fixedOptions" style="width: 80px" />
+            </template>
             <template #searchable="{ row }">
               <w-switch v-model="tableConfigMap[row.field_name].searchable" />
+            </template>
+            <template #searchMode="{ row }">
+              <w-select v-model="tableConfigMap[row.field_name].searchMode" :options="searchModeOptions" style="width: 100px" />
             </template>
             <template #sortable="{ row }">
               <w-switch v-model="tableConfigMap[row.field_name].sortable" />
@@ -193,7 +213,7 @@ const activeTab = ref('fields')
 const model = reactive<any>({})
 const fields = ref<any[]>([])
 const formConfig = reactive<any>({ fields: [] })
-const tableConfig = reactive<any>({ fields: [] })
+const tableConfig = reactive<any>({ fields: [], toolbar: ['create', 'batchDelete', 'export', 'import'], rowActions: ['edit', 'delete'] })
 const formConfigMap = reactive<Record<string, any>>({})
 const tableConfigMap = reactive<Record<string, any>>({})
 const validationRules = ref<any[]>([])
@@ -333,9 +353,59 @@ const tableDesignColumns = [
   { prop: 'field_name', label: '字段名' },
   { prop: 'display_name', label: '显示名称' },
   { prop: 'inTable', label: '列表显示', width: 100 },
+  { prop: 'format', label: '格式化', width: 120 },
+  { prop: 'align', label: '对齐', width: 100 },
+  { prop: 'fixed', label: '固定', width: 100 },
   { prop: 'searchable', label: '可查询', width: 90 },
+  { prop: 'searchMode', label: '查询方式', width: 120 },
   { prop: 'sortable', label: '可排序', width: 90 },
   { prop: 'width', label: '列宽', width: 110 }
+]
+
+const formatOptions = [
+  { label: '无', value: '' },
+  { label: '日期', value: 'date' },
+  { label: '日期时间', value: 'datetime' },
+  { label: '数字', value: 'number' },
+  { label: '金额', value: 'money' },
+  { label: '百分比', value: 'percent' },
+  { label: '布尔', value: 'boolean' },
+  { label: '字典', value: 'dict' }
+]
+
+const alignOptions = [
+  { label: '左', value: 'left' },
+  { label: '中', value: 'center' },
+  { label: '右', value: 'right' }
+]
+
+const fixedOptions = [
+  { label: '无', value: '' },
+  { label: '左侧', value: 'left' },
+  { label: '右侧', value: 'right' }
+]
+
+const searchModeOptions = [
+  { label: '等于', value: 'eq' },
+  { label: '包含', value: 'like' },
+  { label: '范围', value: 'between' },
+  { label: '大于', value: 'gt' },
+  { label: '小于', value: 'lt' },
+  { label: '大于等于', value: 'gte' },
+  { label: '小于等于', value: 'lte' }
+]
+
+const toolbarActionOptions = [
+  { label: '新增', value: 'create' },
+  { label: '批量删除', value: 'batchDelete' },
+  { label: '导出', value: 'export' },
+  { label: '导入', value: 'import' }
+]
+
+const rowActionOptions = [
+  { label: '编辑', value: 'edit' },
+  { label: '删除', value: 'delete' },
+  { label: '查看', value: 'view' }
 ]
 
 onMounted(() => loadData())
@@ -385,10 +455,19 @@ function syncConfigMaps() {
         field: field.field_name,
         label: field.display_name,
         inTable: true,
+        format: '',
+        align: 'left',
+        fixed: '',
         searchable: field.type === 'string' || field.type === 'text',
+        searchMode: 'like',
         sortable: false,
         width: undefined
       }
+    } else {
+      if (tableConfigMap[field.field_name].format === undefined) tableConfigMap[field.field_name].format = ''
+      if (tableConfigMap[field.field_name].align === undefined) tableConfigMap[field.field_name].align = 'left'
+      if (tableConfigMap[field.field_name].fixed === undefined) tableConfigMap[field.field_name].fixed = ''
+      if (tableConfigMap[field.field_name].searchMode === undefined) tableConfigMap[field.field_name].searchMode = 'like'
     }
   })
 }
@@ -446,6 +525,8 @@ async function loadData() {
       ? JSON.parse(data.tables[0].config)
       : data.tables[0].config
     tableConfig.fields = saved.fields || []
+    tableConfig.toolbar = saved.toolbar || ['create', 'batchDelete', 'export', 'import']
+    tableConfig.rowActions = saved.rowActions || ['edit', 'delete']
     tableConfig.fields.forEach((f: any) => {
       tableConfigMap[f.field] = f
     })
@@ -609,12 +690,23 @@ async function saveFormConfig() {
 
 async function saveTableConfig() {
   const configFields = fields.value
-    .map((f) => tableConfigMap[f.field_name])
+    .map((f) => {
+      const config = { ...tableConfigMap[f.field_name] }
+      if (!config.format) delete config.format
+      if (!config.fixed) delete config.fixed
+      if (config.align === 'left') delete config.align
+      if (config.searchMode === 'like') delete config.searchMode
+      return config
+    })
     .filter((f) => f && f.inTable)
   await lowcodeApi.saveTable({
     modelId,
     name: '默认列表',
-    config: { fields: configFields },
+    config: {
+      fields: configFields,
+      toolbar: tableConfig.toolbar || ['create', 'batchDelete', 'export', 'import'],
+      rowActions: tableConfig.rowActions || ['edit', 'delete']
+    },
     status: 1
   })
   alert('列表配置已保存')

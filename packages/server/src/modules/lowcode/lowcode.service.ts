@@ -392,30 +392,41 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
     const { field, operator, value } = condition
     if (value === undefined || value === '' || value === null || !field) return
 
+    const resolveField = (f: string) => {
+      const refField = refFields.find((rf: any) => rf.field_name === f)
+      if (refField) return `ref_${f}.${refField.ref_display_field}`
+      return `${model.table_name}.${f}`
+    }
+
     switch (operator) {
       case 'eq':
-        builder.where(field, value)
+        builder.where(resolveField(field), value)
         break
       case 'ne':
-        builder.whereNot(field, value)
+        builder.whereNot(resolveField(field), value)
         break
       case 'like':
-        builder.where(field, 'like', `%${value}%`)
+        builder.where(resolveField(field), 'like', `%${value}%`)
+        break
+      case 'between':
+        if (Array.isArray(value) && value.length === 2) {
+          builder.whereBetween(resolveField(field), [value[0], value[1]])
+        }
         break
       case 'gt':
-        builder.where(field, '>', value)
+        builder.where(resolveField(field), '>', value)
         break
       case 'lt':
-        builder.where(field, '<', value)
+        builder.where(resolveField(field), '<', value)
         break
       case 'gte':
-        builder.where(field, '>=', value)
+        builder.where(resolveField(field), '>=', value)
         break
       case 'lte':
-        builder.where(field, '<=', value)
+        builder.where(resolveField(field), '<=', value)
         break
       default:
-        builder.where(field, value)
+        builder.where(resolveField(field), value)
     }
   })
 

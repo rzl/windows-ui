@@ -77,4 +77,22 @@ describe('QueryBuilder', () => {
 
     expect(wrapper.emitted('reset')).toBeTruthy()
   })
+
+  it('字段配置 searchMode 后默认 operator 应同步', async () => {
+    const wrapper = mount(QueryBuilder, {
+      props: { fields: [{ prop: 'age', label: '年龄', searchMode: 'between' }] },
+      global: {
+        stubs: ['WIcon']
+      }
+    })
+    const addBtn = findButton(wrapper, '添加条件')
+    await addBtn!.trigger('click')
+
+    const searchBtn = findButton(wrapper, '查询')
+    await searchBtn!.trigger('click')
+
+    const conditions = wrapper.emitted('search')![0][0] as any[]
+    expect(conditions[0].operator).toBe('between')
+    expect(Array.isArray(conditions[0].value)).toBe(true)
+  })
 })

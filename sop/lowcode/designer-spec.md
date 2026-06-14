@@ -206,6 +206,28 @@
 }
 ```
 
+### 列表设计
+
+列表配置支持以下字段级属性：
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| inTable | boolean | 是否在列表显示 |
+| format | string | 列格式化：`date`、`datetime`、`number`、`money`、`percent`、`boolean`、`dict` |
+| align | string | 对齐方式：`left`、`center`、`right` |
+| fixed | string | 固定列：`left`、`right` |
+| searchable | boolean | 是否可查询 |
+| searchMode | string | 查询方式：`eq`、`like`、`between`、`gt`、`lt`、`gte`、`lte` |
+| sortable | boolean | 是否可排序 |
+| width | number | 列宽 |
+
+表格级配置：
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| toolbar | string[] | 工具栏按钮：`create`、`batchDelete`、`export`、`import` |
+| rowActions | string[] | 行操作按钮：`edit`、`delete`、`view` |
+
 ### 默认值表达式
 
 字段支持配置动态默认值，新增记录时自动填充。

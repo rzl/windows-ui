@@ -21,17 +21,21 @@
       >
         <template #toolbar>
           <w-space>
-            <w-button type="primary" @click="openDialog()">+ 新增</w-button>
-            <w-button :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
-            <w-button @click="handleExport">导出</w-button>
-            <w-button @click="triggerImport">导入</w-button>
-            <input ref="fileInput" type="file" accept=".csv" style="display: none" @change="handleFileChange" />
+            <w-button v-if="tableConfig.toolbar.includes('create')" type="primary" @click="openDialog()">+ 新增</w-button>
+            <w-button v-if="tableConfig.toolbar.includes('batchDelete')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
+            <w-button v-if="tableConfig.toolbar.includes('export')" @click="handleExport">导出</w-button>
+            <w-button v-if="tableConfig.toolbar.includes('import')" @click="triggerImport">导入</w-button>
+            <input v-if="tableConfig.toolbar.includes('import')" ref="fileInput" type="file" accept=".csv" style="display: none" @change="handleFileChange" />
           </w-space>
+        </template>
+        <template v-for="col in formattedColumns" :key="col.prop" #[col.prop]="{ row }">
+          {{ col.formatter(row) }}
         </template>
         <template #action="{ row }">
           <w-space>
-            <w-button v-if="canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+            <w-button v-if="tableConfig.rowActions.includes('edit') && canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
+            <w-button v-if="tableConfig.rowActions.includes('delete') && canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+            <w-button v-if="tableConfig.rowActions.includes('view')" size="small" @click="openDialog(row)">查看</w-button>
             <w-tag v-if="row.__flow_status" :type="flowStatusType(row.__flow_status)">{{ flowStatusText(row.__flow_status) }}</w-tag>
           </w-space>
         </template>
@@ -62,14 +66,16 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
+import * as dictApi from '@/api/dict'
 import request from '@/api/request'
 
 const route = useRoute()
 const modelCode = computed(() => route.params.modelCode as string)
+const dictMap = reactive<Record<string, { label: string; value: string }[]>>({})
 
 const model = reactive<any>({})
 const formConfig = reactive<any>({ fields: [] })
-const tableConfig = reactive<any>({ fields: [] })
+const tableConfig = reactive<any>({ fields: [], toolbar: ['create', 'batchDelete', 'export', 'import'], rowActions: ['edit', 'delete'] })
 const list = ref<any[]>([])
 const total = ref(0)
 const query = reactive({ page: 1, pageSize: 10, filters: '', sortBy: '', sortOrder: '' })
@@ -102,6 +108,8 @@ const tableColumns = computed(() => {
       prop: isRef ? `${f.field}_display` : f.field,
       label: f.label,
       width: f.width,
+      align: f.align || 'left',
+      fixed: f.fixed || undefined,
       sortable: f.sortable ? 'custom' : false
     }
   })
@@ -112,10 +120,24 @@ const tableColumns = computed(() => {
   ]
 })
 
+const formattedColumns = computed(() => {
+  return tableConfig.fields
+    .filter((f: any) => f.format && f.inTable)
+    .map((f: any) => {
+      const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
+      const isRef = fieldMeta?.type === 'ref'
+      const prop = isRef ? `${f.field}_display` : f.field
+      const formatter = f.format === 'dict' && fieldMeta?.dict_code
+        ? (row: any) => formatDictValue(row[prop], fieldMeta.dict_code)
+        : (row: any) => formatCellValue(row[prop], f.format)
+      return { prop, formatter }
+    })
+})
+
 const queryFields = computed(() => {
   return tableConfig.fields
     .filter((f: any) => f.searchable)
-    .map((f: any) => ({ prop: f.field, label: f.label }))
+    .map((f: any) => ({ prop: f.field, label: f.label, searchMode: f.searchMode || 'like' }))
 })
 
 watch(modelCode, () => loadModel(), { immediate: true })
@@ -149,6 +171,8 @@ async function loadModel() {
       ? JSON.parse(data.tables[0].config)
       : data.tables[0].config
     tableConfig.fields = saved.fields || []
+    tableConfig.toolbar = saved.toolbar || ['create', 'batchDelete', 'export', 'import']
+    tableConfig.rowActions = saved.rowActions || ['edit', 'delete']
   } else {
     tableConfig.fields = (data.fields || []).map((f: any) => ({
       field: f.field_name,
@@ -158,7 +182,25 @@ async function loadModel() {
     }))
   }
 
+  await loadDicts()
   await loadData()
+}
+
+async function loadDicts() {
+  const dictCodes = new Set<string>()
+  tableConfig.fields.forEach((f: any) => {
+    if (f.format === 'dict') {
+      const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
+      if (fieldMeta?.dict_code) dictCodes.add(fieldMeta.dict_code)
+    }
+  })
+  if (!dictCodes.size) return
+  const dicts = await dictApi.getDicts()
+  const targetDicts = dicts.filter((d: any) => dictCodes.has(d.code))
+  for (const dict of targetDicts) {
+    const detail = await dictApi.getDict(dict.id)
+    dictMap[dict.code] = (detail.items || []).map((item: any) => ({ label: item.label, value: String(item.value) }))
+  }
 }
 
 function canEdit(row: any) {
@@ -172,6 +214,34 @@ function flowStatusText(status: string) {
     rejected: '已驳回'
   }
   return map[status] || status
+}
+
+function formatCellValue(value: any, format: string) {
+  if (value === undefined || value === null || value === '') return ''
+  switch (format) {
+    case 'date':
+      return String(value).slice(0, 10)
+    case 'datetime':
+      return String(value).replace('T', ' ').slice(0, 19)
+    case 'number':
+      return Number(value).toLocaleString()
+    case 'money':
+      return '¥' + Number(value).toFixed(2)
+    case 'percent':
+      return (Number(value) * 100).toFixed(2) + '%'
+    case 'boolean':
+      return value ? '是' : '否'
+    default:
+      return value
+  }
+}
+
+function formatDictValue(value: any, dictCode: string) {
+  if (value === undefined || value === null) return ''
+  const dict = dictMap[dictCode]
+  if (!dict) return value
+  const item = dict.find((d: any) => String(d.value) === String(value))
+  return item?.label ?? value
 }
 
 function flowStatusType(status: string) {
