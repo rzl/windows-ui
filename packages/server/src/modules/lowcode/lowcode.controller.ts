@@ -98,7 +98,7 @@ export async function dynamicBatchDelete(req: Request, res: Response) {
 }
 
 export async function dynamicImport(req: Request, res: Response) {
-  const result = await lowcodeService.dynamicImport(req.params.modelCode, req.body.rows || [])
+  const result = await lowcodeService.dynamicImport(req.params.modelCode, req.body.rows || [], (req as AuthRequest).user)
   res.json(success(result, '导入成功'))
 }
 
@@ -124,6 +124,24 @@ export async function getImportTemplate(req: Request, res: Response) {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   res.setHeader('Content-Disposition', `attachment; filename=${req.params.modelCode}_template.xlsx`)
   res.send(buffer)
+}
+
+export async function createExportTask(req: Request, res: Response) {
+  const { ids, columns } = req.body
+  const result = await lowcodeService.createExportTask(req.params.modelCode, { ids, columns }, (req as AuthRequest).user)
+  res.json(success(result, '导出任务已创建'))
+}
+
+export async function getExportTask(req: Request, res: Response) {
+  const result = await lowcodeService.getExportTask(Number(req.params.id))
+  res.json(success(result))
+}
+
+export async function downloadExportFile(req: Request, res: Response) {
+  const { filePath, fileName } = await lowcodeService.downloadExportFile(Number(req.params.id))
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  res.setHeader('Content-Disposition', `attachment; filename=${fileName}`)
+  res.sendFile(filePath)
 }
 
 // 编码规则

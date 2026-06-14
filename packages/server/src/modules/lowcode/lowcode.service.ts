@@ -1,6 +1,8 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import * as XLSX from 'xlsx'
+import * as fs from 'fs'
+import * as path from 'path'
 import * as dashboardService from '../dashboard/dashboard.service'
 import * as flowService from '../flow/flow.service'
 
@@ -226,6 +228,34 @@ async function getFormConfig(modelId: number) {
     return typeof form.config === 'string' ? JSON.parse(form.config) : form.config
   } catch {
     return null
+  }
+}
+
+async function getTableConfig(modelId: number) {
+  const table = await db('lowcode_tables').where({ model_id: modelId }).first()
+  if (!table || !table.config) return null
+  try {
+    return typeof table.config === 'string' ? JSON.parse(table.config) : table.config
+  } catch {
+    return null
+  }
+}
+
+async function checkButtonPermission(modelCode: string, action: string, actionType: 'toolbar' | 'rowAction', user?: any) {
+  if (!user) return
+  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
+  if (isAdmin) return
+
+  const model = await getModelByCode(modelCode)
+  const tableConfig = await getTableConfig(model.id)
+  if (!tableConfig) return
+
+  const key = actionType === 'toolbar' ? 'toolbarPermissions' : 'rowActionPermissions'
+  const permission = tableConfig[key]?.[action]
+  if (!permission) return
+
+  if (!user.permissions?.includes(permission)) {
+    throw new AppError('无权执行该操作', 403)
   }
 }
 
@@ -563,6 +593,7 @@ function computeDefaultValue(field: any, data: any, user?: any) {
 }
 
 export async function dynamicCreate(modelCode: string, data: any, user?: any) {
+  await checkButtonPermission(modelCode, 'create', 'toolbar', user)
   const model = await getModelByCode(modelCode)
 
   // 读取表单配置中的编码规则，为空字段自动生成编码
@@ -608,6 +639,7 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
 }
 
 export async function dynamicUpdate(modelCode: string, id: number, data: any, user?: any) {
+  await checkButtonPermission(modelCode, 'edit', 'rowAction', user)
   const model = await getModelByCode(modelCode)
   await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
@@ -620,6 +652,7 @@ export async function dynamicUpdate(modelCode: string, id: number, data: any, us
 }
 
 export async function dynamicDelete(modelCode: string, id: number, user?: any) {
+  await checkButtonPermission(modelCode, 'delete', 'rowAction', user)
   const model = await getModelByCode(modelCode)
   if (user) {
     const row = await db(model.table_name).where({ id }).first()
@@ -630,6 +663,7 @@ export async function dynamicDelete(modelCode: string, id: number, user?: any) {
 }
 
 export async function dynamicBatchDelete(modelCode: string, ids: (string | number)[], user?: any) {
+  await checkButtonPermission(modelCode, 'batchDelete', 'toolbar', user)
   const model = await getModelByCode(modelCode)
   if (!ids || !ids.length) throw new AppError('未选择记录', 400)
   if (user) {
@@ -642,7 +676,8 @@ export async function dynamicBatchDelete(modelCode: string, ids: (string | numbe
   return true
 }
 
-export async function dynamicImport(modelCode: string, rows: any[]) {
+export async function dynamicImport(modelCode: string, rows: any[], user?: any) {
+  await checkButtonPermission(modelCode, 'import', 'toolbar', user)
   const model = await getModelByCode(modelCode)
   if (!rows || !rows.length) throw new AppError('导入数据不能为空', 400)
   const cleanRows = rows.map((row) => sanitizeData(model.fields, row))
@@ -651,6 +686,7 @@ export async function dynamicImport(modelCode: string, rows: any[]) {
 }
 
 export async function exportDynamicExcel(modelCode: string, options: { ids?: (string | number)[]; columns?: any[] }, user?: any) {
+  await checkButtonPermission(modelCode, 'export', 'toolbar', user)
   const model = await getModelByCode(modelCode)
   const fields = model.fields.filter((f: any) => f.status === 1)
 
@@ -678,9 +714,18 @@ export async function exportDynamicExcel(modelCode: string, options: { ids?: (st
     list = result.list
   }
 
+  // 预加载字典数据
+  const typedFieldMap = fieldMap as Map<string, any>
+  const dictCodes = new Set<string>()
+  for (const col of exportColumns) {
+    const field = typedFieldMap.get(col.field)
+    if (field?.dict_code) dictCodes.add(field.dict_code)
+  }
+  const dictData = await loadDictMap([...dictCodes])
+
   // 构建表头和行
   const headers = exportColumns.map((col: any) => col.label)
-  const rows = list.map((row: any) => exportColumns.map((col: any) => formatExportValue(row, col)))
+  const rows = list.map((row: any) => exportColumns.map((col: any) => formatExportValue(row, col, typedFieldMap, dictData)))
 
   const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows])
   const workbook = XLSX.utils.book_new()
@@ -689,19 +734,52 @@ export async function exportDynamicExcel(modelCode: string, options: { ids?: (st
   return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
 }
 
-function formatExportValue(row: any, col: any) {
+async function loadDictMap(dictCodes: string[]): Promise<Map<string, Map<string, string>>> {
+  const result = new Map<string, Map<string, string>>()
+  if (!dictCodes.length) return result
+
+  const dicts = await db('dicts').whereIn('code', dictCodes).where('status', 1)
+  if (!dicts.length) return result
+
+  const dictIds = dicts.map((d) => d.id)
+  const items = await db('dict_items')
+    .whereIn('dict_id', dictIds)
+    .where('status', 1)
+    .orderBy('sort', 'asc')
+
+  for (const dict of dicts) {
+    const map = new Map<string, string>()
+    for (const item of items.filter((i) => i.dict_id === dict.id)) {
+      map.set(String(item.value), item.label)
+    }
+    result.set(dict.code, map)
+  }
+  return result
+}
+
+function formatExportValue(row: any, col: any, fieldMap: Map<string, any>, dictData: Map<string, any>) {
   const value = row[col.field]
   if (value === undefined || value === null) return ''
 
+  const field = fieldMap.get(col.field)
+
   // 关联字段显示值
-  if (col.type === 'ref' || col.refModel) {
+  if (col.type === 'ref' || col.refModel || field?.type === 'ref') {
     return row[`${col.field}_display`] ?? value
   }
 
   // 字典转换
-  if (col.type === 'select' || col.type === 'radio' || col.format === 'dict') {
-    // 后端不缓存字典，直接返回值；前端导出时已经带 display
+  if (field?.dict_code) {
+    const dict = dictData.get(field.dict_code)
+    if (dict) {
+      return dict.get(String(value)) ?? value
+    }
     return value
+  }
+
+  // 布尔转换
+  if (field?.type === 'boolean' || field?.type === 'switch' || col.format === 'boolean') {
+    return value === 1 || value === true || value === '1' ? '是' : '否'
   }
 
   // 格式化
@@ -714,8 +792,6 @@ function formatExportValue(row: any, col: any) {
       return Number(value).toFixed(2)
     case 'percent':
       return (Number(value) * 100).toFixed(2) + '%'
-    case 'boolean':
-      return value ? '是' : '否'
     default:
       return value
   }
@@ -816,15 +892,29 @@ function sanitizeData(fields: any[], data: any) {
 
     // 类型转换
     if (field.type === 'number' || field.type === 'integer') {
-      result[key] = value === '' || value === undefined ? null : Number(value)
+      result[key] = value === '' || value === undefined || value === null ? null : Number(value)
     } else if (field.type === 'boolean' || field.type === 'switch') {
-      result[key] = value === true || value === '1' || value === 1 ? 1 : 0
+      result[key] = parseBooleanValue(value) ? 1 : 0
+    } else if (field.type === 'date') {
+      result[key] = value === '' || value === undefined || value === null ? null : String(value).slice(0, 10)
+    } else if (field.type === 'datetime') {
+      result[key] = value === '' || value === undefined || value === null ? null : String(value).replace('T', ' ').slice(0, 19)
     } else {
-      result[key] = value
+      result[key] = value === '' ? null : value
     }
   })
 
   return result
+}
+
+function parseBooleanValue(value: any): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value === 1
+  if (typeof value === 'string') {
+    const v = value.trim().toLowerCase()
+    return v === '1' || v === '是' || v === 'yes' || v === 'true' || v === 'y'
+  }
+  return false
 }
 
 // ---------- 编码规则 ----------
@@ -1044,4 +1134,117 @@ export async function validateBatch(items: { code: string; value: any }[]) {
       return { code: item.code, valid: false, message: '校验规则表达式错误' }
     }
   })
+}
+
+// ---------- 异步导出 ----------
+
+const EXPORT_DIR = path.resolve(process.cwd(), 'exports')
+
+function ensureExportDir() {
+  if (!fs.existsSync(EXPORT_DIR)) {
+    fs.mkdirSync(EXPORT_DIR, { recursive: true })
+  }
+}
+
+export async function createExportTask(modelCode: string, options: { ids?: (string | number)[]; columns?: any[] }, user?: any) {
+  await checkButtonPermission(modelCode, 'export', 'toolbar', user)
+  ensureExportDir()
+  const [id] = await db('export_tasks').insert({
+    model_code: modelCode,
+    status: 'pending'
+  })
+
+  // 异步处理导出任务
+  setImmediate(() => {
+    processExportTask(id, modelCode, options, user).catch((error) => {
+      console.error('导出任务处理失败', error)
+    })
+  })
+
+  return { id }
+}
+
+export async function getExportTask(id: number) {
+  return db('export_tasks').where({ id }).first()
+}
+
+async function processExportTask(id: number, modelCode: string, options: { ids?: (string | number)[]; columns?: any[] }, user?: any) {
+  try {
+    const model = await getModelByCode(modelCode)
+    const fields = model.fields.filter((f: any) => f.status === 1)
+
+    let exportColumns: any[] = options.columns || fields.map((f: any) => ({
+      field: f.field_name,
+      label: f.display_name || f.field_name,
+      type: f.type,
+      format: '',
+      dictCode: f.dict_code,
+      refModel: f.ref_model,
+      refDisplayField: f.ref_display_field
+    }))
+
+    const fieldMap = new Map<string, any>(fields.map((f: any) => [f.field_name, f]))
+    exportColumns = exportColumns.filter((col: any) => fieldMap.has(col.field))
+
+    // 分批次查询数据，避免内存溢出
+    const pageSize = 500
+    let page = 1
+    let allRows: any[] = []
+
+    if (options.ids && options.ids.length) {
+      allRows = await db(model.table_name).whereIn('id', options.ids)
+    } else {
+      while (true) {
+        const result = await dynamicList(modelCode, { page, pageSize }, user)
+        allRows = allRows.concat(result.list)
+        if (result.list.length < pageSize || allRows.length >= 50000) break
+        page++
+      }
+    }
+
+    const dictCodes = new Set<string>()
+    for (const col of exportColumns) {
+      const field = fieldMap.get(col.field)
+      if (field?.dict_code) dictCodes.add(field.dict_code)
+    }
+    const dictData = await loadDictMap([...dictCodes])
+
+    const headers = exportColumns.map((col: any) => col.label)
+    const rows = allRows.map((row: any) => exportColumns.map((col: any) => formatExportValue(row, col, fieldMap, dictData)))
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows])
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, model.name || '数据')
+
+    const fileName = `${modelCode}_${Date.now()}.xlsx`
+    const filePath = path.join(EXPORT_DIR, fileName)
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
+    fs.writeFileSync(filePath, buffer)
+
+    await db('export_tasks').where({ id }).update({
+      status: 'success',
+      file_path: filePath,
+      total: allRows.length,
+      success_count: allRows.length,
+      update_time: db.fn.now()
+    })
+  } catch (error: any) {
+    await db('export_tasks').where({ id }).update({
+      status: 'error',
+      message: error.message || '导出失败',
+      update_time: db.fn.now()
+    })
+  }
+}
+
+export async function downloadExportFile(id: number) {
+  const task = await db('export_tasks').where({ id }).first()
+  if (!task) throw new AppError('导出任务不存在', 404)
+  if (task.status !== 'success') throw new AppError('导出任务未完成', 400)
+  if (!task.file_path || !fs.existsSync(task.file_path)) throw new AppError('导出文件已过期', 404)
+
+  return {
+    filePath: task.file_path,
+    fileName: path.basename(task.file_path)
+  }
 }

@@ -43,6 +43,7 @@ sop/
 | [database/schema.md](./database/schema.md) | 数据库设计 |
 | [manuals/README.md](./manuals/README.md) | 用户操作手册总览 |
 | [manuals/lowcode/model.md](./manuals/lowcode/model.md) | 数据模型与低代码开发手册 |
+| [manuals/lowcode/report.md](./manuals/lowcode/report.md) | 报表设计器手册 |
 | [manuals/flow/list.md](./manuals/flow/list.md) | 流程定义手册 |
 | [manuals/flow/pending.md](./manuals/flow/pending.md) | 我的待办手册 |
 | [manuals/schedule/task.md](./manuals/schedule/task.md) | 定时任务手册 |

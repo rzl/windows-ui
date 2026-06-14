@@ -23,10 +23,10 @@
       >
         <template #toolbar>
           <w-space>
-            <w-button v-if="permission.canCreate && tableConfig.toolbar.includes('create')" type="primary" @click="openDialog()">+ 新增</w-button>
-            <w-button v-if="permission.canDelete && tableConfig.toolbar.includes('batchDelete')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
+            <w-button v-if="permission.canCreate && tableConfig.toolbar.includes('create') && hasActionPermission('create', 'toolbar')" type="primary" @click="openDialog()">+ 新增</w-button>
+            <w-button v-if="permission.canDelete && tableConfig.toolbar.includes('batchDelete') && hasActionPermission('batchDelete', 'toolbar')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
             <w-dropdown
-              v-if="permission.canExport && tableConfig.toolbar.includes('export')"
+              v-if="permission.canExport && tableConfig.toolbar.includes('export') && hasActionPermission('export', 'toolbar')"
               trigger-text="导出"
               :items="[
                 { label: '导出全部', value: 'all' },
@@ -35,7 +35,7 @@
               @command="handleExportCommand"
             />
             <w-dropdown
-              v-if="permission.canImport && tableConfig.toolbar.includes('import')"
+              v-if="permission.canImport && tableConfig.toolbar.includes('import') && hasActionPermission('import', 'toolbar')"
               trigger-text="导入"
               :items="[
                 { label: '上传 Excel', value: 'upload' },
@@ -43,7 +43,7 @@
               ]"
               @command="handleImportCommand"
             />
-            <input v-if="permission.canImport && tableConfig.toolbar.includes('import')" ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleFileChange" />
+            <input v-if="permission.canImport && tableConfig.toolbar.includes('import') && hasActionPermission('import', 'toolbar')" ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleFileChange" />
           </w-space>
         </template>
         <template v-for="col in formattedColumns" :key="col.prop" #[col.prop]="{ row }">
@@ -51,9 +51,9 @@
         </template>
         <template #action="{ row }">
           <w-space>
-            <w-button v-if="permission.canEdit && tableConfig.rowActions.includes('edit') && canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="permission.canDelete && tableConfig.rowActions.includes('delete') && canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-            <w-button v-if="tableConfig.rowActions.includes('view')" size="small" @click="openDialog(row)">查看</w-button>
+            <w-button v-if="permission.canEdit && tableConfig.rowActions.includes('edit') && hasActionPermission('edit', 'rowAction') && canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
+            <w-button v-if="permission.canDelete && tableConfig.rowActions.includes('delete') && hasActionPermission('delete', 'rowAction') && canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+            <w-button v-if="tableConfig.rowActions.includes('view') && hasActionPermission('view', 'rowAction')" size="small" @click="openDialog(row)">查看</w-button>
             <w-tag v-if="row.__flow_status" :type="flowStatusType(row.__flow_status)">{{ flowStatusText(row.__flow_status) }}</w-tag>
           </w-space>
         </template>
@@ -86,8 +86,10 @@ import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
 import request from '@/api/request'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const authStore = useAuthStore()
 const modelCode = computed(() => route.params.modelCode as string)
 const dictMap = reactive<Record<string, { label: string; value: string }[]>>({})
 
@@ -128,6 +130,14 @@ const formFields = computed(() => {
 })
 
 const canAccess = computed(() => permission.dataScope !== 'none')
+
+function hasActionPermission(action: string, type: 'toolbar' | 'rowAction') {
+  const required = type === 'toolbar'
+    ? tableConfig.toolbarPermissions?.[action]
+    : tableConfig.rowActionPermissions?.[action]
+  if (!required) return true
+  return authStore.hasPermission(required)
+}
 
 const tableColumns = computed(() => {
   const columns = tableConfig.fields.map((f: any) => {
@@ -205,7 +215,9 @@ async function loadModel() {
       : data.tables[0].config
     tableConfig.fields = saved.fields || []
     tableConfig.toolbar = saved.toolbar || ['create', 'batchDelete', 'export', 'import']
-    tableConfig.rowActions = saved.rowActions || ['edit', 'delete']
+    tableConfig.rowActions = saved.rowActions || ['edit', 'delete', 'view']
+    tableConfig.toolbarPermissions = saved.toolbarPermissions || {}
+    tableConfig.rowActionPermissions = saved.rowActionPermissions || {}
   } else {
     tableConfig.fields = (data.fields || []).map((f: any) => ({
       field: f.field_name,
@@ -421,6 +433,11 @@ function handleExportCommand(command: string) {
 async function exportAllExcel() {
   try {
     const columns = getExportColumns()
+    // 数据量较大时使用异步导出
+    if (total.value > 1000) {
+      await startAsyncExport({ columns })
+      return
+    }
     const blob = await lowcodeApi.exportDynamicExcel(modelCode.value, { columns })
     downloadBlob(blob, `${modelCode.value}.xlsx`)
   } catch (err: any) {
@@ -438,6 +455,26 @@ async function exportSelectedExcel() {
   } catch (err: any) {
     alert(err.message || '导出失败')
   }
+}
+
+async function startAsyncExport(options: { ids?: (string | number)[]; columns?: any[] }) {
+  const result = await lowcodeApi.createExportTask(modelCode.value, options)
+  const taskId = result.id
+  alert('导出任务已创建，请稍候...')
+
+  const poll = async () => {
+    const task = await lowcodeApi.getExportTask(modelCode.value, taskId)
+    if (task.status === 'success') {
+      const blob = await lowcodeApi.downloadExportFile(modelCode.value, taskId)
+      downloadBlob(blob, `${modelCode.value}_${Date.now()}.xlsx`)
+    } else if (task.status === 'error') {
+      alert(task.message || '导出失败')
+    } else {
+      setTimeout(poll, 1000)
+    }
+  }
+
+  setTimeout(poll, 1000)
 }
 
 function getExportColumns() {

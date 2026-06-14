@@ -85,6 +85,20 @@
               <w-checkbox-group v-model="tableConfig.rowActions" :options="rowActionOptions" />
             </w-form-item>
           </w-form>
+          <w-card v-if="tableConfig.toolbar.length" header="工具栏按钮权限" size="small" style="margin-bottom: 12px">
+            <w-form :inline="true">
+              <w-form-item v-for="action in tableConfig.toolbar" :key="action" :label="actionLabel(action, toolbarActionOptions)">
+                <w-input v-model="tableConfig.toolbarPermissions[action]" placeholder="权限标识，留空不控制" style="width: 180px" />
+              </w-form-item>
+            </w-form>
+          </w-card>
+          <w-card v-if="tableConfig.rowActions.length" header="行操作按钮权限" size="small" style="margin-bottom: 12px">
+            <w-form :inline="true">
+              <w-form-item v-for="action in tableConfig.rowActions" :key="action" :label="actionLabel(action, rowActionOptions)">
+                <w-input v-model="tableConfig.rowActionPermissions[action]" placeholder="权限标识，留空不控制" style="width: 180px" />
+              </w-form-item>
+            </w-form>
+          </w-card>
           <w-table :data="fields" :columns="tableDesignColumns" stripe border>
             <template #inTable="{ row }">
               <w-switch v-model="tableConfigMap[row.field_name].inTable" />
@@ -220,7 +234,13 @@ const activeTab = ref('fields')
 const model = reactive<any>({})
 const fields = ref<any[]>([])
 const formConfig = reactive<any>({ fields: [] })
-const tableConfig = reactive<any>({ fields: [], toolbar: ['create', 'batchDelete', 'export', 'import'], rowActions: ['edit', 'delete'] })
+const tableConfig = reactive<any>({
+  fields: [],
+  toolbar: ['create', 'batchDelete', 'export', 'import'],
+  rowActions: ['edit', 'delete', 'view'],
+  toolbarPermissions: {},
+  rowActionPermissions: {}
+})
 const formConfigMap = reactive<Record<string, any>>({})
 const tableConfigMap = reactive<Record<string, any>>({})
 const validationRules = ref<any[]>([])
@@ -415,6 +435,10 @@ const rowActionOptions = [
   { label: '查看', value: 'view' }
 ]
 
+function actionLabel(value: string, options: any[]) {
+  return options.find((o) => o.value === value)?.label || value
+}
+
 onMounted(() => loadData())
 
 watch(fields, () => {
@@ -533,7 +557,9 @@ async function loadData() {
       : data.tables[0].config
     tableConfig.fields = saved.fields || []
     tableConfig.toolbar = saved.toolbar || ['create', 'batchDelete', 'export', 'import']
-    tableConfig.rowActions = saved.rowActions || ['edit', 'delete']
+    tableConfig.rowActions = saved.rowActions || ['edit', 'delete', 'view']
+    tableConfig.toolbarPermissions = saved.toolbarPermissions || {}
+    tableConfig.rowActionPermissions = saved.rowActionPermissions || {}
     tableConfig.fields.forEach((f: any) => {
       tableConfigMap[f.field] = f
     })
@@ -718,13 +744,29 @@ async function saveTableConfig() {
       return config
     })
     .filter((f) => f && f.inTable)
+  // 只保存已启用按钮的权限
+  const toolbarPermissions: Record<string, string> = {}
+  const rowActionPermissions: Record<string, string> = {}
+  for (const action of tableConfig.toolbar || []) {
+    if (tableConfig.toolbarPermissions?.[action]) {
+      toolbarPermissions[action] = tableConfig.toolbarPermissions[action]
+    }
+  }
+  for (const action of tableConfig.rowActions || []) {
+    if (tableConfig.rowActionPermissions?.[action]) {
+      rowActionPermissions[action] = tableConfig.rowActionPermissions[action]
+    }
+  }
+
   await lowcodeApi.saveTable({
     modelId,
     name: '默认列表',
     config: {
       fields: configFields,
       toolbar: tableConfig.toolbar || ['create', 'batchDelete', 'export', 'import'],
-      rowActions: tableConfig.rowActions || ['edit', 'delete']
+      rowActions: tableConfig.rowActions || ['edit', 'delete', 'view'],
+      toolbarPermissions,
+      rowActionPermissions
     },
     status: 1
   })

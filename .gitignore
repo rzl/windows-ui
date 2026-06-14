@@ -49,4 +49,5 @@ coverage/
 *.sqlite
 *.sqlite3
 packages/server/data/
+packages/server/exports/
 uploads/

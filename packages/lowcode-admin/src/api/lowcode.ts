@@ -152,6 +152,18 @@ export function getImportTemplate(modelCode: string) {
   return request.get(`/lowcode/${modelCode}/template`, { responseType: 'blob' })
 }
 
+export function createExportTask(modelCode: string, data: { ids?: (string | number)[]; columns?: any[] }) {
+  return request.post(`/lowcode/${modelCode}/export-task`, data)
+}
+
+export function getExportTask(modelCode: string, id: number) {
+  return request.get(`/lowcode/${modelCode}/export-task/${id}`)
+}
+
+export function downloadExportFile(modelCode: string, id: number) {
+  return request.get(`/lowcode/${modelCode}/export-task/${id}/download`, { responseType: 'blob' })
+}
+
 // 编码规则
 export function getCodingRules() {
   return request.get('/lowcode/coding-rules')

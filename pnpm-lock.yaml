@@ -125,6 +125,9 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.22.2
+      express-async-errors:
+        specifier: ^3.1.1
+        version: 3.1.1(express@4.22.2)
       helmet:
         specifier: ^7.1.0
         version: 7.2.0
@@ -1592,6 +1595,11 @@ packages:
   expand-template@2.0.3:
     resolution: {integrity: sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==}
     engines: {node: '>=6'}
+
+  express-async-errors@3.1.1:
+    resolution: {integrity: sha512-h6aK1da4tpqWSbyCa3FxB/V6Ehd4EEB15zyQq9qe75OZBp0krinNKuH4rAY+S/U/2I36vdLAUFSjQJ+TFmODng==}
+    peerDependencies:
+      express: ^4.16.2
 
   express@4.22.2:
     resolution: {integrity: sha512-IuL+Elrou2ZvCFHs18/CIzy2Nzvo25nZ1/D2eIZlz7c+QUayAcYoiM2BthCjs+EBHVpjYjcuLDAiCWgeIX3X1Q==}
@@ -4296,6 +4304,10 @@ snapshots:
       strip-final-newline: 3.0.0
 
   expand-template@2.0.3: {}
+
+  express-async-errors@3.1.1(express@4.22.2):
+    dependencies:
+      express: 4.22.2
 
   express@4.22.2:
     dependencies:

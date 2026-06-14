@@ -168,6 +168,24 @@ const routes = [
         name: 'DashboardDesigner',
         component: () => import('@/views/dashboard/DashboardDesigner.vue'),
         meta: { title: '仪表盘设计', permission: 'dashboard:design' }
+      },
+      {
+        path: 'report/list',
+        name: 'ReportList',
+        component: () => import('@/views/report/ReportList.vue'),
+        meta: { title: '报表管理', permission: 'report:list' }
+      },
+      {
+        path: 'report/design/:code',
+        name: 'ReportDesigner',
+        component: () => import('@/views/report/ReportDesigner.vue'),
+        meta: { title: '报表设计', permission: 'report:design' }
+      },
+      {
+        path: 'report/run/:code',
+        name: 'ReportPage',
+        component: () => import('@/views/report/ReportPage.vue'),
+        meta: { title: '报表运行', permission: 'report:run' }
       }
     ]
   },
