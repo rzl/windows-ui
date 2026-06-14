@@ -3,6 +3,7 @@
     <w-card header="字典管理">
       <div class="toolbar">
         <w-button v-if="auth.hasPermission('dict:create')" type="primary" @click="openDictDialog()">+ 新增字典</w-button>
+        <w-button @click="goCategory">分类管理</w-button>
       </div>
 
       <w-table :data="dicts" :columns="dictColumns" stripe border>
@@ -27,6 +28,9 @@
         </w-form-item>
         <w-form-item label="字典编码">
           <w-input v-model="dictForm.code" :disabled="!!dictForm.id" />
+        </w-form-item>
+        <w-form-item label="分类">
+          <w-select v-model="dictForm.categoryId" :options="categoryOptions" />
         </w-form-item>
         <w-form-item label="描述">
           <w-input v-model="dictForm.description" type="textarea" />
@@ -85,11 +89,15 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import * as dictApi from '@/api/dict'
 
 const auth = useAuthStore()
+const router = useRouter()
 const dicts = ref<any[]>([])
+const categories = ref<any[]>([])
+const categoryOptions = ref<any[]>([])
 const dictDialogVisible = ref(false)
 const itemDialogVisible = ref(false)
 const itemFormVisible = ref(false)
@@ -102,6 +110,7 @@ const dictColumns = [
   { prop: 'id', label: 'ID', width: 60 },
   { prop: 'name', label: '字典名称', width: 180 },
   { prop: 'code', label: '字典编码' },
+  { prop: 'category_name', label: '分类' },
   { prop: 'description', label: '描述' },
   { prop: 'status', label: '状态' },
   { prop: 'action', label: '操作', width: 200, fixed: 'right' }
@@ -119,7 +128,13 @@ const itemColumns = [
 onMounted(() => loadData())
 
 async function loadData() {
-  dicts.value = await dictApi.getDicts()
+  const [dictData, categoryData] = await Promise.all([
+    dictApi.getDicts(),
+    dictApi.getDictCategories()
+  ])
+  dicts.value = dictData
+  categories.value = categoryData
+  categoryOptions.value = [{ label: '无', value: null }, ...categoryData.map((c: any) => ({ label: c.name, value: c.id }))]
 }
 
 function openDictDialog(row?: any) {
@@ -127,8 +142,10 @@ function openDictDialog(row?: any) {
   if (row) {
     Object.assign(dictForm, JSON.parse(JSON.stringify(row)))
     dictForm.status = row.status === 1
+    dictForm.categoryId = row.category_id || null
   } else {
     dictForm.status = true
+    dictForm.categoryId = null
   }
   dictDialogVisible.value = true
 }
@@ -154,6 +171,10 @@ async function handleDeleteDict(row: any) {
     await dictApi.deleteDict(row.id)
     await loadData()
   }
+}
+
+function goCategory() {
+  router.push('/system/dict-category')
 }
 
 async function openItemDialog(row: any) {

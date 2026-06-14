@@ -189,3 +189,37 @@ lowcode_models
 | assignee_value | 处理人值（角色 ID 或用户 ID） |
 | status | 状态：`pending` / `approved` / `rejected` |
 | comment | 审批意见 |
+
+## 字典分类（dict_categories）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| code | 分类编码 |
+| name | 分类名称 |
+| sort | 排序 |
+| status | 状态 |
+
+`dicts` 表通过 `category_id` 关联字典分类。
+
+## 系统公告（notices）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| title | 标题 |
+| content | 内容 |
+| type | 类型：`notice` / `announcement` |
+| sort | 排序 |
+| status | 状态 |
+| publish_time | 发布时间 |
+
+## 职务（positions）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| code | 职务编码 |
+| name | 职务名称 |
+| sort | 排序 |
+| status | 状态 |

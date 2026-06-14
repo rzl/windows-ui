@@ -50,6 +50,24 @@ const routes = [
         meta: { title: '字典管理', permission: 'dict:list' }
       },
       {
+        path: 'system/notice',
+        name: 'NoticeList',
+        component: () => import('@/views/system/NoticeList.vue'),
+        meta: { title: '系统公告', permission: 'notice:list' }
+      },
+      {
+        path: 'system/dict-category',
+        name: 'DictCategoryList',
+        component: () => import('@/views/system/DictCategoryList.vue'),
+        meta: { title: '字典分类', permission: 'dict:list' }
+      },
+      {
+        path: 'system/position',
+        name: 'PositionList',
+        component: () => import('@/views/system/PositionList.vue'),
+        meta: { title: '职务管理', permission: 'position:list' }
+      },
+      {
         path: 'lowcode/model',
         name: 'ModelList',
         component: () => import('@/views/lowcode/ModelList.vue'),

@@ -5,6 +5,7 @@ export interface DictForm {
   name?: string
   code?: string
   description?: string
+  categoryId?: number
   status?: number
 }
 
@@ -13,6 +14,14 @@ export interface DictItemForm {
   dictId?: number
   label?: string
   value?: string
+  sort?: number
+  status?: number
+}
+
+export interface DictCategoryForm {
+  id?: number
+  code?: string
+  name?: string
   sort?: number
   status?: number
 }
@@ -35,6 +44,22 @@ export function updateDict(id: number, data: DictForm) {
 
 export function deleteDict(id: number) {
   return request.delete(`/system/dicts/${id}`)
+}
+
+export function getDictCategories() {
+  return request.get('/system/dict-categories')
+}
+
+export function createDictCategory(data: DictCategoryForm) {
+  return request.post('/system/dict-categories', data)
+}
+
+export function updateDictCategory(id: number, data: DictCategoryForm) {
+  return request.put(`/system/dict-categories/${id}`, data)
+}
+
+export function deleteDictCategory(id: number) {
+  return request.delete(`/system/dict-categories/${id}`)
 }
 
 export function createDictItem(data: DictItemForm) {

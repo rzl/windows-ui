@@ -48,3 +48,66 @@ export async function deleteDictItem(req: Request, res: Response) {
   await systemService.deleteDictItem(Number(req.params.id))
   res.json(success(null, '删除成功'))
 }
+
+// 字典分类
+export async function getDictCategories(_req: Request, res: Response) {
+  const result = await systemService.getDictCategories()
+  res.json(success(result))
+}
+
+export async function createDictCategory(req: Request, res: Response) {
+  const result = await systemService.createDictCategory(req.body)
+  res.json(success(result, '创建成功'))
+}
+
+export async function updateDictCategory(req: Request, res: Response) {
+  const result = await systemService.updateDictCategory(Number(req.params.id), req.body)
+  res.json(success(result, '更新成功'))
+}
+
+export async function deleteDictCategory(req: Request, res: Response) {
+  await systemService.deleteDictCategory(Number(req.params.id))
+  res.json(success(null, '删除成功'))
+}
+
+// 公告
+export async function getNotices(_req: Request, res: Response) {
+  const result = await systemService.getNotices()
+  res.json(success(result))
+}
+
+export async function createNotice(req: Request, res: Response) {
+  const result = await systemService.createNotice(req.body)
+  res.json(success(result, '创建成功'))
+}
+
+export async function updateNotice(req: Request, res: Response) {
+  const result = await systemService.updateNotice(Number(req.params.id), req.body)
+  res.json(success(result, '更新成功'))
+}
+
+export async function deleteNotice(req: Request, res: Response) {
+  await systemService.deleteNotice(Number(req.params.id))
+  res.json(success(null, '删除成功'))
+}
+
+// 职务
+export async function getPositions(_req: Request, res: Response) {
+  const result = await systemService.getPositions()
+  res.json(success(result))
+}
+
+export async function createPosition(req: Request, res: Response) {
+  const result = await systemService.createPosition(req.body)
+  res.json(success(result, '创建成功'))
+}
+
+export async function updatePosition(req: Request, res: Response) {
+  const result = await systemService.updatePosition(Number(req.params.id), req.body)
+  res.json(success(result, '更新成功'))
+}
+
+export async function deletePosition(req: Request, res: Response) {
+  await systemService.deletePosition(Number(req.params.id))
+  res.json(success(null, '删除成功'))
+}
