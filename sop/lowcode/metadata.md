@@ -23,8 +23,16 @@ lowcode_models
 | name | 模型显示名称 |
 | table_name | 对应物理表名 |
 | description | 描述 |
+| data_permission | 数据权限规则：`all` / `self` / `dept` / `dept_and_child` |
 | status | 状态：1 启用，0 禁用 |
 | create_time / update_time | 创建/更新时间 |
+
+**物理表审计字段**：
+
+| 字段 | 说明 |
+|------|------|
+| create_by | 创建人用户 ID |
+| dept_id | 创建人所属部门 ID |
 
 **规则**：
 

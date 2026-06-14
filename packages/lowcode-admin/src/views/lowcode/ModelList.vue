@@ -35,6 +35,9 @@
         <w-form-item label="描述">
           <w-input v-model="formModel.description" type="textarea" />
         </w-form-item>
+        <w-form-item label="数据权限">
+          <w-select v-model="formModel.dataPermission" :options="dataPermissionOptions" />
+        </w-form-item>
         <w-form-item label="状态">
           <w-switch v-model="formModel.status" active-text="启用" inactive-text="禁用" />
         </w-form-item>
@@ -91,6 +94,13 @@ const columns = [
   { prop: 'action', label: '操作', width: 240, fixed: 'right' }
 ]
 
+const dataPermissionOptions = [
+  { label: '全部可见', value: 'all' },
+  { label: '仅本人', value: 'self' },
+  { label: '本部门', value: 'dept' },
+  { label: '本部门及子部门', value: 'dept_and_child' }
+]
+
 onMounted(() => loadData())
 
 async function loadData() {
@@ -102,8 +112,10 @@ function openDialog(row?: any) {
   if (row) {
     Object.assign(formModel, JSON.parse(JSON.stringify(row)))
     formModel.status = row.status === 1
+    formModel.dataPermission = row.data_permission || 'all'
   } else {
     formModel.status = true
+    formModel.dataPermission = 'all'
   }
   dialogVisible.value = true
 }

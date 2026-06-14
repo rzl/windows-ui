@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { success } from '../../utils/response'
+import type { AuthRequest } from '../../middleware/auth'
 import * as lowcodeService from './lowcode.service'
 
 // 模型
@@ -62,7 +63,7 @@ export async function saveTable(req: Request, res: Response) {
 
 // 动态 CRUD
 export async function dynamicList(req: Request, res: Response) {
-  const result = await lowcodeService.dynamicList(req.params.modelCode, req.query)
+  const result = await lowcodeService.dynamicList(req.params.modelCode, req.query, (req as AuthRequest).user)
   res.json(success(result))
 }
 
@@ -72,7 +73,7 @@ export async function dynamicDetail(req: Request, res: Response) {
 }
 
 export async function dynamicCreate(req: Request, res: Response) {
-  const result = await lowcodeService.dynamicCreate(req.params.modelCode, req.body)
+  const result = await lowcodeService.dynamicCreate(req.params.modelCode, req.body, (req as AuthRequest).user)
   res.json(success(result, '创建成功'))
 }
 

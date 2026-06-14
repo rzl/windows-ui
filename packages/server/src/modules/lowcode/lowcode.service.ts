@@ -92,6 +92,7 @@ export async function createModel(data: any) {
     name: data.name,
     table_name: tableName,
     description: data.description,
+    data_permission: data.dataPermission || 'all',
     status: data.status ?? 1
   })
 
@@ -108,6 +109,7 @@ export async function updateModel(id: number, data: any) {
   await db('lowcode_models').where({ id }).update({
     name: data.name,
     description: data.description,
+    data_permission: data.dataPermission || 'all',
     status: data.status,
     update_time: db.fn.now()
   })
@@ -257,6 +259,8 @@ async function createPhysicalTable(tableName: string) {
 
   await db.schema.createTable(tableName, (table) => {
     table.increments('id').primary()
+    table.integer('create_by').unsigned().nullable()
+    table.integer('dept_id').unsigned().nullable()
     table.timestamp('create_time').defaultTo(db.fn.now())
     table.timestamp('update_time').defaultTo(db.fn.now())
   })
@@ -310,13 +314,16 @@ async function alterPhysicalColumn(tableName: string, columnName: string, fieldD
 
 // ---------- 动态 CRUD ----------
 
-export async function dynamicList(modelCode: string, query: any) {
+export async function dynamicList(modelCode: string, query: any, user?: any) {
   const model = await getModelByCode(modelCode)
   const { keyword, filters, page = 1, pageSize = 10, sortBy, sortOrder } = query
 
   const builder = db(model.table_name)
   const fields = model.fields.filter((f: any) => f.status === 1)
   const fieldNames = fields.map((f: any) => f.field_name)
+
+  // 数据权限过滤
+  await applyDataPermission(builder, model, user)
 
   // 关键词模糊搜索
   if (keyword && fields.length) {
@@ -431,10 +438,14 @@ export async function dynamicDetail(modelCode: string, id: number) {
   return row
 }
 
-export async function dynamicCreate(modelCode: string, data: any) {
+export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   const model = await getModelByCode(modelCode)
   await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
+  if (user) {
+    cleanData.create_by = user.id
+    cleanData.dept_id = user.deptId || null
+  }
   const [id] = await db(model.table_name).insert(cleanData)
 
   // 如果模型绑定了启用状态的流程，自动启动流程实例
@@ -603,6 +614,38 @@ function normalizeOptions(data: any): { label: string; value: any }[] {
     })
   }
   return []
+}
+
+async function applyDataPermission(builder: any, model: any, user?: any) {
+  if (!user || !model.data_permission) return
+  const permission = model.data_permission
+  const type = typeof permission === 'string' ? permission : permission.type
+
+  if (type === 'self') {
+    builder.where('create_by', user.id)
+  } else if (type === 'dept') {
+    builder.where('dept_id', user.deptId || null)
+  } else if (type === 'dept_and_child') {
+    const deptIds = await getChildDeptIds(user.deptId)
+    builder.whereIn('dept_id', deptIds.length ? deptIds : [null])
+  }
+}
+
+async function getChildDeptIds(parentId?: number): Promise<number[]> {
+  if (!parentId) return []
+  const result = new Set<number>([parentId])
+  const queue = [parentId]
+  while (queue.length) {
+    const current = queue.shift()!
+    const children = await db('depts').where({ parent_id: current, status: 1 }).select('id')
+    for (const child of children) {
+      if (!result.has(child.id)) {
+        result.add(child.id)
+        queue.push(child.id)
+      }
+    }
+  }
+  return Array.from(result)
 }
 
 function formatDate(date: Date, format: string) {
