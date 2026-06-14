@@ -55,6 +55,8 @@ lowcode_models
 | dict_code | 关联字典编码。`select/radio` 类型可配置，运行时自动从字典表读取选项 |
 | ref_model | 关联模型编码。`ref` 类型可配置，表示关联到哪个低代码模型 |
 | ref_display_field | 关联模型显示字段。`ref` 类型可配置，用于列表中展示关联记录的值 |
+| default_value_type | 默认值类型：`constant`、`currentUser`、`currentTime`、`currentDept`、`field`、`expr` |
+| default_value_expr | 默认值表达式，根据类型存储常量值、字段名或表达式脚本 |
 | validation_rule | 后端校验规则编码 |
 | sort | 排序 |
 | status | 状态 |

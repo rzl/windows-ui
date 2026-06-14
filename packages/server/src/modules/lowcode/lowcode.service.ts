@@ -152,6 +152,8 @@ export async function createField(data: any) {
     length: data.length ?? 255,
     required: data.required ? 1 : 0,
     default_value: data.defaultValue,
+    default_value_type: data.defaultValueType || 'constant',
+    default_value_expr: data.defaultValueExpr || null,
     options: data.options ? JSON.stringify(data.options) : null,
     validation_rule: data.validationRule || null,
     dict_code: data.dictCode || null,
@@ -180,6 +182,8 @@ export async function updateField(id: number, data: any) {
     length: data.length,
     required: data.required ? 1 : 0,
     default_value: data.defaultValue,
+    default_value_type: data.defaultValueType || 'constant',
+    default_value_expr: data.defaultValueExpr || null,
     options: data.options ? JSON.stringify(data.options) : null,
     validation_rule: data.validationRule || null,
     dict_code: data.dictCode || null,
@@ -470,6 +474,31 @@ export async function dynamicDetail(modelCode: string, id: number) {
   return row
 }
 
+function computeDefaultValue(field: any, data: any, user?: any) {
+  const type = field.default_value_type
+  const expr = field.default_value_expr
+  if (!type || type === 'constant') return expr
+  if (type === 'currentUser') return user?.id ?? null
+  if (type === 'currentDept') return user?.deptId ?? null
+  if (type === 'currentTime') {
+    const now = new Date()
+    if (field.type === 'date') return now.toISOString().slice(0, 10)
+    if (field.type === 'datetime') return now.toISOString().slice(0, 19).replace('T', ' ')
+    return now.toISOString()
+  }
+  if (type === 'field') return expr ? data[expr] : undefined
+  if (type === 'expr') {
+    try {
+      const fn = new Function('ctx', `with(ctx) { return (${expr}) }`)
+      return fn({ ...data, user, now: new Date() })
+    } catch (error) {
+      console.error(`默认值表达式执行失败: ${expr}`, error)
+      return undefined
+    }
+  }
+  return undefined
+}
+
 export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   const model = await getModelByCode(modelCode)
 
@@ -480,6 +509,16 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
       if (!field.codingRule) continue
       if (data[field.field] !== undefined && data[field.field] !== '' && data[field.field] !== null) continue
       data[field.field] = await generateCode(field.codingRule)
+    }
+  }
+
+  // 为空字段填充默认值
+  for (const field of model.fields) {
+    if (!field.default_value_type) continue
+    if (data[field.field_name] !== undefined && data[field.field_name] !== '' && data[field.field_name] !== null) continue
+    const value = computeDefaultValue(field, data, user)
+    if (value !== undefined) {
+      data[field.field_name] = value
     }
   }
 

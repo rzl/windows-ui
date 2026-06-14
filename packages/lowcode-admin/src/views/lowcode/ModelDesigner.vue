@@ -109,8 +109,17 @@
         <w-form-item label="必填">
           <w-switch v-model="fieldForm.required" />
         </w-form-item>
-        <w-form-item label="默认值">
-          <w-input v-model="fieldForm.defaultValue" />
+        <w-form-item label="默认值类型">
+          <w-select v-model="fieldForm.defaultValueType" :options="defaultValueTypeOptions" />
+        </w-form-item>
+        <w-form-item v-if="fieldForm.defaultValueType === 'constant'" label="默认值">
+          <w-input v-model="fieldForm.defaultValueExpr" placeholder="常量值" />
+        </w-form-item>
+        <w-form-item v-else-if="fieldForm.defaultValueType === 'field'" label="关联字段">
+          <w-select v-model="fieldForm.defaultValueExpr" :options="dependFieldOptions" />
+        </w-form-item>
+        <w-form-item v-else-if="fieldForm.defaultValueType === 'expr'" label="表达式">
+          <w-input v-model="fieldForm.defaultValueExpr" placeholder="例如 date('Y-m-d')" />
         </w-form-item>
         <w-form-item v-if="['select', 'radio'].includes(fieldForm.type)" label="关联字典">
           <w-select v-model="fieldForm.dictCode" :options="dictOptions" />
@@ -232,6 +241,15 @@ const fieldTypeOptions = [
   { label: '富文本', value: 'rich-text' }
 ]
 
+const defaultValueTypeOptions = [
+  { label: '常量', value: 'constant' },
+  { label: '当前用户', value: 'currentUser' },
+  { label: '当前时间', value: 'currentTime' },
+  { label: '当前部门', value: 'currentDept' },
+  { label: '关联字段', value: 'field' },
+  { label: '表达式', value: 'expr' }
+]
+
 const validationRuleOptions = computed(() => [
   { label: '无', value: '' },
   ...(validationRules.value || []).map((r: any) => ({ label: r.name, value: r.code }))
@@ -341,6 +359,8 @@ function syncConfigMaps() {
         codingRule: '',
         refModel: field.ref_model || '',
         refDisplayField: field.ref_display_field || '',
+        defaultValueType: field.default_value_type || 'constant',
+        defaultValueExpr: field.default_value_expr || '',
         options: field.options ? JSON.parse(field.options) : undefined
       }
     } else {
@@ -352,6 +372,12 @@ function syncConfigMaps() {
       }
       if (formConfigMap[field.field_name].codingRule === undefined) {
         formConfigMap[field.field_name].codingRule = ''
+      }
+      if (formConfigMap[field.field_name].defaultValueType === undefined) {
+        formConfigMap[field.field_name].defaultValueType = 'constant'
+      }
+      if (formConfigMap[field.field_name].defaultValueExpr === undefined) {
+        formConfigMap[field.field_name].defaultValueExpr = ''
       }
     }
     if (!tableConfigMap[field.field_name]) {
@@ -437,6 +463,8 @@ function openFieldDialog(row?: any) {
     fieldForm.optionsText = row.options && !row.dict_code ? JSON.stringify(JSON.parse(row.options)) : ''
     fieldForm.refModel = row.ref_model || ''
     fieldForm.refDisplayField = row.ref_display_field || ''
+    fieldForm.defaultValueType = row.default_value_type || 'constant'
+    fieldForm.defaultValueExpr = row.default_value_expr || ''
   } else {
     fieldForm.modelId = modelId
     fieldForm.type = 'string'
@@ -444,6 +472,8 @@ function openFieldDialog(row?: any) {
     fieldForm.required = false
     fieldForm.status = true
     fieldForm.dictCode = ''
+    fieldForm.defaultValueType = 'constant'
+    fieldForm.defaultValueExpr = ''
     fieldForm.sort = 0
   }
   fieldDialogVisible.value = true
@@ -501,6 +531,8 @@ async function handleSaveField() {
   data.dictCode = data.dictCode || ''
   data.refModel = data.refModel || ''
   data.refDisplayField = data.refDisplayField || ''
+  data.defaultValueType = data.defaultValueType || 'constant'
+  data.defaultValueExpr = data.defaultValueExpr || ''
   if (['select', 'radio'].includes(data.type)) {
     if (data.dictCode) {
       data.options = undefined
@@ -558,6 +590,10 @@ async function saveFormConfig() {
       }
       if (!config.codingRule) {
         delete config.codingRule
+      }
+      if (!config.defaultValueType || config.defaultValueType === 'constant') {
+        delete config.defaultValueType
+        delete config.defaultValueExpr
       }
       return config
     })

@@ -177,6 +177,8 @@ export interface DynamicField {
   validationRule?: string
   rules?: FormRule[]
   codingRule?: string
+  defaultValueType?: 'constant' | 'currentUser' | 'currentTime' | 'currentDept' | 'field' | 'expr'
+  defaultValueExpr?: string
   refModel?: string
   refDisplayField?: string
   dependsOn?: {
@@ -223,6 +225,10 @@ const props = defineProps({
     type: Function as PropType<(modelCode: string, displayField: string, keyword: string) => Promise<{ label: string; value: any }[]>>,
     default: undefined
   },
+  userInfo: {
+    type: Object as PropType<{ id?: number | string; deptId?: number | string; [key: string]: any }>,
+    default: undefined
+  },
   generateCode: {
     type: Function as PropType<(ruleCode: string) => Promise<string>>,
     default: undefined
@@ -265,6 +271,41 @@ const validationErrors = reactive<Record<string, string>>({})
 const fieldOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
 const refOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
 const generatedCodeSet = new Set<string>()
+
+function evalExpr(expr: string, ctx: Record<string, any>) {
+  try {
+    const fn = new Function('ctx', `with(ctx) { return (${expr}) }`)
+    return fn(ctx)
+  } catch (error) {
+    console.error(`默认值表达式执行失败: ${expr}`, error)
+    return undefined
+  }
+}
+
+function computeDefaultValue(field: DynamicField): any {
+  if (!field.defaultValueType || field.defaultValueType === 'constant') {
+    return field.defaultValueExpr
+  }
+  if (field.defaultValueType === 'currentUser') {
+    return props.userInfo?.id ?? undefined
+  }
+  if (field.defaultValueType === 'currentDept') {
+    return props.userInfo?.deptId ?? undefined
+  }
+  if (field.defaultValueType === 'currentTime') {
+    const now = new Date()
+    if (field.type === 'date') return now.toISOString().slice(0, 10)
+    if (field.type === 'datetime') return now.toISOString().slice(0, 19).replace('T', ' ')
+    return now.toISOString()
+  }
+  if (field.defaultValueType === 'field') {
+    return field.defaultValueExpr ? props.model[field.defaultValueExpr] : undefined
+  }
+  if (field.defaultValueType === 'expr') {
+    return evalExpr(field.defaultValueExpr || '', props.model)
+  }
+  return undefined
+}
 
 function getFieldOptions(field: DynamicField) {
   if (fieldOptionsMap[field.prop]) return fieldOptionsMap[field.prop]
@@ -326,6 +367,27 @@ watch(
         console.error(`生成编码失败: ${field.codingRule}`, error)
       }
     }
+  },
+  { immediate: true, deep: true }
+)
+
+// 监听字段配置变化，自动填充默认值
+watch(
+  () => props.fields,
+  (fields) => {
+    fields.forEach((field) => {
+      if (!field.defaultValueType || field.defaultValueType === 'constant') {
+        if (field.defaultValueExpr !== undefined && (props.model[field.prop] === undefined || props.model[field.prop] === '' || props.model[field.prop] === null)) {
+          props.model[field.prop] = field.defaultValueExpr
+        }
+        return
+      }
+      if (props.model[field.prop] !== undefined && props.model[field.prop] !== '' && props.model[field.prop] !== null) return
+      const value = computeDefaultValue(field)
+      if (value !== undefined) {
+        props.model[field.prop] = value
+      }
+    })
   },
   { immediate: true, deep: true }
 )

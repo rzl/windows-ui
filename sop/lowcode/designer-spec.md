@@ -19,6 +19,8 @@
 | codingRule | string | 编码规则编码，新增记录时自动生成编码 |
 | refModel | string | 关联模型编码，`ref` 类型使用 |
 | refDisplayField | string | 关联模型显示字段，`ref` 类型使用 |
+| defaultValueType | string | 默认值类型：`constant`、`currentUser`、`currentTime`、`currentDept`、`field`、`expr` |
+| defaultValueExpr | string | 默认值表达式，随类型不同含义不同 |
 
 ### dependsOn 结构
 
@@ -203,6 +205,32 @@
   "refDisplayField": "name"
 }
 ```
+
+### 默认值表达式
+
+字段支持配置动态默认值，新增记录时自动填充。
+
+```json
+{
+  "field": "createBy",
+  "label": "创建人",
+  "type": "input",
+  "defaultValueType": "currentUser"
+}
+```
+
+支持的类型：
+
+| 类型 | 说明 | `defaultValueExpr` 含义 |
+|------|------|------------------------|
+| `constant` | 常量 | 直接作为字段值 |
+| `currentUser` | 当前用户 | 无需填写，取 `userInfo.id` |
+| `currentDept` | 当前部门 | 无需填写，取 `userInfo.deptId` |
+| `currentTime` | 当前时间 | 无需填写，根据字段类型返回日期或日期时间 |
+| `field` | 关联字段 | 填写其他字段名，取该字段当前值 |
+| `expr` | 表达式 | 填写 JS 表达式，例如 `date('Y-m-d')` |
+
+后端 `dynamicCreate` 也会在字段为空时兜底计算默认值。
 
 ### 扩展规范
 

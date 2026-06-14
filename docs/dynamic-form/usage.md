@@ -54,6 +54,8 @@ const fields = [
 | dynamicOptions | object | 动态选项配置（见下文） |
 | refModel | string | 关联模型编码，`ref` 类型使用 |
 | refDisplayField | string | 关联模型显示字段，`ref` 类型使用 |
+| defaultValueType | string | 默认值类型：`constant`、`currentUser`、`currentTime`、`currentDept`、`field`、`expr` |
+| defaultValueExpr | string | 默认值表达式 |
 | required | boolean | 是否必填 |
 | disabled | boolean / function | 是否禁用 |
 | hidden | boolean / function | 是否隐藏 |
@@ -75,6 +77,7 @@ const fields = [
 | loadRefOptions | (modelCode, displayField, keyword) => Promise | - | 关联模型选项加载函数，用于 `ref` 字段查询关联记录 |
 | uploadRequest | (file) => Promise | - | 文件上传函数，用于 `upload` 字段真实上传文件并返回 URL |
 | generateCode | (ruleCode) => Promise<string> | - | 编码规则生成函数，用于 `codingRule` 字段自动生成编码 |
+| userInfo | object | - | 当前用户信息，用于 `currentUser` / `currentDept` 默认值 |
 
 ## 方法
 
@@ -178,6 +181,37 @@ async function generateCode(ruleCode) {
 ```
 
 > 注意：`codingRule` 只在字段值为空时触发，且同一次表单渲染中每个字段仅生成一次，避免重复调用。
+
+## 默认值表达式
+
+字段支持配置动态默认值，表单初始化时自动填充。
+
+```ts
+const fields = [
+  { prop: 'createBy', label: '创建人', type: 'input', defaultValueType: 'currentUser' },
+  { prop: 'createTime', label: '创建时间', type: 'datetime', defaultValueType: 'currentTime' },
+  { prop: 'remark', label: '备注', type: 'input', defaultValueType: 'constant', defaultValueExpr: '暂无' }
+]
+```
+
+```vue
+<w-dynamic-form v-model="form" :fields="fields" :user-info="userInfo" />
+
+<script setup>
+const userInfo = { id: 1, deptId: 2 }
+</script>
+```
+
+支持的 `defaultValueType`：
+
+| 类型 | 说明 | `defaultValueExpr` |
+|------|------|-------------------|
+| `constant` | 常量 | 直接作为字段值 |
+| `currentUser` | 当前用户 | 无需填写，取 `userInfo.id` |
+| `currentDept` | 当前部门 | 无需填写，取 `userInfo.deptId` |
+| `currentTime` | 当前时间 | 无需填写，根据字段类型返回日期/日期时间 |
+| `field` | 关联字段 | 填写其他字段名 |
+| `expr` | 表达式 | 填写 JS 表达式，例如 `new Date().getFullYear()` |
 
 ## 关联模型选择
 
