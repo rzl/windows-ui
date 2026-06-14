@@ -205,6 +205,16 @@ export async function deleteField(id: number) {
 
 // ---------- 表单/列表配置 ----------
 
+async function getFormConfig(modelId: number) {
+  const form = await db('lowcode_forms').where({ model_id: modelId }).first()
+  if (!form || !form.config) return null
+  try {
+    return typeof form.config === 'string' ? JSON.parse(form.config) : form.config
+  } catch {
+    return null
+  }
+}
+
 export async function saveForm(data: any) {
   const model = await db('lowcode_models').where({ id: data.modelId }).first()
   if (!model) throw new AppError('模型不存在', 404)
@@ -440,6 +450,17 @@ export async function dynamicDetail(modelCode: string, id: number) {
 
 export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   const model = await getModelByCode(modelCode)
+
+  // 读取表单配置中的编码规则，为空字段自动生成编码
+  const formConfig = await getFormConfig(model.id)
+  if (formConfig?.fields) {
+    for (const field of formConfig.fields) {
+      if (!field.codingRule) continue
+      if (data[field.field] !== undefined && data[field.field] !== '' && data[field.field] !== null) continue
+      data[field.field] = await generateCode(field.codingRule)
+    }
+  }
+
   await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
   if (user) {

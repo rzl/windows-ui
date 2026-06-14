@@ -63,6 +63,9 @@
                 {{ formConfigMap[row.field_name].dynamicOptions?.type ? '已配置' : '配置' }}
               </w-button>
             </template>
+            <template #codingRule="{ row }">
+              <w-select v-model="formConfigMap[row.field_name].codingRule" :options="codingRuleOptions" style="width: 130px" />
+            </template>
           </w-table>
         </w-tab-pane>
 
@@ -180,6 +183,7 @@ const formConfigMap = reactive<Record<string, any>>({})
 const tableConfigMap = reactive<Record<string, any>>({})
 const validationRules = ref<any[]>([])
 const dicts = ref<any[]>([])
+const codingRules = ref<any[]>([])
 
 const fieldDialogVisible = ref(false)
 const fieldForm = reactive<any>({})
@@ -224,6 +228,11 @@ const fieldTypeOptions = [
 const validationRuleOptions = computed(() => [
   { label: '无', value: '' },
   ...(validationRules.value || []).map((r: any) => ({ label: r.name, value: r.code }))
+])
+
+const codingRuleOptions = computed(() => [
+  { label: '无', value: '' },
+  ...(codingRules.value || []).map((r: any) => ({ label: r.name, value: r.code }))
 ])
 
 const dictOptions = computed(() => [
@@ -278,7 +287,8 @@ const formDesignColumns = [
   { prop: 'formRequired', label: '必填', width: 80 },
   { prop: 'validationRule', label: '校验规则', width: 150 },
   { prop: 'dependsOn', label: '联动显示', width: 180 },
-  { prop: 'dynamicOptions', label: '动态选项', width: 100 }
+  { prop: 'dynamicOptions', label: '动态选项', width: 100 },
+  { prop: 'codingRule', label: '编码规则', width: 150 }
 ]
 
 const tableDesignColumns = [
@@ -308,6 +318,7 @@ function syncConfigMaps() {
         validationRule: field.validation_rule || '',
         dependsOn: { field: '', value: '', operator: 'eq' },
         dynamicOptions: { type: '' },
+        codingRule: '',
         options: field.options ? JSON.parse(field.options) : undefined
       }
     } else {
@@ -316,6 +327,9 @@ function syncConfigMaps() {
       }
       if (!formConfigMap[field.field_name].dynamicOptions) {
         formConfigMap[field.field_name].dynamicOptions = { type: '' }
+      }
+      if (formConfigMap[field.field_name].codingRule === undefined) {
+        formConfigMap[field.field_name].codingRule = ''
       }
     }
     if (!tableConfigMap[field.field_name]) {
@@ -353,15 +367,17 @@ function typeLabel(type: string) {
 }
 
 async function loadData() {
-  const [data, rules, dictList] = await Promise.all([
+  const [data, rules, dictList, codingRuleList] = await Promise.all([
     lowcodeApi.getModel(modelId),
     lowcodeApi.getValidationRules(),
-    dictApi.getDicts()
+    dictApi.getDicts(),
+    lowcodeApi.getCodingRules()
   ])
   Object.assign(model, data)
   fields.value = data.fields || []
   validationRules.value = rules || []
   dicts.value = dictList || []
+  codingRules.value = codingRuleList || []
 
   if (data.forms?.length) {
     const saved = typeof data.forms[0].config === 'string'
@@ -504,6 +520,9 @@ async function saveFormConfig() {
       }
       if (!config.dynamicOptions || !config.dynamicOptions.type) {
         delete config.dynamicOptions
+      }
+      if (!config.codingRule) {
+        delete config.codingRule
       }
       return config
     })

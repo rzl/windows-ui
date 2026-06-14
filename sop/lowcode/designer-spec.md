@@ -16,6 +16,7 @@
 | dependsOn | object | 联动显示条件 |
 | options | array | 静态选项（`select/radio/checkbox` 使用） |
 | dynamicOptions | object | 动态选项配置 |
+| codingRule | string | 编码规则编码，新增记录时自动生成编码 |
 
 ### dependsOn 结构
 
@@ -172,6 +173,19 @@
 | `sql` | `sql` | 只读 SELECT 查询，结果取首条数据的第一个数字或首个字段 |
 | `api` | `api.method` / `api.url` | 调用内部接口，返回 data 字段 |
 | `script` | `script` | 在线 JS 脚本，可调用 `db.raw()` 与 `http()` |
+
+### 编码规则
+
+当字段配置了 `codingRule` 后，动态表单在新增模式下会自动调用编码规则生成接口回填该字段值；后端 `dynamicCreate` 也会在字段为空时兜底生成，确保直接调用 API 时编码一致。
+
+```json
+{
+  "field": "orderNo",
+  "label": "订单编号",
+  "type": "input",
+  "codingRule": "ORDER_NO"
+}
+```
 
 ### 扩展规范
 

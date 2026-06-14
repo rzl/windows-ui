@@ -57,6 +57,7 @@ const fields = [
 | rules | FormRule[] | 自定义校验规则 |
 | validationRule | string | - | 后端校验规则编码 |
 | dependsOn | object | - | 字段联动配置 |
+| codingRule | string | - | 编码规则编码，新增时自动生成编码 |
 | span | number | 占位列数（预留） |
 
 ## Props
@@ -69,6 +70,7 @@ const fields = [
 | validateRules | (items) => Promise | - | 后端校验函数，用于校验绑定了 `validationRule` 的字段 |
 | loadOptions | (config, model) => Promise | - | 动态选项加载函数，用于加载 `dynamicOptions` 配置的选项 |
 | uploadRequest | (file) => Promise | - | 文件上传函数，用于 `upload` 字段真实上传文件并返回 URL |
+| generateCode | (ruleCode) => Promise<string> | - | 编码规则生成函数，用于 `codingRule` 字段自动生成编码 |
 
 ## 方法
 
@@ -150,3 +152,25 @@ async function loadOptions(config, model) {
 }
 </script>
 ```
+
+## 编码规则自动生成
+
+配置字段的 `codingRule` 后，表单初始化时会自动调用 `generateCode` 生成并回填编码，适用于工号、订单号、流水号等场景。
+
+```ts
+const fields = [
+  { prop: 'orderNo', label: '订单编号', type: 'input', codingRule: 'ORDER_NO' }
+]
+```
+
+```vue
+<w-dynamic-form v-model="form" :fields="fields" :generate-code="generateCode" />
+
+<script setup>
+async function generateCode(ruleCode) {
+  return request.get(`/lowcode/coding-rules/${ruleCode}/generate`)
+}
+</script>
+```
+
+> 注意：`codingRule` 只在字段值为空时触发，且同一次表单渲染中每个字段仅生成一次，避免重复调用。

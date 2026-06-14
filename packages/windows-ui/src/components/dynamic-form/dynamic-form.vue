@@ -164,6 +164,7 @@ export interface DynamicField {
   required?: boolean
   validationRule?: string
   rules?: FormRule[]
+  codingRule?: string
   dependsOn?: {
     field: string
     value?: any
@@ -204,6 +205,10 @@ const props = defineProps({
     type: Function as PropType<(config: DynamicField['dynamicOptions'], model: Record<string, any>) => Promise<{ label: string; value: any }[]>>,
     default: undefined
   },
+  generateCode: {
+    type: Function as PropType<(ruleCode: string) => Promise<string>>,
+    default: undefined
+  },
   uploadRequest: {
     type: Function as PropType<(file: File) => Promise<{ url: string; name: string; size?: number }>>,
     default: undefined
@@ -240,6 +245,7 @@ function isDependsOnHidden(field: DynamicField): boolean {
 const formRef = ref<any>(null)
 const validationErrors = reactive<Record<string, string>>({})
 const fieldOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
+const generatedCodeSet = new Set<string>()
 
 function getFieldOptions(field: DynamicField) {
   if (fieldOptionsMap[field.prop]) return fieldOptionsMap[field.prop]
@@ -266,6 +272,27 @@ watch(
         loadFieldOptions(field)
       }
     })
+  },
+  { immediate: true, deep: true }
+)
+
+// 监听字段配置变化，自动为生码字段生成编码
+watch(
+  () => props.fields,
+  async (fields) => {
+    if (!props.generateCode) return
+    for (const field of fields) {
+      if (!field.codingRule) continue
+      if (props.model[field.prop] !== undefined && props.model[field.prop] !== '' && props.model[field.prop] !== null) continue
+      if (generatedCodeSet.has(field.prop)) continue
+      try {
+        const code = await props.generateCode(field.codingRule)
+        props.model[field.prop] = code
+        generatedCodeSet.add(field.prop)
+      } catch (error) {
+        console.error(`生成编码失败: ${field.codingRule}`, error)
+      }
+    }
   },
   { immediate: true, deep: true }
 )

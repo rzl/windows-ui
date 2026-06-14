@@ -47,6 +47,7 @@
         :validate-rules="validateRules"
         :load-options="loadFieldOptions"
         :upload-request="uploadFile"
+        :generate-code="generateCodeForField"
       />
       <template #footer>
         <w-button @click="closeDialog">取消</w-button>
@@ -218,6 +219,10 @@ async function validateRules(items: { code: string; value: any }[]) {
 
 async function loadFieldOptions(config: any, model: any) {
   return lowcodeApi.executeFieldOptions(config, model)
+}
+
+async function generateCodeForField(ruleCode: string) {
+  return lowcodeApi.generateCode(ruleCode)
 }
 
 async function uploadFile(file: File) {
