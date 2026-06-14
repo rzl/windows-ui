@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, computed, onMounted, type Ref } from 'vue'
+import { inject, computed, onMounted, ref, type Ref } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WFormItem' })
@@ -19,12 +19,12 @@ const formSize = inject<Ref<string>>('formSize')
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || formSize?.value || globalSize.value)
 
-const errors = inject<Record<string, string>>('formErrors', {})
+const errors = inject<Ref<Record<string, string>>>('formErrors', ref({}))
 const formModel = inject<Record<string, any>>('formModel', {})
 const formRules = inject<Record<string, any[]>>('formRules', {})
 const registerField = inject<(field: any) => void>('formRegisterField', () => {})
 
-const error = computed(() => (props.prop ? errors[props.prop] : ''))
+const error = computed(() => (props.prop ? errors.value[props.prop] : ''))
 
 onMounted(() => {
   if (props.prop) {
