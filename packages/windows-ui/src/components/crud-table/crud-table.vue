@@ -74,7 +74,9 @@ const emit = defineEmits([
   'size-change',
   'selection-change',
   'row-click',
-  'sort-change'
+  'sort-change',
+  'update:current-page',
+  'update:page-size'
 ])
 
 const globalSize = useGlobalSize()

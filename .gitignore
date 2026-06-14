@@ -44,3 +44,9 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Database & uploads
+*.sqlite
+*.sqlite3
+packages/server/data/
+uploads/

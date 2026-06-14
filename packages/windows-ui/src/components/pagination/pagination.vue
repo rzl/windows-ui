@@ -30,7 +30,7 @@ const { t } = useLocale()
 const size = computed(() => props.size || globalSize.value)
 const totalText = computed(() => t('共多少条', { total: props.total }))
 
-const emit = defineEmits(['update:currentPage', 'change'])
+const emit = defineEmits(['update:current-page', 'change', 'update:page-size'])
 
 const totalPages = computed(() => Math.ceil(props.total / props.pageSize))
 
