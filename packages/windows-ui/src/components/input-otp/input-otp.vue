@@ -38,7 +38,7 @@ const setItemRef = (el: HTMLInputElement, index: number) => { if (el) inputRefs.
 
 watch(() => props.modelValue, (v) => {
   if (v) values.value = v.split('').concat(new Array(props.length).fill('')).slice(0, props.length)
-})
+}, { immediate: true })
 
 watch(values, (v) => {
   const code = v.join('')

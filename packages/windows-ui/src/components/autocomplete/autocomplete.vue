@@ -1,6 +1,6 @@
 <template>
   <div :class="['w-autocomplete', `w-autocomplete--${size}`]" v-click-outside="close">
-    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" :size="size" @focus="open = true" @input="handleInput" @clear="handleClear" />
+    <w-input v-model="inputValue" :placeholder="placeholder" :clearable="clearable" :size="size" :disabled="disabled" @focus="open = true" @input="handleInput" @clear="handleClear" />
     <div v-show="open && filtered.length" class="w-autocomplete__suggestions">
       <div v-for="item in filtered" :key="item.value" class="w-autocomplete__item" @click="select(item)">{{ item.label }}</div>
     </div>
@@ -12,7 +12,7 @@ import { ref, computed } from 'vue'
 import WInput from '../input/input.vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WAutocomplete' })
-const props = defineProps({ modelValue: String, placeholder: String, options: { type: Array as () => { label: string; value: string }[], default: () => [] }, clearable: { type: Boolean, default: true }, size: { type: String, default: undefined } })
+const props = defineProps({ modelValue: String, placeholder: String, options: { type: Array as () => { label: string; value: string }[], default: () => [] }, clearable: { type: Boolean, default: true }, size: { type: String, default: undefined }, disabled: Boolean })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'select', 'clear'])
@@ -22,7 +22,7 @@ const filtered = computed(() => {
   if (!inputValue.value) return props.options.slice(0, 10)
   return props.options.filter(o => o.label.toLowerCase().includes(inputValue.value.toLowerCase())).slice(0, 10)
 })
-const handleInput = (e: Event) => { inputValue.value = (e.target as HTMLInputElement).value; emit('update:modelValue', inputValue.value); open.value = true }
+const handleInput = () => { emit('update:modelValue', inputValue.value); open.value = true }
 const select = (item: any) => { inputValue.value = item.label; emit('update:modelValue', item.value); emit('select', item); open.value = false }
 const close = () => { open.value = false }
 const handleClear = () => { emit('update:modelValue', ''); emit('clear') }
