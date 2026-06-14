@@ -1,7 +1,7 @@
 <template>
   <div :class="['w-tabs', `w-tabs--${size}`]">
     <div class="w-tabs__header">
-      <div v-for="(tab, i) in tabs" :key="i" :class="['w-tabs__item', { 'is-active': activeIndex === i }]" @click="activeIndex = i; emit('change', i)">
+      <div v-for="(tab, i) in tabs" :key="i" :class="['w-tabs__item', { 'is-active': activeIndex === i }]" @click="activeIndex = i; emit('update:modelValue', i); emit('change', i)">
         <w-icon v-if="tab.icon" :name="tab.icon" :size="size" />
         {{ tab.label }}
       </div>
