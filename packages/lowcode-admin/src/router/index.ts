@@ -128,6 +128,12 @@ const routes = [
         meta: { title: '服务器监控', permission: 'monitor:server' }
       },
       {
+        path: 'monitor/schedule',
+        name: 'ScheduleList',
+        component: () => import('@/views/monitor/ScheduleList.vue'),
+        meta: { title: '定时任务', permission: 'monitor:schedule' }
+      },
+      {
         path: 'monitor/operation-log',
         name: 'OperationLogList',
         component: () => import('@/views/monitor/OperationLogList.vue'),

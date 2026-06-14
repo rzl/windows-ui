@@ -223,3 +223,27 @@ lowcode_models
 | name | 职务名称 |
 | sort | 排序 |
 | status | 状态 |
+
+## 定时任务（scheduled_tasks）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| code | 任务编码 |
+| name | 任务名称 |
+| cron | Cron 表达式 |
+| handler_type | 处理器类型：`sql` / `script` / `api` |
+| handler_config | 处理器配置 JSON |
+| status | 状态 |
+| last_run_time | 上次执行时间 |
+| last_run_result | 上次执行结果 |
+
+## 定时任务日志（scheduled_task_logs）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| task_id | 任务 ID |
+| status | 执行状态：`success` / `error` |
+| result | 执行结果 |
+| create_time | 执行时间 |

@@ -3,6 +3,7 @@ import app from './app'
 import { config } from './config'
 import { logger } from './utils/logger'
 import { wsManager } from './utils/websocket'
+import { startScheduler } from './modules/schedule/scheduler'
 
 const PORT = config.port
 const server = http.createServer(app)
@@ -13,4 +14,5 @@ wsManager.init(server)
 server.listen(PORT, '127.0.0.1', () => {
   logger.info(`Server running on http://127.0.0.1:${PORT}`)
   console.log(`Server running on http://127.0.0.1:${PORT}`)
+  startScheduler().catch((err) => logger.error('启动定时任务失败', err))
 })
