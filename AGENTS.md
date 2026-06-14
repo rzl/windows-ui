@@ -11,17 +11,19 @@
 
 - **技术栈**：
   - UI 库 / 前端：Vue 3（Composition API / `<script setup>`）、TypeScript 5.3+、Vite 5.0+
-  - 状态管理：Pinia
-  - 后端：Node.js + Express 4 + TypeScript + Knex + SQLite3
+  - 状态管理：Pinia 3.0+
+  - 路由 / 国际化：vue-router 4.6+、vue-i18n 11.4+（playground 与 Admin 子应用使用）
+  - 低代码流程设计：@vue-flow/core 等（`packages/lowcode-admin`）
+  - 后端：Node.js + Express 4.19+ + TypeScript 5.4+ + Knex 3.1+ + SQLite3 5.1+
   - 包管理：pnpm workspaces
 - **工作区包**：
   - `@windows-ui/core`：组件库源码，位于 `packages/windows-ui`
   - `@windows-ui/playground`：组件文档与示例站点，内部同时包含一个 Admin 后台模板子应用
   - `@windows-ui/lowcode-admin`：低代码管理平台前端
   - `@windows-ui/server`：低代码管理平台后端服务
-- **组件数量**：`packages/windows-ui/src/components/` 下共有 **89 个组件目录**，在 `packages/windows-ui/src/index.ts` 中注册并导出了 **90 个组件**（`WFormItem` 与 `WForm` 共用 `form/` 目录）
+- **组件数量**：`packages/windows-ui/src/components/` 下共有 **91 个组件目录**、**94 个 `.vue` 单文件组件**；在 `packages/windows-ui/src/index.ts` 中全局注册并 named export 的组件为 **92 个**（`form/` 目录同时提供 `WForm` 与 `WFormItem`；`menu/sub-menu.vue`、`tree/tree-node.vue` 为内部子组件，不对外注册）
 - **默认前缀**：`w-`（例如 `w-button`），可通过 `WConfigProvider` 自定义
-- **主题系统**：基于 CSS 变量（`--w-*`），`WConfigProvider` 支持动态传入主题色并自动计算色阶（lighter / light / dark / darker），同时保留 XP 经典硬编码渐变以保证视觉一致性
+- **主题系统**：基于 CSS 变量（`--w-*`），`WConfigProvider` 支持动态传入主题色并自动计算色阶（lighter / light / dark / darker）以及标题栏渐变，同时保留 XP 经典硬编码渐变以保证视觉一致性
 - **国际化**：内置 `zh-CN` / `en-US` 语言包，语言文件为单层键值对；支持通过 `WConfigProvider` 局部配置或 `app.use(WindowsUI, { locale, messages })` 全局配置，组件内部通过 `useLocale()` 获取翻译函数
 - **原始需求**：见仓库根目录 `1.text`（只读参考）
 
@@ -33,6 +35,7 @@
 windows-ui/
 ├── package.json                 # 根 package.json，定义 workspace 与顶层脚本
 ├── pnpm-workspace.yaml          # pnpm 工作区：packages/*
+├── .npmrc                       # pnpm 配置（verify-deps-before-run=false 等）
 ├── 1.text                       # 原始需求文档（只读参考）
 │
 ├── packages/
@@ -53,6 +56,7 @@ windows-ui/
 │   │   │       └── <name>/
 │   │   │           └── <name>.vue   # 单文件组件（SFC），每个组件一个目录一个文件
 │   │   ├── vite.config.ts       # Vite lib 模式构建配置（ES + UMD + d.ts）
+│   │   ├── vitest.config.ts     # Vitest 单元测试配置
 │   │   ├── tsconfig.json
 │   │   └── package.json
 │   │
@@ -62,7 +66,7 @@ windows-ui/
 │   │   │   ├── App.vue
 │   │   │   ├── router/index.ts  # hash 路由，覆盖全部组件独立页面 + 分类首页 + 首页
 │   │   │   ├── views/Layout.vue # 侧边栏 + 内容区布局，含全局尺寸 / 主题色 / 语言切换控件
-│   │   │   ├── pages/           # 按分类展示组件（BasicPage、FormPage…）
+│   │   │   ├── pages/           # 按分类展示组件（BasicPage、FormPage、DataPage、NavPage、FeedbackPage、OthersPage）
 │   │   │   │   └── components/  # 每个组件的独立演示页面（*ComponentPage.vue）
 │   │   │   ├── components/      # 演示通用组件
 │   │   │   │   ├── DemoSection.vue   # 组件演示区块（标题 + 描述 + 可折叠的 usage.md）
@@ -74,8 +78,8 @@ windows-ui/
 │   │   │       ├── main.ts      # Admin 入口：Pinia + vue-router + vue-i18n + WindowsUI
 │   │   │       ├── App.vue
 │   │   │       ├── router/      # Admin 路由（含登录、权限守卫）
-│   │   │       ├── views/       # Admin 页面（dashboard、login、user、order 等）
-│   │   │       ├── stores/      # Pinia 状态管理（auth 等）
+│   │   │       ├── views/       # Admin 页面（dashboard、login、user、article、order、profile、editor、nested、error）
+│   │   │       ├── stores/      # Pinia 状态管理（auth、app、article、order、user）
 │   │   │       ├── i18n/        # vue-i18n 国际化
 │   │   │       ├── components/  # 业务组件（Breadcrumb、LangSelect、RichEditor、Screenfull、ThemeSetting）
 │   │   │       ├── composables/ # 组合式函数（useCrud、usePermission）
@@ -93,8 +97,8 @@ windows-ui/
 │   │   │   ├── router/index.ts  # hash 路由 + 登录权限守卫
 │   │   │   ├── api/             # axios 封装 + 各模块接口
 │   │   │   ├── stores/          # Pinia（auth、app、menu、user）
-│   │   │   ├── views/           # 页面（system、lowcode、monitor、dashboard、login 等）
-│   │   │   ├── components/      # 业务组件
+│   │   │   ├── views/           # 页面（system、lowcode、flow、monitor、dashboard、login、pages）
+│   │   │   ├── components/      # 业务组件（含 flow-designer 流程设计器）
 │   │   │   ├── composables/     # useWebSocket 等
 │   │   │   └── types/           # 类型定义
 │   │   ├── index.html
@@ -105,22 +109,25 @@ windows-ui/
 │   │   ├── src/
 │   │   │   ├── index.ts         # 服务启动入口（http + WebSocket）
 │   │   │   ├── app.ts           # Express 应用配置
-│   │   │   ├── config/index.ts  # 环境变量与配置读取
+│   │   │   ├── config/index.ts  # 环境变量与配置读取（PORT 默认 3001）
 │   │   │   ├── db/index.ts      # Knex + SQLite 数据库实例
 │   │   │   ├── routes/index.ts  # API 路由总线
 │   │   │   ├── modules/         # 业务模块
 │   │   │   │   ├── auth/        # 登录 / 刷新 / 登出 / 个人信息
 │   │   │   │   ├── rbac/        # 用户 / 角色 / 菜单 / 部门
-│   │   │   │   ├── system/      # 字典等系统模块
+│   │   │   │   ├── system/      # 字典 / 字典分类 / 职务 / 公告 / 通知等
 │   │   │   │   ├── lowcode/     # 数据模型 / 字段 / 表单 / 列表 / 编码规则 / 校验规则 / 动态 CRUD
 │   │   │   │   ├── monitor/     # 消息 / 模板 / 操作日志 / 服务器监控
-│   │   │   │   └── dashboard/   # 仪表盘 / 首页配置
+│   │   │   │   ├── dashboard/   # 仪表盘 / 首页配置
+│   │   │   │   ├── flow/        # 流程定义与实例
+│   │   │   │   ├── common/      # 公共接口（如上传）
+│   │   │   │   └── schedule/    # 定时任务与调度器
 │   │   │   ├── middleware/      # auth、error、requestLog
 │   │   │   └── utils/           # logger、response、websocket
 │   │   ├── migrations/          # Knex 迁移文件
 │   │   ├── seeds/               # Knex 种子数据
 │   │   ├── data/lowcode.sqlite  # SQLite 数据文件（开发默认）
-│   │   ├── .env.example         # 环境变量示例
+│   │   ├── .env.example         # 环境变量示例（PORT=3000，JWT 配置等）
 │   │   ├── knexfile.js
 │   │   └── package.json
 │   │
@@ -153,7 +160,7 @@ windows-ui/
 | `pnpm dev` | 启动 playground 开发服务器（同时承载组件文档站点与 Admin 后台） |
 | `pnpm dev:admin` | 当前等价于 `pnpm dev`（Admin 与 playground 共享同一 Vite 服务，访问 `/admin.html`） |
 | `pnpm dev:lowcode` | 启动低代码管理平台前端（默认端口 `5174`，代理 `/api` 到 `localhost:3001`） |
-| `pnpm dev:server` | 启动后端服务（默认监听 `127.0.0.1:3001`，热重载） |
+| `pnpm dev:server` | 启动后端服务（默认监听 `127.0.0.1:3001`，热重载；`.env.example` 中 PORT=3000，若复制为 `.env` 会覆盖该端口） |
 | `pnpm build` | 构建 UI 库（ES + UMD + d.ts），输出到 `packages/windows-ui/dist/` |
 | `pnpm build:playground` | 构建 playground 生产包（含 `index.html` 与 `admin.html` 双入口） |
 | `pnpm build:admin` | 当前等价于 `pnpm build:playground` |
@@ -198,6 +205,7 @@ windows-ui/
 - 后端默认监听 `127.0.0.1:3001`，默认使用 SQLite（`packages/server/data/lowcode.sqlite`）。
 - 后端数据库迁移位于 `packages/server/migrations/`，种子位于 `packages/server/seeds/`。
 - 低代码核心能力：数据模型设计 → 字段管理 → 表单/列表配置 → 自动创建物理表 → 通过 `/:modelCode` 动态 CRUD 接口运行。
+- 低代码前端 additionally 包含基于 `@vue-flow` 的流程设计器与审批待办页面。
 
 ---
 
@@ -206,7 +214,7 @@ windows-ui/
 ### 文件与命名
 
 1. **目录**：每个组件独占一个目录，`packages/windows-ui/src/components/<kebab-case-name>/`
-2. **文件**：目录内通常只有一个 `<kebab-case-name>.vue`，例如 `button/button.vue`。部分复杂组件会在同目录下包含子组件（如 `form/form-item.vue`）。
+2. **文件**：目录内通常只有一个 `<kebab-case-name>.vue`，例如 `button/button.vue`。部分复杂组件会在同目录下包含子组件（如 `form/form-item.vue`、`menu/sub-menu.vue`、`tree/tree-node.vue`）。
 3. **组件名**：Vue 组件内部必须使用 `defineOptions({ name: 'W<Name>' })`，例如 `WButton`。
 4. **注册前缀**：在 `index.ts` 中统一注册为 `w-<name>`，通过 `usePrefix()` 可支持自定义前缀。
 
@@ -234,7 +242,7 @@ windows-ui/
 - `base.css` 提供全局工具类（`.w-xp-theme`、`.w-xp-btn-base`、`.w-xp-input-base`、`.w-xp-window-base` 等），供复杂组件组合使用，这些类会全局生效。
 - `WConfigProvider` 接收 `theme` 对象，支持动态修改主色等变量，并会自动推导 lighter / light / dark / darker 四个色阶以及标题栏渐变，直接注入到 `document.documentElement` 的内联样式中。
 - 常用变量：
-  - `--w-color-primary` / `--w-color-success` / `--w-color-warning` / `--w-color-danger`
+  - `--w-color-primary` / `--w-color-success` / `--w-color-warning` / `--w-color-danger` / `--w-color-info`
   - `--w-bg-color`（`#ece9d8`，经典 XP 米色背景）
   - `--w-font-family`（`'Tahoma', 'Microsoft Sans Serif', sans-serif`）
   - `--w-border-radius-base`（`3px`）
@@ -264,11 +272,18 @@ windows-ui/
 
 ## 测试策略
 
-**现状**：已在 `packages/windows-ui` 中配置 **Vitest** + `@vue/test-utils` + `jsdom`，测试脚本为 `pnpm --filter @windows-ui/core test`。
+**现状**：已在 `packages/windows-ui` 中配置 **Vitest 1.6** + `@vue/test-utils` + `jsdom`，测试脚本为：
+
+```bash
+pnpm --filter @windows-ui/core test
+```
+
+- 配置位于 `packages/windows-ui/vitest.config.ts`：`environment: 'jsdom'`，`globals: true`。
+- 当前共有 **37 个 `.spec.ts` 测试文件**、**203 个测试用例**，全部通过。
 
 **测试范围**：
 - 组件以单元测试为主：验证 Props 渲染、事件触发、CSS 类名切换。
-- 复杂交互组件（如 `date-picker`、`table`、`virtualized-*`）建议补充集成测试。
+- 复杂交互组件（如 `form`、`table`、`query-builder`、`dynamic-form`、`crud-table`）已补充集成测试。
 
 **测试文件位置**：与组件 SFC 同目录，命名为 `<component>.spec.ts`。
 
@@ -305,7 +320,7 @@ windows-ui/
 7. 在 `packages/playground/src/views/Layout.vue` 的侧边栏 `navItems` 中新增导航项。
 8. 编写 `docs/<name>/usage.md`、`designs/<name>/design.md`、`develops/<name>/progress.md`。
 9. 若该组件属于后台场景常用组件，视情况在 `packages/playground/src/admin/` 或 `packages/lowcode-admin/src/views/` 中补充示例页面。
-10. 运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
+10. 运行 `pnpm --filter @windows-ui/core test` 确保新增测试通过，运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
 
 ---
 
@@ -319,6 +334,7 @@ windows-ui/
 - **低代码后端认证**：后端使用 JWT（secret 来自 `.env`），token 黑名单为内存 `Set`；开发默认账号为 `admin/admin`（由 seed 写入），**生产环境必须修改 JWT_SECRET 与默认密码**。
 - **动态 SQL 风险**：低代码模块通过 Knex 拼接动态表名/字段名进行 CRUD，字段过滤与关键字搜索已使用参数化查询，但 `filters` 中的 `field` 字段未做白名校验，若直接暴露给不可信用户需谨慎加固。
 - **SQL 字段变更限制**：后端低代码字段删除目前仅删除元数据，未从 SQLite 物理表中删除列（SQLite 不支持 `DROP COLUMN`），生产环境如需完整字段同步需自行实现表重建逻辑。
+- **文件上传**：后端使用 `multer` 处理上传文件，上传目录 `/uploads` 以静态资源方式暴露；生产环境应对文件类型、大小与访问权限做额外限制。
 
 ---
 
@@ -342,8 +358,8 @@ windows-ui/
 | 组件文件放哪？ | `packages/windows-ui/src/components/<name>/<name>.vue` |
 | 怎么导出组件？ | 在 `packages/windows-ui/src/index.ts` import + 加入数组 + named export |
 | 怎么写文档？ | 在 `docs/`、`designs/`、`develops/` 下各建 `<name>/<file>.md` |
-| 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `ConfigProvider` 传 `theme` 对象 |
+| 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `WConfigProvider` 传 `theme` 对象 |
 | 多语言怎么配？ | `app.use(WindowsUI, { locale: 'en-US' })` 或 `<w-config-provider locale="en-US">`，也支持传入自定义单层语言对象 |
-| 有测试吗？ | 目前没有；建议引入 Vitest + `@vue/test-utils` |
+| 怎么跑测试？ | `pnpm --filter @windows-ui/core test`（当前 37 个 spec 文件、203 个用例全部通过） |
 | Admin 后台在哪？ | playground 内的多入口子应用：`packages/playground/src/admin/`（访问 `/admin.html`） |
 | 低代码平台在哪？ | `packages/lowcode-admin/` + `packages/server/` |
