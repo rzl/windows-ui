@@ -14,6 +14,7 @@ router.delete('/definitions/:id', flowController.deleteFlowDefinition)
 
 router.post('/instances/start', flowController.startFlowInstance)
 router.get('/instances/status/:businessKey', flowController.getInstanceStatus)
+router.get('/instances/trace/:businessKey', flowController.getFlowTrace)
 
 router.get('/tasks/pending', flowController.getPendingTasks)
 router.post('/tasks/:id/approve', flowController.approveTask)

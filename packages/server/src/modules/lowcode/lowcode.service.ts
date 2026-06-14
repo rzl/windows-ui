@@ -284,6 +284,7 @@ async function createPhysicalTable(tableName: string) {
   await db.schema.createTable(tableName, (table) => {
     table.increments('id').primary()
     table.integer('create_by').unsigned().nullable()
+    table.integer('update_by').unsigned().nullable()
     table.integer('dept_id').unsigned().nullable()
     table.timestamp('create_time').defaultTo(db.fn.now())
     table.timestamp('update_time').defaultTo(db.fn.now())
@@ -528,10 +529,11 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
   }
 }
 
-export async function dynamicDetail(modelCode: string, id: number) {
+export async function dynamicDetail(modelCode: string, id: number, user?: any) {
   const model = await getModelByCode(modelCode)
   const row = await db(model.table_name).where({ id }).first()
   if (!row) throw new AppError('记录不存在', 404)
+  await assertRowPermission(model, row, user)
   return row
 }
 
@@ -587,6 +589,7 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   const cleanData = sanitizeData(model.fields, data)
   if (user) {
     cleanData.create_by = user.id
+    cleanData.update_by = user.id
     cleanData.dept_id = user.deptId || null
   }
   const [id] = await db(model.table_name).insert(cleanData)
@@ -595,7 +598,7 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   try {
     const flowDef = await flowService.getFlowDefinitionByModelCode(modelCode)
     if (flowDef) {
-      await flowService.startFlowInstance(flowDef.code, id, cleanData)
+      await flowService.startFlowInstance(flowDef.code, id, cleanData, user)
     }
   } catch (error) {
     console.error('启动流程失败', error)
@@ -604,24 +607,37 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   return db(model.table_name).where({ id }).first()
 }
 
-export async function dynamicUpdate(modelCode: string, id: number, data: any) {
+export async function dynamicUpdate(modelCode: string, id: number, data: any, user?: any) {
   const model = await getModelByCode(modelCode)
   await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
   cleanData.update_time = db.fn.now()
+  if (user) {
+    cleanData.update_by = user.id
+  }
   await db(model.table_name).where({ id }).update(cleanData)
   return db(model.table_name).where({ id }).first()
 }
 
-export async function dynamicDelete(modelCode: string, id: number) {
+export async function dynamicDelete(modelCode: string, id: number, user?: any) {
   const model = await getModelByCode(modelCode)
+  if (user) {
+    const row = await db(model.table_name).where({ id }).first()
+    if (row) await assertRowPermission(model, row, user)
+  }
   await db(model.table_name).where({ id }).del()
   return true
 }
 
-export async function dynamicBatchDelete(modelCode: string, ids: (string | number)[]) {
+export async function dynamicBatchDelete(modelCode: string, ids: (string | number)[], user?: any) {
   const model = await getModelByCode(modelCode)
   if (!ids || !ids.length) throw new AppError('未选择记录', 400)
+  if (user) {
+    const rows = await db(model.table_name).whereIn('id', ids)
+    for (const row of rows) {
+      await assertRowPermission(model, row, user)
+    }
+  }
   await db(model.table_name).whereIn('id', ids).del()
   return true
 }
@@ -910,6 +926,33 @@ async function applyDataPermission(builder: any, model: any, user?: any) {
   } else if (type === 'dept_and_child') {
     const deptIds = await getChildDeptIds(user.deptId)
     builder.whereIn('dept_id', deptIds.length ? deptIds : [null])
+  }
+}
+
+async function assertRowPermission(model: any, row: any, user?: any) {
+  if (!user || !model.data_permission) return
+  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
+  if (isAdmin) return
+
+  const permission = model.data_permission
+  const type = typeof permission === 'string' ? permission : permission.type
+
+  if (type === 'all') return
+  if (type === 'self') {
+    if (row.create_by !== user.id) {
+      throw new AppError('无权访问该记录', 403)
+    }
+  } else if (type === 'dept') {
+    if (row.dept_id !== user.deptId) {
+      throw new AppError('无权访问该记录', 403)
+    }
+  } else if (type === 'dept_and_child') {
+    const deptIds = await getChildDeptIds(user.deptId)
+    if (!deptIds.includes(row.dept_id)) {
+      throw new AppError('无权访问该记录', 403)
+    }
+  } else if (type === 'none') {
+    throw new AppError('无权访问该记录', 403)
   }
 }
 

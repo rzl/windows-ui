@@ -48,7 +48,7 @@
       </template>
     </w-dialog>
 
-    <w-dialog v-model="flowDialogVisible" title="流程配置" width="520">
+    <w-dialog v-model="flowDialogVisible" title="流程配置" width="980">
       <w-form :model="flowForm">
         <w-form-item label="流程编码">
           <w-input v-model="flowForm.code" placeholder="英文编码" />
@@ -59,8 +59,8 @@
         <w-form-item label="状态">
           <w-switch v-model="flowForm.status" active-text="启用" inactive-text="禁用" />
         </w-form-item>
-        <w-form-item label="节点配置（JSON）">
-          <textarea v-model="flowForm.configText" class="w-xp-textarea" rows="10" placeholder='{"nodes":[],"transitions":[]}' />
+        <w-form-item label="流程设计">
+          <flow-designer v-model="flowForm.config" />
         </w-form-item>
       </w-form>
       <template #footer>
@@ -77,6 +77,7 @@ import { useRouter } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as flowApi from '@/api/flow'
 import { useAuthStore } from '@/stores/auth'
+import FlowDesigner from '@/components/flow-designer/FlowDesigner.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -160,20 +161,17 @@ async function openFlowDialog(row: any) {
   flowForm.code = `${row.code}_flow`
   flowForm.name = `${row.name}审批流程`
   flowForm.status = true
-  flowForm.configText = JSON.stringify({
+  flowForm.config = {
     nodes: [
       { id: 'start', type: 'start', name: '开始' },
       { id: 'manager', type: 'approve', name: '经理审批', assigneeType: 'role', assigneeValue: '' },
-      { id: 'sign', type: 'sign', name: '会签', signType: 'all', assignees: [{ type: 'role', value: '' }] },
       { id: 'end', type: 'end', name: '结束' }
     ],
     transitions: [
       { from: 'start', to: 'manager', condition: 'submit' },
-      { from: 'manager', to: 'sign', condition: 'approve' },
-      { from: 'manager', to: 'start', condition: 'reject' },
-      { from: 'sign', to: 'end', condition: 'approve' }
+      { from: 'manager', to: 'end', condition: 'approve' }
     ]
-  }, null, 2)
+  }
 
   try {
     const existing = await flowApi.getFlowDefinitionByModel(row.code)
@@ -181,9 +179,9 @@ async function openFlowDialog(row: any) {
       flowForm.code = existing.code
       flowForm.name = existing.name
       flowForm.status = existing.status === 1
-      flowForm.configText = typeof existing.config === 'string'
-        ? existing.config
-        : JSON.stringify(existing.config || { nodes: [], transitions: [] }, null, 2)
+      flowForm.config = typeof existing.config === 'string'
+        ? JSON.parse(existing.config)
+        : (existing.config || { nodes: [], transitions: [] })
     }
   } catch {
     // ignore
@@ -196,18 +194,11 @@ function closeFlowDialog() {
 }
 
 async function handleSaveFlow() {
-  let config: any
-  try {
-    config = JSON.parse(flowForm.configText)
-  } catch {
-    alert('JSON 格式错误')
-    return
-  }
   await flowApi.saveFlowDefinition({
     code: flowForm.code,
     name: flowForm.name,
     modelCode: flowForm.modelCode,
-    config,
+    config: flowForm.config,
     status: flowForm.status ? 1 : 0
   })
   closeFlowDialog()

@@ -28,6 +28,10 @@ export function getInstanceStatus(businessKey: number) {
   return request.get(`/flow/instances/status/${businessKey}`)
 }
 
+export function getFlowTrace(businessKey: number) {
+  return request.get(`/flow/instances/trace/${businessKey}`)
+}
+
 export function getPendingTasks() {
   return request.get('/flow/tasks/pending')
 }

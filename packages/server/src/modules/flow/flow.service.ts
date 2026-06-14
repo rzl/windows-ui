@@ -117,7 +117,7 @@ export async function deleteFlowDefinition(id: number) {
 
 // ---------- 流程实例 ----------
 
-export async function startFlowInstance(flowCode: string, businessKey: number, businessData: any = {}, _starter?: any) {
+export async function startFlowInstance(flowCode: string, businessKey: number, businessData: any = {}, starter?: any) {
   const def = await getFlowDefinitionByCode(flowCode)
   const config = def.config as FlowConfig
 
@@ -135,7 +135,9 @@ export async function startFlowInstance(flowCode: string, businessKey: number, b
     business_key: businessKey,
     business_data: JSON.stringify(businessData),
     status: 'running',
-    current_node_id: nextNode.id
+    current_node_id: nextNode.id,
+    starter_id: starter?.id || null,
+    starter_name: starter?.nickname || starter?.username || null
   })
 
   await enterNode(instanceId, nextNode)
@@ -154,6 +156,36 @@ export async function getInstanceStatus(businessKey: number) {
     status: instance.status,
     currentNodeId: instance.current_node_id,
     taskId: task?.id || null
+  }
+}
+
+export async function getFlowTrace(businessKey: number) {
+  const instance = await db('flow_instances').where({ business_key: businessKey }).orderBy('id', 'desc').first()
+  if (!instance) return null
+  const tasks = await db('flow_tasks')
+    .where({ instance_id: instance.id })
+    .orderBy('id', 'asc')
+  return {
+    instanceId: instance.id,
+    flowCode: instance.flow_code,
+    status: instance.status,
+    starterId: instance.starter_id,
+    starterName: instance.starter_name,
+    businessData: parseBusinessData(instance),
+    createTime: instance.create_time,
+    tasks: tasks.map((t) => ({
+      id: t.id,
+      nodeId: t.node_id,
+      nodeName: t.node_name,
+      status: t.status,
+      assigneeType: t.assignee_type,
+      assigneeValue: t.assignee_value,
+      operatorId: t.operator_id,
+      operatorName: t.operator_name,
+      comment: t.comment,
+      createTime: t.create_time,
+      updateTime: t.update_time
+    }))
   }
 }
 
@@ -200,7 +232,7 @@ export async function rejectTask(taskId: number, comment: string, _operator?: an
   return handleTask(taskId, 'reject', comment, _operator)
 }
 
-async function handleTask(taskId: number, action: 'approve' | 'reject', comment: string, _operator?: any) {
+async function handleTask(taskId: number, action: 'approve' | 'reject', comment: string, operator?: any) {
   const task = await db('flow_tasks').where({ id: taskId }).first()
   if (!task) throw new AppError('任务不存在', 404)
   if (task.status !== 'pending') throw new AppError('任务已处理', 400)
@@ -215,6 +247,8 @@ async function handleTask(taskId: number, action: 'approve' | 'reject', comment:
   await db('flow_tasks').where({ id: taskId }).update({
     status: action === 'approve' ? 'approved' : 'rejected',
     comment,
+    operator_id: operator?.id || null,
+    operator_name: operator?.nickname || operator?.username || null,
     update_time: db.fn.now()
   })
 

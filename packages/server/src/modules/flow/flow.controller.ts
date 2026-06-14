@@ -39,6 +39,11 @@ export async function getInstanceStatus(req: Request, res: Response) {
   res.json(success(result))
 }
 
+export async function getFlowTrace(req: Request, res: Response) {
+  const result = await flowService.getFlowTrace(Number(req.params.businessKey))
+  res.json(success(result))
+}
+
 export async function getPendingTasks(req: Request, res: Response) {
   const result = await flowService.getPendingTasks((req as AuthRequest).user)
   res.json(success(result))

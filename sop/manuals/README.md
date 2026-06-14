@@ -27,10 +27,12 @@ sop/manuals/
 │   ├── model.md                 # 数据模型
 │   ├── form-designer.md         # 表单设计器
 │   ├── table-designer.md        # 列表设计器
-│   └── run-page.md              # 运行业务页面
+│   ├── run-page.md              # 运行业务页面
+│   └── flow.md                  # 流程管理
 ├── monitor/                     # 监控与消息
 │   ├── message.md               # 消息中心
-│   └── server-monitor.md        # 系统监控
+│   ├── server-monitor.md        # 系统监控
+│   └── schedule.md              # 定时任务
 └── appendix/                    # 附录
     └── faq.md                   # 常见问题
 ```
