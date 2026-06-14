@@ -14,7 +14,10 @@
           <w-input v-model="report.name" style="width: 180px" />
         </w-form-item>
         <w-form-item label="数据模型">
-          <w-select v-model="report.modelCode" :options="modelOptions" disabled style="width: 180px" />
+          <w-select v-model="report.modelCode" :options="modelOptions" :disabled="!!report.externalDataSourceId" style="width: 180px" />
+        </w-form-item>
+        <w-form-item label="外部数据源">
+          <w-select v-model="report.externalDataSourceId" :options="externalDataSourceOptions" clearable style="width: 180px" @change="handleExternalChange" />
         </w-form-item>
         <w-form-item label="状态">
           <w-switch v-model="report.status" active-text="启用" inactive-text="禁用" />
@@ -97,6 +100,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as reportApi from '@/api/report'
 import * as lowcodeApi from '@/api/lowcode'
+import * as externalDatasourceApi from '@/api/external-datasource'
 
 const route = useRoute()
 const router = useRouter()
@@ -111,6 +115,7 @@ const report = reactive<any>({
 const model = reactive<any>({})
 const fields = ref<any[]>([])
 const models = ref<any[]>([])
+const externalDataSources = ref<any[]>([])
 const activeTab = ref('columns')
 const columnMap = reactive<Record<string, any>>({})
 const groupBy = ref<string[]>([])
@@ -118,6 +123,7 @@ const filters = ref<any[]>([])
 const params = ref<any[]>([])
 
 const modelOptions = computed(() => models.value.map((m: any) => ({ label: m.name, value: m.code })))
+const externalDataSourceOptions = computed(() => externalDataSources.value.map((ds: any) => ({ label: ds.name, value: String(ds.id) })))
 const fieldList = computed(() => fields.value)
 const fieldOptions = computed(() => fields.value.map((f: any) => ({ label: f.display_name || f.field_name, value: f.field_name })))
 const groupFieldOptions = computed(() => fields.value
@@ -188,35 +194,76 @@ const paramTypeOptions = [
 onMounted(() => loadData())
 
 async function loadData() {
-  const [reportData, modelList] = await Promise.all([
+  const [reportData, modelList, dsList] = await Promise.all([
     reportApi.getReport(reportCode.value),
-    lowcodeApi.getModels()
+    lowcodeApi.getModels(),
+    externalDatasourceApi.getExternalDataSources()
   ])
   Object.assign(report, reportData)
   report.status = reportData.status === 1
+  report.externalDataSourceId = reportData.config?.externalDataSourceId ? String(reportData.config.externalDataSourceId) : ''
   models.value = modelList
-
-  const modelData = await lowcodeApi.getModelByCode(reportData.model_code)
-  Object.assign(model, modelData)
-  fields.value = modelData.fields || []
-  syncColumnMap()
+  externalDataSources.value = dsList || []
 
   const config = reportData.config || {}
   groupBy.value = config.groupBy || []
   filters.value = config.filters || []
   params.value = config.params || []
 
-  // 回显已保存的列配置
-  if (config.columns?.length) {
-    for (const col of config.columns) {
-      if (columnMap[col.field]) {
-        columnMap[col.field].selected = true
-        columnMap[col.field].label = col.label || columnMap[col.field].label
-        columnMap[col.field].aggregate = col.aggregate || ''
-        columnMap[col.field].format = col.format || ''
+  if (report.externalDataSourceId) {
+    await loadExternalFields(Number(report.externalDataSourceId), config.columns)
+  } else if (reportData.model_code) {
+    const modelData = await lowcodeApi.getModelByCode(reportData.model_code)
+    Object.assign(model, modelData)
+    fields.value = modelData.fields || []
+    syncColumnMap()
+    // 回显已保存的列配置
+    if (config.columns?.length) {
+      for (const col of config.columns) {
+        if (columnMap[col.field]) {
+          columnMap[col.field].selected = true
+          columnMap[col.field].label = col.label || columnMap[col.field].label
+          columnMap[col.field].aggregate = col.aggregate || ''
+          columnMap[col.field].format = col.format || ''
+        }
       }
     }
   }
+}
+
+async function loadExternalFields(id: number, savedColumns?: any[]) {
+  try {
+    const result = await externalDatasourceApi.testExternalDataSource(id)
+    const sample = result.sample?.[0] || {}
+    fields.value = Object.keys(sample).map((key) => ({
+      field_name: key,
+      display_name: key,
+      type: 'string'
+    }))
+    syncColumnMap()
+    if (savedColumns?.length) {
+      for (const col of savedColumns) {
+        if (columnMap[col.field]) {
+          columnMap[col.field].selected = true
+          columnMap[col.field].label = col.label || columnMap[col.field].label
+          columnMap[col.field].aggregate = col.aggregate || ''
+          columnMap[col.field].format = col.format || ''
+        }
+      }
+    }
+  } catch (err: any) {
+    alert(err.message || '加载外部数据源字段失败')
+  }
+}
+
+async function handleExternalChange(val: any) {
+  if (!val) {
+    fields.value = []
+    report.modelCode = ''
+    return
+  }
+  report.modelCode = ''
+  await loadExternalFields(Number(val))
 }
 
 function syncColumnMap() {
@@ -259,18 +306,21 @@ async function handleSave() {
       format: c.format
     }))
 
-  const config = {
+  const config: any = {
     columns,
     groupBy: groupBy.value,
     filters: filters.value.filter((f: any) => f.field),
     params: params.value.filter((p: any) => p.name)
+  }
+  if (report.externalDataSourceId) {
+    config.externalDataSourceId = Number(report.externalDataSourceId)
   }
 
   await reportApi.saveReport({
     id: report.id,
     code: report.code,
     name: report.name,
-    modelCode: report.modelCode,
+    modelCode: report.externalDataSourceId ? '' : report.modelCode,
     config,
     status: report.status ? 1 : 0
   })

@@ -44,6 +44,12 @@
               @command="handleImportCommand"
             />
             <input v-if="permission.canImport && tableConfig.toolbar.includes('import') && hasActionPermission('import', 'toolbar')" ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleFileChange" />
+            <w-dropdown
+              v-if="printTemplates.length"
+              trigger-text="打印"
+              :items="printTemplateItems"
+              @command="handlePrintCommand"
+            />
           </w-space>
         </template>
         <template v-for="col in formattedColumns" :key="col.prop" #[col.prop]="{ row }">
@@ -66,6 +72,7 @@
         v-model="formModel"
         :fields="formFields"
         :columns="2"
+        :layout="formLayout"
         :validate-rules="validateRules"
         :load-options="loadFieldOptions"
         :load-ref-options="loadRefOptions"
@@ -77,6 +84,14 @@
         <w-button type="primary" @click="handleSave">确定</w-button>
       </template>
     </w-dialog>
+
+    <w-dialog v-model="printPreviewVisible" title="打印预览" width="900">
+      <div class="print-preview-content" v-html="previewHtml"></div>
+      <template #footer>
+        <w-button @click="printPreviewVisible = false">关闭</w-button>
+        <w-button type="primary" @click="doPrint">打印</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -85,6 +100,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
+import * as printApi from '@/api/print'
 import request from '@/api/request'
 import { useAuthStore } from '@/stores/auth'
 
@@ -114,6 +130,13 @@ const dialogTitle = ref('新增')
 const formModel = reactive<any>({})
 const dynamicFormRef = ref<any>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+const printTemplates = ref<any[]>([])
+const printPreviewVisible = ref(false)
+const previewHtml = ref('')
+
+const printTemplateItems = computed(() => {
+  return printTemplates.value.map((t: any) => ({ label: t.name, value: t.code }))
+})
 
 const formFields = computed(() => {
   return formConfig.fields.map((f: any) => ({
@@ -128,6 +151,8 @@ const formFields = computed(() => {
     refDisplayField: f.refDisplayField
   }))
 })
+
+const formLayout = computed(() => formConfig.layout)
 
 const canAccess = computed(() => permission.dataScope !== 'none')
 
@@ -183,12 +208,14 @@ watch(modelCode, () => loadModel(), { immediate: true })
 
 async function loadModel() {
   if (!modelCode.value) return
-  const [data, perm] = await Promise.all([
+  const [data, perm, printData] = await Promise.all([
     lowcodeApi.getModelByCode(modelCode.value),
-    lowcodeApi.getModelPermission(modelCode.value)
+    lowcodeApi.getModelPermission(modelCode.value),
+    printApi.getPrintTemplates(modelCode.value)
   ])
   Object.assign(model, data)
   Object.assign(permission, perm)
+  printTemplates.value = printData || []
   formConfig.fields = []
   tableConfig.fields = []
 
@@ -519,6 +546,28 @@ async function downloadImportTemplate() {
   }
 }
 
+async function handlePrintCommand(command: string) {
+  const ids = selectedRows.value.length ? selectedRows.value.map((r) => r.id) : undefined
+  const res = await printApi.previewPrintTemplate(command, { recordIds: ids })
+  const pages = res.pages || []
+  previewHtml.value = pages.map((p: any) => `<div style="margin:0 auto 16px;box-shadow:0 0 8px rgba(0,0,0,0.1)">${p.html}</div>`).join('')
+  printPreviewVisible.value = true
+}
+
+function doPrint() {
+  const printWindow = window.open('', '_blank')
+  if (!printWindow) return
+  printWindow.document.write(`
+    <html>
+      <head><title>打印</title></head>
+      <body style="margin:0;padding:20px;background:#f5f5f5">${previewHtml.value}</body>
+    </html>
+  `)
+  printWindow.document.close()
+  printWindow.focus()
+  setTimeout(() => printWindow.print(), 300)
+}
+
 async function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
@@ -543,4 +592,5 @@ async function handleFileChange(e: Event) {
 
 <style scoped>
 .list-page { padding: 8px; }
+.print-preview-content { max-height: 600px; overflow: auto; }
 </style>

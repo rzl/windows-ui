@@ -1,154 +1,11 @@
 <template>
   <w-form ref="formRef" :model="model" :rules="rules">
-    <div class="w-dynamic-form" :style="gridStyle">
-      <w-form-item
-        v-for="field in visibleFields"
-        :key="field.prop"
-        :label="field.label"
-        :prop="field.prop"
-      >
-        <!-- 输入框 -->
-        <w-input
-          v-if="field.type === 'input' || field.type === 'text'"
-          v-model="model[field.prop]"
-          :type="field.inputType || 'text'"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-          :clearable="field.clearable"
-        />
-
-        <!-- 数字输入框 -->
-        <w-input-number
-          v-else-if="field.type === 'number'"
-          v-model="model[field.prop]"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-          :min="field.min"
-          :max="field.max"
-        />
-
-        <!-- 文本域 -->
-        <w-input
-          v-else-if="field.type === 'textarea'"
-          v-model="model[field.prop]"
-          type="textarea"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-          :rows="field.rows || 3"
-        />
-
-        <!-- 下拉选择 -->
-        <w-select
-          v-else-if="field.type === 'select'"
-          v-model="model[field.prop]"
-          :options="getFieldOptions(field)"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-          :clearable="field.clearable"
-        />
-
-        <!-- 单选框 -->
-        <w-space v-else-if="field.type === 'radio'">
-          <w-radio
-            v-for="opt in getFieldOptions(field)"
-            :key="opt.value"
-            v-model="model[field.prop]"
-            :label="opt.value"
-            :disabled="isDisabled(field)"
-          >
-            {{ opt.label }}
-          </w-radio>
-        </w-space>
-
-        <!-- 多选框 -->
-        <w-space v-else-if="field.type === 'checkbox'">
-          <w-checkbox
-            v-for="opt in getFieldOptions(field)"
-            :key="opt.value"
-            v-model="model[field.prop]"
-            :label="opt.value"
-            :disabled="isDisabled(field)"
-          >
-            {{ opt.label }}
-          </w-checkbox>
-        </w-space>
-
-        <!-- 开关 -->
-        <w-switch
-          v-else-if="field.type === 'switch'"
-          v-model="model[field.prop]"
-          :disabled="isDisabled(field)"
-          :active-text="field.activeText"
-          :inactive-text="field.inactiveText"
-        />
-
-        <!-- 日期 -->
-        <w-date-picker
-          v-else-if="field.type === 'date'"
-          v-model="model[field.prop]"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-        />
-
-        <!-- 日期时间 -->
-        <w-date-time-picker
-          v-else-if="field.type === 'datetime'"
-          v-model="model[field.prop]"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-        />
-
-        <!-- 关联模型 -->
-        <w-select
-          v-else-if="field.type === 'ref'"
-          v-model="model[field.prop]"
-          :options="refOptionsMap[field.prop] || []"
-          :placeholder="field.placeholder || '请选择'"
-          :disabled="isDisabled(field)"
-          :clearable="field.clearable"
-          filterable
-          @focus="loadRefOptions(field)"
-        />
-
-        <!-- 文件上传 -->
-        <w-upload
-          v-else-if="field.type === 'upload'"
-          :button-text="field.placeholder || '选择文件'"
-          :disabled="isDisabled(field)"
-          :http-request="props.uploadRequest"
-          @change="model[field.prop] = $event"
-        />
-
-        <!-- 级联选择 -->
-        <w-cascader
-          v-else-if="field.type === 'cascader'"
-          v-model="model[field.prop]"
-          :options="getFieldOptions(field)"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-          :clearable="field.clearable"
-        />
-
-        <!-- 富文本 -->
-        <w-rich-text
-          v-else-if="field.type === 'rich-text'"
-          v-model="model[field.prop]"
-          :placeholder="field.placeholder"
-          :disabled="isDisabled(field)"
-        />
-
-        <!-- 自定义 -->
-        <slot v-else :name="field.prop" :field="field" :model="model" />
-        <div v-if="validationErrors[field.prop]" class="w-dynamic-form__error">
-          {{ validationErrors[field.prop] }}
-        </div>
-      </w-form-item>
-    </div>
+    <render-layout :layout="effectiveLayout" />
   </w-form>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch, type PropType } from 'vue'
+import { computed, h, reactive, ref, watch, type PropType, type VNode } from 'vue'
 import WForm from '../form/form.vue'
 import WFormItem from '../form/form-item.vue'
 import WInput from '../input/input.vue'
@@ -162,6 +19,11 @@ import WDateTimePicker from '../date-time-picker/date-time-picker.vue'
 import WUpload from '../upload/upload.vue'
 import WCascader from '../cascader/cascader.vue'
 import WRichText from '../rich-text/rich-text.vue'
+import WCard from '../card/card.vue'
+import WTabs from '../tabs/tabs.vue'
+import WSpace from '../space/space.vue'
+import WButton from '../button/button.vue'
+import WTable from '../table/table.vue'
 import type { FormRule } from '../form/form.vue'
 
 export interface DynamicField {
@@ -204,6 +66,21 @@ export interface DynamicField {
   span?: number
 }
 
+export interface FormLayout {
+  type: 'root' | 'fieldset' | 'tabs' | 'grid' | 'subtable'
+  title?: string
+  name?: string
+  span?: number
+  activeTab?: string
+  tabs?: { title: string; name: string; children: (FormLayout | string)[] }[]
+  children?: (FormLayout | string)[]
+  field?: string
+  columns?: { field: string; label: string; width?: number; type?: string }[]
+  subModelCode?: string
+  foreignField?: string
+  localField?: string
+}
+
 defineOptions({ name: 'WDynamicForm' })
 
 export type ValidateRuleItem = { code: string; value: any }
@@ -213,6 +90,7 @@ const props = defineProps({
   model: { type: Object as () => Record<string, any>, default: () => ({}) },
   fields: { type: Array as () => DynamicField[], default: () => [] },
   columns: { type: Number, default: 1 },
+  layout: { type: Object as () => FormLayout, default: undefined },
   validateRules: {
     type: Function as PropType<(items: ValidateRuleItem[]) => Promise<ValidateRuleResult[]>>,
     default: undefined
@@ -247,6 +125,24 @@ const visibleFields = computed(() => {
   })
 })
 
+const effectiveLayout = computed<FormLayout>(() => {
+  if (props.layout) return props.layout
+  return {
+    type: 'grid',
+    span: props.columns,
+    children: visibleFields.value.map((f) => f.prop)
+  }
+})
+
+const RenderLayout = {
+  props: {
+    layout: { type: Object as () => FormLayout, required: true }
+  },
+  setup(layoutProps: { layout: FormLayout }) {
+    return () => renderLayoutNode(layoutProps.layout)
+  }
+}
+
 function isDependsOnHidden(field: DynamicField): boolean {
   if (!field.dependsOn || !field.dependsOn.field) return false
   const targetValue = props.model[field.dependsOn.field]
@@ -271,6 +167,163 @@ const validationErrors = reactive<Record<string, string>>({})
 const fieldOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
 const refOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
 const generatedCodeSet = new Set<string>()
+const activeTabMap = reactive<Record<string, number>>({})
+
+function getField(prop: string): DynamicField | undefined {
+  return props.fields.find((f) => f.prop === prop)
+}
+
+function renderFieldControl(field: DynamicField): VNode | null {
+  const common = {
+    modelValue: props.model[field.prop],
+    'onUpdate:modelValue': (v: any) => { props.model[field.prop] = v },
+    placeholder: field.placeholder,
+    disabled: isDisabled(field)
+  }
+
+  if (field.type === 'input' || field.type === 'text') {
+    return h(WInput, { ...common, type: field.inputType || 'text', clearable: field.clearable })
+  }
+  if (field.type === 'number') {
+    return h(WInputNumber, { ...common, min: field.min, max: field.max })
+  }
+  if (field.type === 'textarea') {
+    return h(WInput, { ...common, type: 'textarea', rows: field.rows || 3 })
+  }
+  if (field.type === 'select') {
+    return h(WSelect, { ...common, options: getFieldOptions(field), clearable: field.clearable })
+  }
+  if (field.type === 'radio') {
+    return h(WSpace, null, () => getFieldOptions(field).map((opt) =>
+      h(WRadio, { modelValue: props.model[field.prop], 'onUpdate:modelValue': common['onUpdate:modelValue'], label: opt.value, disabled: common.disabled }, () => opt.label)
+    ))
+  }
+  if (field.type === 'checkbox') {
+    return h(WSpace, null, () => getFieldOptions(field).map((opt) =>
+      h(WCheckbox, { modelValue: props.model[field.prop], 'onUpdate:modelValue': common['onUpdate:modelValue'], label: opt.value, disabled: common.disabled }, () => opt.label)
+    ))
+  }
+  if (field.type === 'switch') {
+    return h(WSwitch, { ...common, activeText: field.activeText, inactiveText: field.inactiveText })
+  }
+  if (field.type === 'date') {
+    return h(WDatePicker, common)
+  }
+  if (field.type === 'datetime') {
+    return h(WDateTimePicker, common)
+  }
+  if (field.type === 'ref') {
+    return h(WSelect, {
+      modelValue: props.model[field.prop],
+      'onUpdate:modelValue': common['onUpdate:modelValue'],
+      options: refOptionsMap[field.prop] || [],
+      placeholder: field.placeholder || '请选择',
+      disabled: common.disabled,
+      clearable: field.clearable,
+      filterable: true,
+      onFocus: () => { loadRefOptions(field) }
+    })
+  }
+  if (field.type === 'upload') {
+    return h(WUpload, { buttonText: field.placeholder || '选择文件', disabled: common.disabled, httpRequest: props.uploadRequest, onChange: (v: any) => { props.model[field.prop] = v } })
+  }
+  if (field.type === 'cascader') {
+    return h(WCascader, { ...common, options: getFieldOptions(field), clearable: field.clearable })
+  }
+  if (field.type === 'rich-text') {
+    return h(WRichText, common)
+  }
+  return h('slot', { name: field.prop, field, model: props.model })
+}
+
+function renderFieldItem(prop: string): VNode | null {
+  const field = getField(prop)
+  if (!field) return null
+  if (typeof field.hidden === 'function' ? field.hidden(props.model) : field.hidden) return null
+  if (isDependsOnHidden(field)) return null
+  return h(WFormItem, { label: field.label, prop: field.prop }, () => [
+    renderFieldControl(field),
+    validationErrors[field.prop] ? h('div', { class: 'w-dynamic-form__error' }, validationErrors[field.prop]) : null
+  ])
+}
+
+function renderLayoutNode(node: FormLayout | string): VNode | null {
+  if (typeof node === 'string') {
+    return renderFieldItem(node)
+  }
+  if (!node) return null
+
+  const children: (VNode | null)[] = (node.children || []).map((child) => renderLayoutNode(child))
+
+  if (node.type === 'root') {
+    return h('div', { class: 'w-dynamic-form' }, children)
+  }
+
+  if (node.type === 'grid') {
+    return h('div', {
+      class: 'w-dynamic-form__grid',
+      style: {
+        display: 'grid',
+        gridTemplateColumns: `repeat(${node.span || props.columns}, 1fr)`,
+        gap: '12px'
+      }
+    }, children)
+  }
+
+  if (node.type === 'fieldset') {
+    return h(WCard, { header: node.title || '分组', class: 'w-dynamic-form__fieldset' }, () => children)
+  }
+
+  if (node.type === 'tabs') {
+    const tabs = node.tabs || []
+    const activeIndex = activeTabMap[node.name || 'default'] || 0
+    const tabLabels = tabs.map((tab) => ({ label: tab.title, name: tab.name }))
+    return h(WTabs, {
+      tabs: tabLabels,
+      modelValue: activeIndex,
+      'onUpdate:modelValue': (v: number) => { activeTabMap[node.name || 'default'] = v }
+    }, {
+      default: ({ active }: { active: number }) => {
+        const tab = tabs[active]
+        if (!tab) return null
+        return h('div', { class: 'w-dynamic-form__tab-content' }, tab.children.map((c) => renderLayoutNode(c)))
+      }
+    })
+  }
+
+  if (node.type === 'subtable') {
+    return renderSubTable(node)
+  }
+
+  return h('div', { class: 'w-dynamic-form' }, children)
+}
+
+function renderSubTable(node: FormLayout): VNode | null {
+  const field = node.field
+  if (!field) return null
+  if (!props.model[field]) props.model[field] = []
+  const rows: any[] = Array.isArray(props.model[field]) ? props.model[field] : []
+  const columns = (node.columns || []).map((col) => ({
+    prop: col.field,
+    label: col.label,
+    width: col.width
+  }))
+
+  function addRow() {
+    if (!Array.isArray(props.model[field as string])) props.model[field as string] = []
+    props.model[field as string].push({})
+  }
+  function removeRow(idx: number) {
+    props.model[field as string].splice(idx, 1)
+  }
+
+  return h(WCard, { header: node.title || '子表', class: 'w-dynamic-form__subtable' }, () => [
+    h(WTable, { data: rows, columns }, {
+      action: ({ $index }: any) => h(WButton, { size: 'small', type: 'danger', onClick: () => removeRow($index) }, () => '删除')
+    }),
+    h(WButton, { type: 'primary', onClick: addRow }, () => '+ 新增行')
+  ])
+}
 
 function evalExpr(expr: string, ctx: Record<string, any>) {
   try {
@@ -422,14 +475,6 @@ const rules = computed(() => {
     }
   })
   return result
-})
-
-const gridStyle = computed(() => {
-  return {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${props.columns}, 1fr)`,
-    gap: '12px'
-  }
 })
 
 function isDisabled(field: DynamicField): boolean {

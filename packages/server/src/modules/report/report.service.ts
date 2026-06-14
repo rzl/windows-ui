@@ -2,6 +2,7 @@ import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import * as XLSX from 'xlsx'
 import { getModelByCode } from '../lowcode/lowcode.service'
+import * as externalDatasourceService from '../external-datasource/external-datasource.service'
 
 export interface ReportColumn {
   field: string
@@ -39,6 +40,7 @@ export interface ReportConfig {
   filters?: ReportFilter[]
   joins?: ReportJoin[]
   params?: ReportParam[]
+  externalDataSourceId?: number
 }
 
 function safeCode(name: string) {
@@ -98,6 +100,15 @@ export async function deleteReport(id: number) {
 export async function executeReport(code: string, params: any = {}, user?: any) {
   const report = await getReportByCode(code)
   const config = report.config as ReportConfig
+
+  // 外部数据源报表
+  if (config.externalDataSourceId) {
+    const ctx = buildExternalCtx(params)
+    const rows = await externalDatasourceService.executeExternalDataSource(config.externalDataSourceId, ctx)
+    const list = Array.isArray(rows) ? rows : []
+    return { report, config, list, params: config.params || [] }
+  }
+
   const model = await getModelByCode(report.model_code)
   const fields = model.fields.filter((f: any) => f.status === 1)
   const fieldMap = new Map<string, any>(fields.map((f: any) => [f.field_name, f]))
@@ -160,6 +171,19 @@ export async function executeReport(code: string, params: any = {}, user?: any) 
     list,
     params: config.params || []
   }
+}
+
+function buildExternalCtx(params: any) {
+  const ctx: Record<string, any> = {}
+  if (params?.filters?.length) {
+    for (const f of params.filters) {
+      if (f.field && f.value !== undefined) ctx[f.field] = f.value
+    }
+  }
+  if (params?.params) {
+    Object.assign(ctx, params.params)
+  }
+  return ctx
 }
 
 function applyFilters(builder: any, filters: ReportFilter[], tableName: string, fieldMap: Map<string, any>) {

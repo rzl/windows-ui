@@ -5,6 +5,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as dashboardService from '../dashboard/dashboard.service'
 import * as flowService from '../flow/flow.service'
+import * as externalDatasourceService from '../external-datasource/external-datasource.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -975,6 +976,12 @@ export async function executeFieldOptions(config: any, ctx: any = {}) {
       .where({ dict_id: dict.id, status: 1 })
       .orderBy('sort', 'asc')
     return items.map((item) => ({ label: item.label, value: item.value }))
+  }
+
+  if (type === 'external') {
+    if (!config.externalDataSourceId) throw new AppError('外部数据源不能为空', 400)
+    const rows = await externalDatasourceService.executeExternalDataSource(Number(config.externalDataSourceId), { ...ctx, ...(config.params || {}) })
+    return externalDatasourceService.formatOptions(rows, config.labelField, config.valueField)
   }
 
   const dataSource: dashboardService.DataSourceConfig = {

@@ -29,7 +29,10 @@
 
         <w-tab-pane label="表单设计" name="form">
           <div class="toolbar">
-            <w-button v-if="isAdmin" type="primary" size="small" @click="saveFormConfig">保存表单配置</w-button>
+            <template v-if="isAdmin">
+              <w-button type="primary" size="small" @click="saveFormConfig">保存表单配置</w-button>
+              <w-button size="small" @click="openLayoutDialog">布局配置</w-button>
+            </template>
             <w-tag v-else type="warning">只读模式</w-tag>
           </div>
           <w-table :data="fields" :columns="formDesignColumns" stripe border>
@@ -184,6 +187,15 @@
       </template>
     </w-dialog>
 
+    <!-- 布局配置弹窗 -->
+    <w-dialog v-model="layoutDialogVisible" title="表单布局配置（JSON）" width="600">
+      <w-input v-model="layoutText" type="textarea" :rows="16" placeholder='{"type":"tabs","tabs":[{"title":"基本信息","name":"base","children":["name","phone"]}]}' />
+      <template #footer>
+        <w-button @click="layoutDialogVisible = false">取消</w-button>
+        <w-button type="primary" @click="saveLayoutConfig">保存</w-button>
+      </template>
+    </w-dialog>
+
     <!-- 动态选项配置弹窗 -->
     <w-dialog v-model="optionDialogVisible" title="动态选项配置" width="480">
       <w-form :model="optionForm">
@@ -192,6 +204,18 @@
         </w-form-item>
         <w-form-item label="依赖字段">
           <w-select v-model="optionForm.dependsOn" :options="dependFieldOptions" style="width: 200px" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'external'" label="外部数据源">
+          <w-select v-model="optionForm.externalDataSourceId" :options="externalDataSourceOptions" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'external'" label="标签字段">
+          <w-input v-model="optionForm.labelField" placeholder="label" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'external'" label="值字段">
+          <w-input v-model="optionForm.valueField" placeholder="value" />
+        </w-form-item>
+        <w-form-item v-if="optionForm.type === 'external'" label="额外参数(JSON)">
+          <w-input v-model="optionForm.paramsText" type="textarea" :rows="2" placeholder='{"key":"value"}' />
         </w-form-item>
         <w-form-item v-if="optionForm.type === 'dict'" label="字典编码">
           <w-select v-model="optionForm.dictCode" :options="dictOptions" />
@@ -223,6 +247,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
+import * as externalDatasourceApi from '@/api/external-datasource'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -250,6 +275,8 @@ const codingRules = ref<any[]>([])
 const fieldDialogVisible = ref(false)
 const fieldForm = reactive<any>({})
 const optionDialogVisible = ref(false)
+const layoutDialogVisible = ref(false)
+const layoutText = ref('')
 const optionForm = reactive<any>({
   fieldName: '',
   type: '',
@@ -263,10 +290,13 @@ const optionForm = reactive<any>({
 const optionTypeOptions = [
   { label: '无', value: '' },
   { label: '系统字典', value: 'dict' },
+  { label: '外部数据源', value: 'external' },
   { label: 'SQL', value: 'sql' },
   { label: '内部接口', value: 'api' },
   { label: '脚本', value: 'script' }
 ]
+
+const externalDataSources = ref<any[]>([])
 
 const httpMethodOptions = [
   { label: 'GET', value: 'GET' },
@@ -336,6 +366,11 @@ const refFieldOptions = computed(() => {
 const dependFieldOptions = computed(() => [
   { label: '无', value: '' },
   ...fields.value.map((f) => ({ label: f.display_name || f.field_name, value: f.field_name }))
+])
+
+const externalDataSourceOptions = computed(() => [
+  { label: '请选择', value: '' },
+  ...externalDataSources.value.map((ds: any) => ({ label: ds.name, value: String(ds.id) }))
 ])
 
 const formTypeOptions = [
@@ -528,12 +563,13 @@ function typeLabel(type: string) {
 const models = ref<any[]>([])
 
 async function loadData() {
-  const [data, rules, dictList, codingRuleList, modelList] = await Promise.all([
+  const [data, rules, dictList, codingRuleList, modelList, dsList] = await Promise.all([
     lowcodeApi.getModel(modelId),
     lowcodeApi.getValidationRules(),
     dictApi.getDicts(),
     lowcodeApi.getCodingRules(),
-    lowcodeApi.getModels()
+    lowcodeApi.getModels(),
+    externalDatasourceApi.getExternalDataSources()
   ])
   Object.assign(model, data)
   fields.value = data.fields || []
@@ -541,12 +577,14 @@ async function loadData() {
   dicts.value = dictList || []
   codingRules.value = codingRuleList || []
   models.value = modelList || []
+  externalDataSources.value = dsList || []
 
   if (data.forms?.length) {
     const saved = typeof data.forms[0].config === 'string'
       ? JSON.parse(data.forms[0].config)
       : data.forms[0].config
     formConfig.fields = saved.fields || []
+    formConfig.layout = saved.layout
     formConfig.fields.forEach((f: any) => {
       formConfigMap[f.field] = f
     })
@@ -605,6 +643,10 @@ function openOptionDialog(fieldName: string) {
     type: existing.type || '',
     dependsOn: existing.dependsOn || '',
     dictCode: existing.dictCode || '',
+    externalDataSourceId: existing.externalDataSourceId ? String(existing.externalDataSourceId) : '',
+    labelField: existing.labelField || 'label',
+    valueField: existing.valueField || 'value',
+    paramsText: existing.params ? JSON.stringify(existing.params) : '',
     sql: existing.sql || '',
     api: { method: 'GET', url: '', params: {}, body: {}, ...(existing.api || {}) },
     script: existing.script || ''
@@ -625,6 +667,17 @@ function saveOptionConfig() {
   }
   if (optionForm.dependsOn) config.dependsOn = optionForm.dependsOn
   if (config.type === 'dict') config.dictCode = optionForm.dictCode || ''
+  if (config.type === 'external') {
+    config.externalDataSourceId = optionForm.externalDataSourceId ? Number(optionForm.externalDataSourceId) : undefined
+    config.labelField = optionForm.labelField || 'label'
+    config.valueField = optionForm.valueField || 'value'
+    try {
+      config.params = optionForm.paramsText ? JSON.parse(optionForm.paramsText) : {}
+    } catch {
+      alert('额外参数 JSON 格式错误')
+      return
+    }
+  }
   if (config.type === 'sql') config.sql = optionForm.sql || ''
   if (config.type === 'api') config.api = optionForm.api || { method: 'GET', url: '' }
   if (config.type === 'script') config.script = optionForm.script || ''
@@ -723,13 +776,30 @@ async function saveFormConfig() {
       return config
     })
     .filter((f) => f && f.inForm)
+  const config: any = { fields: configFields }
+  if (formConfig.layout) config.layout = formConfig.layout
   await lowcodeApi.saveForm({
     modelId,
     name: '默认表单',
-    config: { fields: configFields },
+    config,
     status: 1
   })
   alert('表单配置已保存')
+}
+
+function openLayoutDialog() {
+  layoutText.value = formConfig.layout ? JSON.stringify(formConfig.layout, null, 2) : ''
+  layoutDialogVisible.value = true
+}
+
+function saveLayoutConfig() {
+  try {
+    const layout = layoutText.value ? JSON.parse(layoutText.value) : undefined
+    formConfig.layout = layout
+    layoutDialogVisible.value = false
+  } catch {
+    alert('JSON 格式错误')
+  }
 }
 
 async function saveTableConfig() {

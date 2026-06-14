@@ -9,6 +9,8 @@ import flowRoutes from '../modules/flow/flow.routes'
 import commonRoutes from '../modules/common/common.routes'
 import scheduleRoutes from '../modules/schedule/schedule.routes'
 import reportRoutes from '../modules/report/report.routes'
+import printRoutes from '../modules/print/print.routes'
+import externalDatasourceRoutes from '../modules/external-datasource/external-datasource.routes'
 
 const router: RouterType = Router()
 
@@ -22,5 +24,7 @@ router.use('/flow', flowRoutes)
 router.use('/common', commonRoutes)
 router.use('/schedule', scheduleRoutes)
 router.use('/report', reportRoutes)
+router.use('/print', printRoutes)
+router.use('/external-datasources', externalDatasourceRoutes)
 
 export default router

@@ -186,6 +186,30 @@ const routes = [
         name: 'ReportPage',
         component: () => import('@/views/report/ReportPage.vue'),
         meta: { title: '报表运行', permission: 'report:run' }
+      },
+      {
+        path: 'lowcode/print-template',
+        name: 'PrintTemplateList',
+        component: () => import('@/views/report/PrintTemplateList.vue'),
+        meta: { title: '打印模板', permission: 'lowcode:printTemplate' }
+      },
+      {
+        path: 'print/design/:code',
+        name: 'PrintTemplateDesigner',
+        component: () => import('@/views/report/PrintTemplateDesigner.vue'),
+        meta: { title: '打印模板设计', permission: 'lowcode:printTemplate' }
+      },
+      {
+        path: 'print/preview/:code',
+        name: 'PrintPreview',
+        component: () => import('@/views/report/PrintPreview.vue'),
+        meta: { title: '打印预览', permission: 'lowcode:printTemplate' }
+      },
+      {
+        path: 'lowcode/external-datasource',
+        name: 'ExternalDataSourceList',
+        component: () => import('@/views/external-datasource/ExternalDataSourceList.vue'),
+        meta: { title: '外部数据源', permission: 'lowcode:externalDatasource' }
       }
     ]
   },
