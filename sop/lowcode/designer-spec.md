@@ -206,6 +206,21 @@
 }
 ```
 
+### 流程设计
+
+流程配置通过可视化设计器完成，支持的节点类型：
+
+- `start`：开始节点
+- `approve`：审批节点（支持角色/用户/部门审批）
+- `cc`：抄送节点
+- `condition`：条件分支节点
+- `sign`：会签节点（全部通过 / 一人通过）
+- `end`：结束节点
+
+流程保存后存储为 `{ nodes: FlowNode[], transitions: FlowTransition[] }` 结构，后端流程引擎按此执行。
+
+详细使用说明见 [flow-designer.md](./flow-designer.md)。
+
 ### 数据权限
 
 模型级数据权限在「模型信息」中配置：

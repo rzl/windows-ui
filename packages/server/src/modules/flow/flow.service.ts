@@ -2,18 +2,19 @@ import { db } from '../../db'
 import { AppError } from '../../utils/response'
 
 export interface FlowAssignee {
-  type: 'role' | 'user'
+  type: 'role' | 'user' | 'dept'
   value: string
 }
 
 export interface FlowNode {
   id: string
-  type: 'start' | 'approve' | 'sign' | 'end'
+  type: 'start' | 'approve' | 'cc' | 'condition' | 'sign' | 'end'
   name: string
-  assigneeType?: 'role' | 'user'
+  assigneeType?: 'role' | 'user' | 'dept'
   assigneeValue?: string
   signType?: 'all' | 'any'
   assignees?: FlowAssignee[]
+  condition?: string
 }
 
 export interface FlowTransition {
@@ -173,12 +174,18 @@ export async function getPendingTasks(user: any) {
     )
 
   if (user?.roleId && user?.id) {
+    const deptIds = user.deptId ? [String(user.deptId)] : []
     query.where((qb) => {
       qb.where((q) => {
         q.where('flow_tasks.assignee_type', 'role').andWhere('flow_tasks.assignee_value', String(user.roleId))
       }).orWhere((q) => {
         q.where('flow_tasks.assignee_type', 'user').andWhere('flow_tasks.assignee_value', String(user.id))
       })
+      if (deptIds.length) {
+        qb.orWhere((q) => {
+          q.where('flow_tasks.assignee_type', 'dept').andWhere('flow_tasks.assignee_value', deptIds[0])
+        })
+      }
     })
   }
 
@@ -277,6 +284,55 @@ async function enterNode(instanceId: number, node: FlowNode) {
         status: 'pending'
       }))
     )
+  } else if (node.type === 'cc') {
+    // 抄送节点：记录抄送任务并自动通过
+    await db('flow_tasks').insert({
+      instance_id: instanceId,
+      node_id: node.id,
+      node_name: node.name,
+      assignee_type: node.assigneeType,
+      assignee_value: node.assigneeValue,
+      status: 'cc'
+    })
+    await autoMoveToNextNode(instanceId, node, 'approve')
+  } else if (node.type === 'condition') {
+    // 条件节点：自动根据表达式流转
+    const instance = await db('flow_instances').where({ id: instanceId }).first()
+    if (!instance) return
+    const def = await getFlowDefinitionByCode(instance.flow_code)
+    const config = def.config as FlowConfig
+    const businessData = parseBusinessData(instance)
+    const transition = findMatchedTransition(config, node.id, '', businessData)
+    if (transition) {
+      const nextNode = config.nodes.find((n) => n.id === transition.to)
+      if (nextNode) {
+        await db('flow_instances').where({ id: instanceId }).update({ current_node_id: nextNode.id, update_time: db.fn.now() })
+        await enterNode(instanceId, nextNode)
+      }
+    }
+  }
+}
+
+async function autoMoveToNextNode(instanceId: number, node: FlowNode, action: string) {
+  const instance = await db('flow_instances').where({ id: instanceId }).first()
+  if (!instance) return
+  const def = await getFlowDefinitionByCode(instance.flow_code)
+  const config = def.config as FlowConfig
+  const businessData = parseBusinessData(instance)
+  const transition = findMatchedTransition(config, node.id, action, businessData)
+  if (!transition) return
+  const nextNode = config.nodes.find((n) => n.id === transition.to)
+  if (!nextNode) return
+
+  if (nextNode.type === 'end') {
+    await db('flow_instances').where({ id: instanceId }).update({
+      status: action === 'approve' ? 'completed' : 'rejected',
+      current_node_id: null,
+      update_time: db.fn.now()
+    })
+  } else {
+    await db('flow_instances').where({ id: instanceId }).update({ current_node_id: nextNode.id, update_time: db.fn.now() })
+    await enterNode(instanceId, nextNode)
   }
 }
 

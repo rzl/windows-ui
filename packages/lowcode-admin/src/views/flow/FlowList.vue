@@ -17,7 +17,7 @@
       </w-table>
     </w-card>
 
-    <w-dialog v-model="dialogVisible" title="流程定义" width="480">
+    <w-dialog v-model="dialogVisible" title="流程定义" width="900">
       <w-form :model="formModel">
         <w-form-item label="流程编码">
           <w-input v-model="formModel.code" :disabled="!!formModel.id" placeholder="英文编码" />
@@ -31,8 +31,8 @@
         <w-form-item label="状态">
           <w-switch v-model="formModel.status" active-text="启用" inactive-text="禁用" />
         </w-form-item>
-        <w-form-item label="节点配置（JSON）">
-          <textarea v-model="formModel.configText" class="w-xp-textarea" rows="8" placeholder='{"nodes":[],"transitions":[]}' />
+        <w-form-item label="流程设计">
+          <flow-designer v-model="formModel.config" />
         </w-form-item>
       </w-form>
       <template #footer>
@@ -47,6 +47,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import * as flowApi from '@/api/flow'
 import * as lowcodeApi from '@/api/lowcode'
+import FlowDesigner from '@/components/flow-designer/FlowDesigner.vue'
 
 const flows = ref<any[]>([])
 const models = ref<any[]>([])
@@ -80,23 +81,20 @@ function openDialog(row?: any) {
   if (row) {
     Object.assign(formModel, JSON.parse(JSON.stringify(row)))
     formModel.status = row.status === 1
-    formModel.configText = typeof row.config === 'string' ? row.config : JSON.stringify(row.config || { nodes: [], transitions: [] }, null, 2)
+    formModel.config = typeof row.config === 'string' ? JSON.parse(row.config) : (row.config || { nodes: [], transitions: [] })
   } else {
     formModel.status = true
-    formModel.configText = JSON.stringify({
+    formModel.config = {
       nodes: [
         { id: 'start', type: 'start', name: '开始' },
         { id: 'manager', type: 'approve', name: '经理审批', assigneeType: 'role', assigneeValue: '' },
-        { id: 'sign', type: 'sign', name: '会签', signType: 'all', assignees: [{ type: 'role', value: '' }] },
         { id: 'end', type: 'end', name: '结束' }
       ],
       transitions: [
         { from: 'start', to: 'manager', condition: 'submit' },
-        { from: 'manager', to: 'sign', condition: 'approve' },
-        { from: 'manager', to: 'start', condition: 'reject' },
-        { from: 'sign', to: 'end', condition: 'approve' }
+        { from: 'manager', to: 'end', condition: 'approve' }
       ]
-    }, null, 2)
+    }
   }
   dialogVisible.value = true
 }
@@ -106,18 +104,11 @@ function closeDialog() {
 }
 
 async function handleSave() {
-  let config: any
-  try {
-    config = JSON.parse(formModel.configText)
-  } catch {
-    alert('JSON 格式错误')
-    return
-  }
   const data = {
     code: formModel.code,
     name: formModel.name,
     modelCode: formModel.modelCode,
-    config,
+    config: formModel.config,
     status: formModel.status ? 1 : 0
   }
   await flowApi.saveFlowDefinition(data)
