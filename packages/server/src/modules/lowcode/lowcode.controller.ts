@@ -102,6 +102,30 @@ export async function dynamicImport(req: Request, res: Response) {
   res.json(success(result, '导入成功'))
 }
 
+export async function exportDynamicExcel(req: Request, res: Response) {
+  const { ids, columns } = req.body
+  const buffer = await lowcodeService.exportDynamicExcel(req.params.modelCode, { ids, columns }, (req as AuthRequest).user)
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  res.setHeader('Content-Disposition', `attachment; filename=${req.params.modelCode}.xlsx`)
+  res.send(buffer)
+}
+
+export async function importDynamicExcel(req: Request, res: Response) {
+  if (!req.file?.buffer) {
+    res.status(400).json(success(null, '请上传 Excel 文件'))
+    return
+  }
+  const result = await lowcodeService.importDynamicExcel(req.params.modelCode, req.file.buffer, (req as AuthRequest).user)
+  res.json(success(result))
+}
+
+export async function getImportTemplate(req: Request, res: Response) {
+  const buffer = await lowcodeService.getImportTemplate(req.params.modelCode)
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  res.setHeader('Content-Disposition', `attachment; filename=${req.params.modelCode}_template.xlsx`)
+  res.send(buffer)
+}
+
 // 编码规则
 export async function getCodingRules(_req: Request, res: Response) {
   const result = await lowcodeService.getCodingRules()

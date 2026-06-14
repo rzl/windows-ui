@@ -1,5 +1,6 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import * as XLSX from 'xlsx'
 import * as dashboardService from '../dashboard/dashboard.service'
 import * as flowService from '../flow/flow.service'
 
@@ -631,6 +632,145 @@ export async function dynamicImport(modelCode: string, rows: any[]) {
   const cleanRows = rows.map((row) => sanitizeData(model.fields, row))
   await db(model.table_name).insert(cleanRows)
   return { count: cleanRows.length }
+}
+
+export async function exportDynamicExcel(modelCode: string, options: { ids?: (string | number)[]; columns?: any[] }, user?: any) {
+  const model = await getModelByCode(modelCode)
+  const fields = model.fields.filter((f: any) => f.status === 1)
+
+  // 如果没有指定列，使用全部字段
+  let exportColumns: any[] = options.columns || fields.map((f: any) => ({
+    field: f.field_name,
+    label: f.display_name || f.field_name,
+    type: f.type,
+    format: '',
+    dictCode: f.dict_code,
+    refModel: f.ref_model,
+    refDisplayField: f.ref_display_field
+  }))
+
+  // 过滤无效列
+  const fieldMap = new Map(fields.map((f: any) => [f.field_name, f]))
+  exportColumns = exportColumns.filter((col: any) => fieldMap.has(col.field))
+
+  // 查询数据
+  let list: any[]
+  if (options.ids && options.ids.length) {
+    list = await db(model.table_name).whereIn('id', options.ids)
+  } else {
+    const result = await dynamicList(modelCode, { page: 1, pageSize: 10000 }, user)
+    list = result.list
+  }
+
+  // 构建表头和行
+  const headers = exportColumns.map((col: any) => col.label)
+  const rows = list.map((row: any) => exportColumns.map((col: any) => formatExportValue(row, col)))
+
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows])
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, model.name || '数据')
+
+  return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
+}
+
+function formatExportValue(row: any, col: any) {
+  const value = row[col.field]
+  if (value === undefined || value === null) return ''
+
+  // 关联字段显示值
+  if (col.type === 'ref' || col.refModel) {
+    return row[`${col.field}_display`] ?? value
+  }
+
+  // 字典转换
+  if (col.type === 'select' || col.type === 'radio' || col.format === 'dict') {
+    // 后端不缓存字典，直接返回值；前端导出时已经带 display
+    return value
+  }
+
+  // 格式化
+  switch (col.format) {
+    case 'date':
+      return String(value).slice(0, 10)
+    case 'datetime':
+      return String(value).replace('T', ' ').slice(0, 19)
+    case 'money':
+      return Number(value).toFixed(2)
+    case 'percent':
+      return (Number(value) * 100).toFixed(2) + '%'
+    case 'boolean':
+      return value ? '是' : '否'
+    default:
+      return value
+  }
+}
+
+export async function importDynamicExcel(modelCode: string, buffer: Buffer, user?: any) {
+  const model = await getModelByCode(modelCode)
+  const fields = model.fields.filter((f: any) => f.status === 1)
+  const fieldMap = new Map<string, any>(fields.map((f: any) => [f.display_name || f.field_name, f]))
+
+  const workbook = XLSX.read(buffer, { type: 'buffer' })
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+  const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+
+  if (json.length < 2) throw new AppError('Excel 文件为空或格式错误', 400)
+
+  const headers = json[0].map((h: any) => String(h).trim())
+  const dataRows = json.slice(1)
+
+  const successes: any[] = []
+  const failures: { row: number; reason: string }[] = []
+
+  for (let i = 0; i < dataRows.length; i++) {
+    const rowValues = dataRows[i]
+    if (rowValues.every((v: any) => v === undefined || v === '' || v === null)) continue
+
+    const row: any = {}
+    headers.forEach((header: string, index: number) => {
+      const field = fieldMap.get(header)
+      if (!field) return
+      row[field.field_name] = rowValues[index]
+    })
+
+    try {
+      const created = await dynamicCreate(modelCode, row, user)
+      successes.push(created)
+    } catch (error: any) {
+      failures.push({ row: i + 2, reason: error.message || '创建失败' })
+    }
+  }
+
+  return {
+    total: dataRows.length,
+    success: successes.length,
+    failure: failures.length,
+    failures
+  }
+}
+
+export async function getImportTemplate(modelCode: string) {
+  const model = await getModelByCode(modelCode)
+  const fields = model.fields
+    .filter((f: any) => f.status === 1 && !['id', 'create_time', 'update_time'].includes(f.field_name))
+
+  const headers = fields.map((f: any) => f.display_name || f.field_name)
+  const example = fields.map((f: any) => {
+    switch (f.type) {
+      case 'number': return 0
+      case 'boolean': return '是'
+      case 'date': return '2024-01-01'
+      case 'datetime': return '2024-01-01 12:00:00'
+      case 'select': return '选项1'
+      default: return '示例'
+    }
+  })
+
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, example])
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, '导入模板')
+
+  return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
 }
 
 async function validateDynamicData(fields: any[], data: any) {

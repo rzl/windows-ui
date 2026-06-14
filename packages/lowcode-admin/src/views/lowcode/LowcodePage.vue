@@ -25,9 +25,25 @@
           <w-space>
             <w-button v-if="permission.canCreate && tableConfig.toolbar.includes('create')" type="primary" @click="openDialog()">+ 新增</w-button>
             <w-button v-if="permission.canDelete && tableConfig.toolbar.includes('batchDelete')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
-            <w-button v-if="permission.canExport && tableConfig.toolbar.includes('export')" @click="handleExport">导出</w-button>
-            <w-button v-if="permission.canImport && tableConfig.toolbar.includes('import')" @click="triggerImport">导入</w-button>
-            <input v-if="permission.canImport && tableConfig.toolbar.includes('import')" ref="fileInput" type="file" accept=".csv" style="display: none" @change="handleFileChange" />
+            <w-dropdown
+              v-if="permission.canExport && tableConfig.toolbar.includes('export')"
+              trigger-text="导出"
+              :items="[
+                { label: '导出全部', value: 'all' },
+                { label: '导出选中', value: 'selected', disabled: !selectedRows.length }
+              ]"
+              @command="handleExportCommand"
+            />
+            <w-dropdown
+              v-if="permission.canImport && tableConfig.toolbar.includes('import')"
+              trigger-text="导入"
+              :items="[
+                { label: '上传 Excel', value: 'upload' },
+                { label: '下载模板', value: 'template' }
+              ]"
+              @command="handleImportCommand"
+            />
+            <input v-if="permission.canImport && tableConfig.toolbar.includes('import')" ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleFileChange" />
           </w-space>
         </template>
         <template v-for="col in formattedColumns" :key="col.prop" #[col.prop]="{ row }">
@@ -394,87 +410,97 @@ async function handleBatchDelete() {
   }
 }
 
-function handleExport() {
-  const headers = tableConfig.fields.map((f: any) => f.label)
-  const keys = tableConfig.fields.map((f: any) => f.field)
-  const rows = list.value.map((row: any) => keys.map((k: string) => row[k] ?? ''))
-  const csv = [headers.join(','), ...rows.map((r: any[]) => r.map(escapeCsv).join(','))].join('\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+function handleExportCommand(command: string) {
+  if (command === 'all') {
+    exportAllExcel()
+  } else if (command === 'selected') {
+    exportSelectedExcel()
+  }
+}
+
+async function exportAllExcel() {
+  try {
+    const columns = getExportColumns()
+    const blob = await lowcodeApi.exportDynamicExcel(modelCode.value, { columns })
+    downloadBlob(blob, `${modelCode.value}.xlsx`)
+  } catch (err: any) {
+    alert(err.message || '导出失败')
+  }
+}
+
+async function exportSelectedExcel() {
+  if (!selectedRows.value.length) return
+  try {
+    const columns = getExportColumns()
+    const ids = selectedRows.value.map((r) => r.id)
+    const blob = await lowcodeApi.exportDynamicExcel(modelCode.value, { ids, columns })
+    downloadBlob(blob, `${modelCode.value}_selected.xlsx`)
+  } catch (err: any) {
+    alert(err.message || '导出失败')
+  }
+}
+
+function getExportColumns() {
+  return tableConfig.fields
+    .filter((f: any) => f.inTable)
+    .map((f: any) => {
+      const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
+      return {
+        field: f.field,
+        label: f.label,
+        type: fieldMeta?.type,
+        format: f.format,
+        dictCode: fieldMeta?.dict_code,
+        refModel: fieldMeta?.ref_model,
+        refDisplayField: fieldMeta?.ref_display_field
+      }
+    })
+}
+
+function downloadBlob(blob: Blob, filename: string) {
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
-  link.download = `${modelCode.value}.csv`
+  link.download = filename
   link.click()
   URL.revokeObjectURL(link.href)
 }
 
-function escapeCsv(value: any) {
-  const str = String(value ?? '')
-  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-    return '"' + str.replace(/"/g, '""') + '"'
+function handleImportCommand(command: string) {
+  if (command === 'upload') {
+    fileInput.value?.click()
+  } else if (command === 'template') {
+    downloadImportTemplate()
   }
-  return str
 }
 
-function triggerImport() {
-  fileInput.value?.click()
+async function downloadImportTemplate() {
+  try {
+    const blob = await lowcodeApi.getImportTemplate(modelCode.value)
+    downloadBlob(blob, `${modelCode.value}_template.xlsx`)
+  } catch (err: any) {
+    alert(err.message || '下载模板失败')
+  }
 }
 
 async function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
-  const text = await file.text()
-  const rows = parseCsv(text)
-  if (!rows.length) {
-    alert('CSV 文件为空或格式错误')
-    return
-  }
   try {
-    await lowcodeApi.importDynamic(modelCode.value, rows)
-    alert(`成功导入 ${rows.length} 条记录`)
+    const result = await lowcodeApi.importDynamicExcel(modelCode.value, file)
+    const msg = `导入完成：成功 ${result.success} 条，失败 ${result.failure} 条`
+    if (result.failures?.length) {
+      const details = result.failures.map((f: any) => `第 ${f.row} 行：${f.reason}`).join('\n')
+      alert(`${msg}\n\n失败详情：\n${details}`)
+    } else {
+      alert(msg)
+    }
     target.value = ''
+    selectedRows.value = []
     await loadData()
   } catch (err: any) {
     alert(err.message || '导入失败')
   }
-}
-
-function parseCsv(text: string) {
-  const lines = text.trim().split('\n')
-  if (lines.length < 2) return []
-  const headers = parseCsvLine(lines[0])
-  return lines.slice(1).map((line) => {
-    const values = parseCsvLine(line)
-    const row: any = {}
-    headers.forEach((h, i) => {
-      row[h] = values[i] ?? ''
-    })
-    return row
-  })
-}
-
-function parseCsvLine(line: string) {
-  const result: string[] = []
-  let current = ''
-  let inQuotes = false
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i]
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"'
-        i++
-      } else {
-        inQuotes = !inQuotes
-      }
-    } else if (char === ',' && !inQuotes) {
-      result.push(current)
-      current = ''
-    } else {
-      current += char
-    }
-  }
-  result.push(current)
-  return result
 }
 </script>
 

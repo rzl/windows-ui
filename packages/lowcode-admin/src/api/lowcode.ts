@@ -136,6 +136,22 @@ export function importDynamic(modelCode: string, rows: any[]) {
   return request.post(`/lowcode/${modelCode}/import`, { rows })
 }
 
+export function exportDynamicExcel(modelCode: string, data: { ids?: (string | number)[]; columns?: any[] }) {
+  return request.post(`/lowcode/${modelCode}/export`, data, { responseType: 'blob' })
+}
+
+export function importDynamicExcel(modelCode: string, file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post(`/lowcode/${modelCode}/import-excel`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+export function getImportTemplate(modelCode: string) {
+  return request.get(`/lowcode/${modelCode}/template`, { responseType: 'blob' })
+}
+
 // 编码规则
 export function getCodingRules() {
   return request.get('/lowcode/coding-rules')

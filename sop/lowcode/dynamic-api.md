@@ -136,3 +136,61 @@ GET /api/lowcode/models/code/:code/permission
 | `none` | 无权限，前端应阻止访问 |
 
 管理员（`roleId === 1` 或拥有 `*` 权限）自动拥有全部权限。
+
+## 数据导入导出
+
+### Excel 导出
+
+```http
+POST /api/lowcode/:modelCode/export
+Content-Type: application/json
+
+{
+  "ids": [1, 2],
+  "columns": [
+    { "field": "name", "label": "名称", "type": "string", "format": "" },
+    { "field": "status", "label": "状态", "type": "select", "format": "dict", "dictCode": "status" }
+  ]
+}
+```
+
+- `ids`：可选，指定导出记录 ID 数组；为空则导出全部（上限 10000 条）。
+- `columns`：可选，指定导出列；为空则使用模型全部字段。
+- 关联字段会自动使用 `${field}_display` 显示值。
+- 支持格式化：`date`、`datetime`、`money`、`percent`、`boolean`。
+
+响应为 `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` 二进制流。
+
+### Excel 导入
+
+```http
+POST /api/lowcode/:modelCode/import-excel
+Content-Type: multipart/form-data
+
+file=<Excel 文件>
+```
+
+Excel 第一行应为字段显示名（`display_name`），后续每行为一条记录。后端按行创建数据，自动填充默认值、校验规则、编码规则，并返回导入结果：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "total": 100,
+    "success": 98,
+    "failure": 2,
+    "failures": [
+      { "row": 3, "reason": "字段 xxx 必填" }
+    ]
+  },
+  "message": "success"
+}
+```
+
+### 导入模板下载
+
+```http
+GET /api/lowcode/:modelCode/template
+```
+
+返回 Excel 模板文件，包含字段显示名表头与一行示例数据，方便用户按格式填写后导入。

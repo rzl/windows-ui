@@ -1,8 +1,10 @@
 import { Router, type Router as RouterType } from 'express'
+import multer from 'multer'
 import { authMiddleware } from '../../middleware/auth'
 import * as lowcodeController from './lowcode.controller'
 
 const router: RouterType = Router()
+const upload = multer({ storage: multer.memoryStorage() })
 
 router.use(authMiddleware)
 
@@ -45,6 +47,9 @@ router.post('/options/execute', lowcodeController.executeFieldOptions)
 // 动态 CRUD（放在最后避免路径冲突）
 router.get('/:modelCode', lowcodeController.dynamicList)
 router.post('/:modelCode/import', lowcodeController.dynamicImport)
+router.post('/:modelCode/export', lowcodeController.exportDynamicExcel)
+router.post('/:modelCode/import-excel', upload.single('file'), lowcodeController.importDynamicExcel)
+router.get('/:modelCode/template', lowcodeController.getImportTemplate)
 router.delete('/:modelCode/batch', lowcodeController.dynamicBatchDelete)
 router.get('/:modelCode/:id', lowcodeController.dynamicDetail)
 router.post('/:modelCode', lowcodeController.dynamicCreate)
