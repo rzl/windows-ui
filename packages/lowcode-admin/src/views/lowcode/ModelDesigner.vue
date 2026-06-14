@@ -118,6 +118,12 @@
         <w-form-item v-if="['select', 'radio'].includes(fieldForm.type) && !fieldForm.dictCode" label="选项（JSON）">
           <w-input v-model="fieldForm.optionsText" type="textarea" placeholder='[{"label":"男","value":"1"}]' />
         </w-form-item>
+        <w-form-item v-if="fieldForm.type === 'ref'" label="关联模型">
+          <w-select v-model="fieldForm.refModel" :options="modelOptions" />
+        </w-form-item>
+        <w-form-item v-if="fieldForm.type === 'ref' && fieldForm.refModel" label="显示字段">
+          <w-select v-model="fieldForm.refDisplayField" :options="refFieldOptions" />
+        </w-form-item>
         <w-form-item label="排序">
           <w-input-number v-model="fieldForm.sort" />
         </w-form-item>
@@ -220,6 +226,7 @@ const fieldTypeOptions = [
   { label: '日期时间', value: 'datetime' },
   { label: '下拉选择', value: 'select' },
   { label: '单选', value: 'radio' },
+  { label: '关联模型', value: 'ref' },
   { label: '文件上传', value: 'upload' },
   { label: '级联选择', value: 'cascader' },
   { label: '富文本', value: 'rich-text' }
@@ -249,6 +256,18 @@ function getDependFieldOptions(currentFieldName: string) {
   ]
 }
 
+const modelOptions = computed(() => [
+  { label: '请选择', value: '' },
+  ...models.value.map((m: any) => ({ label: m.name, value: m.code }))
+])
+
+const refFieldOptions = computed(() => {
+  if (!fieldForm.refModel) return []
+  const target = models.value.find((m: any) => m.code === fieldForm.refModel)
+  if (!target || !target.fields) return []
+  return target.fields.map((f: any) => ({ label: f.display_name || f.field_name, value: f.field_name }))
+})
+
 const dependFieldOptions = computed(() => [
   { label: '无', value: '' },
   ...fields.value.map((f) => ({ label: f.display_name || f.field_name, value: f.field_name }))
@@ -263,6 +282,7 @@ const formTypeOptions = [
   { label: '日期时间', value: 'datetime' },
   { label: '下拉', value: 'select' },
   { label: '单选', value: 'radio' },
+  { label: '关联模型', value: 'ref' },
   { label: '文件上传', value: 'upload' },
   { label: '级联选择', value: 'cascader' },
   { label: '富文本', value: 'rich-text' }
@@ -319,6 +339,8 @@ function syncConfigMaps() {
         dependsOn: { field: '', value: '', operator: 'eq' },
         dynamicOptions: { type: '' },
         codingRule: '',
+        refModel: field.ref_model || '',
+        refDisplayField: field.ref_display_field || '',
         options: field.options ? JSON.parse(field.options) : undefined
       }
     } else {
@@ -355,6 +377,7 @@ function mapFieldTypeToFormType(type: string) {
     datetime: 'datetime',
     select: 'select',
     radio: 'radio',
+    ref: 'ref',
     upload: 'upload',
     cascader: 'cascader',
     'rich-text': 'rich-text'
@@ -366,18 +389,22 @@ function typeLabel(type: string) {
   return fieldTypeOptions.find((o) => o.value === type)?.label || type
 }
 
+const models = ref<any[]>([])
+
 async function loadData() {
-  const [data, rules, dictList, codingRuleList] = await Promise.all([
+  const [data, rules, dictList, codingRuleList, modelList] = await Promise.all([
     lowcodeApi.getModel(modelId),
     lowcodeApi.getValidationRules(),
     dictApi.getDicts(),
-    lowcodeApi.getCodingRules()
+    lowcodeApi.getCodingRules(),
+    lowcodeApi.getModels()
   ])
   Object.assign(model, data)
   fields.value = data.fields || []
   validationRules.value = rules || []
   dicts.value = dictList || []
   codingRules.value = codingRuleList || []
+  models.value = modelList || []
 
   if (data.forms?.length) {
     const saved = typeof data.forms[0].config === 'string'
@@ -408,6 +435,8 @@ function openFieldDialog(row?: any) {
     fieldForm.status = row.status === 1
     fieldForm.dictCode = row.dict_code || ''
     fieldForm.optionsText = row.options && !row.dict_code ? JSON.stringify(JSON.parse(row.options)) : ''
+    fieldForm.refModel = row.ref_model || ''
+    fieldForm.refDisplayField = row.ref_display_field || ''
   } else {
     fieldForm.modelId = modelId
     fieldForm.type = 'string'
@@ -470,6 +499,8 @@ async function handleSaveField() {
   data.required = data.required ? 1 : 0
   data.status = data.status ? 1 : 0
   data.dictCode = data.dictCode || ''
+  data.refModel = data.refModel || ''
+  data.refDisplayField = data.refDisplayField || ''
   if (['select', 'radio'].includes(data.type)) {
     if (data.dictCode) {
       data.options = undefined
@@ -484,6 +515,10 @@ async function handleSaveField() {
   } else {
     data.options = undefined
     data.dictCode = ''
+  }
+  if (data.type !== 'ref') {
+    data.refModel = ''
+    data.refDisplayField = ''
   }
   delete data.optionsText
 

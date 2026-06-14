@@ -155,6 +155,8 @@ export async function createField(data: any) {
     options: data.options ? JSON.stringify(data.options) : null,
     validation_rule: data.validationRule || null,
     dict_code: data.dictCode || null,
+    ref_model: data.refModel || null,
+    ref_display_field: data.refDisplayField || null,
     sort: data.sort ?? 0,
     status: data.status ?? 1
   })
@@ -181,6 +183,8 @@ export async function updateField(id: number, data: any) {
     options: data.options ? JSON.stringify(data.options) : null,
     validation_rule: data.validationRule || null,
     dict_code: data.dictCode || null,
+    ref_model: data.refModel || null,
+    ref_display_field: data.refDisplayField || null,
     sort: data.sort,
     status: data.status
   })
@@ -303,9 +307,10 @@ async function addPhysicalColumn(tableName: string, columnName: string, fieldDat
       case 'datetime':
         table.datetime(columnName)
         break
+      case 'ref':
       case 'upload':
       case 'cascader':
-        table.string(columnName, 255)
+        table.integer(columnName)
         break
       case 'rich-text':
         table.text(columnName)
@@ -328,22 +333,36 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
   const model = await getModelByCode(modelCode)
   const { keyword, filters, page = 1, pageSize = 10, sortBy, sortOrder } = query
 
-  const builder = db(model.table_name)
   const fields = model.fields.filter((f: any) => f.status === 1)
   const fieldNames = fields.map((f: any) => f.field_name)
+  const refFields = fields.filter((f: any) => f.type === 'ref' && f.ref_model && f.ref_display_field)
+
+  // 构建主查询，包含关联字段
+  const selectColumns = [`${model.table_name}.*`, ...refFields.map((f: any) => `ref_${f.field_name}.${f.ref_display_field} as ${f.field_name}_display`)]
+  const builder = db(model.table_name).select(selectColumns)
+
+  // 关联查询
+  for (const field of refFields) {
+    const refModel = await getModelByCode(field.ref_model)
+    builder.leftJoin(
+      `${refModel.table_name} as ref_${field.field_name}`,
+      `${model.table_name}.${field.field_name}`,
+      `ref_${field.field_name}.id`
+    )
+  }
 
   // 数据权限过滤
   await applyDataPermission(builder, model, user)
 
   // 关键词模糊搜索
   if (keyword && fields.length) {
-    const stringFields = fields
-      .filter((f: any) => ['string', 'text', 'textarea'].includes(f.type))
-      .map((f: any) => f.field_name)
+    const searchFields = fields
+      .filter((f: any) => ['string', 'text', 'textarea'].includes(f.type) || (f.type === 'ref' && f.ref_display_field))
+      .map((f: any) => f.type === 'ref' ? `ref_${f.field_name}.${f.ref_display_field}` : `${model.table_name}.${f.field_name}`)
 
-    if (stringFields.length) {
+    if (searchFields.length) {
       builder.where((qb) => {
-        stringFields.forEach((field: string, index: number) => {
+        searchFields.forEach((field: string, index: number) => {
           if (index === 0) {
             qb.where(field, 'like', `%${keyword}%`)
           } else {
@@ -401,9 +420,12 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
   // 排序
   if (sortBy && fieldNames.includes(sortBy)) {
     const order = sortOrder === 'ascending' ? 'asc' : 'desc'
-    builder.orderBy(sortBy, order)
+    const sortField = refFields.find((f: any) => f.field_name === sortBy)
+      ? `${sortBy}_display`
+      : `${model.table_name}.${sortBy}`
+    builder.orderBy(sortField, order)
   } else {
-    builder.orderBy('id', 'desc')
+    builder.orderBy(`${model.table_name}.id`, 'desc')
   }
 
   const list = await builder

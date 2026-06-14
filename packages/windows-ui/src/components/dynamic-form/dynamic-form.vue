@@ -98,6 +98,18 @@
           :disabled="isDisabled(field)"
         />
 
+        <!-- 关联模型 -->
+        <w-select
+          v-else-if="field.type === 'ref'"
+          v-model="model[field.prop]"
+          :options="refOptionsMap[field.prop] || []"
+          :placeholder="field.placeholder || '请选择'"
+          :disabled="isDisabled(field)"
+          :clearable="field.clearable"
+          filterable
+          @focus="loadRefOptions(field)"
+        />
+
         <!-- 文件上传 -->
         <w-upload
           v-else-if="field.type === 'upload'"
@@ -155,7 +167,7 @@ import type { FormRule } from '../form/form.vue'
 export interface DynamicField {
   prop: string
   label: string
-  type: 'input' | 'text' | 'number' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'switch' | 'date' | 'datetime' | 'upload' | 'cascader' | 'rich-text' | 'custom'
+  type: 'input' | 'text' | 'number' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'switch' | 'date' | 'datetime' | 'ref' | 'upload' | 'cascader' | 'rich-text' | 'custom'
   inputType?: string
   placeholder?: string
   options?: { label: string; value: any }[]
@@ -165,6 +177,8 @@ export interface DynamicField {
   validationRule?: string
   rules?: FormRule[]
   codingRule?: string
+  refModel?: string
+  refDisplayField?: string
   dependsOn?: {
     field: string
     value?: any
@@ -203,6 +217,10 @@ const props = defineProps({
   },
   loadOptions: {
     type: Function as PropType<(config: DynamicField['dynamicOptions'], model: Record<string, any>) => Promise<{ label: string; value: any }[]>>,
+    default: undefined
+  },
+  loadRefOptions: {
+    type: Function as PropType<(modelCode: string, displayField: string, keyword: string) => Promise<{ label: string; value: any }[]>>,
     default: undefined
   },
   generateCode: {
@@ -245,6 +263,7 @@ function isDependsOnHidden(field: DynamicField): boolean {
 const formRef = ref<any>(null)
 const validationErrors = reactive<Record<string, string>>({})
 const fieldOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
+const refOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
 const generatedCodeSet = new Set<string>()
 
 function getFieldOptions(field: DynamicField) {
@@ -263,6 +282,17 @@ async function loadFieldOptions(field: DynamicField) {
   }
 }
 
+async function loadRefOptions(field: DynamicField) {
+  if (!field.refModel || !field.refDisplayField || !props.loadRefOptions) return
+  try {
+    const options = await props.loadRefOptions(field.refModel, field.refDisplayField, '')
+    refOptionsMap[field.prop] = options || []
+  } catch (error) {
+    console.error(`加载关联模型 ${field.refModel} 选项失败`, error)
+    refOptionsMap[field.prop] = []
+  }
+}
+
 // 监听依赖字段变化，自动加载动态选项
 watch(
   () => props.fields,
@@ -270,6 +300,9 @@ watch(
     fields.forEach((field) => {
       if (field.dynamicOptions) {
         loadFieldOptions(field)
+      }
+      if (field.type === 'ref') {
+        loadRefOptions(field)
       }
     })
   },

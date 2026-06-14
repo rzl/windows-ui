@@ -46,6 +46,7 @@
         :columns="2"
         :validate-rules="validateRules"
         :load-options="loadFieldOptions"
+        :load-ref-options="loadRefOptions"
         :upload-request="uploadFile"
         :generate-code="generateCodeForField"
       />
@@ -87,17 +88,23 @@ const formFields = computed(() => {
     required: f.required,
     validationRule: f.validationRule,
     dependsOn: f.dependsOn,
-    options: f.options
+    options: f.options,
+    refModel: f.refModel,
+    refDisplayField: f.refDisplayField
   }))
 })
 
 const tableColumns = computed(() => {
-  const columns = tableConfig.fields.map((f: any) => ({
-    prop: f.field,
-    label: f.label,
-    width: f.width,
-    sortable: f.sortable ? 'custom' : false
-  }))
+  const columns = tableConfig.fields.map((f: any) => {
+    const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
+    const isRef = fieldMeta?.type === 'ref'
+    return {
+      prop: isRef ? `${f.field}_display` : f.field,
+      label: f.label,
+      width: f.width,
+      sortable: f.sortable ? 'custom' : false
+    }
+  })
   return [
     { type: 'selection', width: 48 },
     ...columns,
@@ -223,6 +230,14 @@ async function loadFieldOptions(config: any, model: any) {
 
 async function generateCodeForField(ruleCode: string) {
   return lowcodeApi.generateCode(ruleCode)
+}
+
+async function loadRefOptions(modelCode: string, displayField: string, keyword: string) {
+  const result = await lowcodeApi.getDynamicList(modelCode, { page: 1, pageSize: 50, keyword })
+  return result.list.map((row: any) => ({
+    label: row[displayField] || `ID:${row.id}`,
+    value: row.id
+  }))
 }
 
 async function uploadFile(file: File) {

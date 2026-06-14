@@ -17,6 +17,8 @@
 | options | array | 静态选项（`select/radio/checkbox` 使用） |
 | dynamicOptions | object | 动态选项配置 |
 | codingRule | string | 编码规则编码，新增记录时自动生成编码 |
+| refModel | string | 关联模型编码，`ref` 类型使用 |
+| refDisplayField | string | 关联模型显示字段，`ref` 类型使用 |
 
 ### dependsOn 结构
 
@@ -49,6 +51,7 @@
 | upload | WUpload | 文件上传 |
 | cascader | WCascader | 级联选择 |
 | rich-text | WRichText | 富文本编辑器 |
+| ref | WSelect | 关联模型，需配置 `refModel` 与 `refDisplayField` |
 
 ### 示例
 
@@ -184,6 +187,20 @@
   "label": "订单编号",
   "type": "input",
   "codingRule": "ORDER_NO"
+}
+```
+
+### 关联模型
+
+当字段类型为 `ref` 时，需要配置 `refModel`（关联模型编码）与 `refDisplayField`（关联模型显示字段）。动态表单会以下拉选择方式展示关联记录，列表中会显示关联记录的值而非原始 ID。
+
+```json
+{
+  "field": "customerId",
+  "label": "客户",
+  "type": "ref",
+  "refModel": "customer",
+  "refDisplayField": "name"
 }
 ```
 

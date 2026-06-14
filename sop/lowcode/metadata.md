@@ -53,6 +53,8 @@ lowcode_models
 | default_value | 默认值 |
 | options | 选项 JSON 字符串 |
 | dict_code | 关联字典编码。`select/radio` 类型可配置，运行时自动从字典表读取选项 |
+| ref_model | 关联模型编码。`ref` 类型可配置，表示关联到哪个低代码模型 |
+| ref_display_field | 关联模型显示字段。`ref` 类型可配置，用于列表中展示关联记录的值 |
 | validation_rule | 后端校验规则编码 |
 | sort | 排序 |
 | status | 状态 |
