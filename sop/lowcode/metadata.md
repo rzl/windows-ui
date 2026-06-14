@@ -154,13 +154,15 @@ lowcode_models
 {
   "nodes": [
     { "id": "start", "type": "start", "name": "开始" },
-    { "id": "approve", "type": "approve", "name": "审批", "assigneeType": "role", "assigneeValue": "2" },
+    { "id": "manager", "type": "approve", "name": "经理审批", "assigneeType": "role", "assigneeValue": "2" },
+    { "id": "sign", "type": "sign", "name": "会签", "signType": "all", "assignees": [{ "type": "role", "value": "3" }] },
     { "id": "end", "type": "end", "name": "结束" }
   ],
   "transitions": [
-    { "from": "start", "to": "approve", "condition": "submit" },
-    { "from": "approve", "to": "end", "condition": "approve" },
-    { "from": "approve", "to": "start", "condition": "reject" }
+    { "from": "start", "to": "manager", "condition": "submit" },
+    { "from": "manager", "to": "sign", "condition": "approve" },
+    { "from": "manager", "to": "start", "condition": "reject" },
+    { "from": "sign", "to": "end", "condition": "approve" }
   ]
 }
 ```
@@ -172,6 +174,7 @@ lowcode_models
 | id | 主键 |
 | flow_code | 流程编码 |
 | business_key | 业务主键（动态表记录 ID） |
+| business_data | 业务表单数据快照（JSON） |
 | status | 状态：`running` / `completed` / `rejected` |
 | current_node_id | 当前节点 ID |
 

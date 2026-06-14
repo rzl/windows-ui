@@ -20,7 +20,32 @@
 |------|------|
 | start | 开始节点，每个流程必须有且仅有一个 |
 | approve | 审批节点，需配置 `assigneeType` 和 `assigneeValue` |
+| sign | 会签节点，需配置 `signType` 和 `assignees` |
 | end | 结束节点 |
+
+### 会签节点
+
+会签节点用于需要多人审批的场景。
+
+| 属性 | 说明 |
+|------|------|
+| signType | `all` 表示全部通过才流转，`any` 表示任一通过即流转 |
+| assignees | 审批人数组，每项包含 `type`（role/user）和 `value` |
+
+示例：
+
+```json
+{
+  "id": "sign",
+  "type": "sign",
+  "name": "会签",
+  "signType": "all",
+  "assignees": [
+    { "type": "user", "value": "2" },
+    { "type": "user", "value": "3" }
+  ]
+}
+```
 
 ### 审批人配置
 
@@ -36,6 +61,30 @@
 | submit | 从开始节点提交到第一个审批节点 |
 | approve | 审批节点通过后流转 |
 | reject | 审批节点驳回后流转 |
+| 表达式 | 根据业务表单字段值判断，如 `form.amount > 1000` |
+
+### 条件分支
+
+除了 `approve` / `reject` 固定条件外，流转条件还可以写成 JavaScript 表达式，用于根据业务数据走不同分支。
+
+表达式中可通过 `form` 访问业务表单字段。例如：
+
+```json
+{
+  "from": "manager",
+  "to": "sign",
+  "condition": "form.amount > 1000"
+},
+{
+  "from": "manager",
+  "to": "end",
+  "condition": "form.amount <= 1000"
+}
+```
+
+上述配置表示：当 `amount` 大于 1000 时进入会签，否则直接结束。
+
+> 条件表达式使用 `new Function` 执行，仅支持简单比较和逻辑运算。请勿写入复杂或危险代码。
 
 ### 示例配置
 

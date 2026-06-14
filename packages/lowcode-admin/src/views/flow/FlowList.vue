@@ -86,13 +86,15 @@ function openDialog(row?: any) {
     formModel.configText = JSON.stringify({
       nodes: [
         { id: 'start', type: 'start', name: '开始' },
-        { id: 'approve', type: 'approve', name: '审批', assigneeType: 'role', assigneeValue: '' },
+        { id: 'manager', type: 'approve', name: '经理审批', assigneeType: 'role', assigneeValue: '' },
+        { id: 'sign', type: 'sign', name: '会签', signType: 'all', assignees: [{ type: 'role', value: '' }] },
         { id: 'end', type: 'end', name: '结束' }
       ],
       transitions: [
-        { from: 'start', to: 'approve', condition: 'submit' },
-        { from: 'approve', to: 'end', condition: 'approve' },
-        { from: 'approve', to: 'start', condition: 'reject' }
+        { from: 'start', to: 'manager', condition: 'submit' },
+        { from: 'manager', to: 'sign', condition: 'approve' },
+        { from: 'manager', to: 'start', condition: 'reject' },
+        { from: 'sign', to: 'end', condition: 'approve' }
       ]
     }, null, 2)
   }

@@ -452,7 +452,7 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   try {
     const flowDef = await flowService.getFlowDefinitionByModelCode(modelCode)
     if (flowDef) {
-      await flowService.startFlowInstance(flowDef.code, id)
+      await flowService.startFlowInstance(flowDef.code, id, cleanData)
     }
   } catch (error) {
     console.error('启动流程失败', error)

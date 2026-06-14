@@ -1,18 +1,25 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 
+export interface FlowAssignee {
+  type: 'role' | 'user'
+  value: string
+}
+
 export interface FlowNode {
   id: string
-  type: 'start' | 'approve' | 'end'
+  type: 'start' | 'approve' | 'sign' | 'end'
   name: string
   assigneeType?: 'role' | 'user'
   assigneeValue?: string
+  signType?: 'all' | 'any'
+  assignees?: FlowAssignee[]
 }
 
 export interface FlowTransition {
   from: string
   to: string
-  condition: 'submit' | 'approve' | 'reject'
+  condition: string
 }
 
 export interface FlowConfig {
@@ -29,6 +36,27 @@ function parseConfig(config: any): FlowConfig {
     return JSON.parse(config)
   }
   return config || { nodes: [], transitions: [] }
+}
+
+function parseBusinessData(instance: any): any {
+  if (!instance?.business_data) return {}
+  try {
+    return typeof instance.business_data === 'string'
+      ? JSON.parse(instance.business_data)
+      : instance.business_data
+  } catch {
+    return {}
+  }
+}
+
+function evaluateCondition(condition: string, form: any): boolean {
+  if (!condition || ['submit', 'approve', 'reject'].includes(condition)) return false
+  try {
+    const fn = new Function('form', `return (${condition})`)
+    return !!fn(form || {})
+  } catch {
+    return false
+  }
 }
 
 // ---------- 流程定义 ----------
@@ -88,14 +116,14 @@ export async function deleteFlowDefinition(id: number) {
 
 // ---------- 流程实例 ----------
 
-export async function startFlowInstance(flowCode: string, businessKey: number, _starter?: any) {
+export async function startFlowInstance(flowCode: string, businessKey: number, businessData: any = {}, _starter?: any) {
   const def = await getFlowDefinitionByCode(flowCode)
   const config = def.config as FlowConfig
 
   const startNode = config.nodes.find((n) => n.type === 'start')
   if (!startNode) throw new AppError('流程缺少开始节点', 400)
 
-  const transition = config.transitions.find((t) => t.from === startNode.id && t.condition === 'submit')
+  const transition = findMatchedTransition(config, startNode.id, 'submit', businessData)
   if (!transition) throw new AppError('开始节点未配置提交流转', 400)
 
   const nextNode = config.nodes.find((n) => n.id === transition.to)
@@ -104,20 +132,12 @@ export async function startFlowInstance(flowCode: string, businessKey: number, _
   const [instanceId] = await db('flow_instances').insert({
     flow_code: flowCode,
     business_key: businessKey,
+    business_data: JSON.stringify(businessData),
     status: 'running',
     current_node_id: nextNode.id
   })
 
-  if (nextNode.type === 'approve') {
-    await db('flow_tasks').insert({
-      instance_id: instanceId,
-      node_id: nextNode.id,
-      node_name: nextNode.name,
-      assignee_type: nextNode.assigneeType,
-      assignee_value: nextNode.assigneeValue,
-      status: 'pending'
-    })
-  }
+  await enterNode(instanceId, nextNode)
 
   return { instanceId, currentNodeId: nextNode.id }
 }
@@ -183,20 +203,25 @@ async function handleTask(taskId: number, action: 'approve' | 'reject', comment:
 
   const def = await getFlowDefinitionByCode(instance.flow_code)
   const config = def.config as FlowConfig
-
-  const transition = config.transitions.find(
-    (t) => t.from === task.node_id && t.condition === action
-  )
-  if (!transition) throw new AppError(`当前节点未配置${action === 'approve' ? '通过' : '驳回'}流转`, 400)
-
-  const nextNode = config.nodes.find((n) => n.id === transition.to)
-  if (!nextNode) throw new AppError('流转目标节点不存在', 400)
+  const businessData = parseBusinessData(instance)
 
   await db('flow_tasks').where({ id: taskId }).update({
     status: action === 'approve' ? 'approved' : 'rejected',
     comment,
     update_time: db.fn.now()
   })
+
+  const currentNode = config.nodes.find((n) => n.id === task.node_id)
+  if (currentNode?.type === 'sign') {
+    const shouldMove = await checkSignComplete(instance.id, currentNode)
+    if (!shouldMove) return true
+  }
+
+  const transition = findMatchedTransition(config, task.node_id, action, businessData)
+  if (!transition) throw new AppError(`当前节点未配置${action === 'approve' ? '通过' : '驳回'}流转`, 400)
+
+  const nextNode = config.nodes.find((n) => n.id === transition.to)
+  if (!nextNode) throw new AppError('流转目标节点不存在', 400)
 
   if (nextNode.type === 'end') {
     await db('flow_instances').where({ id: instance.id }).update({
@@ -210,15 +235,59 @@ async function handleTask(taskId: number, action: 'approve' | 'reject', comment:
       update_time: db.fn.now()
     })
 
-    await db('flow_tasks').insert({
-      instance_id: instance.id,
-      node_id: nextNode.id,
-      node_name: nextNode.name,
-      assignee_type: nextNode.assigneeType,
-      assignee_value: nextNode.assigneeValue,
-      status: 'pending'
-    })
+    await enterNode(instance.id, nextNode)
   }
 
   return true
+}
+
+function findMatchedTransition(config: FlowConfig, nodeId: string, action: string, businessData: any): FlowTransition | undefined {
+  const transitions = config.transitions.filter((t) => t.from === nodeId)
+  // 优先匹配 action 字面量
+  const exact = transitions.find((t) => t.condition === action)
+  if (exact) return exact
+  // 再匹配表达式
+  return transitions.find((t) => evaluateCondition(t.condition, businessData))
+}
+
+async function enterNode(instanceId: number, node: FlowNode) {
+  if (node.type === 'approve') {
+    await db('flow_tasks').insert({
+      instance_id: instanceId,
+      node_id: node.id,
+      node_name: node.name,
+      assignee_type: node.assigneeType,
+      assignee_value: node.assigneeValue,
+      status: 'pending'
+    })
+  } else if (node.type === 'sign') {
+    const assignees = node.assignees?.length
+      ? node.assignees
+      : node.assigneeType && node.assigneeValue
+        ? [{ type: node.assigneeType, value: node.assigneeValue }]
+        : []
+    if (!assignees.length) throw new AppError('会签节点未配置审批人', 400)
+    await db('flow_tasks').insert(
+      assignees.map((a) => ({
+        instance_id: instanceId,
+        node_id: node.id,
+        node_name: node.name,
+        assignee_type: a.type,
+        assignee_value: a.value,
+        status: 'pending'
+      }))
+    )
+  }
+}
+
+async function checkSignComplete(instanceId: number, node: FlowNode): Promise<boolean> {
+  const tasks = await db('flow_tasks').where({ instance_id: instanceId, node_id: node.id })
+  const pendingCount = tasks.filter((t) => t.status === 'pending').length
+  const approvedCount = tasks.filter((t) => t.status === 'approved').length
+
+  if (node.signType === 'any') {
+    return approvedCount > 0
+  }
+  // 默认 all
+  return pendingCount === 0
 }
