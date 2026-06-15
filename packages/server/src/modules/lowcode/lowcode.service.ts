@@ -6,6 +6,7 @@ import * as path from 'path'
 import * as dashboardService from '../dashboard/dashboard.service'
 import * as flowService from '../flow/flow.service'
 import * as externalDatasourceService from '../external-datasource/external-datasource.service'
+import * as auditService from '../audit/audit.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -102,7 +103,8 @@ export async function createModel(data: any) {
     table_name: tableName,
     description: data.description,
     data_permission: data.dataPermission || 'all',
-    status: data.status ?? 1
+    status: data.status ?? 1,
+    enable_audit: data.enableAudit ? 1 : 0
   })
 
   // 自动创建物理表（仅 id + 时间戳）
@@ -120,6 +122,7 @@ export async function updateModel(id: number, data: any) {
     description: data.description,
     data_permission: data.dataPermission || 'all',
     status: data.status,
+    enable_audit: data.enableAudit ? 1 : 0,
     update_time: db.fn.now()
   })
   return db('lowcode_models').where({ id }).first()
@@ -593,7 +596,7 @@ function computeDefaultValue(field: any, data: any, user?: any) {
   return undefined
 }
 
-export async function dynamicCreate(modelCode: string, data: any, user?: any) {
+export async function dynamicCreate(modelCode: string, data: any, user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'create', 'toolbar', user)
   const model = await getModelByCode(modelCode)
 
@@ -626,6 +629,17 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   }
   const [id] = await db(model.table_name).insert(cleanData)
 
+  // 记录审计日志
+  const createdRow = await db(model.table_name).where({ id }).first()
+  await auditService.logAudit({
+    modelCode,
+    recordId: id,
+    action: 'create',
+    after: createdRow,
+    user,
+    req
+  })
+
   // 如果模型绑定了启用状态的流程，自动启动流程实例
   try {
     const flowDef = await flowService.getFlowDefinitionByModelCode(modelCode)
@@ -639,9 +653,10 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any) {
   return db(model.table_name).where({ id }).first()
 }
 
-export async function dynamicUpdate(modelCode: string, id: number, data: any, user?: any) {
+export async function dynamicUpdate(modelCode: string, id: number, data: any, user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'edit', 'rowAction', user)
   const model = await getModelByCode(modelCode)
+  const beforeRow = await db(model.table_name).where({ id }).first()
   await validateDynamicData(model.fields, data)
   const cleanData = sanitizeData(model.fields, data)
   cleanData.update_time = db.fn.now()
@@ -649,40 +664,91 @@ export async function dynamicUpdate(modelCode: string, id: number, data: any, us
     cleanData.update_by = user.id
   }
   await db(model.table_name).where({ id }).update(cleanData)
-  return db(model.table_name).where({ id }).first()
+  const afterRow = await db(model.table_name).where({ id }).first()
+
+  await auditService.logAudit({
+    modelCode,
+    recordId: id,
+    action: 'update',
+    before: beforeRow,
+    after: afterRow,
+    user,
+    req
+  })
+
+  return afterRow
 }
 
-export async function dynamicDelete(modelCode: string, id: number, user?: any) {
+export async function dynamicDelete(modelCode: string, id: number, user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'delete', 'rowAction', user)
   const model = await getModelByCode(modelCode)
-  if (user) {
-    const row = await db(model.table_name).where({ id }).first()
-    if (row) await assertRowPermission(model, row, user)
+  const beforeRow = await db(model.table_name).where({ id }).first()
+  if (user && beforeRow) {
+    await assertRowPermission(model, beforeRow, user)
   }
   await db(model.table_name).where({ id }).del()
+
+  if (beforeRow) {
+    await auditService.logAudit({
+      modelCode,
+      recordId: id,
+      action: 'delete',
+      before: beforeRow,
+      user,
+      req
+    })
+  }
+
   return true
 }
 
-export async function dynamicBatchDelete(modelCode: string, ids: (string | number)[], user?: any) {
+export async function dynamicBatchDelete(modelCode: string, ids: (string | number)[], user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'batchDelete', 'toolbar', user)
   const model = await getModelByCode(modelCode)
   if (!ids || !ids.length) throw new AppError('未选择记录', 400)
+  const rows = await db(model.table_name).whereIn('id', ids)
   if (user) {
-    const rows = await db(model.table_name).whereIn('id', ids)
     for (const row of rows) {
       await assertRowPermission(model, row, user)
     }
   }
   await db(model.table_name).whereIn('id', ids).del()
+
+  for (const row of rows) {
+    await auditService.logAudit({
+      modelCode,
+      recordId: row.id,
+      action: 'delete',
+      before: row,
+      user,
+      req
+    })
+  }
+
   return true
 }
 
-export async function dynamicImport(modelCode: string, rows: any[], user?: any) {
+export async function dynamicImport(modelCode: string, rows: any[], user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'import', 'toolbar', user)
   const model = await getModelByCode(modelCode)
   if (!rows || !rows.length) throw new AppError('导入数据不能为空', 400)
   const cleanRows = rows.map((row) => sanitizeData(model.fields, row))
-  await db(model.table_name).insert(cleanRows)
+  const insertedIds = await db(model.table_name).insert(cleanRows)
+
+  for (let i = 0; i < cleanRows.length; i++) {
+    const recordId = insertedIds[i]
+    if (!recordId) continue
+    const afterRow = await db(model.table_name).where({ id: recordId }).first()
+    await auditService.logAudit({
+      modelCode,
+      recordId,
+      action: 'create',
+      after: afterRow,
+      user,
+      req
+    })
+  }
+
   return { count: cleanRows.length }
 }
 

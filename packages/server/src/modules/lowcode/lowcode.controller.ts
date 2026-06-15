@@ -78,27 +78,27 @@ export async function dynamicDetail(req: Request, res: Response) {
 }
 
 export async function dynamicCreate(req: Request, res: Response) {
-  const result = await lowcodeService.dynamicCreate(req.params.modelCode, req.body, (req as AuthRequest).user)
+  const result = await lowcodeService.dynamicCreate(req.params.modelCode, req.body, (req as AuthRequest).user, req)
   res.json(success(result, '创建成功'))
 }
 
 export async function dynamicUpdate(req: Request, res: Response) {
-  const result = await lowcodeService.dynamicUpdate(req.params.modelCode, Number(req.params.id), req.body, (req as AuthRequest).user)
+  const result = await lowcodeService.dynamicUpdate(req.params.modelCode, Number(req.params.id), req.body, (req as AuthRequest).user, req)
   res.json(success(result, '更新成功'))
 }
 
 export async function dynamicDelete(req: Request, res: Response) {
-  await lowcodeService.dynamicDelete(req.params.modelCode, Number(req.params.id), (req as AuthRequest).user)
+  await lowcodeService.dynamicDelete(req.params.modelCode, Number(req.params.id), (req as AuthRequest).user, req)
   res.json(success(null, '删除成功'))
 }
 
 export async function dynamicBatchDelete(req: Request, res: Response) {
-  await lowcodeService.dynamicBatchDelete(req.params.modelCode, req.body.ids || [], (req as AuthRequest).user)
+  await lowcodeService.dynamicBatchDelete(req.params.modelCode, req.body.ids || [], (req as AuthRequest).user, req)
   res.json(success(null, '批量删除成功'))
 }
 
 export async function dynamicImport(req: Request, res: Response) {
-  const result = await lowcodeService.dynamicImport(req.params.modelCode, req.body.rows || [], (req as AuthRequest).user)
+  const result = await lowcodeService.dynamicImport(req.params.modelCode, req.body.rows || [], (req as AuthRequest).user, req)
   res.json(success(result, '导入成功'))
 }
 

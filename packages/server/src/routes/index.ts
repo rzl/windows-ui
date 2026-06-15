@@ -11,6 +11,8 @@ import scheduleRoutes from '../modules/schedule/schedule.routes'
 import reportRoutes from '../modules/report/report.routes'
 import printRoutes from '../modules/print/print.routes'
 import externalDatasourceRoutes from '../modules/external-datasource/external-datasource.routes'
+import appRoutes from '../modules/app/app.routes'
+import auditRoutes from '../modules/audit/audit.routes'
 
 const router: RouterType = Router()
 
@@ -26,5 +28,7 @@ router.use('/schedule', scheduleRoutes)
 router.use('/report', reportRoutes)
 router.use('/print', printRoutes)
 router.use('/external-datasources', externalDatasourceRoutes)
+router.use('/apps', appRoutes)
+router.use('/audit-logs', auditRoutes)
 
 export default router

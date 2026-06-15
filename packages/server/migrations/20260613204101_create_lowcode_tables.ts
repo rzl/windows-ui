@@ -9,6 +9,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('table_name', 50).notNullable().unique()
     table.string('description', 200)
     table.tinyint('status').notNullable().defaultTo(1)
+    table.tinyint('enable_audit').notNullable().defaultTo(0)
     table.timestamp('create_time').defaultTo(knex.fn.now())
     table.timestamp('update_time').defaultTo(knex.fn.now())
   })

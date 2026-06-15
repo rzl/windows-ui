@@ -7,6 +7,8 @@ export interface ModelForm {
   tableName?: string
   description?: string
   status?: number
+  dataPermission?: string
+  enableAudit?: number | boolean
 }
 
 export interface FieldForm {

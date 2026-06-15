@@ -1,6 +1,16 @@
 <template>
   <div class="designer-page">
     <w-card :header="`模型设计 - ${model.name || model.code || ''}`">
+      <div class="model-setting">
+        <w-form inline :model="model">
+          <w-form-item label="数据审计">
+            <w-switch v-model="model.enableAudit" active-text="启用" inactive-text="禁用" :disabled="!isAdmin" />
+          </w-form-item>
+          <w-form-item>
+            <w-button v-if="isAdmin" type="primary" size="small" @click="saveModelSetting">保存设置</w-button>
+          </w-form-item>
+        </w-form>
+      </div>
       <w-tabs v-model="activeTab">
         <w-tab-pane label="字段管理" name="fields">
           <div class="toolbar">
@@ -572,6 +582,7 @@ async function loadData() {
     externalDatasourceApi.getExternalDataSources()
   ])
   Object.assign(model, data)
+  model.enableAudit = data.enable_audit === 1
   fields.value = data.fields || []
   validationRules.value = rules || []
   dicts.value = dictList || []
@@ -802,6 +813,14 @@ function saveLayoutConfig() {
   }
 }
 
+async function saveModelSetting() {
+  if (!checkDesignPermission()) return
+  await lowcodeApi.updateModel(modelId, {
+    enableAudit: model.enableAudit ? 1 : 0
+  })
+  alert('模型设置已保存')
+}
+
 async function saveTableConfig() {
   if (!checkDesignPermission()) return
   const configFields = fields.value
@@ -847,4 +866,5 @@ async function saveTableConfig() {
 <style scoped>
 .designer-page { padding: 8px; }
 .toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
+.model-setting { margin-bottom: 12px; padding: 8px; background: #f8f8f5; border: 1px solid #d4d0c8; border-radius: 4px; }
 </style>

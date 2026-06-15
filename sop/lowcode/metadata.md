@@ -24,6 +24,7 @@ lowcode_models
 | table_name | 对应物理表名 |
 | description | 描述 |
 | data_permission | 数据权限规则：`all` / `self` / `dept` / `dept_and_child` |
+| enable_audit | 是否启用数据审计：1 启用，0 禁用（默认）。启用后该模型的新增/修改/删除会自动写入 `data_audit_logs` |
 | status | 状态：1 启用，0 禁用 |
 | create_time / update_time | 创建/更新时间 |
 
@@ -251,3 +252,61 @@ lowcode_models
 | status | 执行状态：`success` / `error` |
 | result | 执行结果 |
 | create_time | 执行时间 |
+
+## 应用管理（lowcode_apps）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| code | 应用编码，唯一标识 |
+| name | 应用名称 |
+| description | 描述 |
+| status | 状态：1 启用，0 禁用 |
+| published_version_id | 当前已发布版本 ID |
+| create_time / update_time | 创建/更新时间 |
+
+## 应用资源项（lowcode_app_items）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| app_id | 所属应用 ID |
+| resource_type | 资源类型：`model` / `report` / `dashboard` / `print` |
+| resource_code | 资源编码 |
+| sort | 排序 |
+
+## 应用版本（lowcode_app_versions）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| app_id | 所属应用 ID |
+| version | 版本号，如 `1.0.0` |
+| description | 版本说明 |
+| snapshot | 应用完整快照 JSON |
+| status | 状态：`draft` / `published` / `archived` |
+| create_time | 创建时间 |
+
+应用发布时会根据资源项自动在 `menus` 表生成应用根菜单及子菜单，并可通过版本回滚恢复到历史快照。
+
+## 数据审计日志（data_audit_logs）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| model_code | 操作的数据模型编码 |
+| record_id | 操作的记录 ID |
+| action | 操作类型：`create` / `update` / `delete` |
+| operator_id | 操作人用户 ID |
+| operator_name | 操作人用户名/昵称 |
+| before | 变更前数据 JSON |
+| after | 变更后数据 JSON |
+| diff | 变更差异 JSON |
+| ip | 操作人 IP 地址 |
+| create_time | 操作时间 |
+
+记录规则：
+
+- 仅当 `lowcode_models.enable_audit = 1` 时才会写入审计日志。
+- 覆盖动态 CRUD 的新增、修改、删除、批量删除、导入操作。
+- 审计日志写入失败不会影响主业务流程。

@@ -194,3 +194,79 @@ GET /api/lowcode/:modelCode/template
 ```
 
 返回 Excel 模板文件，包含字段显示名表头与一行示例数据，方便用户按格式填写后导入。
+
+## 数据审计日志
+
+### 查询审计日志
+
+```http
+GET /api/audit-logs
+```
+
+**查询参数**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| modelCode | string | 模型编码 |
+| action | string | 操作类型：`create` / `update` / `delete` |
+| recordId | number | 记录 ID |
+| operatorName | string | 操作人姓名/用户名，模糊匹配 |
+| startTime | string | 开始时间，格式 `YYYY-MM-DD HH:mm:ss` |
+| endTime | string | 结束时间，格式 `YYYY-MM-DD HH:mm:ss` |
+| page | number | 页码，默认 1 |
+| pageSize | number | 每页条数，默认 20 |
+
+**响应**：
+
+```json
+{
+  "code": 200,
+  "data": {
+    "list": [
+      {
+        "id": 1,
+        "model_code": "customer",
+        "record_id": 12,
+        "action": "update",
+        "operator_name": "管理员",
+        "ip": "127.0.0.1",
+        "diff": { "name": { "before": "张三", "after": "张三丰" } },
+        "create_time": "2024-01-01 12:00:00"
+      }
+    ],
+    "total": 100,
+    "page": 1,
+    "pageSize": 20
+  },
+  "message": "success"
+}
+```
+
+### 审计日志详情
+
+```http
+GET /api/audit-logs/:id
+```
+
+返回单条审计日志完整信息，包括 `before`、`after`、`diff` JSON 字段。
+
+### 操作类型列表
+
+```http
+GET /api/audit-logs/actions
+```
+
+返回 `['create', 'update', 'delete']`，供前端筛选下拉框使用。
+
+### 启用审计
+
+在模型设计器的“基础设置”中开启“数据审计”开关并保存，或在更新模型接口中传入 `enableAudit: 1`：
+
+```http
+PUT /api/lowcode/models/:id
+Content-Type: application/json
+
+{ "enableAudit": 1 }
+```
+
+开启后，该模型通过动态 CRUD 接口产生的新增、修改、删除、批量删除、导入操作会自动记录审计日志。

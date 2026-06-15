@@ -210,6 +210,24 @@ const routes = [
         name: 'ExternalDataSourceList',
         component: () => import('@/views/external-datasource/ExternalDataSourceList.vue'),
         meta: { title: '外部数据源', permission: 'lowcode:externalDatasource' }
+      },
+      {
+        path: 'lowcode/app',
+        name: 'AppList',
+        component: () => import('@/views/lowcode/AppList.vue'),
+        meta: { title: '应用管理', permission: 'lowcode:app' }
+      },
+      {
+        path: 'lowcode/app-design/:code',
+        name: 'AppDesigner',
+        component: () => import('@/views/lowcode/AppDesigner.vue'),
+        meta: { title: '应用设计', permission: 'lowcode:app' }
+      },
+      {
+        path: 'lowcode/audit-log',
+        name: 'AuditLogList',
+        component: () => import('@/views/lowcode/AuditLogList.vue'),
+        meta: { title: '审计日志', permission: 'lowcode:auditLog' }
       }
     ]
   },
