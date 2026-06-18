@@ -218,6 +218,24 @@ const routes = [
         meta: { title: '外部数据源', permission: 'lowcode:externalDatasource' }
       },
       {
+        path: 'lowcode/page',
+        name: 'PageList',
+        component: () => import('@/views/lowcode/PageList.vue'),
+        meta: { title: '自定义页面', permission: 'lowcode:page' }
+      },
+      {
+        path: 'lowcode/page-design/:code',
+        name: 'PageDesigner',
+        component: () => import('@/views/lowcode/PageDesigner.vue'),
+        meta: { title: '页面设计', permission: 'lowcode:pageDesign' }
+      },
+      {
+        path: 'lowcode/page-run/:code',
+        name: 'PageRunner',
+        component: () => import('@/views/lowcode/PageRunner.vue'),
+        meta: { title: '页面运行', permission: undefined }
+      },
+      {
         path: 'lowcode/app',
         name: 'AppList',
         component: () => import('@/views/lowcode/AppList.vue'),

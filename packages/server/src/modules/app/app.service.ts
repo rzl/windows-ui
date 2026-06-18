@@ -345,6 +345,13 @@ function buildMenuItem(item: any, parentId: number, sort: number): any {
         component: 'views/report/PrintPreview.vue',
         icon: 'printer'
       }
+    case 'page':
+      return {
+        ...base,
+        path: `/lowcode/page-run/${item.ref_code}`,
+        component: 'views/lowcode/PageRunner.vue',
+        icon: 'page'
+      }
     default:
       return null
   }

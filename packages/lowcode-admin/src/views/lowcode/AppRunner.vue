@@ -15,7 +15,7 @@
       <!-- 工作台模式 -->
       <template v-if="isPortal">
         <div class="widget-grid">
-          <template v-for="(widget, index) in portalWidgets" :key="index">
+          <template v-for="(widget, _index) in portalWidgets" :key="_index">
             <w-card
               :header="widget.title"
               class="widget-card"
@@ -168,6 +168,9 @@ function enterResource(item: any) {
       break
     case 'print':
       router.push(`/print/preview/${item.ref_code}`)
+      break
+    case 'page':
+      router.push(`/lowcode/page-run/${item.ref_code}`)
       break
     default:
       break

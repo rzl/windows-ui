@@ -10,6 +10,7 @@ export interface AppForm {
   status?: number
   isMarket?: number
   items?: AppItem[]
+  portalConfig?: any
 }
 
 export interface AppItem {

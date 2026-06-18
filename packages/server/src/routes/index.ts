@@ -13,6 +13,7 @@ import printRoutes from '../modules/print/print.routes'
 import externalDatasourceRoutes from '../modules/external-datasource/external-datasource.routes'
 import appRoutes from '../modules/app/app.routes'
 import auditRoutes from '../modules/audit/audit.routes'
+import pageRoutes from '../modules/page/page.routes'
 
 const router: RouterType = Router()
 
@@ -30,5 +31,6 @@ router.use('/print', printRoutes)
 router.use('/external-datasources', externalDatasourceRoutes)
 router.use('/apps', appRoutes)
 router.use('/audit-logs', auditRoutes)
+router.use('/pages', pageRoutes)
 
 export default router

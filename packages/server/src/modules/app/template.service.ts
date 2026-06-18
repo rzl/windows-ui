@@ -147,6 +147,19 @@ async function uniqueFlowCode(trx: any, baseCode: string): Promise<string> {
   return candidate
 }
 
+async function uniquePageCode(trx: any, baseCode: string): Promise<string> {
+  let code = safeCode(baseCode)
+  let candidate = code
+  let index = 1
+
+  while (await trx('lowcode_pages').where({ code: candidate }).first()) {
+    candidate = `${code}_${index}`
+    index++
+  }
+
+  return candidate
+}
+
 async function uniqueDataSourceCode(trx: any, baseCode: string): Promise<string> {
   let code = safeCode(baseCode)
   let candidate = code
@@ -515,7 +528,25 @@ export async function installTemplate(templateCode: string, options: InstallTemp
       })
     }
 
-    // 13. 创建应用
+    // 13. 创建自定义页面
+    const pages = template.pages || []
+    for (const page of pages) {
+      const newCode = await uniquePageCode(trx, page.code)
+      codeMap[page.code] = newCode
+
+      const config = parseJson(page.config)
+      const rewrittenConfig = rewritePageConfig(config, codeMap, dataSourceIdMap)
+
+      await trx('lowcode_pages').insert({
+        code: newCode,
+        name: page.name,
+        description: page.description || '',
+        config: stringifyJson(rewrittenConfig),
+        status: page.status ?? 1
+      })
+    }
+
+    // 14. 创建应用
     const portalConfig = template.portalConfig
       ? JSON.stringify(rewriteConfigCodes(template.portalConfig, codeMap, dataSourceIdMap))
       : null
@@ -530,7 +561,7 @@ export async function installTemplate(templateCode: string, options: InstallTemp
       portal_config: portalConfig
     })
 
-    // 14. 创建应用项
+    // 15. 创建应用项
     const items = template.items || []
     if (items.length) {
       await trx('lowcode_app_items').insert(
@@ -544,7 +575,7 @@ export async function installTemplate(templateCode: string, options: InstallTemp
       )
     }
 
-    // 15. 创建并发布版本快照
+    // 16. 创建并发布版本快照
     const snapshot = JSON.stringify({
       app: {
         code: finalAppCode,
@@ -610,6 +641,8 @@ function rewriteConfigCodes(config: any, codeMap: Record<string, string>, dataSo
       result[key] = codeMap[value]
     } else if (key === 'externalDataSourceId' && typeof value === 'number' && dataSourceIdMap[value]) {
       result[key] = dataSourceIdMap[value]
+    } else if (['modelCode', 'dashboardCode', 'reportCode', 'pageCode', 'flowCode'].includes(key) && typeof value === 'string' && codeMap[value]) {
+      result[key] = codeMap[value]
     } else if (typeof value === 'object' && value !== null) {
       result[key] = rewriteConfigCodes(value, codeMap, dataSourceIdMap)
     } else {
@@ -654,6 +687,26 @@ function rewriteDashboardConfig(config: any, codeMap: Record<string, string>, da
       // 替换裸 oldCode（用于模型名引用场景）
       const oldCodePattern = new RegExp(`\\b${oldCode}\\b`, 'g')
       result.dataSource.transformScript = result.dataSource.transformScript?.replace(oldCodePattern, newCode)
+    }
+  }
+
+  return result
+}
+
+function rewritePageConfig(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<number, number>): any {
+  if (!config || typeof config !== 'object') return config
+
+  const result = rewriteConfigCodes(config, codeMap, dataSourceIdMap)
+
+  // 重写页面级 SQL 中可能引用的物理表名
+  if (result.dataSource?.sql && typeof result.dataSource.sql === 'string') {
+    for (const [oldCode, newCode] of Object.entries(codeMap)) {
+      const oldTablePattern = new RegExp(`\\blc_${oldCode}\\b`, 'g')
+      result.dataSource.sql = result.dataSource.sql.replace(oldTablePattern, `lc_${newCode}`)
+      if (result.dataSource.transformScript) {
+        const oldCodePattern = new RegExp(`\\b${oldCode}\\b`, 'g')
+        result.dataSource.transformScript = result.dataSource.transformScript.replace(oldCodePattern, newCode)
+      }
     }
   }
 

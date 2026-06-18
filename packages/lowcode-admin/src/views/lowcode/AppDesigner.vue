@@ -36,35 +36,34 @@
           <div class="designer-body">
             <div class="resource-panel">
               <div class="panel-title">可添加资源</div>
-              <w-tabs v-model="resourceTab">
-                <w-tab-pane label="模型" name="models">
-                  <div class="resource-list">
+              <w-tabs v-model="resourceTabIndex" :tabs="resourceTabOptions">
+                <template #default>
+                  <div v-if="resourceTabIndex === 0" class="resource-list">
                     <div v-for="m in models" :key="m.code" class="resource-item" @click="addItem('model', m.code, m.name)">
                       {{ m.name }}
                     </div>
                   </div>
-                </w-tab-pane>
-                <w-tab-pane label="报表" name="reports">
-                  <div class="resource-list">
+                  <div v-else-if="resourceTabIndex === 1" class="resource-list">
                     <div v-for="r in reports" :key="r.code" class="resource-item" @click="addItem('report', r.code, r.name)">
                       {{ r.name }}
                     </div>
                   </div>
-                </w-tab-pane>
-                <w-tab-pane label="仪表盘" name="dashboards">
-                  <div class="resource-list">
+                  <div v-else-if="resourceTabIndex === 2" class="resource-list">
                     <div v-for="d in dashboards" :key="d.code" class="resource-item" @click="addItem('dashboard', d.code, d.name)">
                       {{ d.name }}
                     </div>
                   </div>
-                </w-tab-pane>
-                <w-tab-pane label="打印模板" name="prints">
-                  <div class="resource-list">
+                  <div v-else-if="resourceTabIndex === 3" class="resource-list">
                     <div v-for="p in printTemplates" :key="p.code" class="resource-item" @click="addItem('print', p.code, p.name)">
                       {{ p.name }}
                     </div>
                   </div>
-                </w-tab-pane>
+                  <div v-else-if="resourceTabIndex === 4" class="resource-list">
+                    <div v-for="p in pages" :key="p.code" class="resource-item" @click="addItem('page', p.code, p.name)">
+                      {{ p.name }}
+                    </div>
+                  </div>
+                </template>
               </w-tabs>
             </div>
 
@@ -206,6 +205,7 @@ import * as lowcodeApi from '@/api/lowcode'
 import * as reportApi from '@/api/report'
 import * as dashboardApi from '@/api/dashboard'
 import * as printApi from '@/api/print'
+import * as pageApi from '@/api/page'
 
 const route = useRoute()
 const router = useRouter()
@@ -224,7 +224,16 @@ const models = ref<any[]>([])
 const reports = ref<any[]>([])
 const dashboards = ref<any[]>([])
 const printTemplates = ref<any[]>([])
-const resourceTab = ref('models')
+const pages = ref<any[]>([])
+const resourceTabIndex = ref(0)
+
+const resourceTabOptions = [
+  { label: '模型' },
+  { label: '报表' },
+  { label: '仪表盘' },
+  { label: '打印模板' },
+  { label: '页面' }
+]
 const activeTab = ref('resources')
 const versionVisible = ref(false)
 const snapshotVisible = ref(false)
@@ -293,12 +302,13 @@ const typeMap: Record<string, string> = {
 onMounted(() => loadData())
 
 async function loadData() {
-  const [appData, modelList, reportList, dashboardList, printList] = await Promise.all([
+  const [appData, modelList, reportList, dashboardList, printList, pageList] = await Promise.all([
     appApi.getApp(code),
     lowcodeApi.getModels(),
     reportApi.getReports(),
     dashboardApi.getDashboards(),
-    printApi.getPrintTemplates()
+    printApi.getPrintTemplates(),
+    pageApi.getPages()
   ])
   Object.assign(app, appData)
   app.status = appData.status === 1
@@ -308,6 +318,7 @@ async function loadData() {
   reports.value = reportList
   dashboards.value = dashboardList
   printTemplates.value = printList
+  pages.value = pageList
 
   const config = appData.portalConfig || { mode: 'list', showResources: false, widgets: [] }
   Object.assign(portalConfig, config)

@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page">
     <div class="widget-grid">
-      <template v-for="(widget, index) in config.widgets" :key="index">
+      <template v-for="(widget, _index) in config.widgets" :key="_index">
         <w-card :header="widget.title" class="widget-card" :class="widget.type === 'dashboard' || widget.type === 'notice' ? 'widget-wide' : ''">
           <stat-widget v-if="widget.type === 'stat'" :widget="widget" :stats="stats" />
           <link-widget v-else-if="widget.type === 'link'" :widget="widget" />
