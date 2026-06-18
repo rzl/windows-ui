@@ -18,6 +18,16 @@ export interface AppForm {
   status?: number
   isMarket?: number
   items?: AppItem[]
+  portalConfig?: any
+}
+
+function parsePortalConfig(value: any) {
+  if (!value) return null
+  try {
+    return typeof value === 'string' ? JSON.parse(value) : value
+  } catch {
+    return null
+  }
 }
 
 function safeCode(name: string) {
@@ -38,14 +48,14 @@ export async function getAppByCode(code: string) {
   const app = await db('lowcode_apps').where({ code }).first()
   if (!app) throw new AppError('应用不存在', 404)
   const items = await db('lowcode_app_items').where({ app_id: app.id }).orderBy('sort', 'asc')
-  return { ...app, items }
+  return { ...app, items, portalConfig: parsePortalConfig(app.portal_config) }
 }
 
 export async function getAppById(id: number) {
   const app = await db('lowcode_apps').where({ id }).first()
   if (!app) throw new AppError('应用不存在', 404)
   const items = await db('lowcode_app_items').where({ app_id: app.id }).orderBy('sort', 'asc')
-  return { ...app, items }
+  return { ...app, items, portalConfig: parsePortalConfig(app.portal_config) }
 }
 
 export async function saveApp(data: AppForm) {
@@ -56,6 +66,10 @@ export async function saveApp(data: AppForm) {
   const exists = await db('lowcode_apps').where({ code }).first()
 
   let appId: number
+  const portalConfig = data.portalConfig
+    ? (typeof data.portalConfig === 'string' ? data.portalConfig : JSON.stringify(data.portalConfig))
+    : null
+
   if (exists) {
     await db('lowcode_apps').where({ code }).update({
       name: data.name,
@@ -64,6 +78,7 @@ export async function saveApp(data: AppForm) {
       description: data.description,
       status: data.status ?? 1,
       is_market: data.isMarket ?? 1,
+      portal_config: portalConfig,
       update_time: db.fn.now()
     })
     appId = exists.id
@@ -76,7 +91,8 @@ export async function saveApp(data: AppForm) {
       icon: data.icon,
       description: data.description,
       status: data.status ?? 1,
-      is_market: data.isMarket ?? 1
+      is_market: data.isMarket ?? 1,
+      portal_config: portalConfig
     })
     appId = id
   }
@@ -114,7 +130,8 @@ export async function createSnapshot(id: number, data: { version: string; descri
       icon: app.icon,
       description: app.description,
       status: app.status,
-      is_market: app.is_market
+      is_market: app.is_market,
+      portalConfig: app.portalConfig
     },
     items: app.items
   })
@@ -158,6 +175,7 @@ export async function rollbackVersion(id: number, versionId: number) {
     description: snapshot.app.description,
     status: snapshot.app.status,
     is_market: snapshot.app.is_market ?? 1,
+    portal_config: snapshot.app.portalConfig ? JSON.stringify(snapshot.app.portalConfig) : null,
     update_time: db.fn.now()
   })
 
@@ -213,6 +231,7 @@ export async function importApp(data: any) {
     description: data.description,
     status: 0, // 导入后默认禁用，需手动发布
     isMarket: data.app?.is_market ?? 1,
+    portalConfig: data.app?.portalConfig || data.portalConfig,
     items: (data.items || []).map((item: any) => ({
       type: item.type,
       refCode: item.refCode || item.ref_code,

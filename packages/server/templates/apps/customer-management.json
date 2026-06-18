@@ -94,6 +94,17 @@
       "message": "请输入正确的邮箱地址"
     }
   ],
+  "portalConfig": {
+    "mode": "portal",
+    "showResources": true,
+    "widgets": [
+      { "type": "stat", "title": "客户总数", "field": "customerCount", "icon": "customer", "color": "primary", "dataSource": { "type": "sql", "sql": "SELECT COUNT(*) AS value FROM lc_customer" } },
+      { "type": "stat", "title": "今日跟进", "field": "followUpCount", "icon": "message", "color": "success", "dataSource": { "type": "sql", "sql": "SELECT COUNT(*) AS value FROM lc_follow_up WHERE date(follow_time) = date('now')" } },
+      { "type": "pending-task", "title": "待办审批", "limit": 5, "icon": "flow", "color": "warning" },
+      { "type": "dashboard", "title": "客户等级分布", "dashboardCode": "customer_dashboard" },
+      { "type": "app-resources", "title": "快捷入口", "limit": 8, "icon": "app", "color": "primary" }
+    ]
+  },
   "models": [
     {
       "code": "customer",

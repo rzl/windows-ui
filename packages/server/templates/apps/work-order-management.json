@@ -48,6 +48,17 @@
     }
   ],
   "validationRules": [],
+  "portalConfig": {
+    "mode": "portal",
+    "showResources": true,
+    "widgets": [
+      { "type": "stat", "title": "工单总数", "field": "workOrderCount", "icon": "work-order", "color": "primary", "dataSource": { "type": "sql", "sql": "SELECT COUNT(*) AS value FROM lc_work_order" } },
+      { "type": "stat", "title": "待处理工单", "field": "pendingCount", "icon": "warning", "color": "danger", "dataSource": { "type": "sql", "sql": "SELECT COUNT(*) AS value FROM lc_work_order WHERE status = 'pending'" } },
+      { "type": "pending-task", "title": "待办流程", "limit": 5, "icon": "flow", "color": "warning" },
+      { "type": "dashboard", "title": "工单优先级分布", "dashboardCode": "work_order_dashboard" },
+      { "type": "app-resources", "title": "快捷入口", "limit": 8, "icon": "app", "color": "primary" }
+    ]
+  },
   "models": [
     {
       "code": "work_order",

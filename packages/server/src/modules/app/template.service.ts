@@ -516,6 +516,9 @@ export async function installTemplate(templateCode: string, options: InstallTemp
     }
 
     // 13. 创建应用
+    const portalConfig = template.portalConfig
+      ? JSON.stringify(rewriteConfigCodes(template.portalConfig, codeMap, dataSourceIdMap))
+      : null
     const [appId] = await trx('lowcode_apps').insert({
       code: finalAppCode,
       name: finalAppName,
@@ -523,7 +526,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
       icon: template.app?.icon || 'app',
       description: template.app?.description || '',
       status: options.autoPublish !== false ? 1 : 0,
-      is_market: 0
+      is_market: 0,
+      portal_config: portalConfig
     })
 
     // 14. 创建应用项
@@ -549,7 +553,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
         icon: template.app?.icon || 'app',
         description: template.app?.description || '',
         status: options.autoPublish !== false ? 1 : 0,
-        is_market: 0
+        is_market: 0,
+        portalConfig: template.portalConfig || null
       },
       items: items.map((item: any) => ({
         type: item.type,

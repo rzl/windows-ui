@@ -170,6 +170,12 @@ const routes = [
         meta: { title: '仪表盘设计', permission: 'dashboard:design' }
       },
       {
+        path: 'dashboard/run/:code',
+        name: 'DashboardRun',
+        component: () => import('@/views/dashboard/Dashboard.vue'),
+        meta: { title: '仪表盘', permission: 'dashboard:run' }
+      },
+      {
         path: 'report/list',
         name: 'ReportList',
         component: () => import('@/views/report/ReportList.vue'),
