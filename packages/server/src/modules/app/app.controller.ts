@@ -7,6 +7,11 @@ export async function getApps(_req: Request, res: Response) {
   res.json(success(result))
 }
 
+export async function getMarketApps(_req: Request, res: Response) {
+  const result = await appService.getMarketApps()
+  res.json(success(result))
+}
+
 export async function getApp(req: Request, res: Response) {
   const result = await appService.getAppByCode(req.params.code)
   res.json(success(result))

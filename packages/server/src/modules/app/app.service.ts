@@ -16,6 +16,7 @@ export interface AppForm {
   icon?: string
   description?: string
   status?: number
+  isMarket?: number
   items?: AppItem[]
 }
 
@@ -25,6 +26,12 @@ function safeCode(name: string) {
 
 export async function getApps() {
   return db('lowcode_apps').orderBy('id', 'desc')
+}
+
+export async function getMarketApps() {
+  return db('lowcode_apps')
+    .where({ status: 1, is_market: 1 })
+    .orderBy('id', 'desc')
 }
 
 export async function getAppByCode(code: string) {
@@ -56,6 +63,7 @@ export async function saveApp(data: AppForm) {
       icon: data.icon,
       description: data.description,
       status: data.status ?? 1,
+      is_market: data.isMarket ?? 1,
       update_time: db.fn.now()
     })
     appId = exists.id
@@ -67,7 +75,8 @@ export async function saveApp(data: AppForm) {
       category: data.category,
       icon: data.icon,
       description: data.description,
-      status: data.status ?? 1
+      status: data.status ?? 1,
+      is_market: data.isMarket ?? 1
     })
     appId = id
   }
@@ -104,7 +113,8 @@ export async function createSnapshot(id: number, data: { version: string; descri
       category: app.category,
       icon: app.icon,
       description: app.description,
-      status: app.status
+      status: app.status,
+      is_market: app.is_market
     },
     items: app.items
   })
@@ -147,6 +157,7 @@ export async function rollbackVersion(id: number, versionId: number) {
     icon: snapshot.app.icon,
     description: snapshot.app.description,
     status: snapshot.app.status,
+    is_market: snapshot.app.is_market ?? 1,
     update_time: db.fn.now()
   })
 
@@ -201,6 +212,7 @@ export async function importApp(data: any) {
     icon: data.icon,
     description: data.description,
     status: 0, // 导入后默认禁用，需手动发布
+    isMarket: data.app?.is_market ?? 1,
     items: (data.items || []).map((item: any) => ({
       type: item.type,
       refCode: item.refCode || item.ref_code,
@@ -239,6 +251,12 @@ async function publishAppMenus(app: any) {
       permission: `app:${app.code}`
     })
   }
+
+  // 同步应用市场上架状态
+  await db('lowcode_apps').where({ id: app.id }).update({
+    is_market: app.is_market ?? 1,
+    update_time: db.fn.now()
+  })
 
   // 清理旧子菜单
   await db('menus').where({ parent_id: appMenu.id }).del()

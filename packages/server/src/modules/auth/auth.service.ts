@@ -100,8 +100,24 @@ export async function getProfile(userId: number) {
     .where('role_id', user.roleId)
     .pluck('permission')
 
+  // 超级管理员直接返回，不额外聚合应用权限
+  if (permissions.includes('*') || user.roleId === 1) {
+    return {
+      ...user,
+      permissions
+    }
+  }
+
+  // 聚合角色授权的应用权限 app:${code}
+  const appPermissions = await db('role_apps')
+    .where({ 'role_apps.role_id': user.roleId, 'role_apps.status': 1 })
+    .join('lowcode_apps', 'role_apps.app_id', 'lowcode_apps.id')
+    .where({ 'lowcode_apps.status': 1 })
+    .pluck('lowcode_apps.code')
+    .then((codes) => codes.map((code) => `app:${code}`))
+
   return {
     ...user,
-    permissions
+    permissions: [...permissions, ...appPermissions]
   }
 }

@@ -224,6 +224,18 @@ const routes = [
         meta: { title: '应用设计', permission: 'lowcode:app' }
       },
       {
+        path: 'lowcode/app-market',
+        name: 'AppMarket',
+        component: () => import('@/views/lowcode/AppMarket.vue'),
+        meta: { title: '应用市场', permission: 'lowcode:appMarket' }
+      },
+      {
+        path: 'lowcode/app-run/:code',
+        name: 'AppRunner',
+        component: () => import('@/views/lowcode/AppRunner.vue'),
+        meta: { title: '应用运行', permission: undefined }
+      },
+      {
         path: 'lowcode/audit-log',
         name: 'AuditLogList',
         component: () => import('@/views/lowcode/AuditLogList.vue'),

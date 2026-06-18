@@ -8,6 +8,7 @@ export interface AppForm {
   icon?: string
   description?: string
   status?: number
+  isMarket?: number
   items?: AppItem[]
 }
 
@@ -24,6 +25,10 @@ export function getApps() {
 
 export function getApp(code: string) {
   return request.get(`/apps/${code}`)
+}
+
+export function getMarketApps() {
+  return request.get('/apps/market')
 }
 
 export function saveApp(data: AppForm) {

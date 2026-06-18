@@ -123,6 +123,8 @@ export async function createRole(data: any) {
     )
   }
 
+  await saveRoleApps(id, data.appIds || [])
+
   return getRoleById(id)
 }
 
@@ -142,6 +144,8 @@ export async function updateRole(id: number, data: any) {
     )
   }
 
+  await saveRoleApps(id, data.appIds || [])
+
   return getRoleById(id)
 }
 
@@ -156,13 +160,83 @@ export async function getRoleById(id: number) {
   const permissions = await db('role_permissions')
     .where({ role_id: id })
     .pluck('permission')
-  return { ...role, permissions }
+  const appIds = await getRoleApps(id)
+  return { ...role, permissions, appIds }
+}
+
+// 角色应用授权
+export async function getRoleApps(roleId: number) {
+  const rows = await db('role_apps')
+    .where({ role_id: roleId, status: 1 })
+    .select('app_id')
+  return rows.map((row) => row.app_id)
+}
+
+async function saveRoleApps(roleId: number, appIds: number[]) {
+  await db('role_apps').where({ role_id: roleId }).del()
+  const validAppIds = (appIds || []).filter((id) => Number(id) > 0)
+  if (validAppIds.length) {
+    await db('role_apps').insert(
+      validAppIds.map((appId) => ({ role_id: roleId, app_id: appId, status: 1 }))
+    )
+  }
 }
 
 // 菜单
 export async function getMenuTree() {
   const menus = await db('menus').orderBy('sort', 'asc')
   return buildTree(menus, 0)
+}
+
+// 按角色过滤后的菜单树（过滤无权限的应用菜单）
+export async function getRoleMenuTree(roleId: number) {
+  const allMenus = await db('menus').orderBy('sort', 'asc')
+  const role = await db('roles').where({ id: roleId }).first()
+
+  // 超级管理员不过滤
+  if (role?.id === 1) {
+    return buildTree(allMenus, 0)
+  }
+
+  const permissions = await db('role_permissions')
+    .where({ role_id: roleId })
+    .pluck('permission')
+  if (permissions.includes('*')) {
+    return buildTree(allMenus, 0)
+  }
+
+  // 获取角色授权的应用编码
+  const appRows = await db('role_apps')
+    .where({ 'role_apps.role_id': roleId, 'role_apps.status': 1 })
+    .join('lowcode_apps', 'role_apps.app_id', 'lowcode_apps.id')
+    .where({ 'lowcode_apps.status': 1 })
+    .select('lowcode_apps.code')
+  const allowedAppCodes = new Set(appRows.map((row) => row.code))
+
+  // 过滤菜单：只移除应用根菜单及其子菜单；保留系统固定菜单
+  const allowedMenuIds = new Set<number>()
+  const menuMap = new Map<number, any>()
+  allMenus.forEach((menu) => menuMap.set(menu.id, menu))
+
+  for (const menu of allMenus) {
+    const isAppRoot = menu.permission?.startsWith('app:')
+    if (!isAppRoot) {
+      allowedMenuIds.add(menu.id)
+      continue
+    }
+
+    const appCode = menu.permission.replace('app:', '')
+    if (allowedAppCodes.has(appCode)) {
+      allowedMenuIds.add(menu.id)
+      // 同时允许该应用根菜单下的所有子菜单
+      allMenus
+        .filter((m) => m.parent_id === menu.id)
+        .forEach((m) => allowedMenuIds.add(m.id))
+    }
+  }
+
+  const filteredMenus = allMenus.filter((menu) => allowedMenuIds.has(menu.id))
+  return buildTree(filteredMenus, 0)
 }
 
 export async function getMenus() {

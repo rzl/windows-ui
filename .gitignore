@@ -51,3 +51,4 @@ coverage/
 packages/server/data/
 packages/server/exports/
 uploads/
+.kimi/*

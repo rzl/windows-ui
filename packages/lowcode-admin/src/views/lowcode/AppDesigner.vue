@@ -26,6 +26,9 @@
         <w-form-item label="状态">
           <w-switch v-model="app.status" active-text="启用" inactive-text="禁用" />
         </w-form-item>
+        <w-form-item label="上架市场">
+          <w-switch v-model="app.isMarket" active-text="上架" inactive-text="下架" />
+        </w-form-item>
       </w-form>
 
       <div class="designer-body">
@@ -132,7 +135,8 @@ const app = reactive<any>({
   name: '',
   category: '',
   icon: '',
-  status: true
+  status: true,
+  isMarket: true
 })
 const items = ref<any[]>([])
 const models = ref<any[]>([])
@@ -182,6 +186,7 @@ async function loadData() {
   ])
   Object.assign(app, appData)
   app.status = appData.status === 1
+  app.isMarket = appData.is_market === 1
   items.value = appData.items || []
   models.value = modelList
   reports.value = reportList
@@ -216,6 +221,7 @@ async function handleSave() {
     icon: app.icon,
     description: app.description,
     status: app.status ? 1 : 0,
+    isMarket: app.isMarket ? 1 : 0,
     items: items.value.map((i) => ({
       type: i.type,
       refCode: i.ref_code,

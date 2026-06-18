@@ -33,28 +33,45 @@
           <w-switch v-model="formModel.status" active-text="启用" inactive-text="禁用" />
         </w-form-item>
         <w-form-item label="权限">
-          <div class="permission-tree">
-            <div v-for="menu in menuTree" :key="menu.id" class="permission-group">
-              <w-checkbox
-                v-model="selectedPermissions"
-                :label="menu.permission"
-                :disabled="!menu.permission"
-              >
-                {{ menu.title }}
-              </w-checkbox>
-              <div v-if="menu.children?.length" class="permission-children">
-                <w-checkbox
-                  v-for="child in menu.children"
-                  :key="child.id"
-                  v-model="selectedPermissions"
-                  :label="child.permission"
-                  :disabled="!child.permission"
-                >
-                  {{ child.title }}
-                </w-checkbox>
+          <w-tabs v-model="permissionTab" :tabs="[{ label: '菜单权限' }, { label: '应用授权' }]">
+            <template #default="{ active }">
+              <div v-if="active === 0" class="permission-tree">
+                <div v-for="menu in menuTree" :key="menu.id" class="permission-group">
+                  <w-checkbox
+                    v-model="selectedPermissions"
+                    :label="menu.permission"
+                    :disabled="!menu.permission"
+                  >
+                    {{ menu.title }}
+                  </w-checkbox>
+                  <div v-if="menu.children?.length" class="permission-children">
+                    <w-checkbox
+                      v-for="child in menu.children"
+                      :key="child.id"
+                      v-model="selectedPermissions"
+                      :label="child.permission"
+                      :disabled="!child.permission"
+                    >
+                      {{ child.title }}
+                    </w-checkbox>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+              <div v-if="active === 1" class="app-auth-tree">
+                <div v-if="!appList.length" class="empty-tip">暂无可用应用</div>
+                <div v-else class="app-list">
+                  <w-checkbox
+                    v-for="app in appList"
+                    :key="app.id"
+                    v-model="selectedApps"
+                    :label="app.id"
+                  >
+                    {{ app.name }}
+                  </w-checkbox>
+                </div>
+              </div>
+            </template>
+          </w-tabs>
         </w-form-item>
       </w-form>
       <template #footer>
@@ -70,13 +87,17 @@ import { onMounted, reactive, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import * as roleApi from '@/api/role'
 import * as menuApi from '@/api/menu'
+import * as appApi from '@/api/app'
 
 const auth = useAuthStore()
 const list = ref<any[]>([])
 const menuTree = ref<any[]>([])
+const appList = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 const selectedPermissions = ref<string[]>([])
+const selectedApps = ref<number[]>([])
+const permissionTab = ref(0)
 
 const columns = [
   { prop: 'id', label: 'ID', width: 60 },
@@ -90,6 +111,7 @@ const columns = [
 onMounted(() => {
   loadData()
   loadMenus()
+  loadApps()
 })
 
 async function loadData() {
@@ -100,13 +122,20 @@ async function loadMenus() {
   menuTree.value = await menuApi.getMenuTree()
 }
 
+async function loadApps() {
+  appList.value = await appApi.getApps()
+}
+
 function openDialog(row?: any) {
   Object.keys(formModel).forEach((k) => delete formModel[k])
   selectedPermissions.value = []
+  selectedApps.value = []
+  permissionTab.value = 0
   if (row) {
     Object.assign(formModel, JSON.parse(JSON.stringify(row)))
     formModel.status = row.status === 1
     selectedPermissions.value = row.permissions || []
+    selectedApps.value = row.appIds || []
   } else {
     formModel.status = true
   }
@@ -121,6 +150,7 @@ async function handleSave() {
   const data = JSON.parse(JSON.stringify(formModel))
   data.status = data.status ? 1 : 0
   data.permissions = selectedPermissions.value.filter(Boolean)
+  data.appIds = selectedApps.value
   if (data.id) {
     await roleApi.updateRole(data.id, data)
   } else {
@@ -144,4 +174,7 @@ async function handleDelete(row: any) {
 .permission-tree { max-height: 300px; overflow-y: auto; border: 1px solid #d4d0c8; padding: 8px; }
 .permission-group { margin-bottom: 8px; }
 .permission-children { padding-left: 20px; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.app-auth-tree { max-height: 300px; overflow-y: auto; border: 1px solid #d4d0c8; padding: 8px; }
+.app-list { display: flex; flex-wrap: wrap; gap: 12px; }
+.empty-tip { color: #999; padding: 16px 0; text-align: center; }
 </style>

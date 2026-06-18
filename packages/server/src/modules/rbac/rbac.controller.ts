@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { success } from '../../utils/response'
+import type { AuthRequest } from '../../middleware/auth'
 import * as rbacService from './rbac.service'
 
 // 用户
@@ -61,8 +62,13 @@ export async function getMenus(_req: Request, res: Response) {
   res.json(success(result))
 }
 
-export async function getMenuTree(_req: Request, res: Response) {
-  const result = await rbacService.getMenuTree()
+export async function getMenuTree(req: AuthRequest, res: Response) {
+  const roleId = req.user?.roleId
+  if (!roleId) {
+    res.json(success([]))
+    return
+  }
+  const result = await rbacService.getRoleMenuTree(roleId)
   res.json(success(result))
 }
 

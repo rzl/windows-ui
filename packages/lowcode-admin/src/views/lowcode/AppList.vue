@@ -9,9 +9,15 @@
         <template #status="{ row }">
           <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
         </template>
+        <template #is_market="{ row }">
+          <w-tag :type="row.is_market === 1 ? 'success' : 'info'">{{ row.is_market === 1 ? '已上架' : '未上架' }}</w-tag>
+        </template>
         <template #action="{ row }">
           <w-space>
             <w-button size="small" @click="goDesign(row)">设计</w-button>
+            <w-button size="small" @click="toggleMarket(row)">
+              {{ row.is_market === 1 ? '下架' : '上架' }}
+            </w-button>
             <w-button size="small" @click="exportAppFile(row)">导出</w-button>
             <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
           </w-space>
@@ -38,6 +44,9 @@
         </w-form-item>
         <w-form-item label="状态">
           <w-switch v-model="formModel.status" active-text="启用" inactive-text="禁用" />
+        </w-form-item>
+        <w-form-item label="上架市场">
+          <w-switch v-model="formModel.isMarket" active-text="上架" inactive-text="下架" />
         </w-form-item>
       </w-form>
       <template #footer>
@@ -73,7 +82,8 @@ const columns = [
   { prop: 'name', label: '应用名称' },
   { prop: 'category', label: '分类' },
   { prop: 'status', label: '状态' },
-  { prop: 'action', label: '操作', width: 220, fixed: 'right' }
+  { prop: 'is_market', label: '应用市场' },
+  { prop: 'action', label: '操作', width: 280, fixed: 'right' }
 ]
 
 onMounted(() => loadData())
@@ -87,8 +97,10 @@ function openDialog(row?: any) {
   if (row) {
     Object.assign(formModel, JSON.parse(JSON.stringify(row)))
     formModel.status = row.status === 1
+    formModel.isMarket = row.is_market === 1
   } else {
     formModel.status = true
+    formModel.isMarket = true
   }
   dialogVisible.value = true
 }
@@ -100,6 +112,7 @@ function closeDialog() {
 async function handleSave() {
   const data = JSON.parse(JSON.stringify(formModel))
   data.status = data.status ? 1 : 0
+  data.isMarket = data.isMarket ? 1 : 0
   const res = await appApi.saveApp({
     code: data.code,
     name: data.name,
@@ -107,11 +120,27 @@ async function handleSave() {
     icon: data.icon,
     description: data.description,
     status: data.status,
+    isMarket: data.isMarket,
     items: []
   })
   closeDialog()
   await loadData()
   goDesign(res)
+}
+
+async function toggleMarket(row: any) {
+  await appApi.saveApp({
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    category: row.category,
+    icon: row.icon,
+    description: row.description,
+    status: row.status,
+    isMarket: row.is_market === 1 ? 0 : 1,
+    items: row.items || []
+  })
+  await loadData()
 }
 
 async function handleDelete(row: any) {

@@ -145,6 +145,17 @@ export async function seed(knex: Knex): Promise<void> {
   await knex('menus').insert([
     {
       parent_id: lowcodeId,
+      name: 'AppMarket',
+      path: '/lowcode/app-market',
+      component: 'views/lowcode/AppMarket.vue',
+      title: '应用市场',
+      icon: 'market',
+      sort: 0,
+      status: 1,
+      permission: 'lowcode:appMarket'
+    },
+    {
+      parent_id: lowcodeId,
       name: 'ModelList',
       path: '/lowcode/model',
       component: 'views/lowcode/ModelList.vue',
