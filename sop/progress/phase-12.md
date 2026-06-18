@@ -79,6 +79,7 @@
   "reports": [{ "code": "", "name": "", "modelCode": "", "config": {...} }],
   "dashboards": [{ "code": "", "name": "", "config": {...} }],
   "prints": [{ "code": "", "name": "", "modelCode": "", "config": {...} }],
+  "pages": [{ "code": "", "name": "", "config": {...} }],
   "datasources": []
 }
 ```
