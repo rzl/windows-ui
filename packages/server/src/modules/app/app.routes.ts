@@ -8,6 +8,8 @@ router.use(authMiddleware)
 
 router.get('/', appController.getApps)
 router.get('/market', appController.getMarketApps)
+router.get('/templates', appController.getAppTemplates)
+router.post('/create-from-template', appController.createAppFromTemplate)
 router.get('/:code', appController.getApp)
 router.post('/', appController.saveApp)
 router.delete('/:id', appController.deleteApp)

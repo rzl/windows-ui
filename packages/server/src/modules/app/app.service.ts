@@ -224,7 +224,17 @@ export async function importApp(data: any) {
   return saveApp(appData)
 }
 
-async function publishAppMenus(app: any) {
+export async function grantAppToRole(appId: number, roleId: number) {
+  const exists = await db('role_apps').where({ app_id: appId, role_id: roleId }).first()
+  if (exists) return
+  await db('role_apps').insert({
+    app_id: appId,
+    role_id: roleId,
+    status: 1
+  })
+}
+
+export async function publishAppMenus(app: any) {
   const lowcodeParent = await db('menus').where({ name: 'Lowcode', path: '/lowcode' }).first()
   if (!lowcodeParent) return
 

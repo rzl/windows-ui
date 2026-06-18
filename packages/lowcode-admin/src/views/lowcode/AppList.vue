@@ -4,6 +4,7 @@
       <div class="toolbar">
         <w-button type="primary" @click="openDialog()">+ 新增应用</w-button>
         <w-button @click="importVisible = true">导入应用</w-button>
+        <w-button @click="openTemplateDialog()">从模板创建</w-button>
       </div>
       <w-table :data="apps" :columns="columns" stripe border>
         <template #status="{ row }">
@@ -62,6 +63,39 @@
         <w-button type="primary" @click="handleImport">导入</w-button>
       </template>
     </w-dialog>
+
+    <w-dialog v-model="templateVisible" title="从模板创建应用" width="640">
+      <div v-if="!templates.length" class="empty-tip">
+        <w-empty description="暂无可用模板" />
+      </div>
+      <div v-else class="template-list">
+        <div
+          v-for="tpl in templates"
+          :key="tpl.code"
+          class="template-item"
+          :class="{ active: templateForm.template === tpl.code }"
+          @click="selectTemplate(tpl)"
+        >
+          <div class="template-name">{{ tpl.name }}</div>
+          <div class="template-desc">{{ tpl.description || '暂无描述' }}</div>
+        </div>
+      </div>
+      <w-form v-if="templateForm.template" :model="templateForm" style="margin-top: 16px;">
+        <w-form-item label="应用编码">
+          <w-input v-model="templateForm.code" placeholder="英文编码" />
+        </w-form-item>
+        <w-form-item label="应用名称">
+          <w-input v-model="templateForm.name" />
+        </w-form-item>
+        <w-form-item label="自动发布">
+          <w-switch v-model="templateForm.autoPublish" active-text="是" inactive-text="否" />
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="templateVisible = false">取消</w-button>
+        <w-button type="primary" :loading="templateInstalling" @click="handleCreateFromTemplate">安装</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -75,6 +109,15 @@ const apps = ref<any[]>([])
 const dialogVisible = ref(false)
 const importVisible = ref(false)
 const importText = ref('')
+const templateVisible = ref(false)
+const templateInstalling = ref(false)
+const templates = ref<any[]>([])
+const templateForm = reactive<any>({
+  template: '',
+  code: '',
+  name: '',
+  autoPublish: true
+})
 const formModel = reactive<any>({})
 
 const columns = [
@@ -162,6 +205,39 @@ async function handleImport() {
   }
 }
 
+async function openTemplateDialog() {
+  templates.value = await appApi.getAppTemplates()
+  templateForm.template = ''
+  templateForm.code = ''
+  templateForm.name = ''
+  templateForm.autoPublish = true
+  templateVisible.value = true
+}
+
+function selectTemplate(tpl: any) {
+  templateForm.template = tpl.code
+  templateForm.code = tpl.code
+  templateForm.name = tpl.name
+  templateForm.autoPublish = true
+}
+
+async function handleCreateFromTemplate() {
+  try {
+    templateInstalling.value = true
+    const res = await appApi.createAppFromTemplate({
+      template: templateForm.template,
+      code: templateForm.code,
+      name: templateForm.name,
+      autoPublish: templateForm.autoPublish
+    })
+    templateVisible.value = false
+    await loadData()
+    goDesign(res)
+  } finally {
+    templateInstalling.value = false
+  }
+}
+
 async function exportAppFile(row: any) {
   const blob = await appApi.exportApp(row.id)
   const link = document.createElement('a')
@@ -179,4 +255,32 @@ function goDesign(row: any) {
 <style scoped>
 .list-page { padding: 8px; }
 .toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
+.empty-tip { padding: 20px 0; }
+.template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.template-item {
+  border: 1px solid #d4d0c8;
+  border-radius: 4px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.template-item:hover,
+.template-item.active {
+  background: #f0f0f0;
+  border-color: #919b9c;
+}
+.template-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.template-desc {
+  color: #666;
+  font-size: 12px;
+}
 </style>

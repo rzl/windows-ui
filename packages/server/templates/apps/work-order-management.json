@@ -1,0 +1,224 @@
+{
+  "template": "work-order-management",
+  "version": "1.0.0",
+  "app": {
+    "name": "工单管理",
+    "category": "运维",
+    "icon": "work-order",
+    "description": "包含工单提交、处理记录、状态流转与统计的示例应用。"
+  },
+  "items": [
+    { "type": "model", "refCode": "work_order", "refName": "工单", "sort": 0 },
+    { "type": "model", "refCode": "work_order_record", "refName": "处理记录", "sort": 1 },
+    { "type": "flow", "refCode": "work_order_handle", "refName": "工单处理流程", "sort": 2 },
+    { "type": "report", "refCode": "work_order_status_report", "refName": "工单状态统计", "sort": 3 },
+    { "type": "dashboard", "refCode": "work_order_dashboard", "refName": "工单仪表盘", "sort": 4 },
+    { "type": "print", "refCode": "work_order_print", "refName": "工单打印", "sort": 5 }
+  ],
+  "dicts": [
+    {
+      "code": "work_order_priority",
+      "name": "工单优先级",
+      "items": [
+        { "label": "紧急", "value": "urgent", "sort": 0 },
+        { "label": "高", "value": "high", "sort": 1 },
+        { "label": "中", "value": "medium", "sort": 2 },
+        { "label": "低", "value": "low", "sort": 3 }
+      ]
+    },
+    {
+      "code": "work_order_status",
+      "name": "工单状态",
+      "items": [
+        { "label": "待处理", "value": "pending", "sort": 0 },
+        { "label": "处理中", "value": "processing", "sort": 1 },
+        { "label": "待确认", "value": "confirming", "sort": 2 },
+        { "label": "已完成", "value": "completed", "sort": 3 },
+        { "label": "已关闭", "value": "closed", "sort": 4 }
+      ]
+    }
+  ],
+  "codingRules": [
+    {
+      "code": "wo_no",
+      "name": "工单编号规则",
+      "prefix": "WO",
+      "dateFormat": "YYYYMMDD",
+      "seqLength": 4
+    }
+  ],
+  "validationRules": [],
+  "models": [
+    {
+      "code": "work_order",
+      "name": "工单",
+      "tableName": "lc_work_order",
+      "description": "工单主表",
+      "status": 1,
+      "dataPermission": "all",
+      "enableAudit": 0,
+      "fields": [
+        { "fieldName": "work_order_no", "displayName": "工单编号", "type": "string", "length": 50, "required": 1, "codingRule": "wo_no", "sort": 0 },
+        { "fieldName": "title", "displayName": "工单标题", "type": "string", "length": 200, "required": 1, "sort": 1 },
+        { "fieldName": "description", "displayName": "问题描述", "type": "text", "required": 0, "sort": 2 },
+        { "fieldName": "priority", "displayName": "优先级", "type": "select", "length": 50, "required": 1, "dictCode": "work_order_priority", "sort": 3 },
+        { "fieldName": "status", "displayName": "工单状态", "type": "select", "length": 50, "required": 1, "dictCode": "work_order_status", "defaultValueType": "constant", "defaultValueExpr": "pending", "sort": 4 },
+        { "fieldName": "submitter", "displayName": "提交人", "type": "string", "length": 50, "required": 0, "defaultValueType": "currentUser", "sort": 5 },
+        { "fieldName": "handler", "displayName": "处理人", "type": "string", "length": 50, "required": 0, "sort": 6 },
+        { "fieldName": "submit_time", "displayName": "提交时间", "type": "datetime", "required": 1, "defaultValueType": "currentTime", "sort": 7 },
+        { "fieldName": "finish_time", "displayName": "完成时间", "type": "datetime", "required": 0, "sort": 8 }
+      ],
+      "form": {
+        "name": "默认表单",
+        "config": {
+          "fields": [
+            { "field": "work_order_no", "label": "工单编号", "type": "input", "required": true, "disabled": true },
+            { "field": "title", "label": "工单标题", "type": "input", "required": true },
+            { "field": "description", "label": "问题描述", "type": "textarea" },
+            { "field": "priority", "label": "优先级", "type": "select", "required": true, "dictCode": "work_order_priority" },
+            { "field": "status", "label": "工单状态", "type": "select", "required": true, "dictCode": "work_order_status" },
+            { "field": "submitter", "label": "提交人", "type": "input", "defaultValueType": "currentUser", "disabled": true },
+            { "field": "handler", "label": "处理人", "type": "input" },
+            { "field": "submit_time", "label": "提交时间", "type": "datetime", "defaultValueType": "currentTime", "disabled": true },
+            { "field": "finish_time", "label": "完成时间", "type": "datetime" }
+          ],
+          "layout": { "type": "default" }
+        }
+      },
+      "table": {
+        "name": "默认列表",
+        "config": {
+          "fields": [
+            { "field": "work_order_no", "label": "工单编号", "inTable": true, "searchable": true, "searchMode": "like", "width": 150 },
+            { "field": "title", "label": "工单标题", "inTable": true, "searchable": true, "searchMode": "like", "width": 220 },
+            { "field": "priority", "label": "优先级", "inTable": true, "width": 100 },
+            { "field": "status", "label": "状态", "inTable": true, "width": 100 },
+            { "field": "submitter", "label": "提交人", "inTable": true, "width": 100 },
+            { "field": "handler", "label": "处理人", "inTable": true, "width": 100 },
+            { "field": "submit_time", "label": "提交时间", "inTable": true, "format": "datetime", "width": 160 },
+            { "field": "finish_time", "label": "完成时间", "inTable": true, "format": "datetime", "width": 160 }
+          ],
+          "toolbar": ["create", "batchDelete", "export"],
+          "rowActions": ["edit", "delete", "view"],
+          "toolbarPermissions": {},
+          "rowActionPermissions": {}
+        }
+      }
+    },
+    {
+      "code": "work_order_record",
+      "name": "处理记录",
+      "tableName": "lc_work_order_record",
+      "description": "工单处理记录",
+      "status": 1,
+      "dataPermission": "all",
+      "enableAudit": 0,
+      "fields": [
+        { "fieldName": "work_order_id", "displayName": "关联工单", "type": "ref", "required": 1, "refModel": "work_order", "refDisplayField": "title", "sort": 0 },
+        { "fieldName": "handler", "displayName": "处理人", "type": "string", "length": 50, "required": 0, "defaultValueType": "currentUser", "sort": 1 },
+        { "fieldName": "handle_time", "displayName": "处理时间", "type": "datetime", "required": 1, "defaultValueType": "currentTime", "sort": 2 },
+        { "fieldName": "handle_content", "displayName": "处理内容", "type": "text", "required": 1, "sort": 3 },
+        { "fieldName": "status", "displayName": "处理状态", "type": "select", "length": 50, "required": 1, "dictCode": "work_order_status", "sort": 4 }
+      ],
+      "form": {
+        "name": "默认表单",
+        "config": {
+          "fields": [
+            { "field": "work_order_id", "label": "关联工单", "type": "ref", "required": true, "refModel": "work_order", "refDisplayField": "title" },
+            { "field": "handler", "label": "处理人", "type": "input", "defaultValueType": "currentUser", "disabled": true },
+            { "field": "handle_time", "label": "处理时间", "type": "datetime", "defaultValueType": "currentTime", "disabled": true },
+            { "field": "status", "label": "处理状态", "type": "select", "required": true, "dictCode": "work_order_status" },
+            { "field": "handle_content", "label": "处理内容", "type": "textarea", "required": true }
+          ],
+          "layout": { "type": "default" }
+        }
+      },
+      "table": {
+        "name": "默认列表",
+        "config": {
+          "fields": [
+            { "field": "work_order_id", "label": "关联工单", "inTable": true, "searchable": true, "searchMode": "eq", "width": 220 },
+            { "field": "handler", "label": "处理人", "inTable": true, "width": 100 },
+            { "field": "handle_time", "label": "处理时间", "inTable": true, "format": "datetime", "width": 160 },
+            { "field": "status", "label": "处理状态", "inTable": true, "width": 100 },
+            { "field": "handle_content", "label": "处理内容", "inTable": true, "width": 300 }
+          ],
+          "toolbar": ["create", "batchDelete", "export"],
+          "rowActions": ["edit", "delete", "view"],
+          "toolbarPermissions": {},
+          "rowActionPermissions": {}
+        }
+      }
+    }
+  ],
+  "flows": [
+    {
+      "code": "work_order_handle",
+      "name": "工单处理流程",
+      "modelCode": "work_order",
+      "status": 1,
+      "config": {
+        "nodes": [
+          { "id": "start", "type": "start", "name": "开始" },
+          { "id": "handle", "type": "approve", "name": "处理人处理", "assigneeType": "role", "assigneeValue": "operator" },
+          { "id": "confirm", "type": "approve", "name": "提交人确认", "assigneeType": "role", "assigneeValue": "submitter" },
+          { "id": "end", "type": "end", "name": "结束" }
+        ],
+        "transitions": [
+          { "from": "start", "to": "handle", "condition": "submit" },
+          { "from": "handle", "to": "confirm", "condition": "approve" },
+          { "from": "confirm", "to": "end", "condition": "approve" }
+        ]
+      }
+    }
+  ],
+  "reports": [
+    {
+      "code": "work_order_status_report",
+      "name": "工单状态统计",
+      "modelCode": "work_order",
+      "status": 1,
+      "config": {
+        "columns": [
+          { "field": "status", "label": "工单状态" },
+          { "field": "id", "label": "数量", "aggregate": "count" }
+        ],
+        "groupBy": ["status"]
+      }
+    }
+  ],
+  "dashboards": [
+    {
+      "code": "work_order_dashboard",
+      "name": "工单仪表盘",
+      "status": 1,
+      "config": {
+        "dataSource": {
+          "type": "sql",
+          "sql": "SELECT priority, COUNT(*) AS value FROM lc_work_order GROUP BY priority",
+          "transformScript": "return { title: { text: '工单优先级分布' }, tooltip: {}, xAxis: { type: 'category', data: data.map(r => r.priority) }, yAxis: { type: 'value' }, series: [{ type: 'bar', data: data.map(r => r.value) }] };"
+        }
+      }
+    }
+  ],
+  "prints": [
+    {
+      "code": "work_order_print",
+      "name": "工单打印",
+      "modelCode": "work_order",
+      "paperSize": "A4",
+      "orientation": "portrait",
+      "pageStyle": {},
+      "config": {
+        "elements": [
+          { "id": "title", "type": "text", "x": 250, "y": 30, "width": 300, "height": 40, "content": "工单详情", "style": { "fontSize": "20px", "fontWeight": "bold", "textAlign": "center" } },
+          { "id": "no", "type": "text", "x": 40, "y": 90, "width": 300, "height": 30, "content": "工单编号：", "field": "work_order_no", "style": { "fontSize": "14px" } },
+          { "id": "title_text", "type": "text", "x": 40, "y": 130, "width": 500, "height": 30, "content": "标题：", "field": "title", "style": { "fontSize": "14px" } },
+          { "id": "priority", "type": "text", "x": 40, "y": 170, "width": 200, "height": 30, "content": "优先级：", "field": "priority", "style": { "fontSize": "14px" } },
+          { "id": "status", "type": "text", "x": 300, "y": 170, "width": 200, "height": 30, "content": "状态：", "field": "status", "style": { "fontSize": "14px" } },
+          { "id": "desc", "type": "text", "x": 40, "y": 210, "width": 660, "height": 80, "content": "问题描述：", "field": "description", "style": { "fontSize": "14px" } }
+        ]
+      }
+    }
+  ]
+}

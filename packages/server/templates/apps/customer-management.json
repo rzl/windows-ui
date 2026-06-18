@@ -1,0 +1,319 @@
+{
+  "template": "customer-management",
+  "version": "1.0.0",
+  "app": {
+    "name": "客户管理",
+    "category": "销售",
+    "icon": "customer",
+    "description": "包含客户信息、联系人、跟进记录的完整客户关系管理示例应用。"
+  },
+  "items": [
+    { "type": "model", "refCode": "customer", "refName": "客户", "sort": 0 },
+    { "type": "model", "refCode": "contact", "refName": "联系人", "sort": 1 },
+    { "type": "model", "refCode": "follow_up", "refName": "跟进记录", "sort": 2 },
+    { "type": "flow", "refCode": "customer_approve", "refName": "客户审批流程", "sort": 3 },
+    { "type": "report", "refCode": "customer_source_report", "refName": "客户来源统计", "sort": 4 },
+    { "type": "dashboard", "refCode": "customer_dashboard", "refName": "客户仪表盘", "sort": 5 },
+    { "type": "print", "refCode": "customer_print", "refName": "客户信息打印", "sort": 6 }
+  ],
+  "dicts": [
+    {
+      "code": "customer_level",
+      "name": "客户等级",
+      "items": [
+        { "label": "潜在客户", "value": "potential", "sort": 0 },
+        { "label": "普通客户", "value": "normal", "sort": 1 },
+        { "label": "VIP客户", "value": "vip", "sort": 2 },
+        { "label": "战略合作伙伴", "value": "partner", "sort": 3 }
+      ]
+    },
+    {
+      "code": "customer_source",
+      "name": "客户来源",
+      "items": [
+        { "label": "电话营销", "value": "telemarketing", "sort": 0 },
+        { "label": "网络营销", "value": "online", "sort": 1 },
+        { "label": "展会", "value": "exhibition", "sort": 2 },
+        { "label": "转介绍", "value": "referral", "sort": 3 },
+        { "label": "其他", "value": "other", "sort": 4 }
+      ]
+    },
+    {
+      "code": "industry",
+      "name": "所属行业",
+      "items": [
+        { "label": "互联网", "value": "internet", "sort": 0 },
+        { "label": "制造业", "value": "manufacturing", "sort": 1 },
+        { "label": "金融", "value": "finance", "sort": 2 },
+        { "label": "教育", "value": "education", "sort": 3 },
+        { "label": "医疗", "value": "medical", "sort": 4 },
+        { "label": "其他", "value": "other", "sort": 5 }
+      ]
+    },
+    {
+      "code": "follow_way",
+      "name": "跟进方式",
+      "items": [
+        { "label": "电话", "value": "phone", "sort": 0 },
+        { "label": "邮件", "value": "email", "sort": 1 },
+        { "label": "面谈", "value": "face", "sort": 2 },
+        { "label": "微信", "value": "wechat", "sort": 3 },
+        { "label": "其他", "value": "other", "sort": 4 }
+      ]
+    },
+    {
+      "code": "customer_status",
+      "name": "客户状态",
+      "items": [
+        { "label": "跟进中", "value": "following", "sort": 0 },
+        { "label": "已成交", "value": "deal", "sort": 1 },
+        { "label": "已流失", "value": "lost", "sort": 2 }
+      ]
+    }
+  ],
+  "codingRules": [
+    {
+      "code": "cust_no",
+      "name": "客户编号规则",
+      "prefix": "C",
+      "dateFormat": "YYYYMMDD",
+      "seqLength": 4
+    }
+  ],
+  "validationRules": [
+    {
+      "code": "phone",
+      "name": "手机号",
+      "pattern": "^1[3-9]\\d{9}$",
+      "message": "请输入正确的手机号"
+    },
+    {
+      "code": "email",
+      "name": "邮箱",
+      "pattern": "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
+      "message": "请输入正确的邮箱地址"
+    }
+  ],
+  "models": [
+    {
+      "code": "customer",
+      "name": "客户",
+      "tableName": "lc_customer",
+      "description": "客户信息主表",
+      "status": 1,
+      "dataPermission": "all",
+      "enableAudit": 0,
+      "fields": [
+        { "fieldName": "customer_no", "displayName": "客户编号", "type": "string", "length": 50, "required": 1, "codingRule": "cust_no", "sort": 0 },
+        { "fieldName": "customer_name", "displayName": "客户名称", "type": "string", "length": 100, "required": 1, "sort": 1 },
+        { "fieldName": "phone", "displayName": "联系电话", "type": "string", "length": 20, "required": 0, "validationRule": "phone", "sort": 2 },
+        { "fieldName": "email", "displayName": "电子邮箱", "type": "string", "length": 100, "required": 0, "validationRule": "email", "sort": 3 },
+        { "fieldName": "customer_level", "displayName": "客户等级", "type": "select", "length": 50, "required": 1, "dictCode": "customer_level", "sort": 4 },
+        { "fieldName": "customer_source", "displayName": "客户来源", "type": "select", "length": 50, "required": 0, "dictCode": "customer_source", "sort": 5 },
+        { "fieldName": "industry", "displayName": "所属行业", "type": "select", "length": 50, "required": 0, "dictCode": "industry", "sort": 6 },
+        { "fieldName": "address", "displayName": "详细地址", "type": "string", "length": 255, "required": 0, "sort": 7 },
+        { "fieldName": "remark", "displayName": "备注", "type": "text", "required": 0, "sort": 8 },
+        { "fieldName": "next_follow_time", "displayName": "下次跟进时间", "type": "date", "length": 30, "required": 0, "sort": 9 },
+        { "fieldName": "status", "displayName": "客户状态", "type": "select", "length": 50, "required": 1, "dictCode": "customer_status", "defaultValueType": "constant", "defaultValueExpr": "following", "sort": 10 }
+      ],
+      "form": {
+        "name": "默认表单",
+        "config": {
+          "fields": [
+            { "field": "customer_no", "label": "客户编号", "type": "input", "required": true, "disabled": true },
+            { "field": "customer_name", "label": "客户名称", "type": "input", "required": true },
+            { "field": "phone", "label": "联系电话", "type": "input", "validationRule": "phone" },
+            { "field": "email", "label": "电子邮箱", "type": "input", "validationRule": "email" },
+            { "field": "customer_level", "label": "客户等级", "type": "select", "required": true, "dictCode": "customer_level" },
+            { "field": "customer_source", "label": "客户来源", "type": "select", "dictCode": "customer_source" },
+            { "field": "industry", "label": "所属行业", "type": "select", "dictCode": "industry" },
+            { "field": "address", "label": "详细地址", "type": "input" },
+            { "field": "next_follow_time", "label": "下次跟进时间", "type": "date" },
+            { "field": "status", "label": "客户状态", "type": "select", "required": true, "dictCode": "customer_status" },
+            { "field": "remark", "label": "备注", "type": "textarea" }
+          ],
+          "layout": { "type": "default" }
+        }
+      },
+      "table": {
+        "name": "默认列表",
+        "config": {
+          "fields": [
+            { "field": "customer_no", "label": "客户编号", "inTable": true, "searchable": true, "searchMode": "like", "width": 140 },
+            { "field": "customer_name", "label": "客户名称", "inTable": true, "searchable": true, "searchMode": "like", "width": 180 },
+            { "field": "phone", "label": "联系电话", "inTable": true, "width": 130 },
+            { "field": "customer_level", "label": "客户等级", "inTable": true, "width": 120 },
+            { "field": "customer_source", "label": "客户来源", "inTable": true, "width": 120 },
+            { "field": "industry", "label": "所属行业", "inTable": true, "width": 120 },
+            { "field": "next_follow_time", "label": "下次跟进", "inTable": true, "format": "date", "width": 120 },
+            { "field": "status", "label": "状态", "inTable": true, "width": 100 }
+          ],
+          "toolbar": ["create", "batchDelete", "export"],
+          "rowActions": ["edit", "delete", "view"],
+          "toolbarPermissions": {},
+          "rowActionPermissions": {}
+        }
+      }
+    },
+    {
+      "code": "contact",
+      "name": "联系人",
+      "tableName": "lc_contact",
+      "description": "客户联系人信息",
+      "status": 1,
+      "dataPermission": "all",
+      "enableAudit": 0,
+      "fields": [
+        { "fieldName": "customer_id", "displayName": "所属客户", "type": "ref", "required": 1, "refModel": "customer", "refDisplayField": "customer_name", "sort": 0 },
+        { "fieldName": "contact_name", "displayName": "联系人姓名", "type": "string", "length": 50, "required": 1, "sort": 1 },
+        { "fieldName": "position", "displayName": "职务", "type": "string", "length": 50, "required": 0, "sort": 2 },
+        { "fieldName": "phone", "displayName": "电话", "type": "string", "length": 20, "required": 0, "validationRule": "phone", "sort": 3 },
+        { "fieldName": "email", "displayName": "邮箱", "type": "string", "length": 100, "required": 0, "validationRule": "email", "sort": 4 },
+        { "fieldName": "is_primary", "displayName": "是否主联系人", "type": "boolean", "required": 0, "defaultValueType": "constant", "defaultValueExpr": "0", "sort": 5 }
+      ],
+      "form": {
+        "name": "默认表单",
+        "config": {
+          "fields": [
+            { "field": "customer_id", "label": "所属客户", "type": "ref", "required": true, "refModel": "customer", "refDisplayField": "customer_name" },
+            { "field": "contact_name", "label": "联系人姓名", "type": "input", "required": true },
+            { "field": "position", "label": "职务", "type": "input" },
+            { "field": "phone", "label": "电话", "type": "input", "validationRule": "phone" },
+            { "field": "email", "label": "邮箱", "type": "input", "validationRule": "email" },
+            { "field": "is_primary", "label": "是否主联系人", "type": "switch" }
+          ],
+          "layout": { "type": "default" }
+        }
+      },
+      "table": {
+        "name": "默认列表",
+        "config": {
+          "fields": [
+            { "field": "customer_id", "label": "所属客户", "inTable": true, "searchable": true, "searchMode": "eq", "width": 180 },
+            { "field": "contact_name", "label": "联系人姓名", "inTable": true, "searchable": true, "searchMode": "like", "width": 140 },
+            { "field": "position", "label": "职务", "inTable": true, "width": 120 },
+            { "field": "phone", "label": "电话", "inTable": true, "width": 130 },
+            { "field": "is_primary", "label": "主联系人", "inTable": true, "format": "boolean", "width": 100 }
+          ],
+          "toolbar": ["create", "batchDelete", "export"],
+          "rowActions": ["edit", "delete", "view"],
+          "toolbarPermissions": {},
+          "rowActionPermissions": {}
+        }
+      }
+    },
+    {
+      "code": "follow_up",
+      "name": "跟进记录",
+      "tableName": "lc_follow_up",
+      "description": "客户跟进记录",
+      "status": 1,
+      "dataPermission": "all",
+      "enableAudit": 0,
+      "fields": [
+        { "fieldName": "customer_id", "displayName": "关联客户", "type": "ref", "required": 1, "refModel": "customer", "refDisplayField": "customer_name", "sort": 0 },
+        { "fieldName": "follow_time", "displayName": "跟进时间", "type": "datetime", "required": 1, "defaultValueType": "currentTime", "sort": 1 },
+        { "fieldName": "follow_way", "displayName": "跟进方式", "type": "select", "length": 50, "required": 1, "dictCode": "follow_way", "sort": 2 },
+        { "fieldName": "content", "displayName": "跟进内容", "type": "text", "required": 1, "sort": 3 },
+        { "fieldName": "next_follow_time", "displayName": "下次跟进时间", "type": "date", "length": 30, "required": 0, "sort": 4 }
+      ],
+      "form": {
+        "name": "默认表单",
+        "config": {
+          "fields": [
+            { "field": "customer_id", "label": "关联客户", "type": "ref", "required": true, "refModel": "customer", "refDisplayField": "customer_name" },
+            { "field": "follow_time", "label": "跟进时间", "type": "datetime", "required": true, "defaultValueType": "currentTime" },
+            { "field": "follow_way", "label": "跟进方式", "type": "select", "required": true, "dictCode": "follow_way" },
+            { "field": "content", "label": "跟进内容", "type": "textarea", "required": true },
+            { "field": "next_follow_time", "label": "下次跟进时间", "type": "date" }
+          ],
+          "layout": { "type": "default" }
+        }
+      },
+      "table": {
+        "name": "默认列表",
+        "config": {
+          "fields": [
+            { "field": "customer_id", "label": "关联客户", "inTable": true, "searchable": true, "searchMode": "eq", "width": 180 },
+            { "field": "follow_time", "label": "跟进时间", "inTable": true, "format": "datetime", "width": 160 },
+            { "field": "follow_way", "label": "跟进方式", "inTable": true, "width": 100 },
+            { "field": "content", "label": "跟进内容", "inTable": true, "width": 240 },
+            { "field": "next_follow_time", "label": "下次跟进", "inTable": true, "format": "date", "width": 120 }
+          ],
+          "toolbar": ["create", "batchDelete", "export"],
+          "rowActions": ["edit", "delete", "view"],
+          "toolbarPermissions": {},
+          "rowActionPermissions": {}
+        }
+      }
+    }
+  ],
+  "flows": [
+    {
+      "code": "customer_approve",
+      "name": "客户审批流程",
+      "modelCode": "customer",
+      "status": 1,
+      "config": {
+        "nodes": [
+          { "id": "start", "type": "start", "name": "开始" },
+          { "id": "approve", "type": "approve", "name": "经理审批", "assigneeType": "role", "assigneeValue": "manager" },
+          { "id": "end", "type": "end", "name": "结束" }
+        ],
+        "transitions": [
+          { "from": "start", "to": "approve", "condition": "submit" },
+          { "from": "approve", "to": "end", "condition": "approve" }
+        ]
+      }
+    }
+  ],
+  "reports": [
+    {
+      "code": "customer_source_report",
+      "name": "客户来源统计",
+      "modelCode": "customer",
+      "status": 1,
+      "config": {
+        "columns": [
+          { "field": "customer_source", "label": "客户来源" },
+          { "field": "id", "label": "客户数量", "aggregate": "count" }
+        ],
+        "groupBy": ["customer_source"]
+      }
+    }
+  ],
+  "dashboards": [
+    {
+      "code": "customer_dashboard",
+      "name": "客户仪表盘",
+      "status": 1,
+      "config": {
+        "dataSource": {
+          "type": "sql",
+          "sql": "SELECT customer_level, COUNT(*) AS value FROM lc_customer WHERE status = 'following' GROUP BY customer_level",
+          "transformScript": "return { title: { text: '客户等级分布' }, tooltip: {}, xAxis: { type: 'category', data: data.map(r => r.customer_level) }, yAxis: { type: 'value' }, series: [{ type: 'bar', data: data.map(r => r.value) }] };"
+        }
+      }
+    }
+  ],
+  "prints": [
+    {
+      "code": "customer_print",
+      "name": "客户信息打印",
+      "modelCode": "customer",
+      "paperSize": "A4",
+      "orientation": "portrait",
+      "pageStyle": {},
+      "config": {
+        "elements": [
+          { "id": "title", "type": "text", "x": 250, "y": 30, "width": 300, "height": 40, "content": "客户信息表", "style": { "fontSize": "20px", "fontWeight": "bold", "textAlign": "center" } },
+          { "id": "no", "type": "text", "x": 40, "y": 90, "width": 300, "height": 30, "content": "客户编号：", "field": "customer_no", "style": { "fontSize": "14px" } },
+          { "id": "name", "type": "text", "x": 40, "y": 130, "width": 300, "height": 30, "content": "客户名称：", "field": "customer_name", "style": { "fontSize": "14px" } },
+          { "id": "level", "type": "text", "x": 40, "y": 170, "width": 300, "height": 30, "content": "客户等级：", "field": "customer_level", "style": { "fontSize": "14px" } },
+          { "id": "phone", "type": "text", "x": 400, "y": 130, "width": 300, "height": 30, "content": "联系电话：", "field": "phone", "style": { "fontSize": "14px" } },
+          { "id": "remark", "type": "text", "x": 40, "y": 210, "width": 660, "height": 60, "content": "备注：", "field": "remark", "style": { "fontSize": "14px" } }
+        ]
+      }
+    }
+  ]
+}

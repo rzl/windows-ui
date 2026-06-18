@@ -62,3 +62,11 @@ export function exportApp(id: number) {
 export function importApp(data: any) {
   return request.post('/apps/import', data)
 }
+
+export function getAppTemplates() {
+  return request.get('/apps/templates')
+}
+
+export function createAppFromTemplate(data: { template: string; code?: string; name?: string; autoPublish?: boolean }) {
+  return request.post('/apps/create-from-template', data)
+}
