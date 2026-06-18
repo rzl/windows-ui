@@ -304,3 +304,89 @@
 1. 在 `dashboard.service.ts` 的 `executeDataSource` 或 `resolveStatValue` 中处理新类型。
 2. 在 `HomepageConfig.vue` 中增加对应配置项。
 3. 同步更新 `sop/manuals/lowcode/homepage-config.md`。
+
+## 自定义页面设计器
+
+### 页面配置结构
+
+`lowcode_pages.config` 存储完整的页面 JSON 配置：
+
+```json
+{
+  "title": "页面标题",
+  "description": "页面描述",
+  "components": [
+    {
+      "id": "comp_xxx",
+      "type": "text",
+      "props": { "content": "Hello", "tag": "p", "align": "left" },
+      "styles": { "marginTop": "12px" },
+      "dataSource": { "type": "static", "value": "" },
+      "events": { "onClick": { "action": "navigate", "target": "" } }
+    }
+  ]
+}
+```
+
+### 通用字段
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| id | string | 组件实例唯一标识 |
+| type | string | 组件类型 |
+| props | object | 组件属性 |
+| styles | object | 自定义样式（marginTop、marginBottom、marginLeft、marginRight、width 等） |
+| children | array | 容器类组件的子组件 |
+| dataSource | object | 数据绑定配置 |
+| events | object | 交互事件配置 |
+
+### 布局组件
+
+| type | 说明 | props |
+|------|------|-------|
+| container | 容器 | padding |
+| card | 卡片 | title |
+| grid | 栅格 | columns、gap |
+| tabs | 标签页 | tabs（数组：{title, name}） |
+
+### 展示组件
+
+| type | 说明 | props |
+|------|------|-------|
+| text | 文本 | content、tag、align |
+| stat | 统计卡片 | title、field、icon、color |
+| chart | 图表（ECharts） | title、height、option |
+| notice | 公告 | content、type |
+
+### 数据组件
+
+| type | 说明 | props |
+|------|------|-------|
+| model | 嵌入模型 CRUD 页面 | modelCode、height |
+| dashboard | 嵌入仪表盘 | dashboardCode |
+| report | 嵌入报表 | reportCode |
+
+### 交互组件
+
+| type | 说明 | props / events |
+|------|------|----------------|
+| button | 按钮 | label、type；events.onClick.action |
+| link | 链接 | label、path |
+
+### 数据源配置
+
+| type | 字段 | 说明 |
+|------|------|------|
+| static | value | 静态值 |
+| sql | sql / transformScript | 只读 SELECT 查询，可附加转换脚本 |
+| api | api.method / api.url / api.params / api.body / transformScript | 调用内部接口 |
+| script | script | 在线 JS 脚本，可调用 `db.raw()` 与 `http()` |
+
+### 事件动作
+
+| action | target | 说明 |
+|--------|--------|------|
+| navigate | 路由路径 | 跳转页面 |
+| refresh | - | 刷新当前组件数据源 |
+| openDialog | 对话框标识 | 打开弹窗（预留） |
+

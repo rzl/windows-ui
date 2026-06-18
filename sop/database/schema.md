@@ -100,3 +100,21 @@
 - `operation_logs`：操作日志
 - `data_logs`：数据变更日志
 - `lowcode_models` / `lowcode_fields` / `lowcode_forms` / `lowcode_tables`：低代码元数据
+- `lowcode_pages`：自定义页面配置
+- `lowcode_apps` / `lowcode_app_items` / `lowcode_app_versions`：应用定义、应用资源、应用版本快照
+
+### lowcode_pages（自定义页面表）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer PK | 自增主键 |
+| code | string UNIQUE | 页面编码 |
+| name | string | 页面名称 |
+| description | text | 页面描述 |
+| config | text | 页面 JSON 配置 |
+| status | integer | 0 禁用 / 1 启用 |
+| create_time | datetime | 创建时间 |
+| update_time | datetime | 更新时间 |
+
+页面配置中的 `components` 数组支持嵌套，容器类组件通过 `children` 字段组织子组件。
+
