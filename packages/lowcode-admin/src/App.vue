@@ -19,3 +19,18 @@ watch(() => app.vconsoleEnabled, (enabled) => {
   }
 }, { immediate: true })
 </script>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Tahoma', 'Microsoft Sans Serif', sans-serif;
+  background: #ece9d8;
+}
+#app,
+#app > div {
+  height: 100%;
+}
+</style>

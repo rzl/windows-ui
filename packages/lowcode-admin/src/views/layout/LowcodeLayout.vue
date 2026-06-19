@@ -5,13 +5,15 @@
         <w-icon name="computer" />
         <span v-show="!app.sidebarCollapsed">Lowcode Admin</span>
       </div>
-      <w-menu
-        :items="menuItems"
-        mode="vertical"
-        :collapse="app.sidebarCollapsed"
-        :default-active="route.path"
-        @select="handleMenuSelect"
-      />
+      <div class="sidebar-menu">
+        <w-menu
+          :items="menuItems"
+          mode="vertical"
+          :collapse="app.sidebarCollapsed"
+          :default-active="route.path"
+          @select="handleMenuSelect"
+        />
+      </div>
     </aside>
     <div class="admin-main">
       <header class="admin-header">
@@ -261,7 +263,9 @@ function closeTab(tab: any) {
 <style scoped>
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 .admin-sidebar {
   width: 220px;
@@ -271,6 +275,8 @@ function closeTab(tab: any) {
   display: flex;
   flex-direction: column;
   transition: width 0.2s;
+  height: 100%;
+  overflow: hidden;
 }
 .admin-sidebar.collapsed {
   width: 64px;
@@ -285,12 +291,20 @@ function closeTab(tab: any) {
   color: var(--w-color-primary);
   white-space: nowrap;
   overflow: hidden;
+  flex-shrink: 0;
+}
+.sidebar-menu {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .admin-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
 }
 .admin-header {
   display: flex;

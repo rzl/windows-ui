@@ -33,12 +33,12 @@ defineProps({
 </script>
 
 <style scoped>
-.w-admin-layout { display: flex; min-height: 100vh; }
-.w-admin-layout__sidebar { width: 220px; flex-shrink: 0; background: var(--w-bg-color); border-right: 2px solid #808080; display: flex; flex-direction: column; transition: width 0.2s; }
+.w-admin-layout { display: flex; height: 100vh; height: 100dvh; overflow: hidden; }
+.w-admin-layout__sidebar { width: 220px; flex-shrink: 0; background: var(--w-bg-color); border-right: 2px solid #808080; display: flex; flex-direction: column; transition: width 0.2s; height: 100%; overflow: hidden; }
 .w-admin-layout__sidebar.collapsed { width: 64px; }
-.w-admin-layout__logo { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid #d4d0c8; font-weight: bold; color: var(--w-color-primary); white-space: nowrap; overflow: hidden; }
-.w-admin-layout__menu { padding: 4px; flex: 1; overflow-y: auto; }
-.w-admin-layout__main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.w-admin-layout__header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--w-bg-color); border-bottom: 2px solid; border-color: #fff #808080 #808080 #fff; }
+.w-admin-layout__logo { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid #d4d0c8; font-weight: bold; color: var(--w-color-primary); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
+.w-admin-layout__menu { padding: 4px; flex: 1; min-height: 0; overflow-y: auto; }
+.w-admin-layout__main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.w-admin-layout__header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--w-bg-color); border-bottom: 2px solid; border-color: #fff #808080 #808080 #fff; flex-shrink: 0; }
 .w-admin-layout__content { flex: 1; padding: 16px; overflow: auto; }
 </style>
