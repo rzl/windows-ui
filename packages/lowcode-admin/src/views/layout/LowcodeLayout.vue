@@ -5,15 +5,13 @@
         <w-icon name="computer" />
         <span v-show="!app.sidebarCollapsed">Lowcode Admin</span>
       </div>
-      <div class="sidebar-body">
-        <w-menu
-          :items="menuItems"
-          mode="vertical"
-          :collapse="app.sidebarCollapsed"
-          :default-active="route.path"
-          @select="handleMenuSelect"
-        />
-      </div>
+      <w-menu
+        :items="menuItems"
+        mode="vertical"
+        :collapse="app.sidebarCollapsed"
+        :default-active="route.path"
+        @select="handleMenuSelect"
+      />
     </aside>
     <div class="admin-main">
       <header class="admin-header">
@@ -263,8 +261,7 @@ function closeTab(tab: any) {
 <style scoped>
 .admin-layout {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 .admin-sidebar {
   width: 220px;
@@ -274,16 +271,6 @@ function closeTab(tab: any) {
   display: flex;
   flex-direction: column;
   transition: width 0.2s;
-}
-.sidebar-body {
-  flex: 1;
-  min-height: 0;
-}
-.admin-sidebar:not(.collapsed) .sidebar-body {
-  overflow-y: auto;
-}
-.admin-sidebar.collapsed .sidebar-body {
-  overflow: visible;
 }
 .admin-sidebar.collapsed {
   width: 64px;
@@ -304,14 +291,11 @@ function closeTab(tab: any) {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 0;
-  overflow: hidden;
 }
 .admin-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
   padding: 8px 16px;
   background: var(--w-bg-color);
   border-bottom: 2px solid;
@@ -331,7 +315,6 @@ function closeTab(tab: any) {
 .tab-bar {
   display: flex;
   gap: 2px;
-  flex-shrink: 0;
   padding: 4px 8px;
   background: #f0f0f0;
   border-bottom: 1px solid #d4d0c8;
@@ -363,20 +346,7 @@ function closeTab(tab: any) {
 
 .admin-content {
   flex: 1;
-  height: 0;
-  min-height: 0;
   padding: 16px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  box-sizing: border-box;
-}
-</style>
-
-<style>
-html,
-body {
-  margin: 0;
-  height: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 </style>
