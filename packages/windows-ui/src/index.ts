@@ -51,6 +51,7 @@ import WCard from './components/card/card.vue'
 import WCarousel from './components/carousel/carousel.vue'
 import WCollapse from './components/collapse/collapse.vue'
 import WDescriptions from './components/descriptions/descriptions.vue'
+import WDescriptionsItem from './components/descriptions/descriptions-item.vue'
 import WEmpty from './components/empty/empty.vue'
 import WImage from './components/image/image.vue'
 import WInfiniteScroll from './components/infinite-scroll/infinite-scroll.vue'
@@ -146,6 +147,7 @@ const components = [
   WCarousel,
   WCollapse,
   WDescriptions,
+  WDescriptionsItem,
   WEmpty,
   WImage,
   WInfiniteScroll,
@@ -258,6 +260,7 @@ export {
   WCarousel,
   WCollapse,
   WDescriptions,
+  WDescriptionsItem,
   WEmpty,
   WImage,
   WInfiniteScroll,

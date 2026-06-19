@@ -6,7 +6,10 @@
         <tr v-for="(row, ri) in rows" :key="ri">
           <td v-for="(cell, ci) in row" :key="ci" class="w-descriptions__cell">
             <span class="w-descriptions__label">{{ cell.label }}</span>
-            <span class="w-descriptions__value"><slot :name="cell.prop || cell.label" :row="cell">{{ cell.value }}</slot></span>
+            <span class="w-descriptions__value">
+              <component v-if="cell.render" :is="cell.render" />
+              <template v-else>{{ cell.value }}</template>
+            </span>
           </td>
         </tr>
       </tbody>
@@ -15,10 +18,53 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
+
+interface DescriptionItem {
+  label?: string
+  value?: any
+  prop?: string
+  render?: () => any
+}
+
 defineOptions({ name: 'WDescriptions' })
-const props = defineProps({ title: String, items: { type: Array as () => { label: string; value?: any; prop?: string }[], default: () => [] }, column: { type: Number, default: 3 } })
-const rows = computed(() => { const rows: any[][] = []; for (let i = 0; i < props.items.length; i += props.column) rows.push(props.items.slice(i, i + props.column)); return rows })
+
+const props = defineProps({
+  title: String,
+  items: { type: Array as () => { label: string; value?: any; prop?: string }[], default: () => [] },
+  column: { type: Number, default: 3 }
+})
+
+const slots = useSlots()
+
+const normalizedItems = computed<DescriptionItem[]>(() => {
+  if (props.items && props.items.length > 0) {
+    return props.items.map((item) => ({ ...item, render: undefined }))
+  }
+
+  const defaultSlot = slots.default?.()
+  if (!defaultSlot) return []
+
+  return defaultSlot
+    .filter((vnode) => typeof vnode.type === 'object' && (vnode.type as any).name === 'WDescriptionsItem')
+    .map((vnode) => ({
+      label: vnode.props?.label || '',
+      prop: vnode.props?.prop,
+      value: undefined,
+      render: () => {
+        const children = vnode.children as any
+        return children?.default?.() || null
+      }
+    }))
+})
+
+const rows = computed(() => {
+  const rows: DescriptionItem[][] = []
+  for (let i = 0; i < normalizedItems.value.length; i += props.column) {
+    rows.push(normalizedItems.value.slice(i, i + props.column))
+  }
+  return rows
+})
 </script>
 
 <style scoped>
