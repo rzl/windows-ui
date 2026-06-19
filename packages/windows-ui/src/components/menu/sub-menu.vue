@@ -1,13 +1,17 @@
 <template>
-  <ul :class="[
-    'w-menu__submenu',
-    {
-      'w-menu__submenu--popup-h': isPopup && props.mode === 'horizontal' && props.level === 0,
-      'w-menu__submenu--popup-c': isPopup && props.collapse && props.level === 0,
-      'w-menu__submenu--popup': isPopup && props.level > 0,
-      [`w-menu__submenu--level-${props.level}`]: true
-    }
-  ]">
+  <ul
+    ref="submenuRef"
+    :class="[
+      'w-menu__submenu',
+      {
+        'w-menu__submenu--popup-h': isPopup && props.mode === 'horizontal' && props.level === 0,
+        'w-menu__submenu--popup-c': isPopup && props.collapse && props.level === 0,
+        'w-menu__submenu--popup': isPopup && props.level > 0,
+        [`w-menu__submenu--level-${props.level}`]: true
+      }
+    ]"
+    :style="popupStyle"
+  >
     <li
       v-for="(item, i) in props.items"
       :key="i"
@@ -37,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, type Ref } from 'vue'
+import { ref, computed, inject, onMounted, type Ref } from 'vue'
 import WIcon from '../icon/icon.vue'
 import SubMenu from './sub-menu.vue'
 
@@ -56,6 +60,21 @@ const injectedSize = inject<Ref<string>>('menuSize')
 const size = computed(() => props.size || injectedSize?.value || 'default')
 
 const emit = defineEmits(['select'])
+
+const submenuRef = ref<HTMLElement>()
+const popupStyle = ref<Record<string, string>>({})
+
+onMounted(() => {
+  if (!isPopup.value || props.level !== 0 || !submenuRef.value) return
+  const parentLi = submenuRef.value.parentElement
+  if (!parentLi) return
+  const rect = parentLi.getBoundingClientRect()
+  if (props.mode === 'horizontal' && !props.collapse) {
+    popupStyle.value = { position: 'fixed', top: `${rect.bottom}px`, left: `${rect.left}px` }
+  } else {
+    popupStyle.value = { position: 'fixed', top: `${rect.top}px`, left: `${rect.right}px` }
+  }
+})
 
 const openSet = ref(new Set<number>())
 const hoverIndex = ref<number | null>(null)
