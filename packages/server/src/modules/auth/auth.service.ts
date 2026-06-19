@@ -4,7 +4,7 @@ import { db } from '../../db'
 import { config } from '../../config'
 import { AppError } from '../../utils/response'
 import { tokenBlacklist } from '../../middleware/auth'
-import type { LoginDto, RefreshDto } from './auth.dto'
+import type { LoginDto, RefreshDto, UpdateProfileDto, ChangePasswordDto } from './auth.dto'
 
 function generateTokens(payload: { id: number; username: string; roleId: number }) {
   const accessToken = jwt.sign(payload, config.jwt.secret as jwt.Secret, {
@@ -120,4 +120,35 @@ export async function getProfile(userId: number) {
     ...user,
     permissions: [...permissions, ...appPermissions]
   }
+}
+
+export async function updateProfile(userId: number, dto: UpdateProfileDto) {
+  const updateData: Record<string, any> = {}
+  if (dto.nickname !== undefined) updateData.nickname = dto.nickname || null
+  if (dto.email !== undefined) updateData.email = dto.email || null
+  if (dto.phone !== undefined) updateData.phone = dto.phone || null
+  if (dto.avatar !== undefined) updateData.avatar = dto.avatar || null
+  updateData.update_time = db.fn.now()
+
+  await db('users').where({ id: userId }).update(updateData)
+  return getProfile(userId)
+}
+
+export async function changePassword(userId: number, dto: ChangePasswordDto) {
+  const user = await db('users').where({ id: userId }).first()
+  if (!user) {
+    throw new AppError('用户不存在', 404)
+  }
+
+  const valid = bcrypt.compareSync(dto.oldPassword, user.password)
+  if (!valid) {
+    throw new AppError('原密码不正确', 400)
+  }
+
+  await db('users').where({ id: userId }).update({
+    password: bcrypt.hashSync(dto.newPassword, 10),
+    update_time: db.fn.now()
+  })
+
+  return true
 }

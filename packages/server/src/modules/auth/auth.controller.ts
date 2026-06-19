@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import { success } from '../../utils/response'
 import * as authService from './auth.service'
-import { loginSchema, refreshSchema } from './auth.dto'
+import { loginSchema, refreshSchema, updateProfileSchema, changePasswordSchema } from './auth.dto'
 
 export async function login(req: Request, res: Response, next: NextFunction) {
   try {
@@ -35,6 +35,28 @@ export async function profile(req: Request, res: Response, next: NextFunction) {
     const user = (req as any).user
     const result = await authService.getProfile(user.id)
     res.json(success(result))
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function updateProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const user = (req as any).user
+    const dto = updateProfileSchema.parse(req.body)
+    const result = await authService.updateProfile(user.id, dto)
+    res.json(success(result, '个人信息更新成功'))
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function changePassword(req: Request, res: Response, next: NextFunction) {
+  try {
+    const user = (req as any).user
+    const dto = changePasswordSchema.parse(req.body)
+    await authService.changePassword(user.id, dto)
+    res.json(success(null, '密码修改成功'))
   } catch (err) {
     next(err)
   }
