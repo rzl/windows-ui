@@ -88,8 +88,10 @@ const handleSubSelect = (value: string, path: string) => {
   subActive.value = path
   activeIndex.value = null
   emit('select', value)
-  openSet.value.delete(parseInt(path.split('-')[0]))
-  if (props.collapse) hoverIndex.value = null
+  if (props.collapse || props.mode === 'horizontal') {
+    openSet.value.clear()
+    if (props.collapse) hoverIndex.value = null
+  }
 }
 </script>
 
