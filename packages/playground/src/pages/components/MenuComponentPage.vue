@@ -3,15 +3,15 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('导航菜单')" id="menu" doc="menu">
 
-      <demo-block :title="t('垂直菜单')" ::code="MenuCode1">
+      <demo-block :title="t('垂直菜单')" :code="MenuCode1">
         <w-menu :items="menuItems" />
       </demo-block>
 
-      <demo-block :title="t('水平菜单')" ::code="MenuCode2">
+      <demo-block :title="t('水平菜单')" :code="MenuCode2">
         <w-menu mode="horizontal" :items="menuItems" />
       </demo-block>
 
-      <demo-block :title="t('收起模式')" ::code="MenuCode3">
+      <demo-block :title="t('收起模式')" :code="MenuCode3">
         <w-menu collapse :items="menuItems" />
       </demo-block>
 
@@ -118,15 +118,38 @@ const menuItems = [
   { label: t('关于我们'), icon: 'user' }
 ]
 
-const verticalCode = `<w-menu :items="[...]" />`
-const horizontalCode = `<w-menu mode="horizontal" :items="[...]" />`
-const collapseCode = `<w-menu collapse :items="[...]" />`
-
 const title = t('Menu 菜单')
 
-const MenuCode1 = `verticalCode`
-const MenuCode2 = `horizontalCode`
-const MenuCode3 = `collapseCode`
+const menuDataCode = `[
+  { label: '首页', icon: 'home' },
+  {
+    label: '产品中心',
+    icon: 'folder',
+    children: [
+      { label: '产品A', icon: 'app' },
+      {
+        label: '产品B',
+        icon: 'model',
+        children: [
+          { label: 'B-基础版', icon: 'file' },
+          {
+            label: 'B-专业版',
+            icon: 'document',
+            children: [
+              { label: '专业版-详情1', icon: 'list' },
+              { label: '专业版-详情2', icon: 'grid' }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  { label: '关于我们', icon: 'user' }
+]`
+
+const MenuCode1 = `<w-menu :items="menuItems" />\n\nconst menuItems = ${menuDataCode}`
+const MenuCode2 = `<w-menu mode="horizontal" :items="menuItems" />\n\nconst menuItems = ${menuDataCode}`
+const MenuCode3 = `<w-menu collapse :items="menuItems" />\n\nconst menuItems = ${menuDataCode}`
 </script>
 
 <style scoped>
