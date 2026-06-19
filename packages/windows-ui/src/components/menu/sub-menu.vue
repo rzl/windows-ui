@@ -17,9 +17,9 @@
       @mousemove="handleMouseMove(i)"
     >
       <div class="w-menu__sub-title" @click.stop="handleClick(item, i)">
+        <w-icon v-if="item.icon" :name="item.icon" :size="size" />
         <span>{{ item.label }}</span>
-        <w-icon v-if="item.children?.length && !isPopup" :name="isOpen(i) ? 'arrowDown' : 'arrowRight'" :size="size" class="w-menu__arrow" />
-        <w-icon v-else-if="item.children?.length" :name="isOpen(i) ? 'arrowDown' : 'arrowRight'" :size="size" class="w-menu__arrow" />
+        <w-icon v-if="item.children?.length" :name="isOpen(i) ? 'arrowDown' : 'arrowRight'" :size="size" class="w-menu__arrow" />
       </div>
       <SubMenu
         v-if="item.children?.length && isSubmenuVisible(i)"
