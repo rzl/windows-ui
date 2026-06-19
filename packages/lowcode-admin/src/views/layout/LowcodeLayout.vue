@@ -360,7 +360,6 @@ function closeTab(tab: any) {
 
 .admin-content {
   flex: 1;
-  padding: 16px;
   overflow: auto;
 }
 </style>
