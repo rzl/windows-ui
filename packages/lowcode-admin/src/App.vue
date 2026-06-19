@@ -1,5 +1,5 @@
 <template>
-  <w-config-provider :size="app.size" :theme="app.theme">
+  <w-config-provider :size="app.size" :theme="app.theme" :locale="app.locale">
     <router-view />
   </w-config-provider>
 </template>

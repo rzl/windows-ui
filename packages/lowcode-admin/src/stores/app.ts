@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
+import { setGlobalLocale, type LocaleType } from '@/locale'
 
 export interface TabItem {
   name: string
@@ -7,18 +8,51 @@ export interface TabItem {
   title: string
 }
 
+const STORAGE_KEY = 'lowcode-admin-settings'
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch (e) {
+    // ignore
+  }
+  return null
+}
+
+const saved = loadSettings()
+
 export const useAppStore = defineStore('app', () => {
   const sidebarCollapsed = ref(false)
-  const size = ref<'small' | 'default' | 'large'>('default')
+  const size = ref<'small' | 'default' | 'large'>(saved?.size || 'default')
+  const locale = ref<LocaleType>(saved?.locale || 'zh-CN')
   const theme = reactive({
-    primary: '#245edb',
-    success: '#3a9e3a',
-    warning: '#e4a010',
-    danger: '#d92b2b'
+    primary: saved?.theme?.primary || '#245edb',
+    success: saved?.theme?.success || '#3a9e3a',
+    warning: saved?.theme?.warning || '#e4a010',
+    danger: saved?.theme?.danger || '#d92b2b'
   })
   const visitedViews = ref<TabItem[]>([
     { name: 'Dashboard', path: '/dashboard', title: '仪表盘' }
   ])
+
+  setGlobalLocale(locale.value)
+
+  watch([size, locale, theme], () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        size: size.value,
+        locale: locale.value,
+        theme: { primary: theme.primary, success: theme.success, warning: theme.warning, danger: theme.danger }
+      })
+    )
+    setGlobalLocale(locale.value)
+  }, { deep: true })
+
+  function setLocale(value: LocaleType) {
+    locale.value = value
+  }
 
   function toggleSidebar() {
     sidebarCollapsed.value = !sidebarCollapsed.value
@@ -45,9 +79,11 @@ export const useAppStore = defineStore('app', () => {
   return {
     sidebarCollapsed,
     size,
+    locale,
     theme,
     visitedViews,
     toggleSidebar,
+    setLocale,
     addView,
     removeView,
     removeOthers,

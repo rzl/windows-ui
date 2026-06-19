@@ -22,6 +22,9 @@
           <w-breadcrumb :items="breadcrumbItems" />
         </div>
         <div class="header-right">
+          <w-button size="small" @click="openSettings">
+            <w-icon name="setting" size="small" />
+          </w-button>
           <div class="user-info" @click="router.push('/profile')">
             <w-avatar
               :src="auth.userInfo?.avatar"
@@ -31,7 +34,7 @@
             <span>{{ auth.userInfo?.nickname }}</span>
           </div>
           <w-button size="small" @click="handleLogout">
-            <w-icon name="logout" size="small" /> 退出
+            <w-icon name="logout" size="small" /> {{ t('退出') }}
           </w-button>
         </div>
       </header>
@@ -59,22 +62,90 @@
       </main>
     </div>
   </div>
+
+  <w-drawer v-model="settingsVisible" :title="t('系统设置')" size="360px">
+    <w-form>
+      <w-form-item :label="t('系统语言')">
+        <w-select v-model="settings.locale" :options="languageOptions" />
+      </w-form-item>
+      <w-form-item :label="t('组件尺寸')">
+        <w-select v-model="settings.size" :options="sizeOptions" />
+      </w-form-item>
+      <w-form-item :label="t('主色')">
+        <w-color-picker v-model="settings.theme.primary" />
+      </w-form-item>
+      <w-form-item :label="t('成功色')">
+        <w-color-picker v-model="settings.theme.success" />
+      </w-form-item>
+      <w-form-item :label="t('警告色')">
+        <w-color-picker v-model="settings.theme.warning" />
+      </w-form-item>
+      <w-form-item :label="t('危险色')">
+        <w-color-picker v-model="settings.theme.danger" />
+      </w-form-item>
+      <div class="settings-actions">
+        <w-button type="primary" @click="saveSettings">{{ t('保存设置') }}</w-button>
+        <w-button @click="settingsVisible = false">{{ t('取消') }}</w-button>
+      </div>
+    </w-form>
+  </w-drawer>
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useMenuStore } from '@/stores/menu'
+import { useLowcodeLocale, type LocaleType } from '@/locale'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const app = useAppStore()
 const menu = useMenuStore()
+const { t } = useLowcodeLocale()
 
 menu.loadMenus()
+
+const settingsVisible = ref(false)
+const settings = reactive({
+  locale: app.locale,
+  size: app.size,
+  theme: { ...app.theme }
+})
+
+const languageOptions = computed(() => [
+  { label: t('中文'), value: 'zh-CN' },
+  { label: t('英文'), value: 'en-US' }
+])
+
+const sizeOptions = computed(() => [
+  { label: t('大'), value: 'large' },
+  { label: t('默认'), value: 'default' },
+  { label: t('小'), value: 'small' }
+])
+
+function openSettings() {
+  settings.locale = app.locale
+  settings.size = app.size
+  settings.theme = { ...app.theme }
+  settingsVisible.value = true
+}
+
+function saveSettings() {
+  app.setLocale(settings.locale as LocaleType)
+  app.size = settings.size
+  app.theme.primary = settings.theme.primary
+  app.theme.success = settings.theme.success
+  app.theme.warning = settings.theme.warning
+  app.theme.danger = settings.theme.danger
+  settingsVisible.value = false
+}
+
+watch(() => app.locale, () => {
+  settings.locale = app.locale
+})
 
 function transformMenu(items: any[]): any[] {
   return items.map((item) => ({
@@ -107,7 +178,7 @@ function buildMenuChain(node: any, byId: Map<number, any>): any[] {
 }
 
 const breadcrumbItems = computed(() => {
-  const items: { label: string; href?: string }[] = [{ label: '首页', href: '/#/dashboard' }]
+  const items: { label: string; href?: string }[] = [{ label: t('首页'), href: '/#/dashboard' }]
   const flat = flattenMenus(menu.menus)
   if (!flat.length) {
     return items
@@ -227,6 +298,13 @@ function closeTab(tab: any) {
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-right { display: flex; align-items: center; gap: 12px; font-size: 13px; }
 .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
 
 .tab-bar {
   display: flex;

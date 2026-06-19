@@ -1,0 +1,20 @@
+export default {
+  系统设置: 'System Settings',
+  主题色: 'Theme Color',
+  主色: 'Primary',
+  成功色: 'Success',
+  警告色: 'Warning',
+  危险色: 'Danger',
+  系统语言: 'System Language',
+  中文: 'Chinese',
+  英文: 'English',
+  组件尺寸: 'Component Size',
+  大: 'Large',
+  默认: 'Default',
+  小: 'Small',
+  保存设置: 'Save Settings',
+  取消: 'Cancel',
+  退出: 'Logout',
+  首页: 'Home',
+  仪表盘: 'Dashboard'
+} as Record<string, string>
