@@ -185,6 +185,7 @@ watch(() => props.modelValue, (val) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: auto;
 }
 
 .w-dialog {
@@ -194,6 +195,9 @@ watch(() => props.modelValue, (val) => {
   box-shadow: var(--w-box-shadow-dark);
   font-family: var(--w-font-family);
   transition: transform 0s;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .w-dialog.is-dragging {
@@ -251,6 +255,7 @@ watch(() => props.modelValue, (val) => {
 .w-dialog__body {
   padding: 16px;
   font-size: var(--w-font-size-base);
+  overflow: auto;
 }
 
 .w-dialog__footer {

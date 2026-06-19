@@ -53,7 +53,9 @@
     </w-dialog>
 
     <w-dialog v-model="logDialogVisible" title="执行日志" width="600">
-      <w-table :data="logs" :columns="logColumns" stripe border />
+      <div class="log-table-wrapper">
+        <w-table :data="logs" :columns="logColumns" stripe border />
+      </div>
     </w-dialog>
   </div>
 </template>
@@ -82,9 +84,9 @@ const columns = [
 ]
 
 const logColumns = [
-  { prop: 'create_time', label: '执行时间' },
-  { prop: 'status', label: '状态' },
-  { prop: 'result', label: '结果' }
+  { prop: 'create_time', label: '执行时间', width: 160 },
+  { prop: 'status', label: '状态', width: 80 },
+  { prop: 'result', label: '结果', className: 'log-result-cell' }
 ]
 
 const handlerTypeOptions = [
@@ -160,4 +162,7 @@ async function openLog(row: any) {
 <style scoped>
 .list-page { padding: 8px; }
 .toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
+.log-table-wrapper { max-height: 55vh; overflow: auto; }
+:deep(.log-result-cell) { word-break: break-all; white-space: normal !important; }
+:deep(.log-result-cell .w-table__cell-content) { white-space: normal !important; }
 </style>
