@@ -19,6 +19,7 @@
           <w-button size="small" @click="app.toggleSidebar">
             <w-icon name="menu" size="small" />
           </w-button>
+          <w-breadcrumb :items="breadcrumbItems" />
         </div>
         <div class="header-right">
           <span>{{ auth.userInfo?.nickname }}</span>
@@ -78,6 +79,66 @@ function transformMenu(items: any[]): any[] {
 }
 
 const menuItems = computed(() => transformMenu(menu.menus))
+
+function flattenMenus(items: any[], result: any[] = []): any[] {
+  items.forEach((item) => {
+    result.push(item)
+    if (item.children?.length) {
+      flattenMenus(item.children, result)
+    }
+  })
+  return result
+}
+
+function buildMenuChain(node: any, byId: Map<number, any>): any[] {
+  const chain: any[] = []
+  while (node) {
+    chain.unshift(node)
+    node = node.parent_id ? byId.get(node.parent_id) : undefined
+  }
+  return chain
+}
+
+const breadcrumbItems = computed(() => {
+  const items: { label: string; href?: string }[] = [{ label: '首页', href: '/#/dashboard' }]
+  const flat = flattenMenus(menu.menus)
+  if (!flat.length) {
+    return items
+  }
+
+  const byPath = new Map<string, any>()
+  const byId = new Map<number, any>()
+  flat.forEach((item) => {
+    if (item.path) byPath.set(item.path, item)
+    byId.set(item.id, item)
+  })
+
+  // 优先精确匹配菜单路径
+  let current = byPath.get(route.path)
+  if (current) {
+    buildMenuChain(current, byId).forEach((node) => {
+      items.push({ label: node.title })
+    })
+    return items
+  }
+
+  // 其次按最长前缀匹配（用于 /lowcode/design/:id 等详情页）
+  const prefixItem = flat
+    .filter((item) => item.path && route.path.startsWith(item.path + '/'))
+    .sort((a, b) => b.path.length - a.path.length)[0]
+
+  if (prefixItem) {
+    buildMenuChain(prefixItem, byId).forEach((node) => {
+      items.push({ label: node.title })
+    })
+  }
+
+  if (route.meta?.title) {
+    items.push({ label: route.meta.title as string })
+  }
+
+  return items
+})
 
 function handleMenuSelect(value: string) {
   router.push(value)
