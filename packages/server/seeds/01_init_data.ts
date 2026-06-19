@@ -128,6 +128,39 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 5,
       status: 1,
       permission: 'dict:list'
+    },
+    {
+      parent_id: systemId,
+      name: 'NoticeList',
+      path: '/system/notice',
+      component: 'views/system/NoticeList.vue',
+      title: '系统公告',
+      icon: 'notice',
+      sort: 6,
+      status: 1,
+      permission: 'notice:list'
+    },
+    {
+      parent_id: systemId,
+      name: 'PositionList',
+      path: '/system/position',
+      component: 'views/system/PositionList.vue',
+      title: '职务管理',
+      icon: 'position',
+      sort: 7,
+      status: 1,
+      permission: 'position:list'
+    },
+    {
+      parent_id: systemId,
+      name: 'DictCategoryList',
+      path: '/system/dict-category',
+      component: 'views/system/DictCategoryList.vue',
+      title: '字典分类',
+      icon: 'category',
+      sort: 8,
+      status: 1,
+      permission: 'dict:list'
     }
   ])
 
@@ -186,6 +219,50 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 3,
       status: 1,
       permission: 'lowcode:validate'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'AppList',
+      path: '/lowcode/app',
+      component: 'views/lowcode/AppList.vue',
+      title: '应用管理',
+      icon: 'app',
+      sort: 4,
+      status: 1,
+      permission: 'lowcode:app'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'PrintTemplateList',
+      path: '/lowcode/print-template',
+      component: 'views/report/PrintTemplateList.vue',
+      title: '打印模板',
+      icon: 'print',
+      sort: 6,
+      status: 1,
+      permission: 'lowcode:printTemplate'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'ExternalDataSourceList',
+      path: '/lowcode/external-datasource',
+      component: 'views/external-datasource/ExternalDataSourceList.vue',
+      title: '外部数据源',
+      icon: 'database',
+      sort: 7,
+      status: 1,
+      permission: 'lowcode:externalDatasource'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'AuditLogList',
+      path: '/lowcode/audit-log',
+      component: 'views/lowcode/AuditLogList.vue',
+      title: '审计日志',
+      icon: 'audit',
+      sort: 8,
+      status: 1,
+      permission: 'lowcode:auditLog'
     }
   ])
 
@@ -196,7 +273,7 @@ export async function seed(knex: Knex): Promise<void> {
     path: '/dashboard-manager',
     title: '仪表盘配置',
     icon: 'dashboard',
-    sort: 6,
+    sort: 8,
     status: 1
   })
 
@@ -261,6 +338,67 @@ export async function seed(knex: Knex): Promise<void> {
     }
   ])
 
+  // 流程中心
+  const [flowId] = await knex('menus').insert({
+    parent_id: 0,
+    name: 'Flow',
+    path: '/flow',
+    title: '流程中心',
+    icon: 'flow',
+    sort: 6,
+    status: 1
+  })
+
+  await knex('menus').insert([
+    {
+      parent_id: flowId,
+      name: 'FlowList',
+      path: '/flow/list',
+      component: 'views/flow/FlowList.vue',
+      title: '流程定义',
+      icon: 'flowChart',
+      sort: 1,
+      status: 1,
+      permission: 'flow:list'
+    },
+    {
+      parent_id: flowId,
+      name: 'PendingTaskList',
+      path: '/flow/pending',
+      component: 'views/flow/PendingTaskList.vue',
+      title: '我的待办',
+      icon: 'task',
+      sort: 2,
+      status: 1,
+      permission: 'flow:task'
+    }
+  ])
+
+  // 报表中心
+  const [reportId] = await knex('menus').insert({
+    parent_id: 0,
+    name: 'Report',
+    path: '/report',
+    title: '报表中心',
+    icon: 'report',
+    sort: 7,
+    status: 1
+  })
+
+  await knex('menus').insert([
+    {
+      parent_id: reportId,
+      name: 'ReportList',
+      path: '/report/list',
+      component: 'views/report/ReportList.vue',
+      title: '报表管理',
+      icon: 'reportList',
+      sort: 1,
+      status: 1,
+      permission: 'report:list'
+    }
+  ])
+
   // 系统监控
   const [monitorId] = await knex('menus').insert({
     parent_id: 0,
@@ -294,6 +432,17 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'monitor:log'
+    },
+    {
+      parent_id: monitorId,
+      name: 'ScheduleList',
+      path: '/monitor/schedule',
+      component: 'views/monitor/ScheduleList.vue',
+      title: '定时任务',
+      icon: 'schedule',
+      sort: 3,
+      status: 1,
+      permission: 'monitor:schedule'
     }
   ])
 
