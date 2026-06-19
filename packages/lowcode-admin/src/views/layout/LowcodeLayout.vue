@@ -22,7 +22,14 @@
           <w-breadcrumb :items="breadcrumbItems" />
         </div>
         <div class="header-right">
-          <span>{{ auth.userInfo?.nickname }}</span>
+          <div class="user-info" @click="router.push('/profile')">
+            <w-avatar
+              :src="auth.userInfo?.avatar"
+              :alt="auth.userInfo?.nickname"
+              size="small"
+            />
+            <span>{{ auth.userInfo?.nickname }}</span>
+          </div>
           <w-button size="small" @click="handleLogout">
             <w-icon name="logout" size="small" /> 退出
           </w-button>
@@ -219,6 +226,7 @@ function closeTab(tab: any) {
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-right { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 
 .tab-bar {
   display: flex;
