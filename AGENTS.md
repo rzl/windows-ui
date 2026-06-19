@@ -139,13 +139,54 @@ windows-ui/
 │   └── <component>/design.md
 ├── develops/                    # 每个组件的开发进度跟踪
 │   └── <component>/progress.md
-└── scripts/                     # Python 辅助脚本
-    ├── add_examples*.py
-    ├── examples.json            # 组件示例代码库
-    ├── gen_docs.py              # 根据 SFC 生成 usage.md 模板
-    ├── gen_docs_v2.py
-    └── sync_docs.py
+├── scripts/                     # Python 辅助脚本
+│   ├── add_examples*.py
+│   ├── examples.json            # 组件示例代码库
+│   ├── gen_docs.py              # 根据 SFC 生成 usage.md 模板
+│   ├── gen_docs_v2.py
+│   └── sync_docs.py
+│
+└── sop/                         # 📋 低代码管理平台 SOP 文档集
+    ├── architecture/            # 系统架构文档
+    ├── backend/                 # 后端开发规范
+    ├── database/                # 数据库设计文档
+    ├── development/             # 开发工作流程与规范
+    ├── lowcode/                 # 低代码平台核心设计
+    ├── manuals/                 # 用户操作手册
+    └── progress/                # 开发进度跟踪
 ```
+
+---
+
+## SOP 文档索引
+
+`sop/` 目录收录低代码管理平台的标准作业程序（SOP），覆盖系统架构、开发规范、数据库设计、低代码核心机制、用户操作手册与项目进度。在涉及 `packages/lowcode-admin` 与 `packages/server` 的开发、重构或问题排查时，应优先查阅对应 SOP 文档。
+
+### 目录说明
+
+| 目录 | 说明 |
+|------|------|
+| `sop/architecture/` | 系统架构总览与前后端架构说明 |
+| `sop/backend/` | 后端开发规范、分层约定与接口标准 |
+| `sop/database/` | 数据库 schema 设计与表关系说明 |
+| `sop/development/` | 低代码平台开发工作流程、组件评估与扩展规范、Git 提交规范 |
+| `sop/lowcode/` | 低代码元数据模型、动态 API 约定、设计器配置规范、流程设计器说明 |
+| `sop/manuals/` | 面向最终用户的操作手册（系统管理、低代码开发、监控消息等） |
+| `sop/progress/` | 按阶段记录的开发进度与待办事项 |
+
+### 关键文档速查
+
+| 场景 | 推荐查阅文档 |
+|------|--------------|
+| 理解系统整体架构与数据流 | `sop/architecture/overview.md` |
+| 新增/修改后端模块、接口或数据库 | `sop/development/workflow.md`、`sop/backend/*.md`、`sop/database/schema.md` |
+| 扩展低代码数据模型、表单、列表、页面设计器 | `sop/lowcode/metadata.md`、`sop/lowcode/designer-spec.md` |
+| 修改动态 CRUD 接口或运行时行为 | `sop/lowcode/dynamic-api.md` |
+| 调整流程设计器或审批相关功能 | `sop/lowcode/flow-designer.md` |
+| 新增/修改面向用户的功能模块 | 同步更新 `sop/manuals/` 下对应手册 |
+| 查看项目当前阶段与待办 | `sop/progress/phase-*.md` |
+
+> **SOP 同步原则**：每完成一个低代码平台功能或阶段，应同步修订对应的 SOP 文档；若功能涉及最终用户操作，必须同步更新 `sop/manuals/` 下的用户手册。
 
 ---
 
@@ -266,6 +307,8 @@ windows-ui/
 | `designs/<component>/` | `design.md` | 组件分类、视觉设计（色彩、尺寸、圆角）、交互设计、可访问性 |
 | `develops/<component>/` | `progress.md` | 状态（已完成/进行中）、实现清单、待优化项、变更记录 |
 
+若修改涉及低代码平台功能（数据模型、表单/列表/页面设计器、流程、动态 API、监控、用户权限等）或面向最终用户的操作体验，还应同步更新 `sop/` 下对应的 SOP 文档与 `sop/manuals/` 用户手册。
+
 > 当前项目尚未配置自动化文档生成工具，文档为纯 Markdown 手工维护。`scripts/` 下的 Python 脚本（如 `gen_docs.py`、`sync_docs.py`、`add_examples*.py`）用于辅助提取组件 Props / 生成示例模板，但产出的内容仍需人工校对。`scripts/examples.json` 中维护了一批可直接写入 usage.md 的组件示例代码。
 
 ---
@@ -320,7 +363,8 @@ pnpm --filter @windows-ui/core test
 7. 在 `packages/playground/src/views/Layout.vue` 的侧边栏 `navItems` 中新增导航项。
 8. 编写 `docs/<name>/usage.md`、`designs/<name>/design.md`、`develops/<name>/progress.md`。
 9. 若该组件属于后台场景常用组件，视情况在 `packages/playground/src/admin/` 或 `packages/lowcode-admin/src/views/` 中补充示例页面。
-10. 运行 `pnpm --filter @windows-ui/core test` 确保新增测试通过，运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
+10. 若修改涉及低代码平台能力或面向用户的功能，同步更新 `sop/` 下对应的 SOP 文档与用户手册（`sop/manuals/`）。
+11. 运行 `pnpm --filter @windows-ui/core test` 确保新增测试通过，运行 `pnpm dev` 验证 playground 效果，运行 `pnpm build` 验证库构建无报错。
 
 ---
 
