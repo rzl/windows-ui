@@ -4,7 +4,9 @@
     <demo-section :title="title" :description="t('下拉选择')" id="select" doc="select">
 
       <demo-block :title="t('基础用法')" :code="SelectCode1"><w-select v-model="form.select" :options="selectOptions" /></demo-block>
-      <demo-block :title="t('虚拟化选择器')" :code="SelectCode2"><w-virtualized-select v-model="form.select" :options="selectOptions" /></demo-block>
+      <demo-block :title="t('可搜索')" :code="SelectCode2"><w-select v-model="form.select" :options="selectOptions" filterable /></demo-block>
+      <demo-block :title="t('自定义过滤函数')" :code="SelectCode3"><w-select v-model="form.select" :options="selectOptions" filterable :filter-method="filterByValue" /></demo-block>
+      <demo-block :title="t('虚拟化选择器')" :code="SelectCode4"><w-virtualized-select v-model="form.select" :options="selectOptions" /></demo-block>
 
     </demo-section>
   </div>
@@ -37,7 +39,13 @@ const message = (msg: string) => alert(msg)
 const title = t('Select 选择器')
 
 const SelectCode1 = `<w-select v-model="form.select" :options="selectOptions" />`
-const SelectCode2 = `<w-virtualized-select v-model="form.select" :options="selectOptions" />`
+const SelectCode2 = `<w-select v-model="form.select" :options="selectOptions" filterable />`
+const SelectCode3 = `<w-select v-model="form.select" :options="selectOptions" filterable :filter-method="filterByValue" />`
+const SelectCode4 = `<w-virtualized-select v-model="form.select" :options="selectOptions" />`
+
+const filterByValue = (option: any, query: string) => {
+  return String(option.value).toLowerCase().includes(query.toLowerCase())
+}
 </script>
 
 <style scoped>

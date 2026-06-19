@@ -24,7 +24,7 @@
     <w-dialog v-model="dialogVisible" title="部门" width="480">
       <w-form :model="formModel">
         <w-form-item label="上级部门">
-          <w-select v-model="formModel.parentId" :options="parentOptions" placeholder="请选择" clearable />
+          <w-select v-model="formModel.parentId" :options="parentOptions" placeholder="请选择" clearable filterable />
         </w-form-item>
         <w-form-item label="部门名称">
           <w-input v-model="formModel.name" />

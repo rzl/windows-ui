@@ -98,4 +98,34 @@ describe('Select', () => {
     expect(wrapper.find('.w-select__dropdown').isVisible()).toBe(false)
     wrapper.unmount()
   })
+
+  it('filterable 模式下 trigger 可输入并过滤选项', async () => {
+    const wrapper = mount(Select, {
+      props: { options, filterable: true },
+      global: { stubs: ['WIcon'] }
+    })
+    await wrapper.find('.w-select__trigger').trigger('click')
+    const input = wrapper.find('.w-select__input')
+    expect(input.exists()).toBe(true)
+    await input.setValue('B')
+    const opts = wrapper.findAll('.w-select__option')
+    expect(opts.length).toBe(1)
+    expect(opts[0].text()).toBe('选项B')
+  })
+
+  it('filterMethod 可自定义过滤规则', async () => {
+    const filterMethod = (option: any, query: string) => {
+      return String(option.value).toLowerCase().includes(query.toLowerCase())
+    }
+    const wrapper = mount(Select, {
+      props: { options, filterable: true, filterMethod },
+      global: { stubs: ['WIcon'] }
+    })
+    await wrapper.find('.w-select__trigger').trigger('click')
+    const input = wrapper.find('.w-select__input')
+    await input.setValue('c')
+    const opts = wrapper.findAll('.w-select__option')
+    expect(opts.length).toBe(1)
+    expect(opts[0].text()).toBe('选项C')
+  })
 })
