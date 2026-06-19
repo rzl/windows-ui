@@ -5,9 +5,9 @@
         <w-button v-if="auth.hasPermission('dept:create')" type="primary" @click="openDialog()">+ 新增</w-button>
       </div>
 
-      <w-table :data="flatDepts" :columns="columns" stripe border row-key="id">
+      <w-table :data="depts" :columns="columns" stripe border row-key="id" default-expand-all>
         <template #parentName="{ row }">
-          {{ row.parentName || '根部门' }}
+          {{ row.parent_id ? parentNameMap.get(row.parent_id) || '-' : '根部门' }}
         </template>
         <template #status="{ row }">
           <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
@@ -67,25 +67,51 @@ const columns = [
   { prop: 'action', label: '操作', width: 140, fixed: 'right' }
 ]
 
-const flatDepts = computed(() => {
-  const result: any[] = []
-  function flatten(items: any[], parentName = '') {
+const parentNameMap = computed(() => {
+  const map = new Map<number, string>()
+  function walk(items: any[]) {
     items.forEach((item) => {
-      result.push({ ...item, parentName })
+      map.set(item.id, item.name)
       if (item.children?.length) {
-        flatten(item.children, item.name)
+        walk(item.children)
       }
     })
   }
-  flatten(depts.value)
-  return result
+  walk(depts.value)
+  return map
 })
 
 const parentOptions = computed(() => {
   const result: any[] = [{ label: '根部门', value: 0 }]
-  depts.value.forEach((d) => {
-    result.push({ label: d.name, value: d.id })
-  })
+  const excludeIds = new Set<number>()
+  if (formModel.id) {
+    function collect(item: any) {
+      excludeIds.add(item.id)
+      item.children?.forEach(collect)
+    }
+    function find(items: any[]) {
+      for (const item of items) {
+        if (item.id === formModel.id) {
+          collect(item)
+          return true
+        }
+        if (item.children?.length && find(item.children)) return true
+      }
+      return false
+    }
+    find(depts.value)
+  }
+  function walk(items: any[], prefix = '') {
+    items.forEach((item) => {
+      if (!excludeIds.has(item.id)) {
+        result.push({ label: prefix + item.name, value: item.id })
+        if (item.children?.length) {
+          walk(item.children, prefix + item.name + ' / ')
+        }
+      }
+    })
+  }
+  walk(depts.value)
   return result
 })
 
