@@ -1,25 +1,23 @@
 <template>
   <div class="list-page">
-    <w-card header="数据模型">
-      <div class="toolbar">
-        <w-button v-if="isAdmin" type="primary" @click="openDialog()">+ 新增模型</w-button>
-      </div>
+    <div class="toolbar">
+      <w-button v-if="isAdmin" type="primary" @click="openDialog()">+ 新增模型</w-button>
+    </div>
 
-      <w-table :data="models" :columns="columns" stripe border>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button v-if="isAdmin" size="small" @click="goDesign(row)">设计</w-button>
-            <w-button size="small" @click="goRun(row)">运行</w-button>
-            <w-button v-if="isAdmin" size="small" @click="openFlowDialog(row)">流程</w-button>
-            <w-button v-if="isAdmin" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="isAdmin" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <w-table :data="models" :columns="columns" stripe border>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button v-if="isAdmin" size="small" @click="goDesign(row)">设计</w-button>
+          <w-button size="small" @click="goRun(row)">运行</w-button>
+          <w-button v-if="isAdmin" size="small" @click="openFlowDialog(row)">流程</w-button>
+          <w-button v-if="isAdmin" size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button v-if="isAdmin" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <w-dialog v-model="dialogVisible" title="数据模型" width="480">
       <w-form :model="formModel">

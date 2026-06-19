@@ -1,13 +1,11 @@
 <template>
   <div class="exception-page">
-    <w-card>
-      <div class="exception-content">
-        <h1>{{ code }}</h1>
-        <h2>{{ title }}</h2>
-        <p>{{ description }}</p>
-        <w-button type="primary" @click="router.push('/')">回到首页</w-button>
-      </div>
-    </w-card>
+    <div class="exception-content">
+      <h1>{{ code }}</h1>
+      <h2>{{ title }}</h2>
+      <p>{{ description }}</p>
+      <w-button type="primary" @click="router.push('/')">回到首页</w-button>
+    </div>
   </div>
 </template>
 

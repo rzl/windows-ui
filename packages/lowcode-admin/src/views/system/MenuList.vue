@@ -1,25 +1,23 @@
 <template>
   <div class="list-page">
-    <w-card header="菜单管理">
-      <div class="toolbar">
-        <w-button v-if="auth.hasPermission('menu:create')" type="primary" @click="openDialog()">+ 新增</w-button>
-      </div>
+    <div class="toolbar">
+      <w-button v-if="auth.hasPermission('menu:create')" type="primary" @click="openDialog()">+ 新增</w-button>
+    </div>
 
-      <w-table :data="menus" :columns="columns" stripe border row-key="id" default-expand-all>
-        <template #parentTitle="{ row }">
-          {{ row.parent_id ? parentTitleMap.get(row.parent_id) || '-' : '根菜单' }}
-        </template>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button v-if="auth.hasPermission('menu:edit')" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="auth.hasPermission('menu:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <w-table :data="menus" :columns="columns" stripe border row-key="id" default-expand-all>
+      <template #parentTitle="{ row }">
+        {{ row.parent_id ? parentTitleMap.get(row.parent_id) || '-' : '根菜单' }}
+      </template>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button v-if="auth.hasPermission('menu:edit')" size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button v-if="auth.hasPermission('menu:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <w-dialog v-model="dialogVisible" title="菜单" width="520">
       <w-form :model="formModel">

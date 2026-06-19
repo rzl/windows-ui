@@ -1,16 +1,14 @@
 <template>
   <div class="result-page">
-    <w-card>
-      <div class="result-content">
-        <w-icon :name="icon" :size="64" />
-        <h2>{{ title }}</h2>
-        <p>{{ description }}</p>
-        <w-space>
-          <w-button type="primary" @click="router.back()">返回</w-button>
-          <w-button @click="router.push('/')">回到首页</w-button>
-        </w-space>
-      </div>
-    </w-card>
+    <div class="result-content">
+      <w-icon :name="icon" :size="64" />
+      <h2>{{ title }}</h2>
+      <p>{{ description }}</p>
+      <w-space>
+        <w-button type="primary" @click="router.back()">返回</w-button>
+        <w-button @click="router.push('/')">回到首页</w-button>
+      </w-space>
+    </div>
   </div>
 </template>
 

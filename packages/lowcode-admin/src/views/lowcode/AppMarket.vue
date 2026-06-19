@@ -1,66 +1,64 @@
 <template>
   <div class="app-market-page">
-    <w-card header="应用市场">
-      <w-tabs v-model="activeTab">
-        <w-tab-pane label="已上架应用" name="apps">
-          <div v-if="!apps.length" class="empty-tip">
-            <w-empty description="暂无可用的应用" />
-          </div>
-          <div v-else class="app-grid">
-            <div
-              v-for="app in apps"
-              :key="app.code"
-              class="app-card"
-              @click="enterApp(app)"
-            >
-              <div class="app-icon">
-                <w-icon :name="app.icon || 'app'" />
-              </div>
-              <div class="app-info">
-                <div class="app-name">{{ app.name }}</div>
-                <div class="app-category">{{ app.category || '未分类' }}</div>
-                <div class="app-desc">{{ app.description || '暂无描述' }}</div>
-              </div>
-              <div class="app-action">
-                <w-button v-if="auth.hasPermission('lowcode:app')" size="small" @click.stop="goDesign(app)">
-                  设计
-                </w-button>
-                <w-button type="primary" size="small" @click.stop="enterApp(app)">
-                  进入
-                </w-button>
-              </div>
+    <w-tabs v-model="activeTab">
+      <w-tab-pane label="已上架应用" name="apps">
+        <div v-if="!apps.length" class="empty-tip">
+          <w-empty description="暂无可用的应用" />
+        </div>
+        <div v-else class="app-grid">
+          <div
+            v-for="app in apps"
+            :key="app.code"
+            class="app-card"
+            @click="enterApp(app)"
+          >
+            <div class="app-icon">
+              <w-icon :name="app.icon || 'app'" />
+            </div>
+            <div class="app-info">
+              <div class="app-name">{{ app.name }}</div>
+              <div class="app-category">{{ app.category || '未分类' }}</div>
+              <div class="app-desc">{{ app.description || '暂无描述' }}</div>
+            </div>
+            <div class="app-action">
+              <w-button v-if="auth.hasPermission('lowcode:app')" size="small" @click.stop="goDesign(app)">
+                设计
+              </w-button>
+              <w-button type="primary" size="small" @click.stop="enterApp(app)">
+                进入
+              </w-button>
             </div>
           </div>
-        </w-tab-pane>
+        </div>
+      </w-tab-pane>
 
-        <w-tab-pane label="示例模板" name="templates">
-          <div v-if="!templates.length" class="empty-tip">
-            <w-empty description="暂无示例模板" />
-          </div>
-          <div v-else class="app-grid">
-            <div
-              v-for="tpl in templates"
-              :key="tpl.code"
-              class="app-card"
-            >
-              <div class="app-icon">
-                <w-icon :name="tpl.icon || 'app'" />
-              </div>
-              <div class="app-info">
-                <div class="app-name">{{ tpl.name }}</div>
-                <div class="app-category">{{ tpl.category || '未分类' }} · v{{ tpl.version }}</div>
-                <div class="app-desc">{{ tpl.description || '暂无描述' }}</div>
-              </div>
-              <div class="app-action">
-                <w-button type="primary" size="small" @click="openInstall(tpl)">
-                  安装
-                </w-button>
-              </div>
+      <w-tab-pane label="示例模板" name="templates">
+        <div v-if="!templates.length" class="empty-tip">
+          <w-empty description="暂无示例模板" />
+        </div>
+        <div v-else class="app-grid">
+          <div
+            v-for="tpl in templates"
+            :key="tpl.code"
+            class="app-card"
+          >
+            <div class="app-icon">
+              <w-icon :name="tpl.icon || 'app'" />
+            </div>
+            <div class="app-info">
+              <div class="app-name">{{ tpl.name }}</div>
+              <div class="app-category">{{ tpl.category || '未分类' }} · v{{ tpl.version }}</div>
+              <div class="app-desc">{{ tpl.description || '暂无描述' }}</div>
+            </div>
+            <div class="app-action">
+              <w-button type="primary" size="small" @click="openInstall(tpl)">
+                安装
+              </w-button>
             </div>
           </div>
-        </w-tab-pane>
-      </w-tabs>
-    </w-card>
+        </div>
+      </w-tab-pane>
+    </w-tabs>
 
     <w-dialog v-model="installVisible" title="安装示例模板" width="520">
       <w-form :model="installForm">

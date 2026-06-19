@@ -1,101 +1,99 @@
 <template>
   <div class="designer-page">
-    <w-card :header="`页面设计 - ${page.name || page.code || ''}`">
-      <div class="toolbar">
-        <w-button size="small" @click="goBack">返回</w-button>
-        <w-space>
-          <w-button size="small" @click="handlePreview">预览</w-button>
-          <w-button type="primary" size="small" @click="handleSave">保存</w-button>
-        </w-space>
+    <div class="toolbar">
+      <w-button size="small" @click="goBack">返回</w-button>
+      <w-space>
+        <w-button size="small" @click="handlePreview">预览</w-button>
+        <w-button type="primary" size="small" @click="handleSave">保存</w-button>
+      </w-space>
+    </div>
+
+    <div class="designer-layout">
+      <!-- 组件库 -->
+      <div class="component-library">
+        <div class="panel-title">组件库</div>
+        <div class="component-group">
+          <div class="group-title">布局</div>
+          <div
+            v-for="type in layoutTypes"
+            :key="type.value"
+            class="component-item"
+            draggable="true"
+            @dragstart="handleDragStart($event, type.value)"
+          >
+            {{ type.label }}
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="group-title">展示</div>
+          <div
+            v-for="type in displayTypes"
+            :key="type.value"
+            class="component-item"
+            draggable="true"
+            @dragstart="handleDragStart($event, type.value)"
+          >
+            {{ type.label }}
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="group-title">数据</div>
+          <div
+            v-for="type in dataTypes"
+            :key="type.value"
+            class="component-item"
+            draggable="true"
+            @dragstart="handleDragStart($event, type.value)"
+          >
+            {{ type.label }}
+          </div>
+        </div>
+        <div class="component-group">
+          <div class="group-title">交互</div>
+          <div
+            v-for="type in actionTypes"
+            :key="type.value"
+            class="component-item"
+            draggable="true"
+            @dragstart="handleDragStart($event, type.value)"
+          >
+            {{ type.label }}
+          </div>
+        </div>
       </div>
 
-      <div class="designer-layout">
-        <!-- 组件库 -->
-        <div class="component-library">
-          <div class="panel-title">组件库</div>
-          <div class="component-group">
-            <div class="group-title">布局</div>
-            <div
-              v-for="type in layoutTypes"
-              :key="type.value"
-              class="component-item"
-              draggable="true"
-              @dragstart="handleDragStart($event, type.value)"
-            >
-              {{ type.label }}
-            </div>
-          </div>
-          <div class="component-group">
-            <div class="group-title">展示</div>
-            <div
-              v-for="type in displayTypes"
-              :key="type.value"
-              class="component-item"
-              draggable="true"
-              @dragstart="handleDragStart($event, type.value)"
-            >
-              {{ type.label }}
-            </div>
-          </div>
-          <div class="component-group">
-            <div class="group-title">数据</div>
-            <div
-              v-for="type in dataTypes"
-              :key="type.value"
-              class="component-item"
-              draggable="true"
-              @dragstart="handleDragStart($event, type.value)"
-            >
-              {{ type.label }}
-            </div>
-          </div>
-          <div class="component-group">
-            <div class="group-title">交互</div>
-            <div
-              v-for="type in actionTypes"
-              :key="type.value"
-              class="component-item"
-              draggable="true"
-              @dragstart="handleDragStart($event, type.value)"
-            >
-              {{ type.label }}
-            </div>
-          </div>
-        </div>
-
-        <!-- 画布 -->
-        <div class="canvas-panel" @dragover.prevent @drop="handleDropToRoot($event)">
-          <div class="panel-title">画布</div>
-          <div class="canvas-body" :class="{ 'is-empty': !config.components?.length }">
-            <component-node
-              v-for="(node, index) in config.components"
-              :key="node.id"
-              :node="node"
-              :index="index"
-              :selected-id="selectedId"
-              :parent-list="config.components"
-              @select="selectNode"
-              @delete="deleteNode"
-              @move="moveNode"
-            />
-            <div v-if="!config.components?.length" class="empty-tip">
-              从左侧拖拽组件到此处
-            </div>
-          </div>
-        </div>
-
-        <!-- 属性面板 -->
-        <div class="property-panel">
-          <div class="panel-title">属性</div>
-          <property-editor
-            v-if="selectedNode"
-            :node="selectedNode"
-            @update="onPropertyUpdate"
+      <!-- 画布 -->
+      <div class="canvas-panel" @dragover.prevent @drop="handleDropToRoot($event)">
+        <div class="panel-title">画布</div>
+        <div class="canvas-body" :class="{ 'is-empty': !config.components?.length }">
+          <component-node
+            v-for="(node, index) in config.components"
+            :key="node.id"
+            :node="node"
+            :index="index"
+            :selected-id="selectedId"
+            :parent-list="config.components"
+            @select="selectNode"
+            @delete="deleteNode"
+            @move="moveNode"
           />
-          <div v-else class="empty-tip">选中画布中的组件以编辑属性</div>
+          <div v-if="!config.components?.length" class="empty-tip">
+            从左侧拖拽组件到此处
+          </div>
         </div>
       </div>
-    </w-card>
+
+      <!-- 属性面板 -->
+      <div class="property-panel">
+        <div class="panel-title">属性</div>
+        <property-editor
+          v-if="selectedNode"
+          :node="selectedNode"
+          @update="onPropertyUpdate"
+        />
+        <div v-else class="empty-tip">选中画布中的组件以编辑属性</div>
+      </div>
+    </div>
 
     <w-dialog v-model="previewVisible" title="页面预览" width="900">
       <page-renderer :code="page.code" :config="config" :preview="true" />

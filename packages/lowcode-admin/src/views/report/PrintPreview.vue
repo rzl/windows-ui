@@ -1,14 +1,12 @@
 <template>
   <div class="preview-page">
-    <w-card>
-      <div class="toolbar">
-        <w-button @click="goBack">返回</w-button>
-        <w-button type="primary" @click="handlePrint">打印 / 另存 PDF</w-button>
-      </div>
-      <div class="preview-wrap">
-        <div v-for="(page, idx) in pages" :key="idx" class="preview-page-box" v-html="page.html"></div>
-      </div>
-    </w-card>
+    <div class="toolbar">
+      <w-button @click="goBack">返回</w-button>
+      <w-button type="primary" @click="handlePrint">打印 / 另存 PDF</w-button>
+    </div>
+    <div class="preview-wrap">
+      <div v-for="(page, idx) in pages" :key="idx" class="preview-page-box" v-html="page.html"></div>
+    </div>
   </div>
 </template>
 

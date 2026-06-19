@@ -1,16 +1,14 @@
 <template>
   <div class="list-page">
-    <w-card header="我的待办">
-      <w-table :data="tasks" :columns="columns" stripe border>
-        <template #action="{ row }">
-          <w-space>
-            <w-button size="small" @click="openDetail(row)">详情</w-button>
-            <w-button size="small" type="primary" @click="handleApprove(row)">通过</w-button>
-            <w-button size="small" type="danger" @click="handleReject(row)">驳回</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <w-table :data="tasks" :columns="columns" stripe border>
+      <template #action="{ row }">
+        <w-space>
+          <w-button size="small" @click="openDetail(row)">详情</w-button>
+          <w-button size="small" type="primary" @click="handleApprove(row)">通过</w-button>
+          <w-button size="small" type="danger" @click="handleReject(row)">驳回</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <w-dialog v-model="detailVisible" title="审批详情" width="700">
       <w-tabs v-model="activeTab">

@@ -1,23 +1,21 @@
 <template>
   <div class="list-page">
-    <w-card :header="report.name || report.code || '报表运行'">
-      <w-form v-if="paramList.length" :inline="true" style="margin-bottom: 12px">
-        <w-form-item v-for="p in paramList" :key="p.name" :label="p.label">
-          <w-input v-if="p.type === 'string' || p.type === 'number'" v-model="paramValues[p.name]" />
-          <w-input v-else-if="p.type === 'date'" v-model="paramValues[p.name]" type="date" />
-          <w-input v-else-if="p.type === 'datetime'" v-model="paramValues[p.name]" type="datetime-local" />
-          <w-select v-else-if="p.type === 'select'" v-model="paramValues[p.name]" :options="p.options || []" />
-        </w-form-item>
-        <w-button type="primary" @click="handleExecute">查询</w-button>
-        <w-button @click="handleExport">导出 Excel</w-button>
-      </w-form>
-      <div v-else class="toolbar">
-        <w-button type="primary" @click="handleExecute">查询</w-button>
-        <w-button @click="handleExport">导出 Excel</w-button>
-      </div>
+    <w-form v-if="paramList.length" :inline="true" style="margin-bottom: 12px">
+      <w-form-item v-for="p in paramList" :key="p.name" :label="p.label">
+        <w-input v-if="p.type === 'string' || p.type === 'number'" v-model="paramValues[p.name]" />
+        <w-input v-else-if="p.type === 'date'" v-model="paramValues[p.name]" type="date" />
+        <w-input v-else-if="p.type === 'datetime'" v-model="paramValues[p.name]" type="datetime-local" />
+        <w-select v-else-if="p.type === 'select'" v-model="paramValues[p.name]" :options="p.options || []" />
+      </w-form-item>
+      <w-button type="primary" @click="handleExecute">查询</w-button>
+      <w-button @click="handleExport">导出 Excel</w-button>
+    </w-form>
+    <div v-else class="toolbar">
+      <w-button type="primary" @click="handleExecute">查询</w-button>
+      <w-button @click="handleExport">导出 Excel</w-button>
+    </div>
 
-      <w-table :data="list" :columns="tableColumns" stripe border />
-    </w-card>
+    <w-table :data="list" :columns="tableColumns" stripe border />
   </div>
 </template>
 

@@ -1,50 +1,48 @@
 <template>
   <div class="list-page">
-    <w-card header="数据审计日志">
-      <w-form inline :model="query">
-        <w-form-item label="模型编码">
-          <w-input v-model="query.modelCode" placeholder="请输入模型编码" clearable />
-        </w-form-item>
-        <w-form-item label="操作类型">
-          <w-select v-model="query.action" :options="actionOptions" placeholder="全部" clearable style="width: 120px" />
-        </w-form-item>
-        <w-form-item label="记录 ID">
-          <w-input v-model.number="query.recordId" placeholder="请输入记录 ID" clearable />
-        </w-form-item>
-        <w-form-item label="操作人">
-          <w-input v-model="query.operatorName" placeholder="请输入操作人" clearable />
-        </w-form-item>
-        <w-form-item label="开始时间">
-          <w-input v-model="query.startTime" placeholder="YYYY-MM-DD HH:mm:ss" />
-        </w-form-item>
-        <w-form-item label="结束时间">
-          <w-input v-model="query.endTime" placeholder="YYYY-MM-DD HH:mm:ss" />
-        </w-form-item>
-        <w-form-item>
-          <w-button type="primary" @click="handleSearch">查询</w-button>
-          <w-button @click="handleReset">重置</w-button>
-        </w-form-item>
-      </w-form>
+    <w-form inline :model="query">
+      <w-form-item label="模型编码">
+        <w-input v-model="query.modelCode" placeholder="请输入模型编码" clearable />
+      </w-form-item>
+      <w-form-item label="操作类型">
+        <w-select v-model="query.action" :options="actionOptions" placeholder="全部" clearable style="width: 120px" />
+      </w-form-item>
+      <w-form-item label="记录 ID">
+        <w-input v-model.number="query.recordId" placeholder="请输入记录 ID" clearable />
+      </w-form-item>
+      <w-form-item label="操作人">
+        <w-input v-model="query.operatorName" placeholder="请输入操作人" clearable />
+      </w-form-item>
+      <w-form-item label="开始时间">
+        <w-input v-model="query.startTime" placeholder="YYYY-MM-DD HH:mm:ss" />
+      </w-form-item>
+      <w-form-item label="结束时间">
+        <w-input v-model="query.endTime" placeholder="YYYY-MM-DD HH:mm:ss" />
+      </w-form-item>
+      <w-form-item>
+        <w-button type="primary" @click="handleSearch">查询</w-button>
+        <w-button @click="handleReset">重置</w-button>
+      </w-form-item>
+    </w-form>
 
-      <w-table :data="list" :columns="columns" stripe border>
-        <template #action_type="{ row }">
-          <w-tag :type="actionTagType(row.action)">{{ actionText(row.action) }}</w-tag>
-        </template>
-        <template #create_time="{ row }">
-          {{ formatTime(row.create_time) }}
-        </template>
-        <template #action="{ row }">
-          <w-button size="small" @click="openDetail(row)">详情</w-button>
-        </template>
-      </w-table>
+    <w-table :data="list" :columns="columns" stripe border>
+      <template #action_type="{ row }">
+        <w-tag :type="actionTagType(row.action)">{{ actionText(row.action) }}</w-tag>
+      </template>
+      <template #create_time="{ row }">
+        {{ formatTime(row.create_time) }}
+      </template>
+      <template #action="{ row }">
+        <w-button size="small" @click="openDetail(row)">详情</w-button>
+      </template>
+    </w-table>
 
-      <w-pagination
-        :current-page="query.page"
-        :page-size="query.pageSize"
-        :total="total"
-        @update:current-page="handlePageChange"
-      />
-    </w-card>
+    <w-pagination
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :total="total"
+      @update:current-page="handlePageChange"
+    />
 
     <w-dialog v-model="detailVisible" title="审计详情" width="720">
       <div v-if="current" class="audit-detail">

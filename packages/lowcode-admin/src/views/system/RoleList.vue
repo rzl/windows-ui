@@ -1,22 +1,20 @@
 <template>
   <div class="list-page">
-    <w-card header="角色管理">
-      <div class="toolbar">
-        <w-button v-if="auth.hasPermission('role:create')" type="primary" @click="openDialog()">+ 新增</w-button>
-      </div>
+    <div class="toolbar">
+      <w-button v-if="auth.hasPermission('role:create')" type="primary" @click="openDialog()">+ 新增</w-button>
+    </div>
 
-      <w-table :data="list" :columns="columns" stripe border>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button v-if="auth.hasPermission('role:edit')" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="auth.hasPermission('role:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <w-table :data="list" :columns="columns" stripe border>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button v-if="auth.hasPermission('role:edit')" size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button v-if="auth.hasPermission('role:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <w-dialog v-model="dialogVisible" title="角色" width="560">
       <w-form :model="formModel">

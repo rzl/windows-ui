@@ -1,23 +1,21 @@
 <template>
   <div class="list-page">
-    <w-card header="定时任务">
-      <div class="toolbar">
-        <w-button type="primary" @click="openDialog()">+ 新增任务</w-button>
-      </div>
-      <w-table :data="tasks" :columns="columns" stripe border>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button size="small" @click="handleRun(row)">执行</w-button>
-            <w-button size="small" @click="openLog(row)">日志</w-button>
-            <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <div class="toolbar">
+      <w-button type="primary" @click="openDialog()">+ 新增任务</w-button>
+    </div>
+    <w-table :data="tasks" :columns="columns" stripe border>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button size="small" @click="handleRun(row)">执行</w-button>
+          <w-button size="small" @click="openLog(row)">日志</w-button>
+          <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <w-dialog v-model="dialogVisible" title="定时任务" width="520">
       <w-form :model="formModel">

@@ -1,30 +1,28 @@
 <template>
   <div class="list-page">
-    <w-card header="应用管理">
-      <div class="toolbar">
-        <w-button type="primary" @click="openDialog()">+ 新增应用</w-button>
-        <w-button @click="importVisible = true">导入应用</w-button>
-        <w-button @click="openTemplateDialog()">从模板创建</w-button>
-      </div>
-      <w-table :data="apps" :columns="columns" stripe border>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #is_market="{ row }">
-          <w-tag :type="row.is_market === 1 ? 'success' : 'info'">{{ row.is_market === 1 ? '已上架' : '未上架' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button size="small" @click="goDesign(row)">设计</w-button>
-            <w-button size="small" @click="toggleMarket(row)">
-              {{ row.is_market === 1 ? '下架' : '上架' }}
-            </w-button>
-            <w-button size="small" @click="exportAppFile(row)">导出</w-button>
-            <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <div class="toolbar">
+      <w-button type="primary" @click="openDialog()">+ 新增应用</w-button>
+      <w-button @click="importVisible = true">导入应用</w-button>
+      <w-button @click="openTemplateDialog()">从模板创建</w-button>
+    </div>
+    <w-table :data="apps" :columns="columns" stripe border>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #is_market="{ row }">
+        <w-tag :type="row.is_market === 1 ? 'success' : 'info'">{{ row.is_market === 1 ? '已上架' : '未上架' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button size="small" @click="goDesign(row)">设计</w-button>
+          <w-button size="small" @click="toggleMarket(row)">
+            {{ row.is_market === 1 ? '下架' : '上架' }}
+          </w-button>
+          <w-button size="small" @click="exportAppFile(row)">导出</w-button>
+          <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <w-dialog v-model="dialogVisible" title="应用" width="520">
       <w-form :model="formModel">

@@ -1,33 +1,31 @@
 <template>
   <div class="list-page">
-    <w-card header="消息管理">
-      <div class="toolbar">
-        <w-button type="primary" @click="openSendDialog()">+ 发送消息</w-button>
-      </div>
-      <w-crud-table
-        :data="list"
-        :columns="columns"
-        :query="query"
-        :total="total"
-        :current-page="query.page"
-        :page-size="query.pageSize"
-        :searchable="false"
-        @page-change="handlePageChange"
-      >
-        <template #toolbar>
-          <w-button size="small" @click="loadUnreadCount">刷新未读</w-button>
-        </template>
-        <template #is_read="{ row }">
-          <w-tag :type="row.is_read === 1 ? 'info' : 'success'">{{ row.is_read === 1 ? '已读' : '未读' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button v-if="row.is_read === 0" size="small" @click="handleRead(row)">标为已读</w-button>
-            <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-crud-table>
-    </w-card>
+    <div class="toolbar">
+      <w-button type="primary" @click="openSendDialog()">+ 发送消息</w-button>
+    </div>
+    <w-crud-table
+      :data="list"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      @page-change="handlePageChange"
+    >
+      <template #toolbar>
+        <w-button size="small" @click="loadUnreadCount">刷新未读</w-button>
+      </template>
+      <template #is_read="{ row }">
+        <w-tag :type="row.is_read === 1 ? 'info' : 'success'">{{ row.is_read === 1 ? '已读' : '未读' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button v-if="row.is_read === 0" size="small" @click="handleRead(row)">标为已读</w-button>
+          <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-crud-table>
 
     <w-dialog v-model="sendDialogVisible" title="发送消息" width="480">
       <w-form :model="sendForm">

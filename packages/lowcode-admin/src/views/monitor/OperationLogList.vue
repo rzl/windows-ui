@@ -1,27 +1,25 @@
 <template>
   <div class="list-page">
-    <w-card header="操作日志">
-      <w-crud-table
-        :data="list"
-        :columns="columns"
-        :query="query"
-        :total="total"
-        :current-page="query.page"
-        :page-size="query.pageSize"
-        @search="handleSearch"
-        @reset="handleReset"
-        @page-change="handlePageChange"
-      >
-        <template #search>
-          <w-form-item label="关键词">
-            <w-input v-model="query.keyword" placeholder="用户/模块/操作" />
-          </w-form-item>
-        </template>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '成功' : '失败' }}</w-tag>
-        </template>
-      </w-crud-table>
-    </w-card>
+    <w-crud-table
+      :data="list"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      @search="handleSearch"
+      @reset="handleReset"
+      @page-change="handlePageChange"
+    >
+      <template #search>
+        <w-form-item label="关键词">
+          <w-input v-model="query.keyword" placeholder="用户/模块/操作" />
+        </w-form-item>
+      </template>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '成功' : '失败' }}</w-tag>
+      </template>
+    </w-crud-table>
   </div>
 </template>
 

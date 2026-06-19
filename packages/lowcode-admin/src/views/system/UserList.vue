@@ -1,46 +1,44 @@
 <template>
   <div class="list-page">
-    <w-card header="用户管理">
-      <w-search-form :model="query" @search="handleSearch" @reset="handleReset">
-        <w-form-item label="关键词">
-          <w-input v-model="query.keyword" placeholder="用户名/昵称/邮箱" />
-        </w-form-item>
-        <w-form-item label="状态">
-          <w-select v-model="query.status" :options="statusOptions" placeholder="请选择" clearable style="width: 120px" />
-        </w-form-item>
-      </w-search-form>
+    <w-search-form :model="query" @search="handleSearch" @reset="handleReset">
+      <w-form-item label="关键词">
+        <w-input v-model="query.keyword" placeholder="用户名/昵称/邮箱" />
+      </w-form-item>
+      <w-form-item label="状态">
+        <w-select v-model="query.status" :options="statusOptions" placeholder="请选择" clearable style="width: 120px" />
+      </w-form-item>
+    </w-search-form>
 
-      <div class="toolbar">
-        <w-button v-if="auth.hasPermission('user:create')" type="primary" @click="openDialog()">+ 新增</w-button>
-        <w-button v-if="auth.hasPermission('user:delete')" type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">批量删除</w-button>
-      </div>
+    <div class="toolbar">
+      <w-button v-if="auth.hasPermission('user:create')" type="primary" @click="openDialog()">+ 新增</w-button>
+      <w-button v-if="auth.hasPermission('user:delete')" type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">批量删除</w-button>
+    </div>
 
-      <w-table
-        :data="store.list"
-        :columns="columns"
-        stripe
-        border
-        highlight-current-row
-        @selection-change="handleSelectionChange"
-      >
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button v-if="auth.hasPermission('user:edit')" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="auth.hasPermission('user:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-table>
+    <w-table
+      :data="store.list"
+      :columns="columns"
+      stripe
+      border
+      highlight-current-row
+      @selection-change="handleSelectionChange"
+    >
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button v-if="auth.hasPermission('user:edit')" size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button v-if="auth.hasPermission('user:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
-      <w-pagination
-        :current-page="query.page"
-        :page-size="query.pageSize"
-        :total="store.total"
-        @update:current-page="handlePageChange"
-      />
-    </w-card>
+    <w-pagination
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :total="store.total"
+      @update:current-page="handlePageChange"
+    />
 
     <w-dialog v-model="dialogVisible" :title="dialogTitle" width="520">
       <w-form :model="formModel">

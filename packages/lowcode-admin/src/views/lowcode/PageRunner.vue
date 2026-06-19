@@ -1,8 +1,6 @@
 <template>
   <div class="page-runner-page">
-    <w-card :header="pageTitle">
-      <page-renderer :code="code" />
-    </w-card>
+    <page-renderer :code="code" />
   </div>
 </template>
 
@@ -13,7 +11,6 @@ import PageRenderer from '@/components/page-designer/PageRenderer.vue'
 
 const route = useRoute()
 const code = computed(() => route.params.code as string)
-const pageTitle = computed(() => route.query.title as string || code.value || '自定义页面')
 </script>
 
 <style scoped>

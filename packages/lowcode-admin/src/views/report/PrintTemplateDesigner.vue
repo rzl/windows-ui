@@ -1,93 +1,91 @@
 <template>
   <div class="designer-page">
-    <w-card>
-      <div class="toolbar">
-        <w-button @click="goBack">返回</w-button>
-        <w-space>
-          <w-button @click="previewVisible = true">预览</w-button>
-          <w-button type="primary" @click="handleSave">保存</w-button>
-        </w-space>
-      </div>
+    <div class="toolbar">
+      <w-button @click="goBack">返回</w-button>
+      <w-space>
+        <w-button @click="previewVisible = true">预览</w-button>
+        <w-button type="primary" @click="handleSave">保存</w-button>
+      </w-space>
+    </div>
 
-      <div class="designer-body">
-        <div class="component-panel">
-          <div class="panel-title">组件</div>
-          <div class="component-list">
-            <div class="component-item" v-for="type in componentTypes" :key="type.value" @click="addElement(type.value)">
-              {{ type.label }}
-            </div>
+    <div class="designer-body">
+      <div class="component-panel">
+        <div class="panel-title">组件</div>
+        <div class="component-list">
+          <div class="component-item" v-for="type in componentTypes" :key="type.value" @click="addElement(type.value)">
+            {{ type.label }}
           </div>
         </div>
+      </div>
 
-        <div class="canvas-wrap">
+      <div class="canvas-wrap">
+        <div
+          class="canvas"
+          :style="canvasStyle"
+          @mousedown="onCanvasMouseDown"
+          @mousemove="onCanvasMouseMove"
+          @mouseup="onCanvasMouseUp"
+          @click.self="selectedId = ''"
+        >
           <div
-            class="canvas"
-            :style="canvasStyle"
-            @mousedown="onCanvasMouseDown"
-            @mousemove="onCanvasMouseMove"
-            @mouseup="onCanvasMouseUp"
-            @click.self="selectedId = ''"
+            v-for="el in elements"
+            :key="el.id"
+            class="element"
+            :class="{ active: el.id === selectedId }"
+            :style="getElementStyle(el)"
+            @mousedown.stop="onElementMouseDown($event, el)"
+            @click.stop="selectedId = el.id"
           >
-            <div
-              v-for="el in elements"
-              :key="el.id"
-              class="element"
-              :class="{ active: el.id === selectedId }"
-              :style="getElementStyle(el)"
-              @mousedown.stop="onElementMouseDown($event, el)"
-              @click.stop="selectedId = el.id"
-            >
-              <div v-if="el.type === 'text'" class="el-text">{{ renderElementText(el) }}</div>
-              <div v-else-if="el.type === 'rect'" class="el-rect"></div>
-              <img v-else-if="el.type === 'image'" class="el-image" :src="el.content || ''" />
-              <div v-else-if="el.type === 'qrcode'" class="el-qrcode">{{ el.content || 'QR' }}</div>
-              <table v-else-if="el.type === 'table'" class="el-table">
-                <tr><th v-for="(col, idx) in (el.tableConfig?.columns || [])" :key="idx">{{ col.label }}</th></tr>
-              </table>
-            </div>
+            <div v-if="el.type === 'text'" class="el-text">{{ renderElementText(el) }}</div>
+            <div v-else-if="el.type === 'rect'" class="el-rect"></div>
+            <img v-else-if="el.type === 'image'" class="el-image" :src="el.content || ''" />
+            <div v-else-if="el.type === 'qrcode'" class="el-qrcode">{{ el.content || 'QR' }}</div>
+            <table v-else-if="el.type === 'table'" class="el-table">
+              <tr><th v-for="(col, idx) in (el.tableConfig?.columns || [])" :key="idx">{{ col.label }}</th></tr>
+            </table>
           </div>
         </div>
-
-        <div class="property-panel">
-          <div class="panel-title">属性</div>
-          <template v-if="selectedElement">
-            <w-form :model="selectedElement" label-width="80px">
-              <w-form-item label="类型">{{ selectedElement.type }}</w-form-item>
-              <w-form-item label="X"><w-input-number v-model="selectedElement.x" /></w-form-item>
-              <w-form-item label="Y"><w-input-number v-model="selectedElement.y" /></w-form-item>
-              <w-form-item label="宽"><w-input-number v-model="selectedElement.width" /></w-form-item>
-              <w-form-item label="高"><w-input-number v-model="selectedElement.height" /></w-form-item>
-              <w-form-item v-if="selectedElement.type === 'text'" label="内容">
-                <w-input v-model="selectedElement.content" />
-              </w-form-item>
-              <w-form-item v-if="selectedElement.type === 'image'" label="图片URL">
-                <w-input v-model="selectedElement.content" />
-              </w-form-item>
-              <w-form-item v-if="selectedElement.type === 'qrcode'" label="内容">
-                <w-input v-model="selectedElement.content" />
-              </w-form-item>
-              <w-form-item v-if="['text', 'qrcode', 'table'].includes(selectedElement.type)" label="绑定字段">
-                <w-select v-model="selectedElement.field" :options="fieldOptions" clearable />
-              </w-form-item>
-              <w-form-item v-if="selectedElement.type === 'table'" label="表格列">
-                <div v-for="(col, idx) in selectedElement.tableConfig.columns" :key="idx" class="col-row">
-                  <w-input v-model="col.label" placeholder="标签" />
-                  <w-input v-model="col.field" placeholder="字段" />
-                  <w-input-number v-model="col.width" placeholder="宽" />
-                  <w-button size="small" type="danger" @click="removeTableColumn(idx)">-</w-button>
-                </div>
-                <w-button size="small" @click="addTableColumn">+ 添加列</w-button>
-              </w-form-item>
-              <w-form-item label="样式">
-                <w-input v-model="styleText" type="textarea" :rows="4" />
-              </w-form-item>
-            </w-form>
-            <w-button type="danger" @click="removeSelected">删除元素</w-button>
-          </template>
-          <div v-else class="empty-tip">请选择元素</div>
-        </div>
       </div>
-    </w-card>
+
+      <div class="property-panel">
+        <div class="panel-title">属性</div>
+        <template v-if="selectedElement">
+          <w-form :model="selectedElement" label-width="80px">
+            <w-form-item label="类型">{{ selectedElement.type }}</w-form-item>
+            <w-form-item label="X"><w-input-number v-model="selectedElement.x" /></w-form-item>
+            <w-form-item label="Y"><w-input-number v-model="selectedElement.y" /></w-form-item>
+            <w-form-item label="宽"><w-input-number v-model="selectedElement.width" /></w-form-item>
+            <w-form-item label="高"><w-input-number v-model="selectedElement.height" /></w-form-item>
+            <w-form-item v-if="selectedElement.type === 'text'" label="内容">
+              <w-input v-model="selectedElement.content" />
+            </w-form-item>
+            <w-form-item v-if="selectedElement.type === 'image'" label="图片URL">
+              <w-input v-model="selectedElement.content" />
+            </w-form-item>
+            <w-form-item v-if="selectedElement.type === 'qrcode'" label="内容">
+              <w-input v-model="selectedElement.content" />
+            </w-form-item>
+            <w-form-item v-if="['text', 'qrcode', 'table'].includes(selectedElement.type)" label="绑定字段">
+              <w-select v-model="selectedElement.field" :options="fieldOptions" clearable />
+            </w-form-item>
+            <w-form-item v-if="selectedElement.type === 'table'" label="表格列">
+              <div v-for="(col, idx) in selectedElement.tableConfig.columns" :key="idx" class="col-row">
+                <w-input v-model="col.label" placeholder="标签" />
+                <w-input v-model="col.field" placeholder="字段" />
+                <w-input-number v-model="col.width" placeholder="宽" />
+                <w-button size="small" type="danger" @click="removeTableColumn(idx)">-</w-button>
+              </div>
+              <w-button size="small" @click="addTableColumn">+ 添加列</w-button>
+            </w-form-item>
+            <w-form-item label="样式">
+              <w-input v-model="styleText" type="textarea" :rows="4" />
+            </w-form-item>
+          </w-form>
+          <w-button type="danger" @click="removeSelected">删除元素</w-button>
+        </template>
+        <div v-else class="empty-tip">请选择元素</div>
+      </div>
+    </div>
 
     <w-dialog v-model="previewVisible" title="打印预览" width="900">
       <div class="preview-pages">

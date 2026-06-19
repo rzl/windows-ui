@@ -1,70 +1,68 @@
 <template>
   <div class="list-page">
-    <w-card :header="model.name || model.code || '低代码页面'">
-      <w-query-builder
-        v-if="queryFields.length"
-        :fields="queryFields"
-        @search="handleQuerySearch"
-        @reset="handleQueryReset"
-      />
-      <w-alert v-if="!canAccess" type="error" title="无权限访问" description="您没有该数据模型的访问权限，请联系管理员。" :closable="false" />
-      <w-crud-table
-        v-else
-        :data="list"
-        :columns="tableColumns"
-        :query="query"
-        :total="total"
-        :current-page="query.page"
-        :page-size="query.pageSize"
-        :searchable="false"
-        @page-change="handlePageChange"
-        @sort-change="handleSortChange"
-        @selection-change="handleSelectionChange"
-      >
-        <template #toolbar>
-          <w-space>
-            <w-button v-if="permission.canCreate && tableConfig.toolbar.includes('create') && hasActionPermission('create', 'toolbar')" type="primary" @click="openDialog()">+ 新增</w-button>
-            <w-button v-if="permission.canDelete && tableConfig.toolbar.includes('batchDelete') && hasActionPermission('batchDelete', 'toolbar')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
-            <w-dropdown
-              v-if="permission.canExport && tableConfig.toolbar.includes('export') && hasActionPermission('export', 'toolbar')"
-              trigger-text="导出"
-              :items="[
-                { label: '导出全部', value: 'all' },
-                { label: '导出选中', value: 'selected', disabled: !selectedRows.length }
-              ]"
-              @command="handleExportCommand"
-            />
-            <w-dropdown
-              v-if="permission.canImport && tableConfig.toolbar.includes('import') && hasActionPermission('import', 'toolbar')"
-              trigger-text="导入"
-              :items="[
-                { label: '上传 Excel', value: 'upload' },
-                { label: '下载模板', value: 'template' }
-              ]"
-              @command="handleImportCommand"
-            />
-            <input v-if="permission.canImport && tableConfig.toolbar.includes('import') && hasActionPermission('import', 'toolbar')" ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleFileChange" />
-            <w-dropdown
-              v-if="printTemplates.length"
-              trigger-text="打印"
-              :items="printTemplateItems"
-              @command="handlePrintCommand"
-            />
-          </w-space>
-        </template>
-        <template v-for="col in formattedColumns" :key="col.prop" #[col.prop]="{ row }">
-          {{ col.formatter(row) }}
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button v-if="permission.canEdit && tableConfig.rowActions.includes('edit') && hasActionPermission('edit', 'rowAction') && canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button v-if="permission.canDelete && tableConfig.rowActions.includes('delete') && hasActionPermission('delete', 'rowAction') && canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-            <w-button v-if="tableConfig.rowActions.includes('view') && hasActionPermission('view', 'rowAction')" size="small" @click="openDialog(row)">查看</w-button>
-            <w-tag v-if="row.__flow_status" :type="flowStatusType(row.__flow_status)">{{ flowStatusText(row.__flow_status) }}</w-tag>
-          </w-space>
-        </template>
-      </w-crud-table>
-    </w-card>
+    <w-query-builder
+      v-if="queryFields.length"
+      :fields="queryFields"
+      @search="handleQuerySearch"
+      @reset="handleQueryReset"
+    />
+    <w-alert v-if="!canAccess" type="error" title="无权限访问" description="您没有该数据模型的访问权限，请联系管理员。" :closable="false" />
+    <w-crud-table
+      v-else
+      :data="list"
+      :columns="tableColumns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      @page-change="handlePageChange"
+      @sort-change="handleSortChange"
+      @selection-change="handleSelectionChange"
+    >
+      <template #toolbar>
+        <w-space>
+          <w-button v-if="permission.canCreate && tableConfig.toolbar.includes('create') && hasActionPermission('create', 'toolbar')" type="primary" @click="openDialog()">+ 新增</w-button>
+          <w-button v-if="permission.canDelete && tableConfig.toolbar.includes('batchDelete') && hasActionPermission('batchDelete', 'toolbar')" :disabled="!selectedRows.length" @click="handleBatchDelete">批量删除</w-button>
+          <w-dropdown
+            v-if="permission.canExport && tableConfig.toolbar.includes('export') && hasActionPermission('export', 'toolbar')"
+            trigger-text="导出"
+            :items="[
+              { label: '导出全部', value: 'all' },
+              { label: '导出选中', value: 'selected', disabled: !selectedRows.length }
+            ]"
+            @command="handleExportCommand"
+          />
+          <w-dropdown
+            v-if="permission.canImport && tableConfig.toolbar.includes('import') && hasActionPermission('import', 'toolbar')"
+            trigger-text="导入"
+            :items="[
+              { label: '上传 Excel', value: 'upload' },
+              { label: '下载模板', value: 'template' }
+            ]"
+            @command="handleImportCommand"
+          />
+          <input v-if="permission.canImport && tableConfig.toolbar.includes('import') && hasActionPermission('import', 'toolbar')" ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleFileChange" />
+          <w-dropdown
+            v-if="printTemplates.length"
+            trigger-text="打印"
+            :items="printTemplateItems"
+            @command="handlePrintCommand"
+          />
+        </w-space>
+      </template>
+      <template v-for="col in formattedColumns" :key="col.prop" #[col.prop]="{ row }">
+        {{ col.formatter(row) }}
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button v-if="permission.canEdit && tableConfig.rowActions.includes('edit') && hasActionPermission('edit', 'rowAction') && canEdit(row)" size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button v-if="permission.canDelete && tableConfig.rowActions.includes('delete') && hasActionPermission('delete', 'rowAction') && canEdit(row)" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+          <w-button v-if="tableConfig.rowActions.includes('view') && hasActionPermission('view', 'rowAction')" size="small" @click="openDialog(row)">查看</w-button>
+          <w-tag v-if="row.__flow_status" :type="flowStatusType(row.__flow_status)">{{ flowStatusText(row.__flow_status) }}</w-tag>
+        </w-space>
+      </template>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" :title="dialogTitle" width="560">
       <w-dynamic-form

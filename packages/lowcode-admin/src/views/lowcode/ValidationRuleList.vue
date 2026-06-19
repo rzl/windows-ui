@@ -1,21 +1,19 @@
 <template>
   <div class="list-page">
-    <w-card header="校验规则">
-      <div class="toolbar">
-        <w-button type="primary" @click="openDialog()">+ 新增</w-button>
-      </div>
-      <w-table :data="list" :columns="columns" stripe border>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button size="small" @click="openDialog(row)">编辑</w-button>
-            <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <div class="toolbar">
+      <w-button type="primary" @click="openDialog()">+ 新增</w-button>
+    </div>
+    <w-table :data="list" :columns="columns" stripe border>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <w-dialog v-model="dialogVisible" title="校验规则" width="480">
       <w-form :model="formModel">

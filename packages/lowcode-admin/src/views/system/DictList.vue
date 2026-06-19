@@ -1,24 +1,22 @@
 <template>
   <div class="list-page">
-    <w-card header="字典管理">
-      <div class="toolbar">
-        <w-button v-if="auth.hasPermission('dict:create')" type="primary" @click="openDictDialog()">+ 新增字典</w-button>
-        <w-button @click="goCategory">分类管理</w-button>
-      </div>
+    <div class="toolbar">
+      <w-button v-if="auth.hasPermission('dict:create')" type="primary" @click="openDictDialog()">+ 新增字典</w-button>
+      <w-button @click="goCategory">分类管理</w-button>
+    </div>
 
-      <w-table :data="dicts" :columns="dictColumns" stripe border>
-        <template #status="{ row }">
-          <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
-        </template>
-        <template #action="{ row }">
-          <w-space>
-            <w-button v-if="auth.hasPermission('dict:edit')" size="small" @click="openDictDialog(row)">编辑</w-button>
-            <w-button v-if="auth.hasPermission('dict:delete')" size="small" type="danger" @click="handleDeleteDict(row)">删除</w-button>
-            <w-button size="small" @click="openItemDialog(row)">字典项</w-button>
-          </w-space>
-        </template>
-      </w-table>
-    </w-card>
+    <w-table :data="dicts" :columns="dictColumns" stripe border>
+      <template #status="{ row }">
+        <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
+      </template>
+      <template #action="{ row }">
+        <w-space>
+          <w-button v-if="auth.hasPermission('dict:edit')" size="small" @click="openDictDialog(row)">编辑</w-button>
+          <w-button v-if="auth.hasPermission('dict:delete')" size="small" type="danger" @click="handleDeleteDict(row)">删除</w-button>
+          <w-button size="small" @click="openItemDialog(row)">字典项</w-button>
+        </w-space>
+      </template>
+    </w-table>
 
     <!-- 字典表单 -->
     <w-dialog v-model="dictDialogVisible" title="字典" width="480">

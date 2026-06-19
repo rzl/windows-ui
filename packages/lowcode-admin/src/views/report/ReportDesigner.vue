@@ -1,97 +1,95 @@
 <template>
   <div class="designer-page">
-    <w-card :header="`报表设计 - ${report.name || report.code || ''}`">
-      <div class="toolbar">
-        <w-button type="primary" size="small" @click="handleSave">保存报表配置</w-button>
-        <w-button size="small" @click="goRun">运行报表</w-button>
-      </div>
+    <div class="toolbar">
+      <w-button type="primary" size="small" @click="handleSave">保存报表配置</w-button>
+      <w-button size="small" @click="goRun">运行报表</w-button>
+    </div>
 
-      <w-form :inline="true">
-        <w-form-item label="报表编码">
-          <w-input v-model="report.code" disabled style="width: 180px" />
-        </w-form-item>
-        <w-form-item label="报表名称">
-          <w-input v-model="report.name" style="width: 180px" />
-        </w-form-item>
-        <w-form-item label="数据模型">
-          <w-select v-model="report.modelCode" :options="modelOptions" :disabled="!!report.externalDataSourceId" style="width: 180px" />
-        </w-form-item>
-        <w-form-item label="外部数据源">
-          <w-select v-model="report.externalDataSourceId" :options="externalDataSourceOptions" clearable style="width: 180px" @change="handleExternalChange" />
-        </w-form-item>
-        <w-form-item label="状态">
-          <w-switch v-model="report.status" active-text="启用" inactive-text="禁用" />
-        </w-form-item>
-      </w-form>
+    <w-form :inline="true">
+      <w-form-item label="报表编码">
+        <w-input v-model="report.code" disabled style="width: 180px" />
+      </w-form-item>
+      <w-form-item label="报表名称">
+        <w-input v-model="report.name" style="width: 180px" />
+      </w-form-item>
+      <w-form-item label="数据模型">
+        <w-select v-model="report.modelCode" :options="modelOptions" :disabled="!!report.externalDataSourceId" style="width: 180px" />
+      </w-form-item>
+      <w-form-item label="外部数据源">
+        <w-select v-model="report.externalDataSourceId" :options="externalDataSourceOptions" clearable style="width: 180px" @change="handleExternalChange" />
+      </w-form-item>
+      <w-form-item label="状态">
+        <w-switch v-model="report.status" active-text="启用" inactive-text="禁用" />
+      </w-form-item>
+    </w-form>
 
-      <w-tabs v-model="activeTab">
-        <w-tab-pane label="报表列" name="columns">
-          <div class="section-title">选择报表列与聚合方式</div>
-          <w-table :data="fieldList" :columns="columnDesignColumns" stripe border>
-            <template #selected="{ row }">
-              <w-switch v-model="columnMap[row.field_name].selected" />
-            </template>
-            <template #label="{ row }">
-              <w-input v-model="columnMap[row.field_name].label" style="width: 120px" />
-            </template>
-            <template #aggregate="{ row }">
-              <w-select v-model="columnMap[row.field_name].aggregate" :options="aggregateOptions" style="width: 100px" />
-            </template>
-            <template #format="{ row }">
-              <w-select v-model="columnMap[row.field_name].format" :options="formatOptions" style="width: 100px" />
-            </template>
-          </w-table>
-        </w-tab-pane>
+    <w-tabs v-model="activeTab">
+      <w-tab-pane label="报表列" name="columns">
+        <div class="section-title">选择报表列与聚合方式</div>
+        <w-table :data="fieldList" :columns="columnDesignColumns" stripe border>
+          <template #selected="{ row }">
+            <w-switch v-model="columnMap[row.field_name].selected" />
+          </template>
+          <template #label="{ row }">
+            <w-input v-model="columnMap[row.field_name].label" style="width: 120px" />
+          </template>
+          <template #aggregate="{ row }">
+            <w-select v-model="columnMap[row.field_name].aggregate" :options="aggregateOptions" style="width: 100px" />
+          </template>
+          <template #format="{ row }">
+            <w-select v-model="columnMap[row.field_name].format" :options="formatOptions" style="width: 100px" />
+          </template>
+        </w-table>
+      </w-tab-pane>
 
-        <w-tab-pane label="分组" name="group">
-          <div class="section-title">选择分组字段（用于汇总统计）</div>
-          <w-checkbox-group v-model="groupBy" :options="groupFieldOptions" />
-        </w-tab-pane>
+      <w-tab-pane label="分组" name="group">
+        <div class="section-title">选择分组字段（用于汇总统计）</div>
+        <w-checkbox-group v-model="groupBy" :options="groupFieldOptions" />
+      </w-tab-pane>
 
-        <w-tab-pane label="过滤条件" name="filters">
-          <div class="toolbar">
-            <w-button type="primary" size="small" @click="addFilter">+ 新增条件</w-button>
-          </div>
-          <w-table :data="filters" :columns="filterColumns" stripe border>
-            <template #field="{ $index }">
-              <w-select v-model="filters[$index].field" :options="fieldOptions" style="width: 150px" />
-            </template>
-            <template #operator="{ $index }">
-              <w-select v-model="filters[$index].operator" :options="operatorOptions" style="width: 120px" />
-            </template>
-            <template #value="{ $index }">
-              <w-input v-model="filters[$index].value" style="width: 180px" />
-            </template>
-            <template #action="{ $index }">
-              <w-button size="small" type="danger" @click="removeFilter($index)">删除</w-button>
-            </template>
-          </w-table>
-        </w-tab-pane>
+      <w-tab-pane label="过滤条件" name="filters">
+        <div class="toolbar">
+          <w-button type="primary" size="small" @click="addFilter">+ 新增条件</w-button>
+        </div>
+        <w-table :data="filters" :columns="filterColumns" stripe border>
+          <template #field="{ $index }">
+            <w-select v-model="filters[$index].field" :options="fieldOptions" style="width: 150px" />
+          </template>
+          <template #operator="{ $index }">
+            <w-select v-model="filters[$index].operator" :options="operatorOptions" style="width: 120px" />
+          </template>
+          <template #value="{ $index }">
+            <w-input v-model="filters[$index].value" style="width: 180px" />
+          </template>
+          <template #action="{ $index }">
+            <w-button size="small" type="danger" @click="removeFilter($index)">删除</w-button>
+          </template>
+        </w-table>
+      </w-tab-pane>
 
-        <w-tab-pane label="报表参数" name="params">
-          <div class="toolbar">
-            <w-button type="primary" size="small" @click="addParam">+ 新增参数</w-button>
-          </div>
-          <w-table :data="params" :columns="paramColumns" stripe border>
-            <template #name="{ $index }">
-              <w-input v-model="params[$index].name" style="width: 120px" />
-            </template>
-            <template #label="{ $index }">
-              <w-input v-model="params[$index].label" style="width: 120px" />
-            </template>
-            <template #type="{ $index }">
-              <w-select v-model="params[$index].type" :options="paramTypeOptions" style="width: 120px" />
-            </template>
-            <template #defaultValue="{ $index }">
-              <w-input v-model="params[$index].defaultValue" style="width: 150px" />
-            </template>
-            <template #action="{ $index }">
-              <w-button size="small" type="danger" @click="removeParam($index)">删除</w-button>
-            </template>
-          </w-table>
-        </w-tab-pane>
-      </w-tabs>
-    </w-card>
+      <w-tab-pane label="报表参数" name="params">
+        <div class="toolbar">
+          <w-button type="primary" size="small" @click="addParam">+ 新增参数</w-button>
+        </div>
+        <w-table :data="params" :columns="paramColumns" stripe border>
+          <template #name="{ $index }">
+            <w-input v-model="params[$index].name" style="width: 120px" />
+          </template>
+          <template #label="{ $index }">
+            <w-input v-model="params[$index].label" style="width: 120px" />
+          </template>
+          <template #type="{ $index }">
+            <w-select v-model="params[$index].type" :options="paramTypeOptions" style="width: 120px" />
+          </template>
+          <template #defaultValue="{ $index }">
+            <w-input v-model="params[$index].defaultValue" style="width: 150px" />
+          </template>
+          <template #action="{ $index }">
+            <w-button size="small" type="danger" @click="removeParam($index)">删除</w-button>
+          </template>
+        </w-table>
+      </w-tab-pane>
+    </w-tabs>
   </div>
 </template>
 

@@ -1,74 +1,72 @@
 <template>
   <div class="designer-page">
-    <w-card :header="`仪表盘设计 - ${dashboard.name || dashboard.code || ''}`">
-      <div class="toolbar">
-        <w-button type="primary" @click="handleSave">保存配置</w-button>
-        <w-button @click="handlePreview">刷新预览</w-button>
-      </div>
+    <div class="toolbar">
+      <w-button type="primary" @click="handleSave">保存配置</w-button>
+      <w-button @click="handlePreview">刷新预览</w-button>
+    </div>
 
-      <w-form :model="dashboard">
-        <w-form-item label="仪表盘编码">
-          <w-input v-model="dashboard.code" disabled />
-        </w-form-item>
-        <w-form-item label="仪表盘名称">
-          <w-input v-model="dashboard.name" />
-        </w-form-item>
-      </w-form>
+    <w-form :model="dashboard">
+      <w-form-item label="仪表盘编码">
+        <w-input v-model="dashboard.code" disabled />
+      </w-form-item>
+      <w-form-item label="仪表盘名称">
+        <w-input v-model="dashboard.name" />
+      </w-form-item>
+    </w-form>
 
-      <div class="editor-layout">
-        <div class="config-panel">
-          <h4>数据源配置</h4>
-          <w-form-item label="数据源类型">
-            <w-select v-model="dataSource.type" :options="dataSourceTypeOptions" />
+    <div class="editor-layout">
+      <div class="config-panel">
+        <h4>数据源配置</h4>
+        <w-form-item label="数据源类型">
+          <w-select v-model="dataSource.type" :options="dataSourceTypeOptions" />
+        </w-form-item>
+
+        <template v-if="dataSource.type === 'sql'">
+          <w-form-item label="SQL 查询">
+            <w-input v-model="dataSource.sql" type="textarea" :rows="4" placeholder='SELECT status, COUNT(*) as value FROM users GROUP BY status' />
+            <p class="tip">只允许 SELECT 查询，禁止写入/修改/删除操作。</p>
           </w-form-item>
+        </template>
 
-          <template v-if="dataSource.type === 'sql'">
-            <w-form-item label="SQL 查询">
-              <w-input v-model="dataSource.sql" type="textarea" :rows="4" placeholder='SELECT status, COUNT(*) as value FROM users GROUP BY status' />
-              <p class="tip">只允许 SELECT 查询，禁止写入/修改/删除操作。</p>
-            </w-form-item>
-          </template>
+        <template v-if="dataSource.type === 'api'">
+          <w-form-item label="请求方法">
+            <w-select v-model="dataSource.api.method" :options="httpMethodOptions" />
+          </w-form-item>
+          <w-form-item label="请求地址">
+            <w-input v-model="dataSource.api.url" placeholder='/api/lowcode/customer' />
+          </w-form-item>
+          <w-form-item label="查询参数（JSON）">
+            <w-input v-model="dataSource.api.paramsText" type="textarea" :rows="2" placeholder='{"pageSize": 100}' />
+          </w-form-item>
+          <w-form-item label="请求体（JSON）">
+            <w-input v-model="dataSource.api.bodyText" type="textarea" :rows="2" placeholder='{}' />
+          </w-form-item>
+        </template>
 
-          <template v-if="dataSource.type === 'api'">
-            <w-form-item label="请求方法">
-              <w-select v-model="dataSource.api.method" :options="httpMethodOptions" />
-            </w-form-item>
-            <w-form-item label="请求地址">
-              <w-input v-model="dataSource.api.url" placeholder='/api/lowcode/customer' />
-            </w-form-item>
-            <w-form-item label="查询参数（JSON）">
-              <w-input v-model="dataSource.api.paramsText" type="textarea" :rows="2" placeholder='{"pageSize": 100}' />
-            </w-form-item>
-            <w-form-item label="请求体（JSON）">
-              <w-input v-model="dataSource.api.bodyText" type="textarea" :rows="2" placeholder='{}' />
-            </w-form-item>
-          </template>
+        <template v-if="dataSource.type === 'script'">
+          <w-form-item label="脚本">
+            <w-input v-model="dataSource.script" type="textarea" :rows="8" placeholder='const rows = await db.raw("SELECT status, COUNT(*) as value FROM users GROUP BY status");&#10;return { title: { text: "用户状态" }, xAxis: { data: rows.map(r => r.status) }, series: [{ type: "bar", data: rows.map(r => r.value) }] };' />
+            <p class="tip">在线编写 JavaScript，可调用 db.raw() 和 http()，需返回完整 ECharts option。</p>
+          </w-form-item>
+        </template>
 
-          <template v-if="dataSource.type === 'script'">
-            <w-form-item label="脚本">
-              <w-input v-model="dataSource.script" type="textarea" :rows="8" placeholder='const rows = await db.raw("SELECT status, COUNT(*) as value FROM users GROUP BY status");&#10;return { title: { text: "用户状态" }, xAxis: { data: rows.map(r => r.status) }, series: [{ type: "bar", data: rows.map(r => r.value) }] };' />
-              <p class="tip">在线编写 JavaScript，可调用 db.raw() 和 http()，需返回完整 ECharts option。</p>
-            </w-form-item>
-          </template>
+        <template v-if="['sql', 'api'].includes(dataSource.type)">
+          <w-form-item label="数据转换脚本">
+            <w-input v-model="dataSource.transformScript" type="textarea" :rows="8" placeholder='return { title: { text: "示例" }, xAxis: { data: data.map(r => r.status) }, series: [{ type: "bar", data: data.map(r => r.value) }] };' />
+            <p class="tip">接收 data 参数，返回完整 ECharts option。</p>
+          </w-form-item>
+        </template>
 
-          <template v-if="['sql', 'api'].includes(dataSource.type)">
-            <w-form-item label="数据转换脚本">
-              <w-input v-model="dataSource.transformScript" type="textarea" :rows="8" placeholder='return { title: { text: "示例" }, xAxis: { data: data.map(r => r.status) }, series: [{ type: "bar", data: data.map(r => r.value) }] };' />
-              <p class="tip">接收 data 参数，返回完整 ECharts option。</p>
-            </w-form-item>
-          </template>
-
-          <template v-if="dataSource.type === 'static'">
-            <h4>ECharts 配置（JSON）</h4>
-            <w-input v-model="optionText" type="textarea" :rows="12" placeholder='{"title":{"text":"示例"},"xAxis":{},"yAxis":{},"series":[{"type":"bar","data":[5,20,36]}]}' />
-          </template>
-        </div>
-        <div class="preview-panel">
-          <h4>预览</h4>
-          <iframe ref="previewFrame" class="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
-        </div>
+        <template v-if="dataSource.type === 'static'">
+          <h4>ECharts 配置（JSON）</h4>
+          <w-input v-model="optionText" type="textarea" :rows="12" placeholder='{"title":{"text":"示例"},"xAxis":{},"yAxis":{},"series":[{"type":"bar","data":[5,20,36]}]}' />
+        </template>
       </div>
-    </w-card>
+      <div class="preview-panel">
+        <h4>预览</h4>
+        <iframe ref="previewFrame" class="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
   </div>
 </template>
 
