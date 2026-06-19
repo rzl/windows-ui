@@ -26,6 +26,7 @@ export const useAppStore = defineStore('app', () => {
   const sidebarCollapsed = ref(false)
   const size = ref<'small' | 'default' | 'large'>(saved?.size || 'default')
   const locale = ref<LocaleType>(saved?.locale || 'zh-CN')
+  const vconsoleEnabled = ref<boolean>(saved?.vconsoleEnabled || false)
   const theme = reactive({
     primary: saved?.theme?.primary || '#245edb',
     success: saved?.theme?.success || '#3a9e3a',
@@ -38,12 +39,13 @@ export const useAppStore = defineStore('app', () => {
 
   setGlobalLocale(locale.value)
 
-  watch([size, locale, theme], () => {
+  watch([size, locale, vconsoleEnabled, theme], () => {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
         size: size.value,
         locale: locale.value,
+        vconsoleEnabled: vconsoleEnabled.value,
         theme: { primary: theme.primary, success: theme.success, warning: theme.warning, danger: theme.danger }
       })
     )
@@ -80,6 +82,7 @@ export const useAppStore = defineStore('app', () => {
     sidebarCollapsed,
     size,
     locale,
+    vconsoleEnabled,
     theme,
     visitedViews,
     toggleSidebar,

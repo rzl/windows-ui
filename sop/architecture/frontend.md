@@ -53,6 +53,13 @@ packages/lowcode-admin/src/
 - `appStore.theme` 包含 `primary`、`success`、`warning`、`danger`，修改后由 `WConfigProvider` 自动计算色阶并写入 CSS 变量，即时生效。
 - 设置保存在 `localStorage`（`lowcode-admin-settings`），刷新后自动恢复。
 
+### VConsole 调试
+
+- 通过 `appStore.vconsoleEnabled` 控制是否启用 VConsole。
+- 启用时由 `App.vue` 调用 `utils/vconsole.ts` 中的 `loadVConsole()`，动态从 CDN（`https://unpkg.com/vconsole@latest/dist/vconsole.min.js`）加载脚本并实例化。
+- 关闭时调用 `destroyVConsole()` 销毁实例。
+- VConsole 开关同样持久化到 `localStorage`。
+
 ### 多语言
 
 - 低代码平台维护独立的多语言模块 `src/locale/`，结构与组件库 `packages/windows-ui/src/locale` 一致：单层键值对，中文作为键。
