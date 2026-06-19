@@ -31,32 +31,36 @@ const menuItems = [
     label: t('产品中心'),
     icon: 'folder',
     children: [
-      { label: t('产品A') },
+      { label: t('产品A'), icon: 'app' },
       {
         label: t('产品B'),
+        icon: 'model',
         children: [
-          { label: t('B-基础版') },
+          { label: t('B-基础版'), icon: 'file' },
           {
             label: t('B-专业版'),
+            icon: 'document',
             children: [
-              { label: t('专业版-详情1') },
-              { label: t('专业版-详情2') },
-              { label: t('专业版-详情3') }
+              { label: t('专业版-详情1'), icon: 'list' },
+              { label: t('专业版-详情2'), icon: 'grid' },
+              { label: t('专业版-详情3'), icon: 'tag' }
             ]
           },
-          { label: t('B-企业版') }
+          { label: t('B-企业版'), icon: 'star' }
         ]
       },
-      { label: t('产品C') },
+      { label: t('产品C'), icon: 'cart' },
       {
         label: t('产品D'),
+        icon: 'code',
         children: [
-          { label: t('D-标准版') },
+          { label: t('D-标准版'), icon: 'check' },
           {
             label: t('D-高级版'),
+            icon: 'settings',
             children: [
-              { label: t('高级版-功能1') },
-              { label: t('高级版-功能2') }
+              { label: t('高级版-功能1'), icon: 'edit' },
+              { label: t('高级版-功能2'), icon: 'search' }
             ]
           }
         ]
@@ -67,40 +71,44 @@ const menuItems = [
     label: t('解决方案'),
     icon: 'folder',
     children: [
-      { label: t('金融行业') },
+      { label: t('金融行业'), icon: 'pie-chart' },
       {
         label: t('互联网行业'),
+        icon: 'bar-chart',
         children: [
-          { label: t('电商') },
+          { label: t('电商'), icon: 'cart' },
           {
             label: t('社交'),
+            icon: 'user',
             children: [
-              { label: t('即时通讯') },
-              { label: t('社区论坛') },
-              { label: t('直播互动') }
+              { label: t('即时通讯'), icon: 'message' },
+              { label: t('社区论坛'), icon: 'notice' },
+              { label: t('直播互动'), icon: 'video' }
             ]
           },
-          { label: t('教育') }
+          { label: t('教育'), icon: 'bookmark' }
         ]
       },
-      { label: t('制造行业') }
+      { label: t('制造行业'), icon: 'setting' }
     ]
   },
   {
     label: t('服务支持'),
     icon: 'folder',
     children: [
-      { label: t('在线文档') },
-      { label: t('视频教程') },
+      { label: t('在线文档'), icon: 'document' },
+      { label: t('视频教程'), icon: 'video' },
       {
         label: t('技术社区'),
+        icon: 'message',
         children: [
-          { label: t('问答区') },
+          { label: t('问答区'), icon: 'help' },
           {
             label: t('博客'),
+            icon: 'bookmark',
             children: [
-              { label: t('前端技术') },
-              { label: t('后端架构') }
+              { label: t('前端技术'), icon: 'code' },
+              { label: t('后端架构'), icon: 'database' }
             ]
           }
         ]
