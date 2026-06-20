@@ -66,7 +66,7 @@
    - 新建表：写迁移文件到 `packages/server/migrations/`
    - 修改表：新建迁移文件，禁止直接修改已执行过的迁移
    - 初始化数据：写到 `packages/server/seeds/`
-5. **低代码动态 API**：新增/修改动态 CRUD 行为时，同步更新 `sop/lowcode/dynamic-api.md`
+5. **低代码动态 API**：新增/修改动态 CRUD 行为时，同步更新 `sop/lowcode/dynamic-api.md`；新增自定义接口时，同步更新 `sop/lowcode/dynamic-api.md` 与 `sop/manuals/lowcode/custom-api.md`
 
 ### 5. 文档同步要求
 

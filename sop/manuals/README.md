@@ -31,7 +31,8 @@ sop/manuals/
 │   ├── flow.md                  # 流程管理
 │   ├── report.md                # 报表设计器
 │   ├── print-template.md        # 打印模板设计器
-│   └── external-datasource.md   # 外部数据源
+│   ├── external-datasource.md   # 外部数据源
+│   └── custom-api.md            # 自定义接口
 ├── monitor/                     # 监控与消息
 │   ├── message.md               # 消息中心
 │   ├── server-monitor.md        # 系统监控

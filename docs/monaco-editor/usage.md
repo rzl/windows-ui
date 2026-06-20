@@ -23,6 +23,7 @@ const code = ref('function hello() {\n  console.log("Hello Monaco")\n}')
 | language | string | 'javascript' | 语言类型，如 javascript、typescript、sql、json、html、css 等 |
 | height | number | 300 | 编辑器高度（px） |
 | readOnly | boolean | false | 是否只读 |
+| cdn | string | '' | Monaco 资源根路径，默认使用本地 `/monaco-editor/min`，可配置为 CDN 地址 |
 
 ## Events
 
@@ -33,6 +34,8 @@ const code = ref('function hello() {\n  console.log("Hello Monaco")\n}')
 
 ## 注意
 
-- 组件内部使用 iframe 加载 `public/monaco-editor.html`，该页面通过 CDN 引入 Monaco Editor。
-- 编辑器与父页面通过 `postMessage` 进行双向通信，无需打包 Monaco 资源，避免构建体积膨胀。
-- 首次加载需要联网获取 Monaco CDN 脚本，请确保运行环境可访问外网。
+- 组件内部使用 iframe 加载 `public/monaco-editor.html`，该页面通过 `<script>` 动态引入 Monaco Editor 资源。
+- 编辑器与父页面通过 `postMessage` 进行双向通信。
+- 默认使用本地 `public/monaco-editor/min` 资源，构建后会随产物一起部署，无需依赖外网 CDN。
+- 可通过 `cdn` prop 指定其他资源根路径，如内网 CDN 或公共 CDN。
+- 当 Monaco 资源加载失败时，组件会自动回退到多行文本框，保证内容仍可编辑。

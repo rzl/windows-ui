@@ -27,3 +27,4 @@
 ## 变更记录
 
 - 2026-06-13：初始实现，iframe + CDN 方案
+- 2026-06-20：改为本地 `/monaco-editor/min` 资源默认加载，新增 `cdn` prop；修复 iframe 与父页面初始化时序；增加加载失败回退 textarea

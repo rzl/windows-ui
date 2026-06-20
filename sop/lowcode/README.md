@@ -8,6 +8,7 @@
 |---|---|
 | [metadata.md](./metadata.md) | 元数据模型设计（模型、字段、表单、列表、编码规则、校验规则、流程） |
 | [dynamic-api.md](./dynamic-api.md) | 动态 CRUD API 约定与实现机制 |
+| [custom-api.md](../manuals/lowcode/custom-api.md) | 自定义接口：通过 Monaco 编辑器在线发布脚本接口 |
 | [designer-spec.md](./designer-spec.md) | 表单设计器、列表设计器、页面设计器与首页组件配置规范 |
 
 ## 核心流程

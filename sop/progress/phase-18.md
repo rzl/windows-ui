@@ -94,6 +94,14 @@
 | `packages/lowcode-admin/package.json` | 新增 `monaco-editor` 与 `postinstall` |
 | `packages/lowcode-admin/src/router/index.ts` | 注册自定义接口页面路由 |
 | `packages/server/seeds/01_init_data.ts` | 新增菜单与权限码 |
+| `AGENTS.md` | 补充自定义接口到低代码能力说明与 SOP 索引 |
+| `docs/monaco-editor/usage.md` | 更新 WMonacoEditor Props 与说明 |
+| `designs/monaco-editor/design.md` | 更新交互设计说明 |
+| `develops/monaco-editor/progress.md` | 更新变更记录 |
+| `sop/lowcode/README.md` | 添加自定义接口文档索引 |
+| `sop/lowcode/dynamic-api.md` | 补充自定义接口链接 |
+| `sop/manuals/README.md` | 添加自定义接口到手册目录 |
+| `sop/development/workflow.md` | 补充自定义接口文档同步要求 |
 
 ## 任务清单
 

@@ -14,9 +14,11 @@
 ## 交互设计
 
 - 组件挂载后自动加载 iframe，iframe 内 Monaco 初始化完成后向父页面发送 `ready` 消息
-- 父页面通过 `postMessage` 向 iframe 发送初始化参数、内容更新、语言切换等指令
+- 父页面收到 `ready` 后再通过 `postMessage` 发送 `init` 初始化参数，避免时序丢失
 - 用户在编辑器内输入时，iframe 通过 `postMessage` 回传 `change` 事件，父页面同步 `v-model`
 - 支持 `readOnly` 只读模式，禁止编辑
+- 支持 `cdn` 配置资源根路径，便于本地化部署或切换 CDN
+- Monaco 加载失败时自动回退到原生 textarea，确保业务可用性
 
 ## 可访问性
 
