@@ -276,6 +276,24 @@ const routes = [
         name: 'AuditLogList',
         component: () => import('@/views/lowcode/AuditLogList.vue'),
         meta: { title: '审计日志', permission: 'lowcode:auditLog' }
+      },
+      {
+        path: 'lowcode/custom-api',
+        name: 'CustomApiList',
+        component: () => import('@/views/lowcode/CustomApiList.vue'),
+        meta: { title: '自定义接口', permission: 'lowcode:customApi' }
+      },
+      {
+        path: 'lowcode/custom-api/edit',
+        name: 'CustomApiCreate',
+        component: () => import('@/views/lowcode/CustomApiEditor.vue'),
+        meta: { title: '新增自定义接口', permission: 'lowcode:customApi' }
+      },
+      {
+        path: 'lowcode/custom-api/edit/:id',
+        name: 'CustomApiEdit',
+        component: () => import('@/views/lowcode/CustomApiEditor.vue'),
+        meta: { title: '编辑自定义接口', permission: 'lowcode:customApi' }
       }
     ]
   },

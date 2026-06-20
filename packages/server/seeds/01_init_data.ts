@@ -285,6 +285,17 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 8,
       status: 1,
       permission: 'lowcode:auditLog'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'CustomApiList',
+      path: '/lowcode/custom-api',
+      component: 'views/lowcode/CustomApiList.vue',
+      title: '自定义接口',
+      icon: 'api',
+      sort: 9,
+      status: 1,
+      permission: 'lowcode:customApi'
     }
   ])
 

@@ -2,6 +2,7 @@ import axios from 'axios'
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { config as appConfig } from '../../config'
+import { runScript, checkSafeSql } from '../../utils/script-runner'
 
 // ---------- 首页配置 ----------
 
@@ -173,7 +174,7 @@ export async function executeDataSource(dataSource: DataSourceConfig, ctx: any =
   if (type === 'sql') {
     const rows = await executeSqlDataSource(dataSource.sql)
     if (dataSource.transformScript) {
-      return executeTransformScript(dataSource.transformScript, rows, ctx)
+      return runScript(dataSource.transformScript, { data: rows, ctx })
     }
     return rows
   }
@@ -181,14 +182,14 @@ export async function executeDataSource(dataSource: DataSourceConfig, ctx: any =
   if (type === 'api') {
     const data = await executeApiDataSource(dataSource.api)
     if (dataSource.transformScript) {
-      return executeTransformScript(dataSource.transformScript, data, ctx)
+      return runScript(dataSource.transformScript, { data, ctx })
     }
     return data
   }
 
   if (type === 'script') {
     if (!dataSource.script) throw new AppError('脚本不能为空', 400)
-    return executeScriptDataSource(dataSource.script, ctx)
+    return runScript(dataSource.script, { ctx })
   }
 
   throw new AppError('不支持的数据源类型', 400)
@@ -218,58 +219,4 @@ async function executeApiDataSource(apiConfig?: DataSourceConfig['api']) {
   return response.data?.data
 }
 
-async function executeTransformScript(script: string, data: any, ctx: any) {
-  return runScript(script, { data, ctx })
-}
 
-async function executeScriptDataSource(script: string, ctx: any) {
-  return runScript(script, { ctx })
-}
-
-async function runScript(script: string, context: { data?: any; ctx?: any }) {
-  if (!script) throw new AppError('脚本不能为空', 400)
-
-  const http = async (cfg: any) => {
-    const res = await axios({
-      ...cfg,
-      url: cfg.url?.startsWith('http') ? cfg.url : `http://127.0.0.1:${appConfig.port}${cfg.url}`,
-      headers: {
-        ...(cfg.headers || {}),
-        'x-dashboard-service': '1'
-      }
-    })
-    return res.data?.data
-  }
-
-  const dbProxy = {
-    raw: async (sql: string) => {
-      checkSafeSql(sql)
-      const result = await db.raw(sql)
-      return Array.isArray(result) ? result : []
-    }
-  }
-
-  const fn = new Function('ctx', 'data', 'db', 'http', `
-    return (async () => {
-      "use strict";
-      ${script}
-    })();
-  `)
-
-  try {
-    return await fn(context.ctx, context.data, dbProxy, http)
-  } catch (error: any) {
-    throw new AppError(`脚本执行失败: ${error.message}`, 400)
-  }
-}
-
-function checkSafeSql(sql: string) {
-  const upper = sql.trim().toUpperCase()
-  if (!upper.startsWith('SELECT')) {
-    throw new AppError('只允许执行 SELECT 查询', 400)
-  }
-  const forbidden = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'TRUNCATE', 'EXEC', 'EXECUTE']
-  if (forbidden.some((k) => upper.includes(k))) {
-    throw new AppError('SQL 包含非法关键字', 400)
-  }
-}

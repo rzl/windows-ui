@@ -1,0 +1,105 @@
+# 自定义接口
+
+## 功能概述
+
+自定义接口允许管理员在线编写 JavaScript 脚本，直接发布为 HTTP 接口。它适用于数据模型无法满足的复杂查询、聚合计算、跨系统数据整合等场景。
+
+脚本运行在 `vm2` 沙箱中，默认只能执行 `SELECT` 查询，无法直接修改数据库。
+
+## 使用入口
+
+进入「低代码」→「自定义接口」菜单，可查看已有接口列表。
+
+## 创建接口
+
+1. 点击「新增接口」进入编辑页。
+2. 填写表单：
+   - **编码**：唯一标识，如 `user_stats`。
+   - **名称**：接口显示名称。
+   - **方法**：GET / POST / PUT / DELETE / ALL（ALL 表示不限制方法）。
+   - **路径**：调用路径，支持多层结构，如 `user/stats`；为空时默认使用编码。
+   - **公开访问**：默认关闭，关闭时调用需要登录；开启后任何人可访问。
+   - **状态**：启用/禁用。
+3. 在 Monaco 编辑器中编写脚本。
+4. 点击「保存接口」。
+
+## 脚本规范
+
+脚本中可直接使用以下变量：
+
+| 变量 | 说明 |
+|------|------|
+| `ctx` | 请求上下文，包含 `params`、`query`、`body`、`headers`、`method`、`user` |
+| `db` | `{ raw(sql) }` 执行 SELECT 查询并返回数组 |
+| `http` | 内部 HTTP 调用，自动代理到本服务 |
+| `axios` | 外部 HTTP 调用，仅暴露 get/post/put/delete/request |
+| `console` | 输出到后端日志 |
+
+脚本需要返回一个对象，例如：
+
+```js
+async function main() {
+  const rows = await db.raw("SELECT status, COUNT(*) as count FROM users GROUP BY status")
+  return {
+    code: 200,
+    message: 'success',
+    data: rows
+  }
+}
+
+return await main()
+```
+
+## 调用接口
+
+保存并启用后，可通过以下地址调用：
+
+```
+GET /api/custom/user/stats
+```
+
+其中 `user/stats` 为接口路径（或编码）。
+
+### 请求示例
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  "http://localhost:3001/api/custom/user/stats?department=sales"
+```
+
+### 响应示例
+
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    { "status": 1, "count": 12 }
+  ]
+}
+```
+
+## 公开接口
+
+若接口开启「公开访问」，则无需登录即可调用：
+
+```bash
+curl "http://localhost:3001/api/custom/public/hello"
+```
+
+> **注意**：公开接口会暴露服务能力，请谨慎开启。
+
+## 测试接口
+
+在编辑页下方可填写 `Query` 和 `Body` 模拟参数，点击「运行测试」立即查看执行结果或错误信息。
+
+## 常见问题
+
+**Q：脚本中如何获取当前登录用户？**
+A：通过 `ctx.user`，包含 `id`、`username`、`roleId`、`deptId`、`permissions`。
+
+**Q：脚本中能否修改数据库？**
+A：默认不允许。`db.raw()` 仅允许 `SELECT` 语句，包含 `INSERT/UPDATE/DELETE` 等关键字会报错。
+
+**Q：接口路径支持多深？**
+A：支持任意多层路径，如 `a/b/c/d`，只要不与现有路由冲突即可。
