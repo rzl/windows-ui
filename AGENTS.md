@@ -183,6 +183,7 @@ windows-ui/
 | 扩展低代码数据模型、表单、列表、页面设计器 | `sop/lowcode/metadata.md`、`sop/lowcode/designer-spec.md` |
 | 修改动态 CRUD 接口或运行时行为 / 新增自定义接口 | `sop/lowcode/dynamic-api.md`、`sop/manuals/lowcode/custom-api.md` |
 | 调整流程设计器或审批相关功能 | `sop/lowcode/flow-designer.md` |
+| 配置数据权限（行级）/ 字段权限 | `sop/manuals/system/data-permission.md`、`sop/manuals/system/field-permission.md` |
 | 新增/修改面向用户的功能模块 | 同步更新 `sop/manuals/` 下对应手册 |
 | 查看项目当前阶段与待办 | `sop/progress/phase-*.md` |
 

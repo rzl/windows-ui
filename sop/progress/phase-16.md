@@ -147,6 +147,7 @@
 | `packages/lowcode-admin/src/views/system/DataPermissionList.vue` | 数据规则管理页面 |
 | `packages/lowcode-admin/src/views/system/FieldPermissionList.vue` | 字段规则管理页面 |
 | `sop/manuals/system/data-permission.md` | 数据权限用户手册 |
+| `sop/manuals/system/field-permission.md` | 字段权限用户手册 |
 
 ## 修改文件
 
@@ -174,7 +175,7 @@
 - [x] 前端：字段规则管理页面
 - [x] 前端：角色管理新增「数据权限」Tab
 - [x] 前端：动态表单/CRUD 表根据字段权限渲染
-- [x] 文档：编写数据权限用户手册与阶段进度文档
+- [x] 文档：编写数据权限、字段权限用户手册与阶段进度文档
 - [x] 验证：迁移、运行、`pnpm build:server`、`pnpm build:lowcode`
 
 ## 验收标准
