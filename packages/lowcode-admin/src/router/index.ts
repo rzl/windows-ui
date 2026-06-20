@@ -68,6 +68,18 @@ const routes = [
         meta: { title: '职务管理', permission: 'position:list' }
       },
       {
+        path: 'system/data-permission',
+        name: 'DataPermissionList',
+        component: () => import('@/views/system/DataPermissionList.vue'),
+        meta: { title: '数据权限', permission: 'data-permission:list' }
+      },
+      {
+        path: 'system/field-permission',
+        name: 'FieldPermissionList',
+        component: () => import('@/views/system/FieldPermissionList.vue'),
+        meta: { title: '字段权限', permission: 'field-permission:list' }
+      },
+      {
         path: 'lowcode/model',
         name: 'ModelList',
         component: () => import('@/views/lowcode/ModelList.vue'),

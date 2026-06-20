@@ -133,64 +133,67 @@
 3. 动态 CRUD 新增/更新时，校验请求体中是否包含 `editable=false` 的字段，包含则返回 403。
 4. 前端 `WDynamicForm` / `WCrudTable` 根据字段权限自动隐藏或禁用字段。
 
-## 新增文件（计划）
+## 新增文件
 
 | 文件 | 说明 |
 |------|------|
 | `packages/server/migrations/20260620010000_create_data_permission_tables.ts` | 数据权限相关表迁移 |
-| `packages/server/src/modules/lowcode/data-permission.service.ts` | 数据规则业务逻辑 |
+| `packages/server/src/modules/lowcode/data-permission.service.ts` | 数据规则业务逻辑与行级过滤 |
 | `packages/server/src/modules/lowcode/data-permission.controller.ts` | 数据规则 HTTP 控制器 |
-| `packages/server/src/modules/lowcode/field-permission.service.ts` | 字段规则业务逻辑 |
+| `packages/server/src/modules/lowcode/field-permission.service.ts` | 字段规则业务逻辑与字段校验 |
 | `packages/server/src/modules/lowcode/field-permission.controller.ts` | 字段规则 HTTP 控制器 |
-| `packages/server/src/modules/lowcode/permission.middleware.ts` | 动态 CRUD 数据/字段权限注入中间件 |
 | `packages/lowcode-admin/src/api/dataPermission.ts` | 数据规则 API 封装 |
 | `packages/lowcode-admin/src/api/fieldPermission.ts` | 字段规则 API 封装 |
 | `packages/lowcode-admin/src/views/system/DataPermissionList.vue` | 数据规则管理页面 |
 | `packages/lowcode-admin/src/views/system/FieldPermissionList.vue` | 字段规则管理页面 |
 | `sop/manuals/system/data-permission.md` | 数据权限用户手册 |
 
-## 修改文件（计划）
+## 修改文件
 
 | 文件 | 说明 |
 |------|------|
-| `packages/server/src/routes/index.ts` | 注册数据/字段权限路由 |
-| `packages/server/src/modules/rbac/role.service.ts` | 角色 CRUD 支持 `dataPermissionIds` |
-| `packages/server/src/modules/auth/auth.service.ts` | `getProfile` 返回角色绑定的数据规则 |
-| `packages/server/src/modules/lowcode/lowcode.service.ts` | 动态 CRUD 查询注入行级过滤 |
-| `packages/server/src/modules/lowcode/lowcode.controller.ts` | 新增/更新时校验字段权限 |
+| `packages/server/src/modules/lowcode/lowcode.routes.ts` | 注册数据/字段权限路由 |
+| `packages/server/src/modules/rbac/rbac.service.ts` | 角色 CRUD 支持 `dataPermissionIds` |
+| `packages/server/src/modules/auth/auth.service.ts` | `getProfile` 返回 `dataPermissionIds` |
+| `packages/server/src/modules/lowcode/lowcode.service.ts` | 动态 CRUD 注入行级过滤、字段校验、隐藏字段过滤 |
+| `packages/server/seeds/01_init_data.ts` | 新增「数据权限」「字段权限」菜单 |
+| `packages/lowcode-admin/src/router/index.ts` | 注册数据/字段权限页面路由 |
 | `packages/lowcode-admin/src/views/system/RoleList.vue` | 新增「数据权限」Tab |
-| `packages/lowcode-admin/src/views/lowcode/ModelDesigner.vue` | 字段配置增加权限相关标识 |
-| `packages/lowcode-admin/src/views/layout/LowcodeLayout.vue` | 若菜单需要，新增数据权限导航 |
-| `packages/lowcode-admin/src/stores/auth.ts` | 保存 `dataPermissionIds` |
-| `packages/windows-ui/src/components/dynamic-form/dynamic-form.vue` | 根据字段权限隐藏/禁用字段 |
-| `packages/windows-ui/src/components/crud-table/crud-table.vue` | 根据字段权限隐藏表格列 |
+| `packages/lowcode-admin/src/views/lowcode/LowcodePage.vue` | 根据字段权限隐藏/禁用表单字段与表格列 |
 
 ## 任务清单
 
-- [ ] 数据库迁移：创建数据规则、字段规则、角色数据权限关联表
-- [ ] 后端：数据规则 CRUD API
-- [ ] 后端：字段规则 CRUD API
-- [ ] 后端：角色服务支持绑定数据规则
-- [ ] 后端：`auth/profile` 返回数据规则列表
-- [ ] 后端：动态 CRUD 查询注入行级权限过滤
-- [ ] 后端：动态 CRUD 保存/更新校验字段权限
-- [ ] 前端：数据规则管理页面
-- [ ] 前端：字段规则管理页面
-- [ ] 前端：角色管理新增「数据权限」Tab
-- [ ] 前端：动态表单/CRUD 表根据字段权限渲染
-- [ ] 文档：编写数据权限用户手册与阶段进度文档
-- [ ] 验证：迁移、运行、`pnpm build:server`、`pnpm build:lowcode`
+- [x] 数据库迁移：创建数据规则、字段规则、角色数据权限关联表
+- [x] 后端：数据规则 CRUD API
+- [x] 后端：字段规则 CRUD API
+- [x] 后端：角色服务支持绑定数据规则
+- [x] 后端：`auth/profile` 返回数据规则列表
+- [x] 后端：动态 CRUD 查询注入行级权限过滤
+- [x] 后端：动态 CRUD 保存/更新校验字段权限
+- [x] 前端：数据规则管理页面
+- [x] 前端：字段规则管理页面
+- [x] 前端：角色管理新增「数据权限」Tab
+- [x] 前端：动态表单/CRUD 表根据字段权限渲染
+- [x] 文档：编写数据权限用户手册与阶段进度文档
+- [x] 验证：迁移、运行、`pnpm build:server`、`pnpm build:lowcode`
 
 ## 验收标准
 
-1. [ ] 管理员可创建数据权限规则并绑定到角色。
-2. [ ] 普通用户登录后，动态 CRUD 列表只显示有权限的数据行。
-3. [ ] 超级管理员可查看全部数据。
-4. [ ] 字段设置为隐藏后，列表不展示该列，表单不显示该字段。
-5. [ ] 字段设置为只读后，表单显示但不可编辑。
-6. [ ] 接口层面禁止写入无权限字段，返回 403。
-7. [ ] 未配置规则时系统行为与现在保持一致。
-8. [ ] `pnpm build:server`、`pnpm build:lowcode` 通过。
+1. [x] 管理员可创建数据权限规则并绑定到角色。
+2. [x] 普通用户登录后，动态 CRUD 列表只显示有权限的数据行。
+3. [x] 超级管理员可查看全部数据。
+4. [x] 字段设置为隐藏后，列表不展示该列，表单不显示该字段。
+5. [x] 字段设置为只读后，表单显示但不可编辑。
+6. [x] 接口层面禁止写入无权限字段，返回 403。
+7. [x] 未配置规则时系统行为与现在保持一致。
+8. [x] `pnpm build:server`、`pnpm build:lowcode` 通过。
+
+## 运行记录
+
+- 2026-06-19：完成后端数据库迁移、数据/字段权限服务、动态 CRUD 集成。
+- 2026-06-19：完成前端数据/字段权限管理页面、角色管理 Tab、LowcodePage 字段权限渲染。
+- 2026-06-19：同步更新种子菜单、路由、用户手册、阶段进度文档。
+- 2026-06-19：运行迁移，`pnpm build:server` 与 `pnpm build:lowcode` 验证通过。
 
 ## 风险与待决策
 

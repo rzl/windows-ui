@@ -7,6 +7,8 @@ import * as dashboardService from '../dashboard/dashboard.service'
 import * as flowService from '../flow/flow.service'
 import * as externalDatasourceService from '../external-datasource/external-datasource.service'
 import * as auditService from '../audit/audit.service'
+import { applyDataPermissionWhere, assertRowPermission as assertDataPermissionRow } from './data-permission.service'
+import { assertFieldWritable, filterHiddenFields, getFieldPermissionMap } from './field-permission.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -377,10 +379,10 @@ async function alterPhysicalColumn(tableName: string, columnName: string, fieldD
 export async function getModelPermission(modelCode: string, user?: any) {
   const model = await getModelByCode(modelCode)
   const permission = model.data_permission || 'all'
+  const currentUser = normalizeUser(user)
 
   // 管理员拥有全部权限
-  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
-  if (isAdmin) {
+  if (currentUser.isAdmin) {
     return {
       dataScope: 'all',
       canCreate: true,
@@ -388,7 +390,8 @@ export async function getModelPermission(modelCode: string, user?: any) {
       canDelete: true,
       canExport: true,
       canImport: true,
-      canDesign: true
+      canDesign: true,
+      fieldPermissions: {}
     }
   }
 
@@ -401,7 +404,8 @@ export async function getModelPermission(modelCode: string, user?: any) {
       canDelete: false,
       canExport: false,
       canImport: false,
-      canDesign: false
+      canDesign: false,
+      fieldPermissions: await getFieldPermissionMap(modelCode, currentUser.roleId)
     }
   }
 
@@ -412,7 +416,8 @@ export async function getModelPermission(modelCode: string, user?: any) {
     canDelete: true,
     canExport: true,
     canImport: true,
-    canDesign: false
+    canDesign: false,
+    fieldPermissions: await getFieldPermissionMap(modelCode, currentUser.roleId)
   }
 }
 
@@ -441,7 +446,8 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
   }
 
   // 数据权限过滤
-  await applyDataPermission(builder, model, user)
+  const currentUser = normalizeUser(user)
+  await applyDataPermissionWhere(builder, modelCode, currentUser)
 
   // 关键词模糊搜索
   if (keyword && fields.length) {
@@ -555,8 +561,10 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
     }
   }
 
+  const filteredList = await filterHiddenFields(modelCode, list, currentUser)
+
   return {
-    list,
+    list: filteredList,
     total: Number(total?.count || 0),
     page: Number(page),
     pageSize: Number(pageSize)
@@ -567,8 +575,9 @@ export async function dynamicDetail(modelCode: string, id: number, user?: any) {
   const model = await getModelByCode(modelCode)
   const row = await db(model.table_name).where({ id }).first()
   if (!row) throw new AppError('记录不存在', 404)
-  await assertRowPermission(model, row, user)
-  return row
+  const currentUser = normalizeUser(user)
+  await assertDataPermissionRow(modelCode, id, currentUser)
+  return filterHiddenFields(modelCode, [row], currentUser).then((rows) => rows[0])
 }
 
 function computeDefaultValue(field: any, data: any, user?: any) {
@@ -620,7 +629,9 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any, re
     }
   }
 
+  const currentUser = normalizeUser(user)
   await validateDynamicData(model.fields, data)
+  await assertFieldWritable(modelCode, data, currentUser)
   const cleanData = sanitizeData(model.fields, data)
   if (user) {
     cleanData.create_by = user.id
@@ -656,8 +667,11 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any, re
 export async function dynamicUpdate(modelCode: string, id: number, data: any, user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'edit', 'rowAction', user)
   const model = await getModelByCode(modelCode)
+  const currentUser = normalizeUser(user)
+  await assertDataPermissionRow(modelCode, id, currentUser)
   const beforeRow = await db(model.table_name).where({ id }).first()
   await validateDynamicData(model.fields, data)
+  await assertFieldWritable(modelCode, data, currentUser)
   const cleanData = sanitizeData(model.fields, data)
   cleanData.update_time = db.fn.now()
   if (user) {
@@ -682,10 +696,9 @@ export async function dynamicUpdate(modelCode: string, id: number, data: any, us
 export async function dynamicDelete(modelCode: string, id: number, user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'delete', 'rowAction', user)
   const model = await getModelByCode(modelCode)
+  const currentUser = normalizeUser(user)
+  await assertDataPermissionRow(modelCode, id, currentUser)
   const beforeRow = await db(model.table_name).where({ id }).first()
-  if (user && beforeRow) {
-    await assertRowPermission(model, beforeRow, user)
-  }
   await db(model.table_name).where({ id }).del()
 
   if (beforeRow) {
@@ -706,12 +719,11 @@ export async function dynamicBatchDelete(modelCode: string, ids: (string | numbe
   await checkButtonPermission(modelCode, 'batchDelete', 'toolbar', user)
   const model = await getModelByCode(modelCode)
   if (!ids || !ids.length) throw new AppError('未选择记录', 400)
-  const rows = await db(model.table_name).whereIn('id', ids)
-  if (user) {
-    for (const row of rows) {
-      await assertRowPermission(model, row, user)
-    }
+  const currentUser = normalizeUser(user)
+  for (const id of ids) {
+    await assertDataPermissionRow(modelCode, Number(id), currentUser)
   }
+  const rows = await db(model.table_name).whereIn('id', ids)
   await db(model.table_name).whereIn('id', ids).del()
 
   for (const row of rows) {
@@ -731,7 +743,11 @@ export async function dynamicBatchDelete(modelCode: string, ids: (string | numbe
 export async function dynamicImport(modelCode: string, rows: any[], user?: any, req?: any) {
   await checkButtonPermission(modelCode, 'import', 'toolbar', user)
   const model = await getModelByCode(modelCode)
+  const currentUser = normalizeUser(user)
   if (!rows || !rows.length) throw new AppError('导入数据不能为空', 400)
+  for (const row of rows) {
+    await assertFieldWritable(modelCode, row, currentUser)
+  }
   const cleanRows = rows.map((row) => sanitizeData(model.fields, row))
   const insertedIds = await db(model.table_name).insert(cleanRows)
 
@@ -774,8 +790,13 @@ export async function exportDynamicExcel(modelCode: string, options: { ids?: (st
 
   // 查询数据
   let list: any[]
+  const currentUser = normalizeUser(user)
   if (options.ids && options.ids.length) {
+    for (const id of options.ids) {
+      await assertDataPermissionRow(modelCode, Number(id), currentUser)
+    }
     list = await db(model.table_name).whereIn('id', options.ids)
+    list = await filterHiddenFields(modelCode, list, currentUser)
   } else {
     const result = await dynamicList(modelCode, { page: 1, pageSize: 10000 }, user)
     list = result.list
@@ -1077,45 +1098,13 @@ function normalizeOptions(data: any): { label: string; value: any }[] {
   return []
 }
 
-async function applyDataPermission(builder: any, model: any, user?: any) {
-  if (!user || !model.data_permission) return
-  const permission = model.data_permission
-  const type = typeof permission === 'string' ? permission : permission.type
-
-  if (type === 'self') {
-    builder.where('create_by', user.id)
-  } else if (type === 'dept') {
-    builder.where('dept_id', user.deptId || null)
-  } else if (type === 'dept_and_child') {
-    const deptIds = await getChildDeptIds(user.deptId)
-    builder.whereIn('dept_id', deptIds.length ? deptIds : [null])
-  }
-}
-
-async function assertRowPermission(model: any, row: any, user?: any) {
-  if (!user || !model.data_permission) return
-  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
-  if (isAdmin) return
-
-  const permission = model.data_permission
-  const type = typeof permission === 'string' ? permission : permission.type
-
-  if (type === 'all') return
-  if (type === 'self') {
-    if (row.create_by !== user.id) {
-      throw new AppError('无权访问该记录', 403)
-    }
-  } else if (type === 'dept') {
-    if (row.dept_id !== user.deptId) {
-      throw new AppError('无权访问该记录', 403)
-    }
-  } else if (type === 'dept_and_child') {
-    const deptIds = await getChildDeptIds(user.deptId)
-    if (!deptIds.includes(row.dept_id)) {
-      throw new AppError('无权访问该记录', 403)
-    }
-  } else if (type === 'none') {
-    throw new AppError('无权访问该记录', 403)
+function normalizeUser(user?: any): { id: number; roleId: number; deptId?: number; isAdmin?: boolean } {
+  if (!user) return { id: 0, roleId: 0 }
+  return {
+    id: user.id,
+    roleId: user.roleId,
+    deptId: user.deptId,
+    isAdmin: user.roleId === 1 || user.permissions?.includes('*')
   }
 }
 

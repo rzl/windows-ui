@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import { getRoleDataPermissionIds as getRoleDataPermissionIdsFromService, saveRoleDataPermissions as saveRoleDataPermissionsToService } from '../lowcode/data-permission.service'
 
 // 用户 CRUD
 export async function getUsers(query: any) {
@@ -124,6 +125,7 @@ export async function createRole(data: any) {
   }
 
   await saveRoleApps(id, data.appIds || [])
+  await saveRoleDataPermissions(id, data.dataPermissionIds || [])
 
   return getRoleById(id)
 }
@@ -145,6 +147,7 @@ export async function updateRole(id: number, data: any) {
   }
 
   await saveRoleApps(id, data.appIds || [])
+  await saveRoleDataPermissions(id, data.dataPermissionIds || [])
 
   return getRoleById(id)
 }
@@ -161,7 +164,8 @@ export async function getRoleById(id: number) {
     .where({ role_id: id })
     .pluck('permission')
   const appIds = await getRoleApps(id)
-  return { ...role, permissions, appIds }
+  const dataPermissionIds = await getRoleDataPermissionIds(id)
+  return { ...role, permissions, appIds, dataPermissionIds }
 }
 
 // 角色应用授权
@@ -180,6 +184,14 @@ async function saveRoleApps(roleId: number, appIds: number[]) {
       validAppIds.map((appId) => ({ role_id: roleId, app_id: appId, status: 1 }))
     )
   }
+}
+
+async function saveRoleDataPermissions(roleId: number, dataPermissionIds: number[]) {
+  await saveRoleDataPermissionsToService(roleId, dataPermissionIds)
+}
+
+async function getRoleDataPermissionIds(roleId: number) {
+  return getRoleDataPermissionIdsFromService(roleId)
 }
 
 // 菜单

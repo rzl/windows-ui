@@ -137,17 +137,23 @@ const printTemplateItems = computed(() => {
 })
 
 const formFields = computed(() => {
-  return formConfig.fields.map((f: any) => ({
-    prop: f.field,
-    label: f.label,
-    type: f.type || 'input',
-    required: f.required,
-    validationRule: f.validationRule,
-    dependsOn: f.dependsOn,
-    options: f.options,
-    refModel: f.refModel,
-    refDisplayField: f.refDisplayField
-  }))
+  const fieldPermissions = permission.fieldPermissions || {}
+  return formConfig.fields.map((f: any) => {
+    const perm = fieldPermissions[f.field]
+    return {
+      prop: f.field,
+      label: f.label,
+      type: f.type || 'input',
+      required: f.required,
+      validationRule: f.validationRule,
+      dependsOn: f.dependsOn,
+      options: f.options,
+      refModel: f.refModel,
+      refDisplayField: f.refDisplayField,
+      disabled: perm && !perm.editable && perm.readable,
+      hidden: perm?.hidden
+    }
+  })
 })
 
 const formLayout = computed(() => formConfig.layout)
@@ -163,18 +169,21 @@ function hasActionPermission(action: string, type: 'toolbar' | 'rowAction') {
 }
 
 const tableColumns = computed(() => {
-  const columns = tableConfig.fields.map((f: any) => {
-    const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
-    const isRef = fieldMeta?.type === 'ref'
-    return {
-      prop: isRef ? `${f.field}_display` : f.field,
-      label: f.label,
-      width: f.width,
-      align: f.align || 'left',
-      fixed: f.fixed || undefined,
-      sortable: f.sortable ? 'custom' : false
-    }
-  })
+  const fieldPermissions = permission.fieldPermissions || {}
+  const columns = tableConfig.fields
+    .filter((f: any) => !fieldPermissions[f.field]?.hidden)
+    .map((f: any) => {
+      const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
+      const isRef = fieldMeta?.type === 'ref'
+      return {
+        prop: isRef ? `${f.field}_display` : f.field,
+        label: f.label,
+        width: f.width,
+        align: f.align || 'left',
+        fixed: f.fixed || undefined,
+        sortable: f.sortable ? 'custom' : false
+      }
+    })
   return [
     { type: 'selection', width: 48 },
     ...columns,

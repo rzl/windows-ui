@@ -2,6 +2,8 @@ import { Router, type Router as RouterType } from 'express'
 import multer from 'multer'
 import { authMiddleware } from '../../middleware/auth'
 import * as lowcodeController from './lowcode.controller'
+import * as dataPermissionController from './data-permission.controller'
+import * as fieldPermissionController from './field-permission.controller'
 
 const router: RouterType = Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -43,6 +45,20 @@ router.post('/validation-rules/batch', lowcodeController.validateBatch)
 
 // 字段选项动态加载
 router.post('/options/execute', lowcodeController.executeFieldOptions)
+
+// 数据权限规则
+router.get('/data-permissions', dataPermissionController.getRules)
+router.get('/data-permissions/:id', dataPermissionController.getRuleById)
+router.post('/data-permissions', dataPermissionController.createRule)
+router.put('/data-permissions/:id', dataPermissionController.updateRule)
+router.delete('/data-permissions/:id', dataPermissionController.deleteRule)
+
+// 字段权限规则
+router.get('/field-permissions', fieldPermissionController.getRules)
+router.get('/field-permissions/:id', fieldPermissionController.getRuleById)
+router.post('/field-permissions', fieldPermissionController.createRule)
+router.put('/field-permissions/:id', fieldPermissionController.updateRule)
+router.delete('/field-permissions/:id', fieldPermissionController.deleteRule)
 
 // 动态 CRUD（放在最后避免路径冲突）
 router.get('/:modelCode', lowcodeController.dynamicList)

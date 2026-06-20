@@ -42,7 +42,7 @@ sop/
 | [architecture/overview.md](./architecture/overview.md) | 系统架构总览 |
 | [database/schema.md](./database/schema.md) | 数据库设计 |
 | [progress/phase-15.md](./progress/phase-15.md) | 阶段十五：顶部系统设置与国际化 |
-| [progress/phase-16.md](./progress/phase-16.md) | 阶段十六：数据权限与行级隔离（规划中） |
+| [progress/phase-16.md](./progress/phase-16.md) | 阶段十六：数据权限与行级隔离 |
 | [manuals/README.md](./manuals/README.md) | 用户操作手册总览 |
 | [manuals/getting-started/homepage.md](./manuals/getting-started/homepage.md) | 首页、导航与系统设置 |
 | [manuals/lowcode/model.md](./manuals/lowcode/model.md) | 数据模型与低代码开发手册 |
@@ -53,6 +53,7 @@ sop/
 | [manuals/flow/pending.md](./manuals/flow/pending.md) | 我的待办手册 |
 | [manuals/schedule/task.md](./manuals/schedule/task.md) | 定时任务手册 |
 | [manuals/monitor/dashboard-designer.md](./manuals/monitor/dashboard-designer.md) | 仪表盘设计器使用手册 |
+| [manuals/system/data-permission.md](./manuals/system/data-permission.md) | 数据权限与字段权限 |
 
 ## 常用命令
 

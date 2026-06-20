@@ -4,6 +4,7 @@ import { db } from '../../db'
 import { config } from '../../config'
 import { AppError } from '../../utils/response'
 import { tokenBlacklist } from '../../middleware/auth'
+import { getRoleDataPermissionIds } from '../lowcode/data-permission.service'
 import type { LoginDto, RefreshDto, UpdateProfileDto, ChangePasswordDto } from './auth.dto'
 
 function generateTokens(payload: { id: number; username: string; roleId: number }) {
@@ -100,11 +101,15 @@ export async function getProfile(userId: number) {
     .where('role_id', user.roleId)
     .pluck('permission')
 
+  // 获取角色绑定的数据权限规则 ID 列表
+  const dataPermissionIds = await getRoleDataPermissionIds(user.roleId)
+
   // 超级管理员直接返回，不额外聚合应用权限
   if (permissions.includes('*') || user.roleId === 1) {
     return {
       ...user,
-      permissions
+      permissions,
+      dataPermissionIds
     }
   }
 
@@ -118,7 +123,8 @@ export async function getProfile(userId: number) {
 
   return {
     ...user,
-    permissions: [...permissions, ...appPermissions]
+    permissions: [...permissions, ...appPermissions],
+    dataPermissionIds
   }
 }
 

@@ -31,7 +31,7 @@
           <w-switch v-model="formModel.status" active-text="启用" inactive-text="禁用" />
         </w-form-item>
         <w-form-item label="权限">
-          <w-tabs v-model="permissionTab" :tabs="[{ label: '菜单权限' }, { label: '应用授权' }]">
+          <w-tabs v-model="permissionTab" :tabs="[{ label: '菜单权限' }, { label: '应用授权' }, { label: '数据权限' }]">
             <template #default="{ active }">
               <div v-if="active === 0" class="permission-tree">
                 <div v-for="menu in menuTree" :key="menu.id" class="permission-group">
@@ -68,6 +68,19 @@
                   </w-checkbox>
                 </div>
               </div>
+              <div v-if="active === 2" class="data-permission-tree">
+                <div v-if="!dataPermissionList.length" class="empty-tip">暂无数据权限规则</div>
+                <div v-else class="data-permission-list">
+                  <w-checkbox
+                    v-for="rule in dataPermissionList"
+                    :key="rule.id"
+                    v-model="selectedDataPermissions"
+                    :label="rule.id"
+                  >
+                    {{ rule.name }}（{{ rule.model_code }} / {{ rule.scope }}）
+                  </w-checkbox>
+                </div>
+              </div>
             </template>
           </w-tabs>
         </w-form-item>
@@ -86,15 +99,18 @@ import { useAuthStore } from '@/stores/auth'
 import * as roleApi from '@/api/role'
 import * as menuApi from '@/api/menu'
 import * as appApi from '@/api/app'
+import * as dataPermissionApi from '@/api/dataPermission'
 
 const auth = useAuthStore()
 const list = ref<any[]>([])
 const menuTree = ref<any[]>([])
 const appList = ref<any[]>([])
+const dataPermissionList = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 const selectedPermissions = ref<string[]>([])
 const selectedApps = ref<number[]>([])
+const selectedDataPermissions = ref<number[]>([])
 const permissionTab = ref(0)
 
 const columns = [
@@ -110,6 +126,7 @@ onMounted(() => {
   loadData()
   loadMenus()
   loadApps()
+  loadDataPermissions()
 })
 
 async function loadData() {
@@ -124,16 +141,23 @@ async function loadApps() {
   appList.value = await appApi.getApps()
 }
 
+async function loadDataPermissions() {
+  const res = await dataPermissionApi.getDataPermissions({ page: 1, pageSize: 1000 })
+  dataPermissionList.value = res.list
+}
+
 function openDialog(row?: any) {
   Object.keys(formModel).forEach((k) => delete formModel[k])
   selectedPermissions.value = []
   selectedApps.value = []
+  selectedDataPermissions.value = []
   permissionTab.value = 0
   if (row) {
     Object.assign(formModel, JSON.parse(JSON.stringify(row)))
     formModel.status = row.status === 1
     selectedPermissions.value = row.permissions || []
     selectedApps.value = row.appIds || []
+    selectedDataPermissions.value = row.dataPermissionIds || []
   } else {
     formModel.status = true
   }
@@ -149,6 +173,7 @@ async function handleSave() {
   data.status = data.status ? 1 : 0
   data.permissions = selectedPermissions.value.filter(Boolean)
   data.appIds = selectedApps.value
+  data.dataPermissionIds = selectedDataPermissions.value
   if (data.id) {
     await roleApi.updateRole(data.id, data)
   } else {
@@ -174,5 +199,7 @@ async function handleDelete(row: any) {
 .permission-children { padding-left: 20px; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .app-auth-tree { max-height: 300px; overflow-y: auto; border: 1px solid #d4d0c8; padding: 8px; }
 .app-list { display: flex; flex-wrap: wrap; gap: 12px; }
+.data-permission-tree { max-height: 300px; overflow-y: auto; border: 1px solid #d4d0c8; padding: 8px; }
+.data-permission-list { display: flex; flex-wrap: wrap; gap: 12px; }
 .empty-tip { color: #999; padding: 16px 0; text-align: center; }
 </style>

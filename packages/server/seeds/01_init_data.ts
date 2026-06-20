@@ -161,6 +161,28 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 8,
       status: 1,
       permission: 'dict:list'
+    },
+    {
+      parent_id: systemId,
+      name: 'DataPermissionList',
+      path: '/system/data-permission',
+      component: 'views/system/DataPermissionList.vue',
+      title: '数据权限',
+      icon: 'lock',
+      sort: 9,
+      status: 1,
+      permission: 'data-permission:list'
+    },
+    {
+      parent_id: systemId,
+      name: 'FieldPermissionList',
+      path: '/system/field-permission',
+      component: 'views/system/FieldPermissionList.vue',
+      title: '字段权限',
+      icon: 'lock',
+      sort: 10,
+      status: 1,
+      permission: 'field-permission:list'
     }
   ])
 
