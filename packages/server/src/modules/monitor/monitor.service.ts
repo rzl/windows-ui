@@ -40,11 +40,13 @@ export async function deleteMessageTemplate(id: number) {
 // ---------- 消息 ----------
 
 export async function getMessages(query: any) {
-  const { receiverId, isRead, page = 1, pageSize = 10 } = query
+  const { receiverId, isRead, type, businessType, page = 1, pageSize = 10 } = query
   const builder = db('messages').orderBy('id', 'desc')
 
   if (receiverId) builder.where('receiver_id', Number(receiverId))
   if (isRead !== undefined && isRead !== '') builder.where('is_read', Number(isRead))
+  if (type) builder.where('type', type)
+  if (businessType) builder.where('business_type', businessType)
 
   const total = await builder.clone().count({ count: '*' }).first()
   const list = await builder
@@ -66,6 +68,11 @@ export async function createMessage(data: any) {
     title: data.title,
     content: data.content,
     channel: data.channel || 'site',
+    type: data.type || 'system',
+    business_type: data.businessType || null,
+    business_key: data.businessKey || null,
+    link: data.link || null,
+    sender_name: data.senderName || null,
     is_read: 0,
     status: 1
   })
@@ -83,6 +90,23 @@ export async function createMessage(data: any) {
 export async function markMessageRead(id: number) {
   await db('messages').where({ id }).update({ is_read: 1 })
   return db('messages').where({ id }).first()
+}
+
+export async function readAllMessages(receiverId: number) {
+  await db('messages').where({ receiver_id: receiverId, is_read: 0 }).update({ is_read: 1 })
+  return true
+}
+
+export async function markMessageReadByBusinessKey(businessType: string, businessKey: string, receiverId: number) {
+  await db('messages')
+    .where({
+      receiver_id: receiverId,
+      business_type: businessType,
+      business_key: businessKey,
+      is_read: 0
+    })
+    .update({ is_read: 1 })
+  return true
 }
 
 export async function deleteMessage(id: number) {

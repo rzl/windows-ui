@@ -46,6 +46,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import * as flowApi from '@/api/flow'
 import * as lowcodeApi from '@/api/lowcode'
+import * as monitorApi from '@/api/monitor'
 
 const tasks = ref<any[]>([])
 const dialogVisible = ref(false)
@@ -152,6 +153,12 @@ async function confirmAction() {
       await flowApi.approveTask(currentTask.value.id, commentForm.comment)
     } else {
       await flowApi.rejectTask(currentTask.value.id, commentForm.comment)
+    }
+    // 将对应的待办消息标为已读
+    try {
+      await monitorApi.markMessageReadByBusinessKey('flow', String(currentTask.value.id))
+    } catch (e) {
+      // 不影响主流程
     }
     closeDialog()
     closeDetail()

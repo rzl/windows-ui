@@ -24,6 +24,7 @@
           <w-breadcrumb :items="breadcrumbItems" />
         </div>
         <div class="header-right">
+          <notification-center />
           <w-button size="small" @click="openSettings">
             <w-icon name="setting" size="small" />
           </w-button>
@@ -103,6 +104,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useMenuStore } from '@/stores/menu'
 import { useLowcodeLocale, type LocaleType } from '@/locale'
+import NotificationCenter from '@/components/NotificationCenter.vue'
 
 const route = useRoute()
 const router = useRouter()

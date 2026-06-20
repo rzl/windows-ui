@@ -16,6 +16,8 @@ router.delete('/message-templates/:id', monitorController.deleteMessageTemplate)
 router.get('/messages', monitorController.getMessages)
 router.post('/messages', monitorController.createMessage)
 router.put('/messages/:id/read', monitorController.markMessageRead)
+router.post('/messages/read-all', monitorController.readAllMessages)
+router.put('/messages/:businessType/:businessKey/read', monitorController.markMessageReadByBusinessKey)
 router.delete('/messages/:id', monitorController.deleteMessage)
 router.get('/messages/unread-count', monitorController.getUnreadCount)
 

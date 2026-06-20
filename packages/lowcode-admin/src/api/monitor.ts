@@ -28,6 +28,14 @@ export function markMessageRead(id: number) {
   return request.put(`/monitor/messages/${id}/read`)
 }
 
+export function readAllMessages() {
+  return request.post('/monitor/messages/read-all')
+}
+
+export function markMessageReadByBusinessKey(businessType: string, businessKey: string) {
+  return request.put(`/monitor/messages/${businessType}/${businessKey}/read`)
+}
+
 export function deleteMessage(id: number) {
   return request.delete(`/monitor/messages/${id}`)
 }

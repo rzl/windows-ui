@@ -8,6 +8,12 @@ export interface TabItem {
   title: string
 }
 
+export interface NotificationState {
+  unreadMessageCount: number
+  unreadTodoCount: number
+  totalUnreadCount: number
+}
+
 const STORAGE_KEY = 'lowcode-admin-settings'
 
 function loadSettings() {
@@ -36,6 +42,12 @@ export const useAppStore = defineStore('app', () => {
   const visitedViews = ref<TabItem[]>([
     { name: 'Dashboard', path: '/dashboard', title: '仪表盘' }
   ])
+
+  const notification = reactive<NotificationState>({
+    unreadMessageCount: 0,
+    unreadTodoCount: 0,
+    totalUnreadCount: 0
+  })
 
   setGlobalLocale(locale.value)
 
@@ -78,6 +90,22 @@ export const useAppStore = defineStore('app', () => {
     visitedViews.value = [{ name: 'Dashboard', path: '/dashboard', title: '仪表盘' }]
   }
 
+  function setNotificationState(state: Partial<NotificationState>) {
+    if (state.unreadMessageCount !== undefined) notification.unreadMessageCount = state.unreadMessageCount
+    if (state.unreadTodoCount !== undefined) notification.unreadTodoCount = state.unreadTodoCount
+    notification.totalUnreadCount = notification.unreadMessageCount + notification.unreadTodoCount
+  }
+
+  function incrementUnreadMessageCount() {
+    notification.unreadMessageCount++
+    notification.totalUnreadCount++
+  }
+
+  function incrementUnreadTodoCount() {
+    notification.unreadTodoCount++
+    notification.totalUnreadCount++
+  }
+
   return {
     sidebarCollapsed,
     size,
@@ -85,11 +113,15 @@ export const useAppStore = defineStore('app', () => {
     vconsoleEnabled,
     theme,
     visitedViews,
+    notification,
     toggleSidebar,
     setLocale,
     addView,
     removeView,
     removeOthers,
-    removeAll
+    removeAll,
+    setNotificationState,
+    incrementUnreadMessageCount,
+    incrementUnreadTodoCount
   }
 })

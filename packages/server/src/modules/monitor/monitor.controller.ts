@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { success } from '../../utils/response'
+import type { AuthRequest } from '../../middleware/auth'
 import * as monitorService from './monitor.service'
 
 // 消息模板
@@ -37,6 +38,20 @@ export async function createMessage(req: Request, res: Response) {
 export async function markMessageRead(req: Request, res: Response) {
   const result = await monitorService.markMessageRead(Number(req.params.id))
   res.json(success(result))
+}
+
+export async function readAllMessages(req: AuthRequest, res: Response) {
+  await monitorService.readAllMessages(Number(req.user?.id))
+  res.json(success(null, '全部已读'))
+}
+
+export async function markMessageReadByBusinessKey(req: AuthRequest, res: Response) {
+  await monitorService.markMessageReadByBusinessKey(
+    req.params.businessType,
+    req.params.businessKey,
+    Number(req.user?.id)
+  )
+  res.json(success(null, '已标为已读'))
 }
 
 export async function deleteMessage(req: Request, res: Response) {

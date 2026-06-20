@@ -1,5 +1,6 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import * as monitorService from '../monitor/monitor.service'
 
 export interface FlowAssignee {
   type: 'role' | 'user' | 'dept'
@@ -265,11 +266,13 @@ async function handleTask(taskId: number, action: 'approve' | 'reject', comment:
   if (!nextNode) throw new AppError('流转目标节点不存在', 400)
 
   if (nextNode.type === 'end') {
+    const finalStatus = action === 'approve' ? 'completed' : 'rejected'
     await db('flow_instances').where({ id: instance.id }).update({
-      status: action === 'approve' ? 'completed' : 'rejected',
+      status: finalStatus,
       current_node_id: null,
       update_time: db.fn.now()
     })
+    await sendFlowResultMessage(instance, finalStatus, operator?.nickname || operator?.username)
   } else {
     await db('flow_instances').where({ id: instance.id }).update({
       current_node_id: nextNode.id,
@@ -291,9 +294,66 @@ function findMatchedTransition(config: FlowConfig, nodeId: string, action: strin
   return transitions.find((t) => evaluateCondition(t.condition, businessData))
 }
 
+async function getReceiverUserIds(assigneeType?: string, assigneeValue?: string): Promise<number[]> {
+  if (!assigneeType || !assigneeValue) return []
+  if (assigneeType === 'user') {
+    const user = await db('users').where({ id: Number(assigneeValue), status: 1 }).first()
+    return user ? [user.id] : []
+  }
+  if (assigneeType === 'role') {
+    const users = await db('users').where({ role_id: Number(assigneeValue), status: 1 }).select('id')
+    return users.map((u) => u.id)
+  }
+  if (assigneeType === 'dept') {
+    const users = await db('users').where({ dept_id: Number(assigneeValue), status: 1 }).select('id')
+    return users.map((u) => u.id)
+  }
+  return []
+}
+
+async function sendFlowTaskMessage(instanceId: number, taskId: number, nodeName: string, receiverId: number, flowName?: string) {
+  try {
+    await monitorService.createMessage({
+      receiverId,
+      type: 'todo',
+      businessType: 'flow',
+      businessKey: String(taskId),
+      title: `您有一条新的审批待办${flowName ? `：${flowName}` : ''}`,
+      content: `节点「${nodeName}」需要您审批，请及时处理。`,
+      link: '/flow/pending'
+    })
+  } catch (err) {
+    // 消息发送失败不应影响流程主流程
+    console.error('发送流程待办消息失败', err)
+  }
+}
+
+async function sendFlowResultMessage(instance: any, status: 'completed' | 'rejected', operatorName?: string) {
+  if (!instance?.starter_id) return
+  try {
+    const flow = await db('flow_definitions').where({ code: instance.flow_code }).first()
+    const title = status === 'completed' ? `流程「${flow?.name || instance.flow_code}」已审批通过` : `流程「${flow?.name || instance.flow_code}」已被驳回`
+    await monitorService.createMessage({
+      receiverId: instance.starter_id,
+      type: 'notice',
+      businessType: 'flow',
+      businessKey: String(instance.id),
+      title,
+      content: operatorName ? `处理人：${operatorName}` : '',
+      link: '/flow/pending'
+    })
+  } catch (err) {
+    console.error('发送流程结果消息失败', err)
+  }
+}
+
 async function enterNode(instanceId: number, node: FlowNode) {
+  const instance = await db('flow_instances').where({ id: instanceId }).first()
+  const flow = instance ? await db('flow_definitions').where({ code: instance.flow_code }).first() : null
+  const flowName = flow?.name || instance?.flow_code || ''
+
   if (node.type === 'approve') {
-    await db('flow_tasks').insert({
+    const [taskId] = await db('flow_tasks').insert({
       instance_id: instanceId,
       node_id: node.id,
       node_name: node.name,
@@ -301,6 +361,8 @@ async function enterNode(instanceId: number, node: FlowNode) {
       assignee_value: node.assigneeValue,
       status: 'pending'
     })
+    const receiverIds = await getReceiverUserIds(node.assigneeType, node.assigneeValue)
+    await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(instanceId, taskId, node.name, rid, flowName)))
   } else if (node.type === 'sign') {
     const assignees = node.assignees?.length
       ? node.assignees
@@ -318,9 +380,18 @@ async function enterNode(instanceId: number, node: FlowNode) {
         status: 'pending'
       }))
     )
+    const tasks = await db('flow_tasks')
+      .where({ instance_id: instanceId, node_id: node.id, status: 'pending' })
+      .select('id', 'assignee_type', 'assignee_value')
+    await Promise.all(
+      tasks.map(async (t) => {
+        const receiverIds = await getReceiverUserIds(t.assignee_type, t.assignee_value)
+        await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(instanceId, t.id, node.name, rid, flowName)))
+      })
+    )
   } else if (node.type === 'cc') {
     // 抄送节点：记录抄送任务并自动通过
-    await db('flow_tasks').insert({
+    const [taskId] = await db('flow_tasks').insert({
       instance_id: instanceId,
       node_id: node.id,
       node_name: node.name,
@@ -328,6 +399,8 @@ async function enterNode(instanceId: number, node: FlowNode) {
       assignee_value: node.assigneeValue,
       status: 'cc'
     })
+    const receiverIds = await getReceiverUserIds(node.assigneeType, node.assigneeValue)
+    await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(instanceId, taskId, node.name, rid, flowName)))
     await autoMoveToNextNode(instanceId, node, 'approve')
   } else if (node.type === 'condition') {
     // 条件节点：自动根据表达式流转
