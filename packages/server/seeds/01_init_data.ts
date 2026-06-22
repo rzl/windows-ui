@@ -296,6 +296,28 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 9,
       status: 1,
       permission: 'lowcode:customApi'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'PageList',
+      path: '/lowcode/page',
+      component: 'views/lowcode/PageList.vue',
+      title: '自定义页面',
+      icon: 'page',
+      sort: 5,
+      status: 1,
+      permission: 'lowcode:page'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'PluginList',
+      path: '/lowcode/plugin',
+      component: 'views/lowcode/PluginList.vue',
+      title: '插件市场',
+      icon: 'plugin',
+      sort: 10,
+      status: 1,
+      permission: 'lowcode:plugin'
     }
   ])
 

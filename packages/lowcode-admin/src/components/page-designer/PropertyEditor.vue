@@ -57,10 +57,13 @@
       <w-form-item label="标题">
         <w-input v-model="node.props.title" />
       </w-form-item>
+      <w-form-item label="图表类型">
+        <w-select v-model="node.props.chartType" :options="chartTypeOptions" @change="handleChartTypeChange" />
+      </w-form-item>
       <w-form-item label="高度">
         <w-input v-model="node.props.height" />
       </w-form-item>
-      <w-form-item label="ECharts 配置（JSON）">
+      <w-form-item label="图表配置（JSON）">
         <w-input v-model="optionText" type="textarea" :rows="8" />
       </w-form-item>
       <data-source-editor v-model="node.dataSource" />
@@ -156,12 +159,23 @@
         <w-input v-model="node.props.path" />
       </w-form-item>
     </template>
+
+    <!-- 插件组件 -->
+    <template v-else-if="pluginComponent">
+      <w-form-item label="组件编码">
+        <w-input :model-value="node.type" disabled />
+      </w-form-item>
+      <w-form-item label="属性（JSON）">
+        <w-input v-model="propsText" type="textarea" :rows="8" />
+      </w-form-item>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import DataSourceEditor from './DataSourceEditor.vue'
+import { listCharts, getChart, getComponent } from '@/utils/pluginManager'
 
 const props = defineProps<{
   node: any
@@ -186,6 +200,16 @@ const typeLabelMap: Record<string, string> = {
 }
 
 const typeLabel = computed(() => typeLabelMap[props.node.type] || props.node.type)
+const pluginComponent = computed(() => getComponent(props.node.type))
+
+const chartTypeOptions = computed(() => listCharts().map((c) => ({ label: c.label, value: c.type })))
+
+function handleChartTypeChange(type: string) {
+  const plugin = getChart(type)
+  if (plugin) {
+    props.node.option = plugin.defaultOption()
+  }
+}
 
 const tagOptions = [
   { label: '段落 p', value: 'p' },
@@ -252,6 +276,20 @@ const tabsText = computed({
   set(value: string) {
     try {
       props.node.props.tabs = JSON.parse(value)
+      emit('update', props.node)
+    } catch {
+      // ignore invalid json
+    }
+  }
+})
+
+const propsText = computed({
+  get() {
+    return JSON.stringify(props.node.props || {}, null, 2)
+  },
+  set(value: string) {
+    try {
+      props.node.props = JSON.parse(value)
       emit('update', props.node)
     } catch {
       // ignore invalid json

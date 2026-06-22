@@ -290,6 +290,18 @@
 
 ### 扩展规范
 
+#### 通过插件扩展（推荐）
+
+平台已支持通过「插件市场」扩展字段类型、图表类型和页面组件，无需修改核心代码：
+
+1. 字段类型扩展：在插件 `contributions.fieldTypes` 中声明，运行时由 `fieldTypeRegistry` 消费。
+2. 图表类型扩展：在插件 `contributions.charts` 中声明，运行时调用 `api.registerChart` 注册渲染器。
+3. 页面组件扩展：在插件 `contributions.components` 中声明，运行时调用 `api.registerComponent` 注册组件。
+
+详细开发指南见 [plugin.md](../manuals/lowcode/plugin.md)。
+
+#### 手动扩展（不推荐）
+
 新增组件类型时：
 
 1. 在 `WDynamicForm` 中增加该类型的渲染分支。
@@ -355,7 +367,7 @@
 |------|------|-------|
 | text | 文本 | content、tag、align |
 | stat | 统计卡片 | title、field、icon、color |
-| chart | 图表（ECharts） | title、height、option |
+| chart | 图表 | title、height、chartType、option |
 | notice | 公告 | content、type |
 
 ### 数据组件

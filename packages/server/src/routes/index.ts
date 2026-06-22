@@ -15,6 +15,7 @@ import appRoutes from '../modules/app/app.routes'
 import auditRoutes from '../modules/audit/audit.routes'
 import pageRoutes from '../modules/page/page.routes'
 import customApiRoutes from '../modules/custom-api/custom-api.routes'
+import pluginRoutes from '../modules/plugin/plugin.routes'
 import { optionalAuthMiddleware } from '../middleware/auth'
 import * as customApiController from '../modules/custom-api/custom-api.controller'
 
@@ -36,6 +37,7 @@ router.use('/apps', appRoutes)
 router.use('/audit-logs', auditRoutes)
 router.use('/pages', pageRoutes)
 router.use('/custom-apis', customApiRoutes)
+router.use('/plugins', pluginRoutes)
 router.use('/custom', optionalAuthMiddleware, customApiController.executeCustomApi)
 
 export default router

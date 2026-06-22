@@ -294,6 +294,24 @@ const routes = [
         name: 'CustomApiEdit',
         component: () => import('@/views/lowcode/CustomApiEditor.vue'),
         meta: { title: '编辑自定义接口', permission: 'lowcode:customApi' }
+      },
+      {
+        path: 'lowcode/plugin',
+        name: 'PluginList',
+        component: () => import('@/views/lowcode/PluginList.vue'),
+        meta: { title: '插件市场', permission: 'lowcode:plugin' }
+      },
+      {
+        path: 'lowcode/plugin/edit',
+        name: 'PluginCreate',
+        component: () => import('@/views/lowcode/PluginEditor.vue'),
+        meta: { title: '新增插件', permission: 'lowcode:plugin' }
+      },
+      {
+        path: 'lowcode/plugin/edit/:id',
+        name: 'PluginEdit',
+        component: () => import('@/views/lowcode/PluginEditor.vue'),
+        meta: { title: '编辑插件', permission: 'lowcode:plugin' }
       }
     ]
   },

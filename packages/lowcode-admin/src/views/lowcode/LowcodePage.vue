@@ -101,6 +101,7 @@ import * as dictApi from '@/api/dict'
 import * as printApi from '@/api/print'
 import request from '@/api/request'
 import { useAuthStore } from '@/stores/auth'
+import { getFieldTypeMeta } from '@/utils/pluginManager'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -333,20 +334,7 @@ function flowStatusType(status: string) {
 }
 
 function mapType(type: string) {
-  const map: Record<string, string> = {
-    string: 'input',
-    text: 'textarea',
-    number: 'number',
-    boolean: 'switch',
-    date: 'date',
-    datetime: 'datetime',
-    select: 'select',
-    radio: 'radio',
-    upload: 'upload',
-    cascader: 'cascader',
-    'rich-text': 'rich-text'
-  }
-  return map[type] || 'input'
+  return getFieldTypeMeta(type)?.formType || 'input'
 }
 
 async function loadData() {

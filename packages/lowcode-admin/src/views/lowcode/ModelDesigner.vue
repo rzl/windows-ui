@@ -259,6 +259,7 @@ import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
 import * as externalDatasourceApi from '@/api/external-datasource'
 import { useAuthStore } from '@/stores/auth'
+import { getFieldTypeOptions, getFieldTypeMeta, mapFieldTypeToFormType } from '@/utils/pluginManager'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -313,20 +314,7 @@ const httpMethodOptions = [
   { label: 'POST', value: 'POST' }
 ]
 
-const fieldTypeOptions = [
-  { label: '字符串', value: 'string' },
-  { label: '文本', value: 'text' },
-  { label: '数字', value: 'number' },
-  { label: '布尔', value: 'boolean' },
-  { label: '日期', value: 'date' },
-  { label: '日期时间', value: 'datetime' },
-  { label: '下拉选择', value: 'select' },
-  { label: '单选', value: 'radio' },
-  { label: '关联模型', value: 'ref' },
-  { label: '文件上传', value: 'upload' },
-  { label: '级联选择', value: 'cascader' },
-  { label: '富文本', value: 'rich-text' }
-]
+const fieldTypeOptions = computed(() => getFieldTypeOptions())
 
 const defaultValueTypeOptions = [
   { label: '常量', value: 'constant' },
@@ -548,26 +536,8 @@ function syncConfigMaps() {
   })
 }
 
-function mapFieldTypeToFormType(type: string) {
-  const map: Record<string, string> = {
-    string: 'input',
-    text: 'textarea',
-    number: 'number',
-    boolean: 'switch',
-    date: 'date',
-    datetime: 'datetime',
-    select: 'select',
-    radio: 'radio',
-    ref: 'ref',
-    upload: 'upload',
-    cascader: 'cascader',
-    'rich-text': 'rich-text'
-  }
-  return map[type] || 'input'
-}
-
 function typeLabel(type: string) {
-  return fieldTypeOptions.find((o) => o.value === type)?.label || type
+  return getFieldTypeMeta(type)?.label || type
 }
 
 const models = ref<any[]>([])

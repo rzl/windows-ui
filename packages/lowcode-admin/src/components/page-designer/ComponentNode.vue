@@ -90,6 +90,10 @@
         </div>
       </template>
 
+      <template v-else-if="pluginComponent">
+        <component :is="pluginComponent.render" :node="node" />
+      </template>
+
       <template v-else>
         <div class="unknown-type">未知组件: {{ node.type }}</div>
       </template>
@@ -99,6 +103,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { listComponents, getComponent } from '@/utils/pluginManager'
 
 const props = defineProps<{
   node: any
@@ -110,7 +115,8 @@ const props = defineProps<{
 const emit = defineEmits(['select', 'delete', 'move'])
 
 const isSelected = computed(() => props.node.id === props.selectedId)
-const isContainer = computed(() => ['container', 'card', 'grid', 'tabs'].includes(props.node.type))
+const pluginComponent = computed(() => getComponent(props.node.type))
+const isContainer = computed(() => ['container', 'card', 'grid', 'tabs'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
 
 const typeLabelMap: Record<string, string> = {
   container: '容器',
@@ -128,7 +134,7 @@ const typeLabelMap: Record<string, string> = {
   link: '链接'
 }
 
-const typeLabel = computed(() => typeLabelMap[props.node.type] || props.node.type)
+const typeLabel = computed(() => typeLabelMap[props.node.type] || pluginComponent.value?.label || props.node.type)
 
 function selectNode(id: string) {
   emit('select', id)
@@ -175,6 +181,11 @@ function handleDrop(event: DragEvent) {
 }
 
 function createDefaultComponent(type: string): any {
+  const pluginDef = listComponents().find((c) => c.type === type)
+  if (pluginDef) {
+    return { id: `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, ...pluginDef.defaultNode() }
+  }
+
   const base = {
     id: `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     type,
@@ -196,7 +207,7 @@ function createDefaultComponent(type: string): any {
     case 'stat':
       return { ...base, props: { title: '统计标题', field: 'value', icon: 'star', color: 'primary' }, dataSource: { type: 'static', value: 0 } }
     case 'chart':
-      return { ...base, props: { height: '300px' }, dataSource: { type: 'static' }, option: { title: { text: '示例图表' }, xAxis: { data: ['一月', '二月', '三月'] }, yAxis: {}, series: [{ type: 'bar', data: [5, 20, 36] }] } }
+      return { ...base, props: { height: '300px', chartType: 'echarts' }, dataSource: { type: 'static' }, option: { title: { text: '示例图表' }, xAxis: { data: ['一月', '二月', '三月'] }, yAxis: {}, series: [{ type: 'bar', data: [5, 20, 36] }] } }
     case 'notice':
       return { ...base, props: { content: '公告内容', type: 'info' } }
     case 'model':

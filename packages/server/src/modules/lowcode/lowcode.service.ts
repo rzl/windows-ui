@@ -9,6 +9,7 @@ import * as externalDatasourceService from '../external-datasource/external-data
 import * as auditService from '../audit/audit.service'
 import { applyDataPermissionWhere, assertRowPermission as assertDataPermissionRow } from './data-permission.service'
 import { assertFieldWritable, filterHiddenFields, getFieldPermissionMap } from './field-permission.service'
+import * as pluginService from '../plugin/plugin.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -18,6 +19,53 @@ function safeTableName(name: string) {
 
 function safeFieldName(name: string) {
   return name.replace(/[^a-z0-9_]/gi, '_').toLowerCase()
+}
+
+async function getPluginFieldMap(): Promise<Record<string, any>> {
+  try {
+    const plugins = await pluginService.getActivePlugins()
+    const map: Record<string, any> = {}
+    for (const plugin of plugins) {
+      const contributions = typeof plugin.contributions === 'string'
+        ? JSON.parse(plugin.contributions || '{}')
+        : plugin.contributions || {}
+      for (const ft of contributions.fieldTypes || []) {
+        if (ft.type) map[ft.type] = ft
+      }
+    }
+    return map
+  } catch {
+    return {}
+  }
+}
+
+function buildColumn(table: any, columnName: string, dbType: string, length?: number) {
+  switch (dbType) {
+    case 'string':
+      table.string(columnName, length || 255)
+      break
+    case 'text':
+      table.text(columnName)
+      break
+    case 'integer':
+      table.integer(columnName)
+      break
+    case 'tinyint':
+    case 'boolean':
+      table.tinyint(columnName)
+      break
+    case 'datetime':
+      table.datetime(columnName)
+      break
+    case 'decimal':
+      table.decimal(columnName, 18, 4)
+      break
+    case 'json':
+      table.json(columnName)
+      break
+    default:
+      table.string(columnName, 255)
+  }
 }
 
 // ---------- 数据模型 ----------
@@ -331,7 +379,14 @@ async function addPhysicalColumn(tableName: string, columnName: string, fieldDat
   const exists = await db.schema.hasColumn(tableName, columnName)
   if (exists) return
 
+  const pluginDbType = await pluginService.getFieldDbType(fieldData.type)
+
   await db.schema.table(tableName, (table) => {
+    if (pluginDbType) {
+      buildColumn(table, columnName, pluginDbType, fieldData.length)
+      return
+    }
+
     switch (fieldData.type) {
       case 'string':
       case 'select':
@@ -632,7 +687,8 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any, re
   const currentUser = normalizeUser(user)
   await validateDynamicData(model.fields, data)
   await assertFieldWritable(modelCode, data, currentUser)
-  const cleanData = sanitizeData(model.fields, data)
+  const pluginFieldMap = await getPluginFieldMap()
+  const cleanData = await sanitizeData(model.fields, data, pluginFieldMap)
   if (user) {
     cleanData.create_by = user.id
     cleanData.update_by = user.id
@@ -672,7 +728,8 @@ export async function dynamicUpdate(modelCode: string, id: number, data: any, us
   const beforeRow = await db(model.table_name).where({ id }).first()
   await validateDynamicData(model.fields, data)
   await assertFieldWritable(modelCode, data, currentUser)
-  const cleanData = sanitizeData(model.fields, data)
+  const pluginFieldMap = await getPluginFieldMap()
+  const cleanData = await sanitizeData(model.fields, data, pluginFieldMap)
   cleanData.update_time = db.fn.now()
   if (user) {
     cleanData.update_by = user.id
@@ -748,7 +805,8 @@ export async function dynamicImport(modelCode: string, rows: any[], user?: any, 
   for (const row of rows) {
     await assertFieldWritable(modelCode, row, currentUser)
   }
-  const cleanRows = rows.map((row) => sanitizeData(model.fields, row))
+  const pluginFieldMap = await getPluginFieldMap()
+  const cleanRows = await Promise.all(rows.map((row) => sanitizeData(model.fields, row, pluginFieldMap)))
   const insertedIds = await db(model.table_name).insert(cleanRows)
 
   for (let i = 0; i < cleanRows.length; i++) {
@@ -969,16 +1027,36 @@ async function validateDynamicData(fields: any[], data: any) {
   }
 }
 
-function sanitizeData(fields: any[], data: any) {
+async function sanitizeData(fields: any[], data: any, pluginFieldMap?: Record<string, any>) {
   const result: any = {}
   const fieldMap = new Map(fields.map((f) => [f.field_name, f]))
+  const pluginMap = pluginFieldMap || await getPluginFieldMap()
 
   Object.entries(data).forEach(([key, value]) => {
     if (RESERVED_FIELDS.includes(key)) return
     const field = fieldMap.get(key)
     if (!field) return
 
-    // 类型转换
+    const pluginMeta = pluginMap[field.type]
+
+    // 插件字段类型按 dbType 转换
+    if (pluginMeta?.dbType) {
+      const dbType = pluginMeta.dbType
+      if (dbType === 'integer' || dbType === 'tinyint') {
+        result[key] = value === '' || value === undefined || value === null ? null : Number(value)
+      } else if (dbType === 'boolean') {
+        result[key] = parseBooleanValue(value) ? 1 : 0
+      } else if (dbType === 'datetime') {
+        result[key] = value === '' || value === undefined || value === null ? null : String(value).replace('T', ' ').slice(0, 19)
+      } else if (dbType === 'date') {
+        result[key] = value === '' || value === undefined || value === null ? null : String(value).slice(0, 10)
+      } else {
+        result[key] = value === '' ? null : value
+      }
+      return
+    }
+
+    // 内置类型转换
     if (field.type === 'number' || field.type === 'integer') {
       result[key] = value === '' || value === undefined || value === null ? null : Number(value)
     } else if (field.type === 'boolean' || field.type === 'switch') {

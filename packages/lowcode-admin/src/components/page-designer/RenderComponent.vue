@@ -132,6 +132,14 @@
       sandbox="allow-scripts allow-same-origin"
     />
 
+    <component
+      v-else-if="pluginComponent"
+      :is="pluginComponent.render"
+      :node="node"
+      :page-code="pageCode"
+      :data-value="dataValue"
+    />
+
     <div v-else class="unknown-component">未知组件: {{ node.type }}</div>
   </div>
 </template>
@@ -140,6 +148,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as pageApi from '@/api/page'
+import { getChart, getComponent } from '@/utils/pluginManager'
 
 const props = defineProps<{
   node: any
@@ -153,6 +162,7 @@ const chartUrl = ref('')
 const modelUrl = ref('')
 const dashboardUrl = ref('')
 const reportUrl = ref('')
+const pluginComponent = computed(() => getComponent(props.node.type))
 
 const displayValue = computed(() => {
   if (dataValue.value !== null && dataValue.value !== undefined) {
@@ -215,22 +225,11 @@ async function loadDataSource() {
 
 function generateChartUrl(option: any) {
   if (chartUrl.value) URL.revokeObjectURL(chartUrl.value)
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>body{margin:0;padding:8px;}</style>
-</head>
-<body>
-  <div id="chart" style="width:100%;height:${props.node.props.height || '300px'};"></div>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>
-  <script>
-    var chart = echarts.init(document.getElementById('chart'));
-    chart.setOption(${JSON.stringify(option)});
-    window.addEventListener('resize', function() { chart.resize(); });
-  <\/script>
-</body>
-</html>`
+  const chartType = props.node.props.chartType || 'echarts'
+  const plugin = getChart(chartType)
+  const html = plugin
+    ? plugin.render(option, props.node.props, dataValue.value)
+    : `<!DOCTYPE html><html><body>未知图表类型: ${chartType}</body></html>`
   const blob = new Blob([html], { type: 'text/html' })
   chartUrl.value = URL.createObjectURL(blob)
 }

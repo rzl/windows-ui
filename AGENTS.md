@@ -116,7 +116,7 @@ windows-ui/
 │   │   │   │   ├── auth/        # 登录 / 刷新 / 登出 / 个人信息
 │   │   │   │   ├── rbac/        # 用户 / 角色 / 菜单 / 部门
 │   │   │   │   ├── system/      # 字典 / 字典分类 / 职务 / 公告 / 通知等
-│   │   │   │   ├── lowcode/     # 数据模型 / 字段 / 表单 / 列表 / 编码规则 / 校验规则 / 动态 CRUD / 自定义接口
+│   │   │   │   ├── lowcode/     # 数据模型 / 字段 / 表单 / 列表 / 编码规则 / 校验规则 / 动态 CRUD / 自定义接口 / 插件扩展
 │   │   │   │   ├── monitor/     # 消息 / 模板 / 操作日志 / 服务器监控
 │   │   │   │   ├── dashboard/   # 仪表盘 / 首页配置
 │   │   │   │   ├── flow/        # 流程定义与实例
@@ -170,7 +170,7 @@ windows-ui/
 | `sop/backend/` | 后端开发规范、分层约定与接口标准 |
 | `sop/database/` | 数据库 schema 设计与表关系说明 |
 | `sop/development/` | 低代码平台开发工作流程、组件评估与扩展规范、Git 提交规范 |
-| `sop/lowcode/` | 低代码元数据模型、动态 API 约定、自定义接口、设计器配置规范、流程设计器说明 |
+| `sop/lowcode/` | 低代码元数据模型、动态 API 约定、自定义接口、设计器配置规范、流程设计器说明、插件扩展规范 |
 | `sop/manuals/` | 面向最终用户的操作手册（系统管理、低代码开发、监控消息等） |
 | `sop/progress/` | 按阶段记录的开发进度与待办事项 |
 
@@ -182,6 +182,7 @@ windows-ui/
 | 新增/修改后端模块、接口或数据库 | `sop/development/workflow.md`、`sop/backend/*.md`、`sop/database/schema.md` |
 | 扩展低代码数据模型、表单、列表、页面设计器 | `sop/lowcode/metadata.md`、`sop/lowcode/designer-spec.md` |
 | 修改动态 CRUD 接口或运行时行为 / 新增自定义接口 | `sop/lowcode/dynamic-api.md`、`sop/manuals/lowcode/custom-api.md` |
+| 扩展字段类型 / 图表类型 / 页面组件 / 开发新插件 | `sop/manuals/lowcode/plugin.md`、`sop/lowcode/designer-spec.md` |
 | 调整流程设计器或审批相关功能 | `sop/lowcode/flow-designer.md` |
 | 配置数据权限（行级）/ 字段权限 | `sop/manuals/system/data-permission.md`、`sop/manuals/system/field-permission.md` |
 | 新增/修改面向用户的功能模块 | 同步更新 `sop/manuals/` 下对应手册 |
@@ -248,6 +249,7 @@ windows-ui/
 - 后端数据库迁移位于 `packages/server/migrations/`，种子位于 `packages/server/seeds/`。
 - 低代码核心能力：数据模型设计 → 字段管理 → 表单/列表配置 → 自动创建物理表 → 通过 `/:modelCode` 动态 CRUD 接口运行。
 - 自定义接口：通过 Monaco 编辑器在线编写脚本，发布为 `/api/custom/*` 接口，支持多层路径与公开/登录访问控制。
+- 插件扩展：通过「插件市场」安装插件，动态注册自定义字段类型、自定义图表类型、自定义页面组件。
 - 低代码前端 additionally 包含基于 `@vue-flow` 的流程设计器与审批待办页面。
 
 ---

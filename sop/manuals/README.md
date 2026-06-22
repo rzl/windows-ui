@@ -41,7 +41,8 @@ sop/manuals/
 │   ├── app-templates.md         # 应用模板安装
 │   ├── app-portal.md            # 应用运行门户/工作台
 │   ├── page-designer.md         # 自定义页面设计器
-│   └── custom-api.md            # 自定义接口
+│   ├── custom-api.md            # 自定义接口
+│   └── plugin.md                # 插件市场
 ├── flow/                        # 流程与审批
 │   └── pending-task.md          # 流程待办与消息提醒
 ├── monitor/                     # 监控与消息

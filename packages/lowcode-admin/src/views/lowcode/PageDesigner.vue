@@ -111,6 +111,7 @@ import * as pageApi from '@/api/page'
 import ComponentNode from '@/components/page-designer/ComponentNode.vue'
 import PropertyEditor from '@/components/page-designer/PropertyEditor.vue'
 import PageRenderer from '@/components/page-designer/PageRenderer.vue'
+import { getChart, listComponents, listComponentsByCategory } from '@/utils/pluginManager'
 
 const route = useRoute()
 const router = useRouter()
@@ -132,12 +133,13 @@ const layoutTypes = [
   { label: '标签页', value: 'tabs' }
 ]
 
-const displayTypes = [
+const displayTypes = computed(() => [
   { label: '文本', value: 'text' },
   { label: '统计卡片', value: 'stat' },
   { label: '图表', value: 'chart' },
-  { label: '公告', value: 'notice' }
-]
+  { label: '公告', value: 'notice' },
+  ...listComponentsByCategory('display').map((c) => ({ label: c.label, value: c.type }))
+])
 
 const dataTypes = [
   { label: '数据模型', value: 'model' },
@@ -145,10 +147,11 @@ const dataTypes = [
   { label: '报表', value: 'report' }
 ]
 
-const actionTypes = [
+const actionTypes = computed(() => [
   { label: '按钮', value: 'button' },
-  { label: '链接', value: 'link' }
-]
+  { label: '链接', value: 'link' },
+  ...listComponentsByCategory('action').map((c) => ({ label: c.label, value: c.type }))
+])
 
 const selectedNode = computed(() => {
   return findNode(config.components, selectedId.value)
@@ -182,6 +185,11 @@ function generateId() {
 }
 
 function createDefaultComponent(type: string): any {
+  const pluginDef = listComponents().find((c) => c.type === type)
+  if (pluginDef) {
+    return { id: generateId(), ...pluginDef.defaultNode() }
+  }
+
   const base = {
     id: generateId(),
     type,
@@ -202,8 +210,10 @@ function createDefaultComponent(type: string): any {
       return { ...base, props: { content: '这是一段文本', tag: 'p', align: 'left' } }
     case 'stat':
       return { ...base, props: { title: '统计标题', field: 'value', icon: 'star', color: 'primary' }, dataSource: { type: 'static', value: 0 } }
-    case 'chart':
-      return { ...base, props: { height: '300px' }, dataSource: { type: 'static' }, option: { title: { text: '示例图表' }, xAxis: { data: ['一月', '二月', '三月'] }, yAxis: {}, series: [{ type: 'bar', data: [5, 20, 36] }] } }
+    case 'chart': {
+      const chartPlugin = getChart('echarts')
+      return { ...base, props: { height: '300px', chartType: 'echarts' }, dataSource: { type: 'static' }, option: chartPlugin ? chartPlugin.defaultOption() : {} }
+    }
     case 'notice':
       return { ...base, props: { content: '公告内容', type: 'info' } }
     case 'model':
