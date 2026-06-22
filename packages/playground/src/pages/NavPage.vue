@@ -48,10 +48,10 @@ const { t } = useI18n()
 </script>
 
 <style scoped>
-.page-title { font-size: 24px; color: #245edb; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #d4d0c8; }
+.page-title { font-size: 24px; color: var(--w-color-primary); margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid var(--w-border-color); }
 .component-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-.component-card { display: block; background: #fff; border: 2px solid; border-color: #fff #808080 #808080 #fff; padding: 16px; text-decoration: none; color: inherit; transition: transform .1s; }
-.component-card:hover { transform: translateY(-2px); background: #f8f8f8; }
-.component-card h3 { margin: 0 0 8px; font-size: 16px; color: #245edb; }
-.component-card p { margin: 0; font-size: 12px; color: #666; }
+.component-card { display: block; background: var(--w-bg-color); border: 2px solid; border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light); padding: 16px; text-decoration: none; color: inherit; transition: transform .1s; }
+.component-card:hover { transform: translateY(-2px); background: var(--w-fill-color); }
+.component-card h3 { margin: 0 0 8px; font-size: 16px; color: var(--w-color-primary); }
+.component-card p { margin: 0; font-size: 12px; color: var(--w-text-color-secondary); }
 </style>

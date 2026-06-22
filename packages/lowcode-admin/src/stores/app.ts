@@ -14,6 +14,8 @@ export interface NotificationState {
   totalUnreadCount: number
 }
 
+export type LowcodeThemeMode = 'light' | 'dark' | 'auto'
+
 const STORAGE_KEY = 'lowcode-admin-settings'
 
 function loadSettings() {
@@ -32,6 +34,7 @@ export const useAppStore = defineStore('app', () => {
   const sidebarCollapsed = ref(false)
   const size = ref<'small' | 'default' | 'large'>(saved?.size || 'default')
   const locale = ref<LocaleType>(saved?.locale || 'zh-CN')
+  const mode = ref<LowcodeThemeMode>(saved?.mode || 'light')
   const vconsoleEnabled = ref<boolean>(saved?.vconsoleEnabled || false)
   const theme = reactive({
     primary: saved?.theme?.primary || '#245edb',
@@ -51,12 +54,13 @@ export const useAppStore = defineStore('app', () => {
 
   setGlobalLocale(locale.value)
 
-  watch([size, locale, vconsoleEnabled, theme], () => {
+  watch([size, locale, mode, vconsoleEnabled, theme], () => {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
         size: size.value,
         locale: locale.value,
+        mode: mode.value,
         vconsoleEnabled: vconsoleEnabled.value,
         theme: { primary: theme.primary, success: theme.success, warning: theme.warning, danger: theme.danger }
       })
@@ -66,6 +70,10 @@ export const useAppStore = defineStore('app', () => {
 
   function setLocale(value: LocaleType) {
     locale.value = value
+  }
+
+  function setMode(value: LowcodeThemeMode) {
+    mode.value = value
   }
 
   function toggleSidebar() {
@@ -110,12 +118,14 @@ export const useAppStore = defineStore('app', () => {
     sidebarCollapsed,
     size,
     locale,
+    mode,
     vconsoleEnabled,
     theme,
     visitedViews,
     notification,
     toggleSidebar,
     setLocale,
+    setMode,
     addView,
     removeView,
     removeOthers,

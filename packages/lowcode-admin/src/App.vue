@@ -1,5 +1,5 @@
 <template>
-  <w-config-provider :size="app.size" :theme="app.theme" :locale="app.locale">
+  <w-config-provider :size="app.size" :theme="app.theme" :locale="app.locale" :mode="app.mode">
     <router-view />
   </w-config-provider>
 </template>
@@ -38,7 +38,7 @@ html, body {
   height: 100%;
   overflow: hidden;
   font-family: 'Tahoma', 'Microsoft Sans Serif', sans-serif;
-  background: #ece9d8;
+  background: var(--w-bg-color-page, var(--w-bg-color));
 }
 #app,
 #app > div {

@@ -76,14 +76,14 @@ const groups = [
 
 <style scoped>
 .home-page { padding: 8px; }
-.section-title { font-size: 20px; color: #245edb; margin: 20px 0 12px; }
+.section-title { font-size: 20px; color: var(--w-color-primary); margin: 20px 0 12px; }
 .nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.nav-card { display: block; padding: 16px; background: #fff; border: 2px solid; border-color: #fff #808080 #808080 #fff; text-decoration: none; color: #000; transition: transform 0.15s; }
-.nav-card:hover { transform: translateY(-2px); box-shadow: 2px 2px 8px rgba(0,0,0,0.2); }
+.nav-card { display: block; padding: 16px; background: var(--w-bg-color); border: 2px solid; border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light); text-decoration: none; color: var(--w-text-color-primary); transition: transform 0.15s; }
+.nav-card:hover { transform: translateY(-2px); box-shadow: var(--w-box-shadow); }
 .nav-card__icon { font-size: 28px; margin-bottom: 8px; }
-.nav-card__title { font-size: 16px; font-weight: bold; color: #245edb; margin-bottom: 4px; }
-.nav-card__count { font-size: 12px; color: #3a9e3a; margin-bottom: 4px; }
-.nav-card__desc { font-size: 11px; color: #666; }
+.nav-card__title { font-size: 16px; font-weight: bold; color: var(--w-color-primary); margin-bottom: 4px; }
+.nav-card__count { font-size: 12px; color: var(--w-color-success); margin-bottom: 4px; }
+.nav-card__desc { font-size: 11px; color: var(--w-text-color-secondary); }
 .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
 .overview-card { margin-bottom: 0; }
 </style>

@@ -54,14 +54,21 @@
   --w-color-white: #ffffff;
   --w-color-black: #000000;
 
-  /* XP Background Colors */
-  --w-bg-color: #ece9d8;
-  --w-bg-color-page: #3a6ea5;
+  /* Background Colors */
+  --w-bg-color: #ffffff;
+  --w-bg-color-page: #f5f5f5;
   --w-bg-color-overlay: rgba(0, 0, 0, 0.5);
 
-  /* XP Border Colors */
+  /* Fill Colors (for panels, buttons, inputs) */
+  --w-fill-color: #f5f5f5;
+  --w-fill-color-light: #f0f0f0;
+  --w-fill-color-lighter: #fafafa;
+  --w-fill-color-dark: #e0e0e0;
+  --w-fill-color-darker: #d4d0c8;
+
+  /* Border Colors */
   --w-border-color: #919b9c;
-  --w-border-color-light: #d6dff7;
+  --w-border-color-light: #e0e0e0;
   --w-border-color-dark: #404040;
   --w-border-color-darker: #808080;
 
@@ -104,4 +111,43 @@
 
   /* Table */
   --w-table-current-row-bg: #dcebfc;
+}
+
+/* Dark mode palette */
+html.dark {
+  color-scheme: dark;
+
+  /* Background Colors */
+  --w-bg-color: #1e1e1e;
+  --w-bg-color-page: #121212;
+  --w-bg-color-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Fill Colors */
+  --w-fill-color: #2d2d2d;
+  --w-fill-color-light: #333333;
+  --w-fill-color-lighter: #262626;
+  --w-fill-color-dark: #3a3a3a;
+  --w-fill-color-darker: #444444;
+
+  /* Border Colors */
+  --w-border-color: #555555;
+  --w-border-color-light: #444444;
+  --w-border-color-dark: #777777;
+  --w-border-color-darker: #999999;
+
+  /* Text Colors */
+  --w-text-color-primary: #ffffff;
+  --w-text-color-regular: #e0e0e0;
+  --w-text-color-secondary: #a0a0a0;
+  --w-text-color-placeholder: #808080;
+  --w-text-color-disabled: #555555;
+  --w-text-color-inverse: #000000;
+
+  /* Shadows */
+  --w-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  --w-box-shadow-light: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  --w-box-shadow-dark: 4px 4px 10px rgba(0, 0, 0, 0.7);
+
+  /* Table */
+  --w-table-current-row-bg: rgba(90, 132, 255, 0.25);
 }

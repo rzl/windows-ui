@@ -1,5 +1,5 @@
 <template>
-  <w-config-provider prefix="w" :size="globalSize" :theme="globalTheme" :locale="globalLocale">
+  <w-config-provider prefix="w" :size="globalSize" :theme="globalTheme" :locale="globalLocale" :mode="globalMode">
     <div class="playground">
       <header class="playground-header">
         <h1>🖥️ Windows UI</h1>
@@ -37,6 +37,17 @@
             <input type="color" :value="themeColors.primary" @change="e => { themeColors.primary = (e.target as HTMLInputElement).value; updateTheme() }" class="color-input" title="primary" />
             <button class="reset-btn" @click="resetTheme">{{ t('重置') }}</button>
             <div class="color-preview" :style="{ backgroundColor: themeColors.primary }"></div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">{{ t('模式') }}</span>
+            <button
+              v-for="m in modeOptions"
+              :key="m"
+              :class="['size-btn', { active: globalMode === m }]"
+              @click="switchMode(m)"
+            >
+              {{ t(modeLabels[m]) }}
+            </button>
           </div>
         </div>
       </header>
@@ -80,10 +91,21 @@ const isActive = (path: string) => {
 const globalSize = ref<'small' | 'default' | 'large'>('default')
 const globalLocale = ref<'zh-CN' | 'en-US'>(i18n.global.locale.value as 'zh-CN' | 'en-US')
 
+type ThemeMode = 'light' | 'dark' | 'auto'
+const modeOptions: ThemeMode[] = ['light', 'dark', 'auto']
+const modeLabels: Record<ThemeMode, string> = { light: '浅色', dark: '深色', auto: '自动' }
+const savedMode = localStorage.getItem('playground_mode') as ThemeMode | null
+const globalMode = ref<ThemeMode>(savedMode || 'light')
+
 function switchLang(lang: 'zh-CN' | 'en-US') {
   globalLocale.value = lang
   setPlaygroundLang(lang)
   window.location.reload()
+}
+
+function switchMode(mode: ThemeMode) {
+  globalMode.value = mode
+  localStorage.setItem('playground_mode', mode)
 }
 
 const translatableNavLabels = ['首页', '全部组件', '基础组件', '表单组件', '数据展示', '导航组件', '反馈组件', '其他组件']
@@ -236,13 +258,13 @@ const navItems = [
 .admin-link:hover { background: rgba(255,255,255,0.3); }
 .playground-body { display: flex; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; padding: 16px; gap: 16px; }
 .playground-sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 16px; align-self: flex-start; max-height: calc(100vh - 32px); overflow-y: auto; }
-.sidebar-nav { background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; }
-.sidebar-link { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #000; text-decoration: none; font-size: 13px; border-bottom: 1px solid #d4d0c8; transition: background 0.15s; }
+.sidebar-nav { background: var(--w-bg-color); border: 2px solid; border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light); }
+.sidebar-link { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: var(--w-text-color-primary); text-decoration: none; font-size: 13px; border-bottom: 1px solid var(--w-border-color); transition: background 0.15s; }
 .sidebar-link:last-child { border-bottom: none; }
-.sidebar-link:hover { background: var(--w-color-primary-light); color: #fff; }
-.sidebar-link.is-active { background: var(--w-color-primary); color: #fff; font-weight: bold; }
-.sidebar-link.is-indented { padding-left: 28px; font-size: 12px; background: #f5f5f5; }
-.sidebar-link.is-indented:hover { background: #e8e8e8; color: var(--w-color-primary); }
-.sidebar-link.is-indented.is-active { background: #dcebfc; color: var(--w-color-primary); }
+.sidebar-link:hover { background: var(--w-color-primary-light); color: var(--w-text-color-inverse); }
+.sidebar-link.is-active { background: var(--w-color-primary); color: var(--w-text-color-inverse); font-weight: bold; }
+.sidebar-link.is-indented { padding-left: 28px; font-size: 12px; background: var(--w-fill-color); }
+.sidebar-link.is-indented:hover { background: var(--w-fill-color-dark); color: var(--w-color-primary); }
+.sidebar-link.is-indented.is-active { background: var(--w-color-primary-lighter); color: var(--w-color-primary); }
 .playground-content { flex: 1; min-width: 0; }
 </style>

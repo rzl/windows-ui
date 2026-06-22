@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { provide, ref, watch, computed, onUnmounted } from 'vue'
+import { provide, ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { configProviderContextKey } from '../../utils/prefix'
 import { localeContextKey, getLocaleMessages, type LocaleType, type LocaleMessages } from '../../locale'
 
@@ -16,12 +16,13 @@ const props = defineProps({
   size: { type: String, default: 'default' },
   zIndex: { type: Number, default: 2000 },
   theme: { type: Object, default: () => ({}) },
-  locale: { type: [String, Object], default: 'zh-CN' }
+  locale: { type: [String, Object], default: 'zh-CN' },
+  mode: { type: String as () => 'light' | 'dark' | 'auto', default: 'light' }
 })
 
-const config = ref({ prefix: props.prefix, size: props.size, zIndex: props.zIndex, locale: props.locale })
-watch(() => [props.prefix, props.size, props.zIndex, props.locale], ([p, s, z, l]) => {
-  config.value = { prefix: p as string, size: s as string, zIndex: z as number, locale: l as string | LocaleMessages }
+const config = ref({ prefix: props.prefix, size: props.size, zIndex: props.zIndex, locale: props.locale, mode: props.mode })
+watch(() => [props.prefix, props.size, props.zIndex, props.locale, props.mode], ([p, s, z, l, m]) => {
+  config.value = { prefix: p as string, size: s as string, zIndex: z as number, locale: l as string | LocaleMessages, mode: m as 'light' | 'dark' | 'auto' }
 }, { immediate: true })
 provide(configProviderContextKey, config)
 
@@ -35,6 +36,40 @@ const localeMessages = computed<LocaleMessages>(() => {
 })
 
 provide(localeContextKey, { locale: localeKey, messages: localeMessages })
+
+/* Mode / dark class handling */
+let mediaQuery: MediaQueryList | null = null
+let mediaQueryListener: ((e: MediaQueryListEvent) => void) | null = null
+
+function isDarkMode(mode: string) {
+  if (mode === 'dark') return true
+  if (mode === 'light') return false
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+  return false
+}
+
+function updateHtmlMode() {
+  if (typeof document === 'undefined') return
+  const dark = isDarkMode(props.mode)
+  document.documentElement.classList.toggle('dark', dark)
+  document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+}
+
+watch(() => props.mode, updateHtmlMode, { immediate: true })
+
+onMounted(() => {
+  if (typeof window === 'undefined' || !window.matchMedia) return
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQueryListener = (e) => {
+    if (props.mode === 'auto') {
+      document.documentElement.classList.toggle('dark', e.matches)
+      document.documentElement.style.colorScheme = e.matches ? 'dark' : 'light'
+    }
+  }
+  mediaQuery.addEventListener('change', mediaQueryListener)
+})
 
 const themeVarMap: Record<string, string> = {
   primary: '--w-color-primary',
@@ -120,6 +155,13 @@ watch(() => props.theme, (t) => applyToDocument(t as Record<string, string>), { 
 
 onUnmounted(() => {
   appliedVars.forEach((v) => document.documentElement.style.removeProperty(v))
+  if (mediaQuery && mediaQueryListener) {
+    mediaQuery.removeEventListener('change', mediaQueryListener)
+  }
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.remove('dark')
+    document.documentElement.style.colorScheme = ''
+  }
 })
 </script>
 

@@ -18,6 +18,7 @@
 - [x] 国际化支持
 
 ## 变更记录
+- 2026-06-22: 全量支持 light / dark / auto 主题模式，`WConfigProvider` 新增 `mode` prop；默认背景色由 `#ece9d8` 改为 `#ffffff`；新增 `html.dark` 暗黑调色盘与全局 `dark.css` 覆盖表，playground、admin、lowcode-admin 同步支持模式切换与持久化
 - 2026-06-12: 新增国际化支持。内置 `zh-CN` / `en-US` 语言包，语言文件为单层键值对；`WConfigProvider` 新增 `locale` prop，支持全局/局部配置；`app.use(WindowsUI, { locale, messages })` 支持全局注入；导出 `useLocale`、`setGlobalLocale`、`registerLocale` 等 API
 - 2024-06-01: 初始版本实现
 - 2026-06-06: 新增 `size` 全局配置支持，旗下组件（Button、Input、Tag、Text、Avatar、Icon）未传入 `size` 时将自动继承全局尺寸

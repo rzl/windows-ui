@@ -6,6 +6,7 @@ export interface ConfigProviderConfig {
   size: string
   zIndex: number
   locale: LocaleType | LocaleMessages
+  mode: 'light' | 'dark' | 'auto'
 }
 
 export const configProviderContextKey: InjectionKey<Ref<ConfigProviderConfig>> = Symbol('configProviderContextKey')

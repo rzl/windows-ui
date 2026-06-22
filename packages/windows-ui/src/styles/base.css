@@ -15,22 +15,22 @@
   font-family: var(--w-font-family);
   font-size: var(--w-font-size-base);
   padding: 3px 10px;
-  border: 1px solid #003c74;
+  border: 1px solid var(--w-border-color-dark);
   border-radius: var(--w-border-radius-base);
-  background: linear-gradient(180deg, #ffffff 0%, #ecebe5 50%, #d6d0c5 100%);
+  background: linear-gradient(180deg, var(--w-bg-color) 0%, var(--w-fill-color) 50%, var(--w-fill-color-dark) 100%);
   color: var(--w-text-color-primary);
   cursor: pointer;
   outline: none;
-  box-shadow: inset 1px 1px 0px rgba(255,255,255,0.8), inset -1px -1px 0px rgba(0,0,0,0.1);
+  box-shadow: inset 1px 1px 0px rgba(255,255,255,0.15), inset -1px -1px 0px rgba(0,0,0,0.15);
 }
 
 .w-xp-btn-base:hover {
-  border-color: #0078d7;
-  background: linear-gradient(180deg, #ffffff 0%, #f0f8ff 50%, #d6e8f5 100%);
+  border-color: var(--w-color-primary);
+  background: linear-gradient(180deg, var(--w-bg-color) 0%, var(--w-color-primary-lighter) 50%, var(--w-color-primary-light) 100%);
 }
 
 .w-xp-btn-base:active {
-  background: linear-gradient(180deg, #d6d0c5 0%, #ecebe5 50%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--w-fill-color-dark) 0%, var(--w-fill-color) 50%, var(--w-bg-color) 100%);
   box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
   padding: 4px 9px 2px 11px;
 }
@@ -45,22 +45,22 @@
   font-family: var(--w-font-family);
   font-size: var(--w-font-size-base);
   padding: 2px 4px;
-  border: 1px solid #7f9db9;
+  border: 1px solid var(--w-border-color);
   border-radius: 0;
-  background: #ffffff;
+  background: var(--w-bg-color);
   color: var(--w-text-color-primary);
   outline: none;
 }
 
 .w-xp-input-base:focus {
-  border-color: #0078d7;
-  outline: 1px solid #a5c2e8;
+  border-color: var(--w-color-primary);
+  outline: 1px solid var(--w-color-primary-lighter);
   outline-offset: -2px;
 }
 
 .w-xp-input-base:disabled {
-  background: #ebebe4;
-  color: #a0a0a0;
+  background: var(--w-fill-color);
+  color: var(--w-text-color-disabled);
 }
 
 /* XP Textarea Base */
@@ -68,9 +68,9 @@
   font-family: var(--w-font-family);
   font-size: var(--w-font-size-base);
   padding: 4px;
-  border: 1px solid #7f9db9;
+  border: 1px solid var(--w-border-color);
   border-radius: 0;
-  background: #ffffff;
+  background: var(--w-bg-color);
   color: var(--w-text-color-primary);
   outline: none;
   resize: vertical;
@@ -79,15 +79,15 @@
 }
 
 .w-xp-textarea:focus {
-  border-color: #0078d7;
-  outline: 1px solid #a5c2e8;
+  border-color: var(--w-color-primary);
+  outline: 1px solid var(--w-color-primary-lighter);
   outline-offset: -2px;
 }
 
 /* XP Window Base */
 .w-xp-window-base {
   background: var(--w-bg-color);
-  border: 1px solid #0054e3;
+  border: 1px solid var(--w-color-primary);
   border-radius: var(--w-border-radius-large) var(--w-border-radius-large) 0 0;
   box-shadow: var(--w-box-shadow-dark);
 }
@@ -115,23 +115,23 @@
 }
 
 .w-xp-scrollbar::-webkit-scrollbar-track {
-  background: #f0f0f0;
-  border-left: 1px solid #d4d0c8;
+  background: var(--w-fill-color);
+  border-left: 1px solid var(--w-border-color);
 }
 
 .w-xp-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, #e8e8e8 0%, #d4d0c8 50%, #c0c0c0 100%);
-  border: 1px solid #808080;
+  background: linear-gradient(90deg, var(--w-fill-color) 0%, var(--w-fill-color-dark) 50%, var(--w-border-color) 100%);
+  border: 1px solid var(--w-border-color-dark);
   border-radius: 0;
 }
 
 .w-xp-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #d0d0d0 100%);
+  background: linear-gradient(90deg, var(--w-fill-color-light) 0%, var(--w-fill-color) 50%, var(--w-fill-color-dark) 100%);
 }
 
 .w-xp-scrollbar::-webkit-scrollbar-button {
-  background: #e0e0e0;
-  border: 1px solid #808080;
+  background: var(--w-fill-color-dark);
+  border: 1px solid var(--w-border-color-dark);
   height: 16px;
   width: 16px;
 }
@@ -140,23 +140,23 @@
 .w-xp-panel {
   background: var(--w-bg-color);
   border: 2px solid;
-  border-color: #ffffff #808080 #808080 #ffffff;
+  border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light);
   padding: 4px;
 }
 
 .w-xp-panel-raised {
-  border-color: #ffffff #404040 #404040 #ffffff;
+  border-color: var(--w-border-color-light) var(--w-border-color-darker) var(--w-border-color-darker) var(--w-border-color-light);
 }
 
 .w-xp-panel-sunken {
-  border-color: #808080 #ffffff #ffffff #808080;
-  background: #ffffff;
+  border-color: var(--w-border-color-dark) var(--w-border-color-light) var(--w-border-color-light) var(--w-border-color-dark);
+  background: var(--w-bg-color);
 }
 
 /* XP Menu */
 .w-xp-menu {
   background: var(--w-bg-color);
-  border: 1px solid #808080;
+  border: 1px solid var(--w-border-color-dark);
   box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
   padding: 2px;
 }
@@ -170,14 +170,15 @@
 }
 
 .w-xp-menu-item:hover {
-  background: var(--w-xp-blue);
+  background: var(--w-color-primary);
   color: var(--w-text-color-inverse);
 }
 
 /* XP Tooltip */
 .w-xp-tooltip {
-  background: #ffffe1;
-  border: 1px solid #000000;
+  background: var(--w-fill-color-lighter);
+  border: 1px solid var(--w-border-color-dark);
+  color: var(--w-text-color-primary);
   padding: 4px 8px;
   font-size: var(--w-font-size-small);
   box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
@@ -186,8 +187,8 @@
 /* XP Tabs */
 .w-xp-tab {
   padding: 4px 12px;
-  background: linear-gradient(180deg, #f8f8f8 0%, #e0e0e0 100%);
-  border: 1px solid #919b9c;
+  background: linear-gradient(180deg, var(--w-fill-color-light) 0%, var(--w-fill-color-dark) 100%);
+  border: 1px solid var(--w-border-color);
   border-bottom: none;
   border-radius: var(--w-border-radius-base) var(--w-border-radius-base) 0 0;
   cursor: pointer;
@@ -203,25 +204,29 @@
 
 /* XP Alert */
 .w-xp-alert-error {
-  background: #ffffff;
-  border: 2px solid #d92b2b;
+  background: var(--w-bg-color);
+  border: 2px solid var(--w-color-danger);
+  color: var(--w-text-color-primary);
   padding: 12px 16px;
 }
 
 .w-xp-alert-warning {
-  background: #ffffcc;
-  border: 1px solid #e4a010;
+  background: var(--w-color-warning-lighter);
+  border: 1px solid var(--w-color-warning);
+  color: var(--w-text-color-primary);
   padding: 8px 12px;
 }
 
 .w-xp-alert-info {
-  background: #e8f4fd;
+  background: var(--w-color-primary-lighter);
   border: 1px solid var(--w-color-primary);
+  color: var(--w-text-color-primary);
   padding: 8px 12px;
 }
 
 .w-xp-alert-success {
-  background: #e8f8e8;
+  background: var(--w-color-success-lighter);
   border: 1px solid var(--w-color-success);
+  color: var(--w-text-color-primary);
   padding: 8px 12px;
 }

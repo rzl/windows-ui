@@ -7,6 +7,8 @@ export interface TabItem {
   title: string
 }
 
+export type AdminThemeMode = 'light' | 'dark' | 'auto'
+
 export const useAppStore = defineStore('app', () => {
   const sidebarCollapsed = ref(false)
   const size = ref<'small' | 'default' | 'large'>('default')
@@ -16,7 +18,13 @@ export const useAppStore = defineStore('app', () => {
     warning: '#e4a010',
     danger: '#d92b2b'
   })
+  const mode = ref<AdminThemeMode>((localStorage.getItem('admin_mode') as AdminThemeMode) || 'light')
   const lang = ref(localStorage.getItem('admin_lang') || 'zh-CN')
+
+  function setMode(value: AdminThemeMode) {
+    mode.value = value
+    localStorage.setItem('admin_mode', value)
+  }
   const visitedViews = ref<TabItem[]>([
     { name: 'Dashboard', path: '/dashboard', title: '仪表盘' }
   ])
@@ -43,5 +51,5 @@ export const useAppStore = defineStore('app', () => {
     visitedViews.value = [{ name: 'Dashboard', path: '/dashboard', title: '仪表盘' }]
   }
 
-  return { sidebarCollapsed, size, theme, lang, visitedViews, toggleSidebar, addView, removeView, removeOthers, removeAll }
+  return { sidebarCollapsed, size, theme, mode, lang, visitedViews, toggleSidebar, addView, removeView, removeOthers, removeAll, setMode }
 })

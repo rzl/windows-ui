@@ -6,6 +6,6 @@
 </script>
 
 <style>
-html, body { margin: 0; padding: 0; font-family: 'Tahoma', 'Microsoft Sans Serif', sans-serif; background: #ece9d8; }
+html, body { margin: 0; padding: 0; font-family: 'Tahoma', 'Microsoft Sans Serif', sans-serif; background: var(--w-bg-color-page, var(--w-bg-color)); }
 #app { min-height: 100vh; }
 </style>

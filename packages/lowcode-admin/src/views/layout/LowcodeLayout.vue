@@ -74,6 +74,9 @@
       <w-form-item :label="t('组件尺寸')">
         <w-select v-model="settings.size" :options="sizeOptions" />
       </w-form-item>
+      <w-form-item :label="t('主题模式')">
+        <w-select v-model="settings.mode" :options="modeOptions" />
+      </w-form-item>
       <w-form-item :label="t('主色')">
         <w-color-picker v-model="settings.theme.primary" />
       </w-form-item>
@@ -119,6 +122,7 @@ const settingsVisible = ref(false)
 const settings = reactive({
   locale: app.locale,
   size: app.size,
+  mode: app.mode,
   vconsoleEnabled: app.vconsoleEnabled,
   theme: { ...app.theme }
 })
@@ -134,9 +138,16 @@ const sizeOptions = computed(() => [
   { label: t('小'), value: 'small' }
 ])
 
+const modeOptions = computed(() => [
+  { label: t('浅色'), value: 'light' },
+  { label: t('深色'), value: 'dark' },
+  { label: t('自动'), value: 'auto' }
+])
+
 function openSettings() {
   settings.locale = app.locale
   settings.size = app.size
+  settings.mode = app.mode
   settings.vconsoleEnabled = app.vconsoleEnabled
   settings.theme = { ...app.theme }
   settingsVisible.value = true
@@ -145,6 +156,7 @@ function openSettings() {
 function saveSettings() {
   app.setLocale(settings.locale as LocaleType)
   app.size = settings.size
+  app.setMode(settings.mode)
   app.vconsoleEnabled = settings.vconsoleEnabled
   app.theme.primary = settings.theme.primary
   app.theme.success = settings.theme.success
@@ -155,6 +167,10 @@ function saveSettings() {
 
 watch(() => app.locale, () => {
   settings.locale = app.locale
+})
+
+watch(() => app.mode, () => {
+  settings.mode = app.mode
 })
 
 function transformMenu(items: any[]): any[] {
@@ -273,7 +289,7 @@ function closeTab(tab: any) {
   width: 220px;
   flex-shrink: 0;
   background: var(--w-bg-color);
-  border-right: 2px solid #808080;
+  border-right: 2px solid var(--w-border-color-dark);
   display: flex;
   flex-direction: column;
   transition: width 0.2s;
@@ -288,7 +304,7 @@ function closeTab(tab: any) {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  border-bottom: 1px solid #d4d0c8;
+  border-bottom: 1px solid var(--w-border-color);
   font-weight: bold;
   color: var(--w-color-primary);
   white-space: nowrap;
@@ -315,7 +331,7 @@ function closeTab(tab: any) {
   padding: 8px 16px;
   background: var(--w-bg-color);
   border-bottom: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
+  border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light);
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-right { display: flex; align-items: center; gap: 12px; font-size: 13px; }
@@ -332,8 +348,8 @@ function closeTab(tab: any) {
   display: flex;
   gap: 2px;
   padding: 4px 8px;
-  background: #f0f0f0;
-  border-bottom: 1px solid #d4d0c8;
+  background: var(--w-fill-color);
+  border-bottom: 1px solid var(--w-border-color);
   overflow-x: auto;
 }
 .tab-item {
@@ -342,16 +358,17 @@ function closeTab(tab: any) {
   gap: 4px;
   padding: 4px 12px;
   background: var(--w-bg-color);
-  border: 1px solid #d4d0c8;
+  border: 1px solid var(--w-border-color);
+  color: var(--w-text-color-primary);
   font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
 }
-.tab-item:hover { background: #e8e8e8; }
+.tab-item:hover { background: var(--w-fill-color-dark); }
 .tab-item.active {
   background: var(--w-color-primary);
-  color: #fff;
+  color: var(--w-text-color-inverse);
   border-color: var(--w-color-primary);
 }
 .tab-close {

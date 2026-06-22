@@ -1,0 +1,360 @@
+/* Global dark-mode overrides for components that still use hard-coded light colors.
+   These selectors intentionally repeat the component class to win over scoped
+   styles without relying on order. */
+
+/* -------- Button -------- */
+html.dark .w-button.w-button {
+  border-color: var(--w-border-color-dark);
+  background: linear-gradient(180deg, var(--w-fill-color-light) 0%, var(--w-fill-color) 50%, var(--w-fill-color-dark) 100%);
+  color: var(--w-text-color-primary);
+}
+html.dark .w-button.w-button:hover {
+  border-color: var(--w-color-primary);
+  background: linear-gradient(180deg, var(--w-color-primary-lighter) 0%, var(--w-color-primary-light) 50%, var(--w-color-primary) 100%);
+  color: var(--w-text-color-inverse);
+}
+html.dark .w-button.w-button:active {
+  background: linear-gradient(180deg, var(--w-fill-color-dark) 0%, var(--w-fill-color) 50%, var(--w-fill-color-light) 100%);
+}
+html.dark .w-button.w-button.is-plain {
+  background: var(--w-bg-color);
+  color: var(--w-text-color-primary);
+  border-color: var(--w-border-color);
+}
+html.dark .w-button.w-button.is-disabled {
+  opacity: 0.5;
+}
+
+/* -------- Input & pickers -------- */
+html.dark .w-input.w-input,
+html.dark .w-input input,
+html.dark .w-input-number.w-input-number,
+html.dark .w-input-number input,
+html.dark .w-input-tag.w-input-tag,
+html.dark .w-input-tag__inner,
+html.dark .w-input-otp__digit.w-input-otp__digit,
+html.dark .w-select__trigger.w-select__trigger,
+html.dark .w-tree-select__trigger.w-tree-select__trigger,
+html.dark .w-virtualized-select__trigger.w-virtualized-select__trigger,
+html.dark .w-color-picker__trigger.w-color-picker__trigger,
+html.dark .w-autocomplete__input,
+html.dark .w-cascader__trigger,
+html.dark .w-date-picker__trigger,
+html.dark .w-date-time-picker__trigger,
+html.dark .w-time-picker__trigger,
+html.dark .w-time-select__trigger,
+html.dark .w-mention__input,
+html.dark .w-rich-text__editor,
+html.dark .w-monaco-editor.w-monaco-editor {
+  background: var(--w-bg-color);
+  border-color: var(--w-border-color);
+  color: var(--w-text-color-primary);
+}
+html.dark .w-input.w-input.is-disabled,
+html.dark .w-input-number.w-input-number.is-disabled,
+html.dark .w-select__trigger.w-select__trigger.is-disabled {
+  background: var(--w-fill-color);
+  color: var(--w-text-color-disabled);
+}
+html.dark .w-input.w-input.is-disabled input,
+html.dark .w-input-number.w-input-number.is-disabled input {
+  color: var(--w-text-color-disabled);
+}
+
+/* -------- Checkbox / Radio / Switch -------- */
+html.dark .w-checkbox__inner.w-checkbox__inner,
+html.dark .w-radio__inner.w-radio__inner {
+  background: var(--w-bg-color);
+  border-color: var(--w-border-color);
+}
+html.dark .w-switch__core.w-switch__core {
+  background: var(--w-border-color);
+  border-color: var(--w-border-color-dark);
+}
+html.dark .w-switch__thumb.w-switch__thumb {
+  background: var(--w-text-color-inverse);
+}
+
+/* -------- Slider -------- */
+html.dark .w-slider__track.w-slider__track {
+  background: var(--w-border-color);
+  border-color: var(--w-border-color-dark);
+}
+html.dark .w-slider__thumb.w-slider__thumb {
+  background: linear-gradient(180deg, var(--w-fill-color-light), var(--w-fill-color), var(--w-fill-color-dark));
+  border-color: var(--w-border-color-dark);
+}
+html.dark .w-slider__tooltip.w-slider__tooltip {
+  background: var(--w-fill-color-lighter);
+  border-color: var(--w-border-color-dark);
+  color: var(--w-text-color-primary);
+}
+
+/* -------- Table -------- */
+html.dark .w-table.w-table {
+  background: var(--w-bg-color);
+  border-color: var(--w-border-color);
+}
+html.dark .w-table.w-table th {
+  background: linear-gradient(180deg, var(--w-fill-color-light), var(--w-fill-color-dark));
+  border-bottom-color: var(--w-border-color);
+}
+html.dark .w-table.w-table td {
+  border-bottom-color: var(--w-border-color);
+}
+html.dark .w-table.w-table tr:hover td,
+html.dark .w-table.w-table tr:hover td.is-fixed-left,
+html.dark .w-table.w-table tr:hover td.is-fixed-right {
+  background: var(--w-table-current-row-bg);
+}
+html.dark .w-table.is-stripe.w-table tr.is-striped td,
+html.dark .w-table.is-stripe.w-table tr.is-striped td.is-fixed-left,
+html.dark .w-table.is-stripe.w-table tr.is-striped td.is-fixed-right {
+  background: var(--w-fill-color);
+}
+html.dark .w-table.w-table th.is-fixed-left,
+html.dark .w-table.w-table th.is-fixed-right,
+html.dark .w-table.w-table td.is-fixed-left,
+html.dark .w-table.w-table td.is-fixed-right {
+  background: var(--w-bg-color);
+}
+html.dark .w-table.w-table th.is-fixed-left,
+html.dark .w-table.w-table th.is-fixed-right {
+  background: linear-gradient(180deg, var(--w-fill-color-light), var(--w-fill-color-dark));
+}
+html.dark .w-table__expanded-row td.w-table__expanded-row td {
+  background: var(--w-fill-color);
+  border-bottom-color: var(--w-border-color);
+}
+html.dark .w-table.w-table tr.is-warning td,
+html.dark .w-table.w-table tr.is-warning td.is-fixed-left,
+html.dark .w-table.w-table tr.is-warning td.is-fixed-right {
+  background: var(--w-color-warning-lighter);
+}
+html.dark .w-table.w-table tr.is-danger td,
+html.dark .w-table.w-table tr.is-danger td.is-fixed-left,
+html.dark .w-table.w-table tr.is-danger td.is-fixed-right {
+  background: var(--w-color-danger-lighter);
+}
+html.dark .w-table.w-table tr.is-success td,
+html.dark .w-table.w-table tr.is-success td.is-fixed-left,
+html.dark .w-table.w-table tr.is-success td.is-fixed-right {
+  background: var(--w-color-success-lighter);
+}
+html.dark .w-table__filter-panel.w-table__filter-panel {
+  background: var(--w-bg-color);
+  border-color: var(--w-border-color-dark);
+}
+html.dark .w-virtualized-table__header.w-virtualized-table__header,
+html.dark .w-virtualized-table__row.w-virtualized-table__row {
+  border-bottom-color: var(--w-border-color);
+}
+html.dark .w-virtualized-table__header.w-virtualized-table__header {
+  background: linear-gradient(180deg, var(--w-fill-color-light), var(--w-fill-color-dark));
+}
+
+/* -------- Tabs -------- */
+html.dark .w-tabs.w-tabs {
+  border-color: var(--w-border-color);
+}
+html.dark .w-tabs__header.w-tabs__header {
+  background: linear-gradient(180deg, var(--w-fill-color-light), var(--w-fill-color-dark));
+  border-bottom-color: var(--w-border-color);
+}
+html.dark .w-tabs__item.w-tabs__item {
+  border-right-color: var(--w-border-color);
+}
+html.dark .w-tabs__item.w-tabs__item:hover {
+  background: var(--w-fill-color);
+}
+
+/* -------- Pagination -------- */
+html.dark .w-pagination__page.w-pagination__page {
+  background: var(--w-bg-color);
+  border-color: var(--w-border-color);
+  color: var(--w-text-color-primary);
+}
+
+/* -------- Card / Dialog / Drawer / MessageBox / Tour / Form / PageContainer -------- */
+html.dark .w-card.w-card,
+html.dark .w-dialog.w-dialog,
+html.dark .w-message-box.w-message-box,
+html.dark .w-tour__content.w-tour__content,
+html.dark .w-form.w-form,
+html.dark .w-page-container__body.w-page-container__body,
+html.dark .w-search-form.w-search-form,
+html.dark .w-admin-layout__header.w-admin-layout__header {
+  border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light);
+}
+html.dark .w-card__footer.w-card__footer,
+html.dark .w-drawer__header.w-drawer__header,
+html.dark .w-message-box__footer.w-message-box__footer,
+html.dark .w-tour__footer.w-tour__footer,
+html.dark .w-notification__header.w-notification__header {
+  border-color: var(--w-border-color);
+}
+html.dark .w-card.w-card {
+  background: var(--w-bg-color);
+}
+
+/* -------- Menu / SubMenu -------- */
+html.dark .w-menu__submenu.w-menu__submenu {
+  background: var(--w-fill-color);
+}
+html.dark .w-menu__submenu--level-1.w-menu__submenu--level-1 {
+  background: var(--w-fill-color);
+}
+html.dark .w-menu__submenu--level-2.w-menu__submenu--level-2 {
+  background: var(--w-fill-color-dark);
+}
+html.dark .w-menu__submenu--level-3.w-menu__submenu--level-3 {
+  background: var(--w-border-color);
+}
+
+/* -------- Dropdown / Autocomplete / Cascader / DatePicker / TimePicker / ColorPicker panels -------- */
+html.dark .w-dropdown__menu.w-dropdown__menu,
+html.dark .w-autocomplete__suggestions.w-autocomplete__suggestions,
+html.dark .w-cascader__dropdown.w-cascader__dropdown,
+html.dark .w-cascader__menu.w-cascader__menu,
+html.dark .w-date-picker-panel.w-date-picker-panel,
+html.dark .w-time-picker__popper.w-time-picker__popper,
+html.dark .w-color-picker-panel.w-color-picker-panel,
+html.dark .w-select__dropdown.w-select__dropdown,
+html.dark .w-tree-select__dropdown.w-tree-select__dropdown,
+html.dark .w-virtualized-select__dropdown.w-virtualized-select__dropdown,
+html.dark .w-mention__dropdown.w-mention__dropdown {
+  background: var(--w-bg-color);
+  border-color: var(--w-border-color-dark);
+}
+html.dark .w-cascader__menu.w-cascader__menu,
+html.dark .w-time-picker__column.w-time-picker__column {
+  border-right-color: var(--w-border-color);
+}
+html.dark .w-time-picker__footer.w-time-picker__footer {
+  border-top-color: var(--w-border-color);
+}
+
+/* -------- Alert -------- */
+html.dark .w-alert.w-alert--info {
+  background: var(--w-color-primary-lighter);
+  border-color: var(--w-color-primary);
+}
+html.dark .w-alert.w-alert--success {
+  background: var(--w-color-success-lighter);
+  border-color: var(--w-color-success);
+}
+html.dark .w-alert.w-alert--warning {
+  background: var(--w-color-warning-lighter);
+  border-color: var(--w-color-warning);
+}
+html.dark .w-alert.w-alert--error {
+  background: var(--w-color-danger-lighter);
+  border-color: var(--w-color-danger);
+}
+
+/* -------- Tooltip -------- */
+html.dark .w-tooltip__popper.w-tooltip__popper {
+  background: var(--w-fill-color-lighter);
+  border-color: var(--w-border-color-dark);
+  color: var(--w-text-color-primary);
+}
+
+/* -------- Upload / Transfer / Progress / Segmented / Timeline / Tree / Image -------- */
+html.dark .w-upload__file-list,
+html.dark .w-upload__file-item,
+html.dark .w-transfer__panel-header,
+html.dark .w-progress__bar-outer,
+html.dark .w-segmented.w-segmented,
+html.dark .w-timeline__item:not(.is-last):before,
+html.dark .w-tree__node:hover,
+html.dark .w-image__placeholder,
+html.dark .w-skeleton__item,
+html.dark .w-calendar__day.is-other-month {
+  background: var(--w-fill-color);
+}
+html.dark .w-upload__file-item,
+html.dark .w-transfer__panel,
+html.dark .w-segmented__item,
+html.dark .w-collapse__item,
+html.dark .w-collapse__header,
+html.dark .w-collapse__content,
+html.dark .w-typography code,
+html.dark .w-carousel__arrow {
+  border-color: var(--w-border-color);
+}
+html.dark .w-segmented__item.w-segmented__item:hover {
+  background: var(--w-fill-color-dark);
+}
+html.dark .w-progress__bar-outer.w-progress__bar-outer {
+  background: var(--w-fill-color-dark);
+}
+html.dark .w-timeline__node.w-timeline__node {
+  border-color: var(--w-bg-color);
+}
+
+/* -------- Scrollbar -------- */
+html.dark .w-scrollbar::-webkit-scrollbar-track,
+html.dark .w-xp-scrollbar::-webkit-scrollbar-track {
+  background: var(--w-fill-color);
+  border-left-color: var(--w-border-color);
+}
+html.dark .w-scrollbar::-webkit-scrollbar-thumb,
+html.dark .w-xp-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, var(--w-fill-color-dark), var(--w-border-color), var(--w-border-color-dark));
+  border-color: var(--w-border-color-dark);
+}
+html.dark .w-scrollbar::-webkit-scrollbar-button,
+html.dark .w-xp-scrollbar::-webkit-scrollbar-button {
+  background: var(--w-fill-color-dark);
+  border-color: var(--w-border-color-dark);
+}
+
+/* -------- Tag -------- */
+html.dark .w-tag.w-tag {
+  background: var(--w-fill-color);
+  border-color: var(--w-border-color);
+  color: var(--w-text-color-primary);
+}
+html.dark .w-tag.w-tag--info {
+  background: var(--w-color-info-lighter);
+  border-color: var(--w-color-info);
+}
+html.dark .w-tag.w-tag--success {
+  background: var(--w-color-success-lighter);
+  border-color: var(--w-color-success);
+}
+html.dark .w-tag.w-tag--warning {
+  background: var(--w-color-warning-lighter);
+  border-color: var(--w-color-warning);
+}
+html.dark .w-tag.w-tag--danger {
+  background: var(--w-color-danger-lighter);
+  border-color: var(--w-color-danger);
+}
+
+/* -------- Popover / Popconfirm / Notification / Message -------- */
+html.dark .w-popover__popper.w-popover__popper,
+html.dark .w-popconfirm__popper.w-popconfirm__popper,
+html.dark .w-notification.w-notification,
+html.dark .w-message.w-message,
+html.dark .w-message-box__wrapper.w-message-box__wrapper {
+  background: var(--w-bg-color);
+  border-color: var(--w-border-color-dark);
+}
+html.dark .w-popover__header.w-popover__header,
+html.dark .w-notification__header.w-notification__header {
+  border-bottom-color: var(--w-border-color);
+}
+
+/* -------- Misc -------- */
+html.dark .w-divider--horizontal.w-divider--horizontal,
+html.dark .w-divider--vertical.w-divider--vertical {
+  border-color: var(--w-border-color);
+}
+html.dark .w-anchor.w-anchor,
+html.dark .w-anchor__link.is-active {
+  border-color: var(--w-border-color);
+}
+html.dark .w-anchor__link.is-active.w-anchor__link.is-active {
+  background: var(--w-fill-color);
+}

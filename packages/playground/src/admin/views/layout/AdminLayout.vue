@@ -1,5 +1,5 @@
 <template>
-  <w-config-provider :size="app.size" :theme="app.theme">
+  <w-config-provider :size="app.size" :theme="app.theme" :mode="app.mode">
     <div class="admin-layout">
       <aside class="admin-sidebar" :class="{ collapsed: app.sidebarCollapsed }">
         <div class="sidebar-logo">
@@ -114,6 +114,23 @@
       <w-divider />
 
       <div class="setting-section">
+        <h4>主题模式</h4>
+        <w-space>
+          <w-button
+            v-for="opt in modeOptions"
+            :key="opt.value"
+            :type="app.mode === opt.value ? 'primary' : 'default'"
+            size="small"
+            @click="app.setMode(opt.value)"
+          >
+            {{ opt.label }}
+          </w-button>
+        </w-space>
+      </div>
+
+      <w-divider />
+
+      <div class="setting-section">
         <h4>组件大小</h4>
         <w-space>
           <w-button
@@ -166,6 +183,12 @@ const sizeOptions = [
   { label: "大", value: "large" }
 ] as const
 
+const modeOptions = [
+  { label: "浅色", value: "light" },
+  { label: "深色", value: "dark" },
+  { label: "自动", value: "auto" }
+] as const
+
 function switchLang(val: string) {
   locale.value = val
   app.lang = val
@@ -179,6 +202,7 @@ function setPrimary(color: string) {
 function resetSettings() {
   app.size = "default"
   app.theme = { primary: "#245edb", success: "#3a9e3a", warning: "#e4a010", danger: "#d92b2b" }
+  app.setMode("light")
   locale.value = "zh-CN"
   app.lang = "zh-CN"
   localStorage.setItem("admin_lang", "zh-CN")
@@ -304,7 +328,7 @@ const vClickOutside = {
   width: 220px;
   flex-shrink: 0;
   background: var(--w-bg-color);
-  border-right: 2px solid #808080;
+  border-right: 2px solid var(--w-border-color-dark);
   display: flex;
   flex-direction: column;
   transition: width 0.2s;
@@ -315,7 +339,7 @@ const vClickOutside = {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  border-bottom: 1px solid #d4d0c8;
+  border-bottom: 1px solid var(--w-border-color);
   font-weight: bold;
   color: var(--w-color-primary);
   white-space: nowrap;
@@ -327,19 +351,19 @@ const vClickOutside = {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  color: #000;
+  color: var(--w-text-color-primary);
   text-decoration: none;
   font-size: 13px;
   border: 1px solid transparent;
   cursor: pointer;
 }
 .sidebar-link:hover {
-  background: var(--w-xp-blue-light);
-  color: #fff;
+  background: var(--w-color-primary-light);
+  color: var(--w-text-color-inverse);
 }
 .sidebar-link.active {
   background: var(--w-color-primary);
-  color: #fff;
+  color: var(--w-text-color-inverse);
   font-weight: bold;
 }
 .menu-parent { justify-content: space-between; position: relative; }
@@ -361,7 +385,7 @@ const vClickOutside = {
   padding: 8px 16px;
   background: var(--w-bg-color);
   border-bottom: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
+  border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light);
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-right { display: flex; align-items: center; gap: 12px; }
@@ -374,14 +398,14 @@ const vClickOutside = {
   cursor: pointer;
   font-size: 13px;
 }
-.user-trigger:hover { background: var(--w-xp-blue-light); color: #fff; }
+.user-trigger:hover { background: var(--w-color-primary-light); color: var(--w-text-color-inverse); }
 .user-menu {
   position: absolute;
   top: 100%;
   right: 0;
   min-width: 140px;
   background: var(--w-bg-color);
-  border: 1px solid #808080;
+  border: 1px solid var(--w-border-color-dark);
   box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
   z-index: 999;
 }
@@ -393,15 +417,15 @@ const vClickOutside = {
   font-size: 13px;
   cursor: pointer;
 }
-.user-menu-item:hover { background: var(--w-xp-blue-light); color: #fff; }
+.user-menu-item:hover { background: var(--w-color-primary-light); color: var(--w-text-color-inverse); }
 
 /* Tab Bar */
 .tab-bar {
   display: flex;
   gap: 2px;
   padding: 4px 8px;
-  background: #f0f0f0;
-  border-bottom: 1px solid #d4d0c8;
+  background: var(--w-fill-color);
+  border-bottom: 1px solid var(--w-border-color);
   overflow-x: auto;
 }
 .tab-item {
@@ -410,16 +434,17 @@ const vClickOutside = {
   gap: 4px;
   padding: 4px 12px;
   background: var(--w-bg-color);
-  border: 1px solid #d4d0c8;
+  border: 1px solid var(--w-border-color);
+  color: var(--w-text-color-primary);
   font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
   user-select: none;
 }
-.tab-item:hover { background: #e8e8e8; }
+.tab-item:hover { background: var(--w-fill-color-dark); }
 .tab-item.active {
   background: var(--w-color-primary);
-  color: #fff;
+  color: var(--w-text-color-inverse);
   border-color: var(--w-color-primary);
 }
 .tab-close {
@@ -432,7 +457,7 @@ const vClickOutside = {
 .context-menu {
   position: fixed;
   background: var(--w-bg-color);
-  border: 1px solid #808080;
+  border: 1px solid var(--w-border-color-dark);
   box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
   z-index: 9999;
   min-width: 120px;
@@ -441,10 +466,11 @@ const vClickOutside = {
   padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
+  color: var(--w-text-color-primary);
 }
 .context-item:hover {
-  background: var(--w-xp-blue-light);
-  color: #fff;
+  background: var(--w-color-primary-light);
+  color: var(--w-text-color-inverse);
 }
 
 .admin-content { flex: 1; padding: 16px; overflow: auto; }

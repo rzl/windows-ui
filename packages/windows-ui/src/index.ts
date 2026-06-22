@@ -1,6 +1,7 @@
 import type { App } from 'vue'
 import './styles/variables.css'
 import './styles/base.css'
+import './styles/dark.css'
 import { setGlobalLocale, registerLocale } from './locale'
 
 // Components
