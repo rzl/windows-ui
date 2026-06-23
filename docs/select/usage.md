@@ -74,12 +74,12 @@ const filterByValue = (option, query) => {
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| modelValue | 绑定值（支持 v-model） | string / number | - |
-| options | 选项数据 | `{ label: string; value: any }[]` | `[]` |
+| modelValue | 绑定值（支持 v-model） | string/number | - |
+| options | 选项数据 | array | [] |
 | placeholder | 占位提示文本 | string | 请选择 |
 | clearable | 是否可清空 | boolean | true |
 | filterable | 是否可搜索 | boolean | false |
-| filterMethod | 自定义过滤函数，接收 `(option, query)` 返回 boolean | function | - |
+| filterMethod | 过滤方法 | function | null |
 | size | 尺寸 | string | default（继承全局 size） |
 
 ### Events

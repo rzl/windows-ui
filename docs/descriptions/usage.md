@@ -43,27 +43,13 @@ const items = ref([
 
 ## API
 
-### WDescriptions Props
+### Props
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | title | 标题 | string | - |
-| items | 描述项列表，优先级高于默认插槽 | `{ label: string; value?: any; prop?: string }[]` | `[]` |
-| column | 每行显示的列数 | number | 3 |
-| border | 是否显示边框（当前组件默认已带边框，保留该属性以兼容写法） | boolean | false |
-
-### WDescriptionsItem Props
-
-| 属性名 | 说明 | 类型 | 默认值 |
-|--------|------|------|--------|
-| label | 标签文本 | string | - |
-| prop | 字段标识 | string | - |
-
-### WDescriptions Slots
-
-| 插槽名 | 说明 |
-|--------|------|
-| default | 自定义描述项内容，通常放置 `w-descriptions-item` 组件 |
+| items | 菜单项列表 | array | [] |
+| column | - | number | 3 |
 
 ## 主题定制
 
@@ -74,7 +60,6 @@ const items = ref([
   --w-color-primary: #245edb;
   --w-bg-color: #ece9d8;
   --w-text-color-primary: #000;
-  --w-text-color-secondary: #666;
   --w-border-radius-base: 3px;
   --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
 }

@@ -35,6 +35,7 @@ const handleSelect = (item) => console.log(item)
 | options | 选项数据 | array | [] |
 | clearable | 是否可清空 | boolean | true |
 | size | 尺寸 | string | default（继承全局 size） |
+| disabled | 是否禁用 | boolean | - |
 
 ### Events
 

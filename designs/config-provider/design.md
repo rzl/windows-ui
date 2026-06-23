@@ -33,6 +33,12 @@ Config
 - 大尺寸：40px（`--w-component-size-large`）
 - 组件内部图标（如有）随组件 size 联动
 
+### 字体规范
+- 基础字号：`--w-font-size-base` 为 14px，作为默认尺寸组件的默认字号
+- 小字号：`--w-font-size-small` 为 12px，作为 small 尺寸组件及辅助说明文字的字号
+- 字体家族：`--w-font-family` 为 `'Tahoma', 'Microsoft Sans Serif', sans-serif`
+- 标题栏、工具提示、徽标等场景使用对应层级的字号变量
+
 ## 交互设计
 - 悬停状态: 颜色加深/高亮
 - 点击状态: 内阴影按压效果

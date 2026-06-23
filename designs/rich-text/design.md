@@ -11,6 +11,13 @@
 - 编辑区：最小高度 120px，支持 placeholder
 - 尺寸：支持 small / default / large 三种尺寸
 
+
+### 尺寸规范
+- 尺寸可选：small / default / large
+- 默认高度：32px（default），跟随 CSS 变量 `--w-component-size`
+- 小尺寸：24px（`--w-component-size-small`）
+- 大尺寸：40px（`--w-component-size-large`）
+- 组件内部图标（如有）随组件 size 联动
 ## 交互设计
 
 - 点击工具栏按钮对选区应用格式（加粗/斜体/下划线）

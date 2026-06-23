@@ -18,7 +18,7 @@ import { WEmpty } from '@windows-ui/core'
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| description | 描述文本 | string | 暂无数据 |
+| description | 描述文本 | string | - |
 
 ## 主题定制
 

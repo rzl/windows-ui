@@ -39,3 +39,36 @@ const code = ref('function hello() {\n  console.log("Hello Monaco")\n}')
 - 默认使用本地 `public/monaco-editor/min` 资源，构建后会随产物一起部署，无需依赖外网 CDN。
 - 可通过 `cdn` prop 指定其他资源根路径，如内网 CDN 或公共 CDN。
 - 当 Monaco 资源加载失败时，组件会自动回退到多行文本框，保证内容仍可编辑。
+
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| modelValue | 绑定值（支持 v-model） | string |  |
+| language | - | string | javascript |
+| height | 高度 | number | 300 |
+| readOnly | - | boolean | false |
+| cdn | - | string |  |
+
+### Events
+
+| 事件名 | 说明 | 回调参数 |
+|--------|------|----------|
+| update:modelValue | 绑定值更新 | value |
+| change | 值改变时触发 | value |
+
+## 主题定制
+
+可通过 CSS 变量自定义主题色：
+
+```css
+:root {
+  --w-color-primary: #245edb;
+  --w-bg-color: #ece9d8;
+  --w-text-color-primary: #000;
+  --w-border-radius-base: 3px;
+  --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
+}
+```

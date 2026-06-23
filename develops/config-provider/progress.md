@@ -27,4 +27,5 @@
 - 2026-06-06: 主题色同时通过 `:style` 绑定与 `document.documentElement.style.setProperty` 两种途径生效，确保普通组件与 `<teleport>` 组件（Dialog、Drawer、MessageBox）均能继承
 - 2026-06-06: 深浅衍生色改为 JS 计算生成，移除对 CSS `color-mix()` 的依赖，提升浏览器兼容性
 - 2026-06-06: Playground 演示页面顶部新增全局尺寸切换与主题色选择器
+- 2026-06-23: 统一字体规范：全局基础字体 `--w-font-size-base` 由 11px 调整为 14px，`--w-font-size-small` 由 10px 调整为 12px，small 尺寸组件字号统一为 12px
 - 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）

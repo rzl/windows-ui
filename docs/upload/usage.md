@@ -46,30 +46,30 @@ async function customUpload(file) {
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| accept | 可接受的文件类型 | string | - |
-| multiple | 是否多选 | boolean | false |
-| buttonText | 按钮文字 | string | 选择文件 |
+| accept | - | string | - |
+| multiple | 是否多选 | boolean | - |
+| buttonText | - | string | 选择文件 |
 | size | 尺寸 | string | default（继承全局 size） |
-| action | 上传地址（与 httpRequest 二选一） | string | - |
-| headers | 上传请求头 | object | {} |
-| httpRequest | 自定义上传函数 | (file) => Promise<{url,name,size}> | - |
-| modelValue / v-model | 已上传文件的 URL | string / string[] | '' |
+| action | 操作区内容 | string |  |
+| headers | - | object | {} |
+| modelValue | 绑定值（支持 v-model） | - | {} |
+| httpRequest | - | function | - |
 
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
 | change | 值改变时触发 | value |
-| update:modelValue | v-model 更新 | value |
-| success | 单个文件上传成功 | { url, name, size } |
-| error | 单个文件上传失败 | error |
-| remove | 移除文件 | index |
+| remove | - | - |
+| success | 成功时触发 | - |
+| error | 错误时触发 | event |
+| update:modelValue | 绑定值更新 | value |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
-| default | 默认触发按钮内容 |
+| default | 默认内容 |
 
 ## 主题定制
 

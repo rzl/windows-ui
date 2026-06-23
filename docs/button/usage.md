@@ -34,7 +34,7 @@ import { WButton, WSpace } from '@windows-ui/core'
 | plain | 是否朴素样式 | boolean | - |
 | round | 是否圆角 | boolean | - |
 | disabled | 是否禁用 | boolean | - |
-| loading | 是否加载中 | boolean | false |
+| loading | 是否加载中 | boolean | - |
 | icon | 图标名称 | string | - |
 
 ### Events

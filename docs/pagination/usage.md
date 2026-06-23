@@ -35,8 +35,9 @@ const pageSize = ref(10)
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
-| update:currentPage | 当前页更新时触发 | currentPage |
+| update:current-page | - | - |
 | change | 值改变时触发 | value |
+| update:page-size | - | - |
 
 ## 主题定制
 
