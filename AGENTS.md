@@ -186,7 +186,8 @@ windows-ui/
 | 调整流程设计器或审批相关功能 | `sop/lowcode/flow-designer.md` |
 | 配置数据权限（行级）/ 字段权限 | `sop/manuals/system/data-permission.md`、`sop/manuals/system/field-permission.md` |
 | 新增/修改面向用户的功能模块 | 同步更新 `sop/manuals/` 下对应手册 |
-| 查看项目当前阶段与待办 | `sop/progress/phase-*.md` |
+| 查看项目当前阶段与待办 | `sop/progress/by-phase/phase-*.md` |
+| 查看功能模块完整演进 | `sop/progress/by-feature/*/README.md` |
 
 > **SOP 同步原则**：每完成一个低代码平台功能或阶段，应同步修订对应的 SOP 文档；若功能涉及最终用户操作，必须同步更新 `sop/manuals/` 下的用户手册。
 

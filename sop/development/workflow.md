@@ -123,11 +123,13 @@ pnpm --filter @windows-ui/core test  # 验证 UI 库单元测试
 - `sop/architecture/backend.md` — 后端分层
 - `sop/database/schema.md` — 数据库设计
 - `sop/lowcode/*.md` — 低代码平台核心设计
-- `sop/progress/phase-*.md` — 各阶段实现清单
+- `sop/progress/by-phase/phase-*.md` — 各阶段实现清单（时间线）
+- `sop/progress/by-feature/*/README.md` — 按功能模块整理的进度（主子线）
 
 ### 进度跟踪
 
-- 每个阶段创建/更新 `sop/progress/phase-*.md`
+- 每个阶段创建/更新 `sop/progress/by-phase/phase-*.md`
+- 每个功能模块的增强同步更新 `sop/progress/by-feature/<feature>/README.md`
 - 任务完成后勾选实现清单
 - 待优化项不删除，持续跟踪
 
