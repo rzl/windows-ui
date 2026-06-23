@@ -48,6 +48,9 @@ export default defineConfig({
       '@': resolve(__dirname, 'src/admin')
     }
   },
+  server: {
+    host: '0.0.0.0'
+  },
   build: {
     rollupOptions: {
       input: {
