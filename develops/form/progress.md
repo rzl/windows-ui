@@ -12,6 +12,7 @@
 - [x] 示例代码
 - [x] 验证规则支持（required, pattern, min, max, validator）
 - [x] validate / resetFields / clearValidate 方法
+- [x] 移动端响应式适配（≤768px 时 label 与内容区纵向堆叠，label 宽度自适应）
 
 ## 待优化项
 - [ ] 单元测试覆盖
@@ -24,3 +25,4 @@
 - 2024-06-01: 初始版本实现
 - 2026-06-08: 增强验证功能（rules、validate、resetFields、clearValidate）
 - 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
+- 2026-06-24: 新增移动端响应式适配，≤768px 时表单项 label 与内容区纵向堆叠，label 宽度自适应

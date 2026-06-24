@@ -15,6 +15,7 @@
 - [x] 支持 custom 类型插槽
 - [x] 在 windows-ui/src/index.ts 注册并导出
 - [x] 编写 docs/designs/develops 三份文档
+- [x] 支持移动端响应式适配（≤768px 自动单列、mobileColumns prop）
 
 ## 待优化项
 
@@ -27,3 +28,4 @@
 - 2026-06-13：新增后端校验规则支持（validationRule + validateRules），暴露 validate 方法
 - 2026-06-13：新增字段联动支持（dependsOn），支持 eq/ne/empty/notEmpty 四种条件
 - 2026-06-13：新增 upload / cascader / rich-text 三种字段类型
+- 2026-06-24：新增移动端响应式适配，≤768px 时 grid 布局自动降为 1 列，新增 mobileColumns prop

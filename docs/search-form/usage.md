@@ -43,6 +43,26 @@ const handleReset = () => console.log('reset')
 |--------|------|
 | default | 默认内容 |
 
+## 移动端适配
+
+当视口宽度 ≤ 768px 时，`WSearchForm` 会自动切换为移动端布局：
+
+- 搜索字段由水平排列改为垂直排列，每个字段独占一行；
+- 查询、重置等操作按钮区域自动换行，保证在窄屏下可正常点击；
+- 无需额外配置，组件内部通过媒体查询自动响应。
+
+```vue
+<template>
+  <w-search-form :model="query" @search="handleSearch" @reset="handleReset">
+    <w-input v-model="query.name" placeholder="名称" />
+    <w-select v-model="query.status" :options="statusOpts" placeholder="状态" />
+    <w-date-picker v-model="query.date" placeholder="日期" />
+  </w-search-form>
+</template>
+```
+
+> **注意**：移动端布局依赖 `window.matchMedia`，在 SSR 场景下首次渲染以桌面端布局为准， hydration 后自动切换。
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

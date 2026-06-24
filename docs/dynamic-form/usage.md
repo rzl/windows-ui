@@ -72,12 +72,37 @@ const fields = [
 | model | Record<string, any> | {} | 表单数据 |
 | fields | DynamicField[] | [] | 字段配置 |
 | columns | number | 1 | 列数 |
+| mobileColumns | number | 1 | 移动端列数，视口宽度 ≤768px 时 grid 布局自动降为该列数 |
 | validateRules | (items) => Promise | - | 后端校验函数，用于校验绑定了 `validationRule` 的字段 |
 | loadOptions | (config, model) => Promise | - | 动态选项加载函数，用于加载 `dynamicOptions` 配置的选项 |
 | loadRefOptions | (modelCode, displayField, keyword) => Promise | - | 关联模型选项加载函数，用于 `ref` 字段查询关联记录 |
 | uploadRequest | (file) => Promise | - | 文件上传函数，用于 `upload` 字段真实上传文件并返回 URL |
 | generateCode | (ruleCode) => Promise<string> | - | 编码规则生成函数，用于 `codingRule` 字段自动生成编码 |
 | userInfo | object | - | 当前用户信息，用于 `currentUser` / `currentDept` 默认值 |
+
+## 移动端适配
+
+WDynamicForm 已针对移动端进行响应式适配：当视口宽度 ≤768px 时，表单 grid 布局会自动降为 `mobileColumns` 指定的列数（默认 1 列），避免多列字段在窄屏下被过度压缩。
+
+新增 prop：
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| mobileColumns | number | 1 | 移动端 grid 列数，视口宽度 ≤768px 时生效 |
+
+使用示例：
+
+```vue
+<w-dynamic-form v-model="form" :fields="fields" :columns="3" :mobile-columns="1" />
+```
+
+注意事项：
+
+- 移动端检测基于 `window.innerWidth`，并在窗口 resize 时自动响应。
+- 传入自定义 `layout` 时，内部的 `grid` 节点同样会遵循 `mobileColumns`。
+- 移动端下表单项 label 与内容区会自动纵向堆叠（由 WForm/WFormItem 适配）。
+- 子表（`subtable` 布局）使用的 WTable 在移动端支持横向滚动，单元格内容不换行。
+- 若动态表单置于 WDialog 中使用，弹窗在移动端会自动切换为全屏，支持点击全屏按钮退出并拖拽。
 
 ## 列表设计
 
@@ -270,6 +295,7 @@ async function loadRefOptions(modelCode, displayField, keyword) {
 | model | - | object | {} |
 | fields | - | array | [] |
 | columns | 列配置 | number | 1 |
+| mobileColumns | 移动端列数 | number | 1 |
 | layout | 布局 | object | - |
 | validateRules | - | function | - |
 | loadOptions | - | function | - |
