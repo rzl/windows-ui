@@ -60,4 +60,10 @@ onMounted(() => {
 .w-form-item__error { color: var(--w-color-danger); font-size: var(--w-font-size-small); margin-top: 2px; }
 .w-form-item--small .w-form-item__label { font-size: var(--w-font-size-small); min-height: var(--w-component-size-small); }
 .w-form-item--large .w-form-item__label { font-size: var(--w-font-size-medium); min-height: var(--w-component-size-large); }
+
+@media (max-width: 768px) {
+  .w-form-item { flex-direction: column; }
+  .w-form-item__label { width: auto; text-align: left; justify-content: flex-start; padding-right: 0; margin-bottom: 4px; }
+  .w-form-item__content { width: 100%; }
+}
 </style>

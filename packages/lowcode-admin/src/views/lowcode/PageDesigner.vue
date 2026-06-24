@@ -8,9 +8,20 @@
       </w-space>
     </div>
 
-    <div class="designer-layout">
+    <div v-if="isMobile" class="mobile-panel-tabs">
+      <div
+        v-for="tab in mobileTabs"
+        :key="tab.value"
+        :class="['mobile-panel-tab', { active: activePanel === tab.value }]"
+        @click="activePanel = tab.value"
+      >
+        {{ tab.label }}
+      </div>
+    </div>
+
+    <div class="designer-layout" :class="{ mobile: isMobile }">
       <!-- 组件库 -->
-      <div class="component-library">
+      <div v-if="!isMobile || activePanel === 'library'" class="component-library">
         <div class="panel-title">组件库</div>
         <div class="component-group">
           <div class="group-title">布局</div>
@@ -20,6 +31,7 @@
             class="component-item"
             draggable="true"
             @dragstart="handleDragStart($event, type.value)"
+            @click="isMobile && addComponent(type.value)"
           >
             {{ type.label }}
           </div>
@@ -32,6 +44,7 @@
             class="component-item"
             draggable="true"
             @dragstart="handleDragStart($event, type.value)"
+            @click="isMobile && addComponent(type.value)"
           >
             {{ type.label }}
           </div>
@@ -44,6 +57,7 @@
             class="component-item"
             draggable="true"
             @dragstart="handleDragStart($event, type.value)"
+            @click="isMobile && addComponent(type.value)"
           >
             {{ type.label }}
           </div>
@@ -56,6 +70,7 @@
             class="component-item"
             draggable="true"
             @dragstart="handleDragStart($event, type.value)"
+            @click="isMobile && addComponent(type.value)"
           >
             {{ type.label }}
           </div>
@@ -63,7 +78,12 @@
       </div>
 
       <!-- 画布 -->
-      <div class="canvas-panel" @dragover.prevent @drop="handleDropToRoot($event)">
+      <div
+        v-if="!isMobile || activePanel === 'canvas'"
+        class="canvas-panel"
+        @dragover.prevent
+        @drop="handleDropToRoot($event)"
+      >
         <div class="panel-title">画布</div>
         <div class="canvas-body" :class="{ 'is-empty': !config.components?.length }">
           <component-node
@@ -84,7 +104,7 @@
       </div>
 
       <!-- 属性面板 -->
-      <div class="property-panel">
+      <div v-if="!isMobile || activePanel === 'property'" class="property-panel">
         <div class="panel-title">属性</div>
         <property-editor
           v-if="selectedNode"
@@ -112,10 +132,12 @@ import ComponentNode from '@/components/page-designer/ComponentNode.vue'
 import PropertyEditor from '@/components/page-designer/PropertyEditor.vue'
 import PageRenderer from '@/components/page-designer/PageRenderer.vue'
 import { getChart, listComponents, listComponentsByCategory } from '@/utils/pluginManager'
+import { useScreen } from '@/composables/useScreen'
 
 const route = useRoute()
 const router = useRouter()
 const code = route.params.code as string
+const { isMobile } = useScreen()
 
 const page = reactive<any>({ code, name: '', description: '' })
 const config = reactive<any>({
@@ -125,6 +147,7 @@ const config = reactive<any>({
 })
 const selectedId = ref<string>('')
 const previewVisible = ref(false)
+const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
 
 const layoutTypes = [
   { label: '容器', value: 'container' },
@@ -152,6 +175,12 @@ const actionTypes = computed(() => [
   { label: '链接', value: 'link' },
   ...listComponentsByCategory('action').map((c) => ({ label: c.label, value: c.type }))
 ])
+
+const mobileTabs = [
+  { label: '组件库', value: 'library' as const },
+  { label: '画布', value: 'canvas' as const },
+  { label: '属性', value: 'property' as const }
+]
 
 const selectedNode = computed(() => {
   return findNode(config.components, selectedId.value)
@@ -249,6 +278,16 @@ function handleDropToRoot(event: DragEvent) {
 
 function selectNode(id: string) {
   selectedId.value = id
+  if (isMobile.value) {
+    activePanel.value = 'property'
+  }
+}
+
+function addComponent(type: string) {
+  if (!config.components) config.components = []
+  const node = createDefaultComponent(type)
+  config.components.push(node)
+  selectNode(node.id)
 }
 
 function deleteNode({ id }: { id: string }) {
@@ -336,4 +375,45 @@ function goBack() {
 .canvas-body { flex: 1; border: 1px dashed #ccc; padding: 12px; position: relative; }
 .canvas-body.is-empty { display: flex; align-items: center; justify-content: center; }
 .empty-tip { color: #999; }
+
+.mobile-panel-tabs { display: none; }
+
+@media (max-width: 768px) {
+  .designer-page { padding: 6px; }
+  .toolbar { margin-bottom: 8px; }
+  .mobile-panel-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--w-border-color);
+  }
+  .mobile-panel-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+    background: var(--w-bg-color);
+    border: 1px solid var(--w-border-color);
+    border-bottom: none;
+    font-size: 13px;
+  }
+  .mobile-panel-tab.active {
+    background: var(--w-color-primary);
+    color: #fff;
+    border-color: var(--w-color-primary);
+  }
+  .designer-layout.mobile {
+    flex-direction: column;
+    gap: 8px;
+    min-height: auto;
+  }
+  .designer-layout.mobile .component-library,
+  .designer-layout.mobile .canvas-panel,
+  .designer-layout.mobile .property-panel {
+    width: auto;
+    flex: none;
+    min-height: 300px;
+  }
+  .component-item { cursor: pointer; }
+}
 </style>

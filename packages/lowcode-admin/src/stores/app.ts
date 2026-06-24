@@ -32,6 +32,9 @@ const saved = loadSettings()
 
 export const useAppStore = defineStore('app', () => {
   const sidebarCollapsed = ref(false)
+  const mobileSidebarVisible = ref(false)
+  const isMobile = ref(false)
+  const screenWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
   const size = ref<'small' | 'default' | 'large'>(saved?.size || 'default')
   const locale = ref<LocaleType>(saved?.locale || 'zh-CN')
   const mode = ref<LowcodeThemeMode>(saved?.mode || 'light')
@@ -80,6 +83,29 @@ export const useAppStore = defineStore('app', () => {
     sidebarCollapsed.value = !sidebarCollapsed.value
   }
 
+  function openMobileSidebar() {
+    mobileSidebarVisible.value = true
+  }
+
+  function closeMobileSidebar() {
+    mobileSidebarVisible.value = false
+  }
+
+  function toggleMobileSidebar() {
+    mobileSidebarVisible.value = !mobileSidebarVisible.value
+  }
+
+  function setMobile(value: boolean) {
+    isMobile.value = value
+    if (!value) {
+      mobileSidebarVisible.value = false
+    }
+  }
+
+  function setScreenWidth(width: number) {
+    screenWidth.value = width
+  }
+
   function addView(view: TabItem) {
     if (visitedViews.value.some((v) => v.path === view.path)) return
     visitedViews.value.push(view)
@@ -116,6 +142,9 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     sidebarCollapsed,
+    mobileSidebarVisible,
+    isMobile,
+    screenWidth,
     size,
     locale,
     mode,
@@ -124,6 +153,11 @@ export const useAppStore = defineStore('app', () => {
     visitedViews,
     notification,
     toggleSidebar,
+    openMobileSidebar,
+    closeMobileSidebar,
+    toggleMobileSidebar,
+    setMobile,
+    setScreenWidth,
     setLocale,
     setMode,
     addView,

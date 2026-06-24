@@ -180,5 +180,9 @@ loadData()
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
+.toolbar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 768px) {
+  .list-page { padding: 6px; }
+}
 </style>

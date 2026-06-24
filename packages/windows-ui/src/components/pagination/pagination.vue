@@ -57,4 +57,9 @@ const goTo = (p: number) => { emit('update:current-page', p); emit('change', p) 
 .w-pagination--small .w-pagination__total { font-size: var(--w-font-size-extra-small); }
 .w-pagination--large .w-pagination__page { padding: 4px 10px; height: var(--w-component-size-large); min-width: var(--w-component-size-large); font-size: var(--w-font-size-medium); }
 .w-pagination--large .w-pagination__total { font-size: var(--w-font-size-base); }
+
+@media (max-width: 768px) {
+  .w-pagination { flex-wrap: wrap; }
+  .w-pagination__total { display: none; }
+}
 </style>

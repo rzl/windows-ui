@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
 
@@ -65,6 +65,23 @@ const offset = ref({ x: 0, y: 0 })
 const isDragging = ref(false)
 const dragMoved = ref(false)
 const isFullscreen = ref(props.fullscreen)
+const screenWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
+
+const isMobile = computed(() => screenWidth.value <= 768)
+const prevFullscreenState = ref(false)
+const mobileFullscreenForced = ref(false)
+
+const updateScreenWidth = () => {
+  screenWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  window.addEventListener('resize', updateScreenWidth)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateScreenWidth)
+})
 
 const dialogStyle = computed(() => {
   if (isFullscreen.value) {
@@ -168,10 +185,29 @@ const handleTouchEnd = () => {
   window.removeEventListener('touchend', handleTouchEnd)
 }
 
+function applyMobileFullscreen() {
+  if (isMobile.value && !mobileFullscreenForced.value) {
+    prevFullscreenState.value = isFullscreen.value
+    isFullscreen.value = true
+    mobileFullscreenForced.value = true
+  }
+}
+
 watch(() => props.modelValue, (val) => {
   if (val) {
     offset.value = { x: 0, y: 0 }
     isFullscreen.value = props.fullscreen
+    mobileFullscreenForced.value = false
+    applyMobileFullscreen()
+  }
+})
+
+watch(isMobile, (val, oldVal) => {
+  if (val && !oldVal) {
+    applyMobileFullscreen()
+  } else if (!val && oldVal) {
+    isFullscreen.value = prevFullscreenState.value
+    mobileFullscreenForced.value = false
   }
 })
 </script>
@@ -274,5 +310,43 @@ watch(() => props.modelValue, (val) => {
 .w-dialog-fade-enter-from,
 .w-dialog-fade-leave-to {
   opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .w-dialog__wrapper {
+    align-items: flex-start;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .w-dialog {
+    margin: 0 12px;
+    max-width: calc(100vw - 24px);
+    width: auto !important;
+  }
+  .w-dialog.is-fullscreen {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+  .w-dialog__body {
+    padding: 12px;
+  }
+  .w-dialog.is-fullscreen .w-dialog__body {
+    flex: 1;
+  }
+  .w-dialog__footer {
+    padding: 10px 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .w-dialog__header {
+    padding: 10px 12px;
+  }
 }
 </style>

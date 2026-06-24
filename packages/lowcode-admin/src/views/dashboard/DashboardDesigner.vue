@@ -246,11 +246,17 @@ async function handleSave() {
 
 <style scoped>
 .designer-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
+.toolbar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
 .editor-layout { display: flex; gap: 16px; margin-top: 16px; }
 .config-panel { flex: 1; min-width: 0; }
 .preview-panel { flex: 1; min-width: 0; }
 .preview-frame { width: 100%; height: 340px; border: 1px solid #d4d0c8; background: #fff; }
 .tip { font-size: 12px; color: #666; margin-top: 8px; }
 h4 { margin: 0 0 8px; }
+
+@media (max-width: 768px) {
+  .designer-page { padding: 6px; }
+  .editor-layout { flex-direction: column; gap: 12px; }
+  .preview-frame { height: 280px; }
+}
 </style>

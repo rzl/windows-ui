@@ -1352,4 +1352,12 @@ const computedFlatRows = computed(() => {
 /* table layout */
 .w-table table { width: 100%; }
 .w-table th, .w-table td { box-sizing: border-box; }
+
+@media (max-width: 768px) {
+  .w-table { overflow-x: auto; }
+  .w-table table { width: auto; min-width: 100%; }
+  .w-table th, .w-table td { white-space: nowrap; }
+  .w-table--small th, .w-table--small td { padding: 4px 6px; }
+  .w-table__cell-content { white-space: nowrap; }
+}
 </style>

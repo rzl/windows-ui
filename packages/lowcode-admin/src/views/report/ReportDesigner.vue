@@ -332,6 +332,10 @@ function goRun() {
 
 <style scoped>
 .designer-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
+.toolbar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
 .section-title { font-weight: bold; margin: 12px 0; }
+
+@media (max-width: 768px) {
+  .designer-page { padding: 6px; }
+}
 </style>

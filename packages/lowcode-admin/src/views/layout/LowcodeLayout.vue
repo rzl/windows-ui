@@ -1,24 +1,34 @@
 <template>
-  <div class="admin-layout">
-    <aside class="admin-sidebar" :class="{ collapsed: app.sidebarCollapsed }">
+  <div class="admin-layout" :class="{ 'is-mobile': app.isMobile }">
+    <aside
+      class="admin-sidebar"
+      :class="{ collapsed: !app.isMobile && app.sidebarCollapsed, mobile: app.isMobile, visible: app.isMobile && app.mobileSidebarVisible }"
+    >
       <div class="sidebar-logo">
         <w-icon name="computer" />
-        <span v-show="!app.sidebarCollapsed">Lowcode Admin</span>
+        <span v-show="!app.sidebarCollapsed || app.isMobile">Lowcode Admin</span>
       </div>
       <div class="sidebar-menu">
         <w-menu
           :items="menuItems"
           mode="vertical"
-          :collapse="app.sidebarCollapsed"
+          :collapse="!app.isMobile && app.sidebarCollapsed"
           :default-active="route.path"
           @select="handleMenuSelect"
         />
       </div>
     </aside>
+
+    <div
+      v-if="app.isMobile && app.mobileSidebarVisible"
+      class="mobile-sidebar-overlay"
+      @click="app.closeMobileSidebar"
+    />
+
     <div class="admin-main">
       <header class="admin-header">
         <div class="header-left">
-          <w-button size="small" @click="app.toggleSidebar">
+          <w-button size="small" @click="app.isMobile ? app.toggleMobileSidebar() : app.toggleSidebar()">
             <w-icon name="menu" size="small" />
           </w-button>
           <w-breadcrumb :items="breadcrumbItems" />
@@ -34,10 +44,11 @@
               :alt="auth.userInfo?.nickname"
               size="small"
             />
-            <span>{{ auth.userInfo?.nickname }}</span>
+            <span v-if="!app.isMobile" class="user-nickname">{{ auth.userInfo?.nickname }}</span>
           </div>
           <w-button size="small" @click="handleLogout">
-            <w-icon name="logout" size="small" /> {{ t('退出') }}
+            <w-icon name="logout" size="small" />
+            <span v-if="!app.isMobile" class="logout-text">{{ t('退出') }}</span>
           </w-button>
         </div>
       </header>
@@ -107,6 +118,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useMenuStore } from '@/stores/menu'
 import { useLowcodeLocale, type LocaleType } from '@/locale'
+import { useScreen } from '@/composables/useScreen'
 import NotificationCenter from '@/components/NotificationCenter.vue'
 
 const route = useRoute()
@@ -115,6 +127,20 @@ const auth = useAuthStore()
 const app = useAppStore()
 const menu = useMenuStore()
 const { t } = useLowcodeLocale()
+const { isMobile } = useScreen()
+
+watch(isMobile, (val) => {
+  app.setMobile(val)
+}, { immediate: true })
+
+watch(
+  () => route.path,
+  () => {
+    if (app.isMobile) {
+      app.closeMobileSidebar()
+    }
+  }
+)
 
 menu.loadMenus()
 
@@ -380,5 +406,52 @@ function closeTab(tab: any) {
 .admin-content {
   flex: 1;
   overflow: auto;
+}
+
+/* 移动端抽屉式侧边栏 */
+.admin-sidebar.mobile {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1000;
+  transform: translateX(-100%);
+  width: 220px;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+}
+.admin-sidebar.mobile.visible {
+  transform: translateX(0);
+}
+.mobile-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 6px 10px;
+  }
+  .header-right {
+    gap: 6px;
+  }
+  .user-info {
+    padding: 2px;
+  }
+  .user-nickname,
+  .logout-text {
+    display: none;
+  }
+  .tab-item {
+    min-height: 32px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  .tab-close {
+    font-size: 14px;
+    padding: 4px;
+    margin: -4px;
+  }
 }
 </style>

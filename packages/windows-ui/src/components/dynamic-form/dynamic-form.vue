@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, reactive, ref, watch, type PropType, type VNode } from 'vue'
+import { computed, h, reactive, ref, watch, onMounted, onBeforeUnmount, type PropType, type VNode } from 'vue'
 import WForm from '../form/form.vue'
 import WFormItem from '../form/form-item.vue'
 import WInput from '../input/input.vue'
@@ -91,6 +91,7 @@ const props = defineProps({
   fields: { type: Array as () => DynamicField[], default: () => [] },
   columns: { type: Number, default: 1 },
   layout: { type: Object as () => FormLayout, default: undefined },
+  mobileColumns: { type: Number, default: 1 },
   validateRules: {
     type: Function as PropType<(items: ValidateRuleItem[]) => Promise<ValidateRuleResult[]>>,
     default: undefined
@@ -163,6 +164,21 @@ function isDependsOnHidden(field: DynamicField): boolean {
 }
 
 const formRef = ref<any>(null)
+const screenWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
+const isMobile = computed(() => screenWidth.value <= 768)
+
+const updateScreenWidth = () => {
+  screenWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  window.addEventListener('resize', updateScreenWidth)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateScreenWidth)
+})
+
 const validationErrors = reactive<Record<string, string>>({})
 const fieldOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
 const refOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
@@ -260,12 +276,13 @@ function renderLayoutNode(node: FormLayout | string): VNode | null {
   }
 
   if (node.type === 'grid') {
+    const columns = isMobile.value ? props.mobileColumns : (node.span || props.columns)
     return h('div', {
       class: 'w-dynamic-form__grid',
       style: {
         display: 'grid',
-        gridTemplateColumns: `repeat(${node.span || props.columns}, 1fr)`,
-        gap: '12px'
+        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        gap: isMobile.value ? '8px' : '12px'
       }
     }, children)
   }

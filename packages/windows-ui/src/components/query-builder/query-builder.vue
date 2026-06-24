@@ -127,4 +127,11 @@ function handleReset() {
 .w-query-builder { padding: 12px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; margin-bottom: 12px; }
 .w-query-builder__row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .w-query-builder__actions { display: flex; gap: 8px; margin-top: 12px; }
+
+@media (max-width: 768px) {
+  .w-query-builder { padding: 10px; }
+  .w-query-builder__row { flex-direction: column; align-items: stretch; gap: 6px; margin-bottom: 12px; }
+  .w-query-builder__row > * { width: 100% !important; }
+  .w-query-builder__actions { flex-wrap: wrap; }
+}
 </style>

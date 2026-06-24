@@ -116,4 +116,9 @@ function handleSelectionChange(rows: any[]) {
 .w-crud-table { }
 .w-crud-table__toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 .w-crud-table__pagination { margin-top: 12px; display: flex; justify-content: flex-end; }
+
+@media (max-width: 768px) {
+  .w-crud-table__toolbar { flex-wrap: wrap; }
+  .w-crud-table__pagination { justify-content: center; }
+}
 </style>

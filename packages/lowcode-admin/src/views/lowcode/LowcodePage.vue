@@ -588,4 +588,8 @@ async function handleFileChange(e: Event) {
 <style scoped>
 .list-page { padding: 8px; }
 .print-preview-content { max-height: 600px; overflow: auto; }
+
+@media (max-width: 768px) {
+  .list-page { padding: 6px; }
+}
 </style>

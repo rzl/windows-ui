@@ -56,4 +56,12 @@ const handleReset = () => {
 .w-search-form__fields { display: flex; flex-wrap: wrap; gap: 12px; }
 .w-search-form__fields.collapsed { max-height: 44px; overflow: hidden; }
 .w-search-form__actions { display: flex; gap: 8px; margin-top: 12px; }
+
+@media (max-width: 768px) {
+  .w-search-form { padding: 10px; }
+  .w-search-form__fields { flex-direction: column; gap: 8px; }
+  .w-search-form__fields.collapsed { max-height: 72px; }
+  .w-search-form__fields :deep(.w-form-item) { width: 100%; margin-bottom: 0; }
+  .w-search-form__actions { flex-wrap: wrap; margin-top: 10px; }
+}
 </style>
