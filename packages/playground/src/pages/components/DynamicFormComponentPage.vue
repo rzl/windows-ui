@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('通过 JSON 字段配置动态渲染表单')" id="dynamic-form" doc="dynamic-form">
 
-      <demo-block :title="t('基础用法')" ::code="DynamicFormCode1">
+      <demo-block :title="t('基础用法')" :code="DynamicFormCode1">
         <w-dynamic-form v-model="formModel" :fields="fields" />
         <div class="demo-actions">
           <w-button type="primary" @click="handleSubmit">{{ t('提交') }}</w-button>
@@ -12,11 +12,11 @@
         <p class="demo-note">{{ t('当前表单值：') }}{{ JSON.stringify(formModel) }}</p>
       </demo-block>
 
-      <demo-block :title="t('两列布局')" ::code="DynamicFormCode2">
+      <demo-block :title="t('两列布局')" :code="DynamicFormCode2">
         <w-dynamic-form v-model="formModel2" :fields="fields2" :columns="2" />
       </demo-block>
 
-      <demo-block :title="t('字段联动')" ::code="DynamicFormCode3">
+      <demo-block :title="t('字段联动')" :code="DynamicFormCode3">
         <w-dynamic-form v-model="formModel3" :fields="fields3" />
         <p class="demo-note">{{ t('选择「其他」来源后，备注字段会显示') }}</p>
       </demo-block>
@@ -66,26 +66,73 @@ function handleReset() {
   Object.keys(formModel).forEach((k) => delete formModel[k])
 }
 
-const codeBasic = `&lt;w-dynamic-form v-model=&quot;formModel&quot; :fields=&quot;fields&quot; /&gt;
+const codeBasic = `&lt;script setup&gt;
+import { reactive } from 'vue'
+
+const formModel = reactive({})
 
 const fields = [
   { prop: 'username', label: '用户名', type: 'input', required: true },
   { prop: 'age', label: '年龄', type: 'number' },
-  { prop: 'status', label: '状态', type: 'switch' }
-]`
+  { prop: 'email', label: '邮箱', type: 'input', inputType: 'email' },
+  { prop: 'gender', label: '性别', type: 'select', options: [{ label: '男', value: 1 }, { label: '女', value: 2 }] },
+  { prop: 'status', label: '状态', type: 'switch', activeText: '启用', inactiveText: '禁用' },
+  { prop: 'remark', label: '备注', type: 'textarea', rows: 3 }
+]
 
-const codeColumns = `&lt;w-dynamic-form v-model=&quot;formModel&quot; :fields=&quot;fields&quot; :columns=&quot;2&quot; /&gt;`
+function handleSubmit() {
+  alert(JSON.stringify(formModel))
+}
 
-const codeLinkage = `&lt;w-dynamic-form v-model=&quot;formModel&quot; :fields=&quot;fields&quot; /&gt;
+function handleReset() {
+  Object.keys(formModel).forEach((k) => delete formModel[k])
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;w-dynamic-form v-model=&quot;formModel&quot; :fields=&quot;fields&quot; /&gt;
+  &lt;div style=&quot;margin-top: 16px; display: flex; gap: 8px;&quot;&gt;
+    &lt;w-button type=&quot;primary&quot; @click=&quot;handleSubmit&quot;&gt;提交&lt;/w-button&gt;
+    &lt;w-button @click=&quot;handleReset&quot;&gt;重置&lt;/w-button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;`
+
+const codeColumns = `&lt;script setup&gt;
+import { reactive } from 'vue'
+
+const formModel = reactive({})
 
 const fields = [
-  { prop: 'source', label: '来源', type: 'select', options: [...] },
-  { prop: 'remark', label: '备注', type: 'textarea', hidden: (model) => model.source !== 'other' }
-]`
+  { prop: 'name', label: '姓名', type: 'input' },
+  { prop: 'phone', label: '手机', type: 'input' },
+  { prop: 'city', label: '城市', type: 'select', options: [{ label: '北京', value: 'bj' }, { label: '上海', value: 'sh' }] },
+  { prop: 'date', label: '日期', type: 'date' }
+]
+&lt;/script&gt;
 
-const DynamicFormCode1 = `codeBasic`
-const DynamicFormCode2 = `codeColumns`
-const DynamicFormCode3 = `codeLinkage`
+&lt;template&gt;
+  &lt;w-dynamic-form v-model=&quot;formModel&quot; :fields=&quot;fields&quot; :columns=&quot;2&quot; /&gt;
+&lt;/template&gt;`
+
+const codeLinkage = `&lt;script setup&gt;
+import { reactive } from 'vue'
+
+const formModel = reactive({ source: 'web' })
+
+const fields = [
+  { prop: 'source', label: '来源', type: 'select', options: [{ label: '官网', value: 'web' }, { label: 'App', value: 'app' }, { label: '其他', value: 'other' }] },
+  { prop: 'remark', label: '备注', type: 'textarea', hidden: (model) => model.source !== 'other' }
+]
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;w-dynamic-form v-model=&quot;formModel&quot; :fields=&quot;fields&quot; /&gt;
+  &lt;p&gt;选择「其他」来源后，备注字段会显示&lt;/p&gt;
+&lt;/template&gt;`
+
+const DynamicFormCode1 = codeBasic
+const DynamicFormCode2 = codeColumns
+const DynamicFormCode3 = codeLinkage
 </script>
 
 <style scoped>

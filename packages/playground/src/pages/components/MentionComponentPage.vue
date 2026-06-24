@@ -35,7 +35,17 @@ const message = (msg: string) => alert(msg)
 
 const title = t('Mention 提及')
 
-const MentionCode1 = `<w-mention v-model="form.mention" :options="mentionOptions" placeholder="输入 @ 触发" />`
+const mentionCommonCode = `import { reactive } from 'vue'
+
+const form = reactive({ mention: '' })
+
+const mentionOptions = [
+  { label: '张三', value: 'zhangsan' },
+  { label: '李四', value: 'lisi' },
+  { label: '王五', value: 'wangwu' }
+]`
+
+const MentionCode1 = `${mentionCommonCode}\n\n<w-mention v-model="form.mention" :options="mentionOptions" placeholder="输入 @ 触发" />`
 </script>
 
 <style scoped>

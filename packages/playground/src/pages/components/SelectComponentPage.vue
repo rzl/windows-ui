@@ -36,16 +36,25 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 
 const message = (msg: string) => alert(msg)
 
+const filterByValue = (option: any, query: string) =>
+  String(option.value).toLowerCase().includes(query.toLowerCase())
+
 const title = t('Select 选择器')
 
-const SelectCode1 = `<w-select v-model="form.select" :options="selectOptions" />`
-const SelectCode2 = `<w-select v-model="form.select" :options="selectOptions" filterable />`
-const SelectCode3 = `<w-select v-model="form.select" :options="selectOptions" filterable :filter-method="filterByValue" />`
-const SelectCode4 = `<w-virtualized-select v-model="form.select" :options="selectOptions" />`
+const selectCommonCode = `import { reactive } from 'vue'
 
-const filterByValue = (option: any, query: string) => {
-  return String(option.value).toLowerCase().includes(query.toLowerCase())
-}
+const form = reactive({ select: '' })
+
+const selectOptions = [
+  { label: '选项1', value: '1' },
+  { label: '选项2', value: '2' },
+  { label: '选项3', value: '3' }
+]`
+
+const SelectCode1 = `${selectCommonCode}\n\n<w-select v-model="form.select" :options="selectOptions" />`
+const SelectCode2 = `${selectCommonCode}\n\n<w-select v-model="form.select" :options="selectOptions" filterable />`
+const SelectCode3 = `${selectCommonCode}\n\nconst filterByValue = (option, query) => String(option.value).toLowerCase().includes(query.toLowerCase())\n\n<w-select v-model="form.select" :options="selectOptions" filterable :filter-method="filterByValue" />`
+const SelectCode4 = `${selectCommonCode}\n\n<w-virtualized-select v-model="form.select" :options="selectOptions" />`
 </script>
 
 <style scoped>

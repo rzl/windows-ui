@@ -35,7 +35,16 @@ const message = (msg: string) => alert(msg)
 
 const title = t('Cascader 级联选择器')
 
-const CascaderCode1 = `<w-cascader v-model="form.cascader" :options="cascaderOptions" placeholder="选择地址" />`
+const CascaderCode1 = `import { reactive } from 'vue'
+
+const form = reactive({ cascader: [] })
+
+const cascaderOptions = [
+  { label: '北京', value: 'beijing', children: [{ label: '朝阳区', value: 'chaoyang' }, { label: '海淀区', value: 'haidian' }] },
+  { label: '上海', value: 'shanghai', children: [{ label: '浦东新区', value: 'pudong' }] }
+]
+
+<w-cascader v-model="form.cascader" :options="cascaderOptions" placeholder="选择地址" />`
 </script>
 
 <style scoped>

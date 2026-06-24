@@ -28,9 +28,14 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 
 const title = t('Tree 树形控件')
 
-const TreeCode1 = `<w-tree :data="treeData" />`
-const TreeCode2 = `<w-tree :data="treeData" expand-all />`
-const TreeCode3 = `<w-virtualized-tree :data="treeData" />`
+const treeCode = `const treeData = [
+  { label: '节点1', value: '1', children: [{ label: '子节点1-1', value: '1-1' }] },
+  { label: '节点2', value: '2' }
+]`
+
+const TreeCode1 = `${treeCode}\n\n<w-tree :data="treeData" />`
+const TreeCode2 = `${treeCode}\n\n<w-tree :data="treeData" expand-all />`
+const TreeCode3 = `${treeCode}\n\n<w-virtualized-tree :data="treeData" />`
 </script>
 
 <style scoped>

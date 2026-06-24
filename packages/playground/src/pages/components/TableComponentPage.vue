@@ -3,9 +3,9 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('数据表格')" id="table" doc="table">
 
-      <demo-block :title="t('基础表格')" ::code="TableCode1"><w-table :data="tableData" :columns="tableColumns" /></demo-block>
+      <demo-block :title="t('基础表格')" :code="TableCode1"><w-table :data="tableData" :columns="tableColumns" /></demo-block>
 
-      <demo-block :title="t('自定义列模板')" ::code="TableCode2"><w-table :data="tableData" :columns="tableColumns">
+      <demo-block :title="t('自定义列模板')" :code="TableCode2"><w-table :data="tableData" :columns="tableColumns">
         <template #status="{ row }">
           <w-tag :type="row.status === '在职' ? 'success' : 'info'">{{ row.status }}</w-tag>
         </template>
@@ -17,33 +17,33 @@
         </template>
       </w-table></demo-block>
 
-      <demo-block :title="t('空数据表格')" ::code="TableCode3"><w-table :data="[]" :columns="tableColumns" /></demo-block>
+      <demo-block :title="t('空数据表格')" :code="TableCode3"><w-table :data="[]" :columns="tableColumns" /></demo-block>
 
-      <demo-block :title="t('带边框 + 斑马纹 + 列宽')" ::code="TableCode4">
+      <demo-block :title="t('带边框 + 斑马纹 + 列宽')" :code="TableCode4">
         <w-table :data="stripeData" :columns="stripeColumns" border stripe />
       </demo-block>
 
-      <demo-block :title="t('多选行')" ::code="TableCode5">
+      <demo-block :title="t('多选行')" :code="TableCode5">
         <w-table :data="tableData" :columns="selectionColumns" @selection-change="handleSelectionChange" />
         <p class="demo-note">已选 {{ selected.length }} 项：{{ selected.map(s => s.name).join('、') || '无' }}</p>
       </demo-block>
 
-      <demo-block :title="t('单选高亮')" ::code="TableCode6">
+      <demo-block :title="t('单选高亮')" :code="TableCode6">
         <w-table :data="tableData" :columns="tableColumns" highlight-current-row @current-change="handleCurrentChange" />
         <p class="demo-note">当前选中：{{ current?.name || '无' }}</p>
       </demo-block>
 
-      <demo-block :title="t('排序')" ::code="TableCode7">
+      <demo-block :title="t('排序')" :code="TableCode7">
         <w-table :data="sortData" :columns="sortColumns" @sort-change="handleSortChange" />
         <p class="demo-note">当前排序：{{ sortInfo.prop }} {{ sortInfo.order }}</p>
       </demo-block>
 
-      <demo-block :title="t('筛选')" ::code="TableCode8">
+      <demo-block :title="t('筛选')" :code="TableCode8">
         <w-table :data="filterData" :columns="filterColumns" @filter-change="handleFilterChange" />
         <p class="demo-note">当前筛选：{{ filterInfo.prop }} = {{ filterInfo.values.join('、') || '无' }}</p>
       </demo-block>
 
-      <demo-block :title="t('尺寸规格')" ::code="TableCode9">
+      <demo-block :title="t('尺寸规格')" :code="TableCode9">
         <w-space direction="vertical">
           <w-table :data="tableData" :columns="tableColumns" size="small" />
           <w-table :data="tableData" :columns="tableColumns" size="default" />
@@ -51,29 +51,29 @@
         </w-space>
       </demo-block>
 
-      <demo-block :title="t('行样式自定义')" ::code="TableCode10">
+      <demo-block :title="t('行样式自定义')" :code="TableCode10">
         <w-table :data="rowClassData" :columns="tableColumns" :row-class-name="rowClassName" />
       </demo-block>
 
-      <demo-block :title="t('分页联动')" ::code="TableCode11">
+      <demo-block :title="t('分页联动')" :code="TableCode11">
         <w-table :data="pagedData" :columns="pageColumns" border />
         <div style="margin-top: 12px;">
           <w-pagination v-model:current-page="currentPage" :page-size="pageSize" :total="pageData.length" />
         </div>
       </demo-block>
 
-      <demo-block :title="t('列宽拖拽')" ::code="TableCode12">
+      <demo-block :title="t('列宽拖拽')" :code="TableCode12">
         <div style="max-width: 480px; border: 1px solid #919b9c;">
           <w-table :data="tableData" :columns="resizeColumns" border />
         </div>
         <p class="demo-note">拖动表头右侧分割线调整列宽，超出容器会产生横向滚动条</p>
       </demo-block>
 
-      <demo-block :title="t('固定表头')" ::code="TableCode13">
+      <demo-block :title="t('固定表头')" :code="TableCode13">
         <w-table :data="fixedHeaderData" :columns="fixedHeaderColumns" :max-height="300" border />
       </demo-block>
 
-      <demo-block :title="t('固定列')" ::code="TableCode14">
+      <demo-block :title="t('固定列')" :code="TableCode14">
         <div style="max-width: 480px; border: 1px solid #919b9c;">
           <w-table :data="fixedColumnData" :columns="fixedColumnColumns" border>
             <template #action="{ row }">
@@ -83,24 +83,24 @@
         </div>
       </demo-block>
 
-      <demo-block :title="t('树形表格')" ::code="TableCode15">
+      <demo-block :title="t('树形表格')" :code="TableCode15">
         <w-table :data="treeData" :columns="treeColumns" row-key="id" default-expand-all />
       </demo-block>
 
-      <demo-block :title="t('树形表格 + 多选')" ::code="TableCode16">
+      <demo-block :title="t('树形表格 + 多选')" :code="TableCode16">
         <w-table :data="treeData" :columns="treeSelectionColumns" row-key="id" default-expand-all @selection-change="handleTreeSelectionChange" />
         <p class="demo-note">已选 {{ treeSelected.length }} 项</p>
       </demo-block>
 
-      <demo-block :title="t('懒加载树形')" ::code="TableCode17">
+      <demo-block :title="t('懒加载树形')" :code="TableCode17">
         <w-table :data="lazyData" :columns="treeColumns" row-key="id" lazy :load="loadTree" />
       </demo-block>
 
-      <demo-block :title="t('多级表头')" ::code="TableCode18">
+      <demo-block :title="t('多级表头')" :code="TableCode18">
         <w-table :data="multiHeaderData" :columns="multiHeaderColumns" border />
       </demo-block>
 
-      <demo-block :title="t('展开行')" ::code="TableCode19">
+      <demo-block :title="t('展开行')" :code="TableCode19">
         <w-table :data="expandData" :columns="expandColumns">
           <template #expand="{ row }">
             <div style="padding: 8px;">
@@ -112,17 +112,17 @@
         </w-table>
       </demo-block>
 
-      <demo-block :title="t('虚拟滚动')" ::code="TableCode20">
+      <demo-block :title="t('虚拟滚动')" :code="TableCode20">
         <w-table :data="virtualScrollData" :columns="virtualScrollColumns" virtualized :height="300" border />
         <p class="demo-note">大数据量下仅渲染可视区域行，滚动流畅</p>
       </demo-block>
 
-      <demo-block :title="t('横向虚拟滚动')" ::code="TableCode21">
+      <demo-block :title="t('横向虚拟滚动')" :code="TableCode21">
         <w-table :data="virtualXData" :columns="virtualXColumns" virtualized virtual-x :height="300" border />
         <p class="demo-note">200+ 列场景下仅渲染可视区域列，搭配左右固定列更流畅</p>
       </demo-block>
 
-      <demo-block :title="t('虚拟化表格')" ::code="TableCode22"><w-virtualized-table :data="virtualData" :columns="virtualColumns" :height="300" /></demo-block>
+      <demo-block :title="t('虚拟化表格')" :code="TableCode22"><w-virtualized-table :data="virtualData" :columns="virtualColumns" :height="300" /></demo-block>
 
     </demo-section>
   </div>
@@ -479,28 +479,28 @@ const multiHeaderData = [
 const handleEdit = (row: any) => alert(t('编辑: ') + row.name)
 const handleDelete = (row: any, index: number) => alert(t('删除第 ') + (index + 1) + t(' 行: ') + row.name)
 
-const TableCode1 = `codeBasic`
-const TableCode2 = `codeSlot`
-const TableCode3 = `codeEmpty`
-const TableCode4 = `codeBorderStripe`
-const TableCode5 = `codeSelection`
-const TableCode6 = `codeHighlight`
-const TableCode7 = `codeSort`
-const TableCode8 = `codeFilter`
-const TableCode9 = `codeSize`
-const TableCode10 = `codeRowClass`
-const TableCode11 = `codePagination`
-const TableCode12 = `codeResize`
-const TableCode13 = `codeFixedHeader`
-const TableCode14 = `codeFixedColumn`
-const TableCode15 = `codeTree`
-const TableCode16 = `codeTreeSelection`
-const TableCode17 = `codeTreeLazy`
-const TableCode18 = `codeMultiHeader`
-const TableCode19 = `codeExpandRow`
-const TableCode20 = `codeVirtualScroll`
-const TableCode21 = `codeVirtualX`
-const TableCode22 = `codeVirtual`
+const TableCode1 = codeBasic
+const TableCode2 = codeSlot
+const TableCode3 = codeEmpty
+const TableCode4 = codeBorderStripe
+const TableCode5 = codeSelection
+const TableCode6 = codeHighlight
+const TableCode7 = codeSort
+const TableCode8 = codeFilter
+const TableCode9 = codeSize
+const TableCode10 = codeRowClass
+const TableCode11 = codePagination
+const TableCode12 = codeResize
+const TableCode13 = codeFixedHeader
+const TableCode14 = codeFixedColumn
+const TableCode15 = codeTree
+const TableCode16 = codeTreeSelection
+const TableCode17 = codeTreeLazy
+const TableCode18 = codeMultiHeader
+const TableCode19 = codeExpandRow
+const TableCode20 = codeVirtualScroll
+const TableCode21 = codeVirtualX
+const TableCode22 = codeVirtual
 </script>
 
 <style scoped>

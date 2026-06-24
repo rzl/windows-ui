@@ -6,7 +6,7 @@
         v-for="group in iconGroups"
         :key="group.title"
         :title="group.title"
-        ::code="IconCode1"
+        :code="getGroupCode(group)"
       >
         <w-space wrap>
           <div v-for="name in group.names" :key="name" class="icon-demo">
@@ -70,7 +70,6 @@ ${group.names.map(n => `  <w-icon name="${n}" />`).join('\n')}
 </w-space>`
 }
 
-const IconCode1 = `getGroupCode(group)`
 const IconCode2 = `<w-space>
   <w-icon name="search" size="small" />
   <w-icon name="search" />

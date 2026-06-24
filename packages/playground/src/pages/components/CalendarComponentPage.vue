@@ -23,7 +23,16 @@ const calendarEvents = [
   { date: '2024-01-15', title: t('会议') },
 ]
 
-const CalendarCode1 = `<w-calendar v-model="form.date" :events="calendarEvents" />`
+const CalendarCode1 = `import { reactive } from 'vue'
+
+const form = reactive({ date: new Date() })
+
+const calendarEvents = [
+  { date: '2024-01-01', title: '元旦' },
+  { date: '2024-01-15', title: '会议' }
+]
+
+<w-calendar v-model="form.date" :events="calendarEvents" />`
 </script>
 
 <style scoped>

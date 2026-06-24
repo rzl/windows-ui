@@ -49,11 +49,27 @@ function onReset() {
 
 const title = t('SearchForm 搜索表单')
 
-const SearchFormCode1 = `<w-search-form :model="searchModel" @search="onSearch" @reset="onReset">
+const searchFormCommonCode = `import { reactive } from 'vue'
+
+const statusOptions = [
+  { label: '全部', value: '' },
+  { label: '启用', value: '1' },
+  { label: '禁用', value: '0' }
+]
+
+function onSearch(model) {
+  alert(JSON.stringify(model))
+}
+
+function onReset() {
+  alert('已重置')
+}`
+
+const SearchFormCode1 = `${searchFormCommonCode}\n\nconst searchModel = reactive({ name: '', status: '' })\n\n<w-search-form :model="searchModel" @search="onSearch" @reset="onReset">
   <w-form-item label="用户名"><w-input v-model="searchModel.name" /></w-form-item>
   <w-form-item label="状态"><w-select v-model="searchModel.status" :options="statusOptions" /></w-form-item>
 </w-search-form>`
-const SearchFormCode2 = `<w-search-form :model="searchModel2" collapsible @search="onSearch" @reset="onReset">
+const SearchFormCode2 = `${searchFormCommonCode}\n\nconst searchModel2 = reactive({ name: '', email: '', phone: '', status: '' })\n\n<w-search-form :model="searchModel2" collapsible @search="onSearch" @reset="onReset">
   <w-form-item label="用户名"><w-input v-model="searchModel2.name" /></w-form-item>
   <w-form-item label="邮箱"><w-input v-model="searchModel2.email" /></w-form-item>
   <w-form-item label="手机"><w-input v-model="searchModel2.phone" /></w-form-item>

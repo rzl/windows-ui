@@ -35,7 +35,18 @@ const message = (msg: string) => alert(msg)
 
 const title = t('Transfer 穿梭框')
 
-const TransferCode1 = `<w-transfer v-model="form.transfer" :data="transferData" />`
+const transferCommonCode = `import { reactive } from 'vue'
+
+const form = reactive({ transfer: [] })
+
+const transferData = [
+  { key: '1', label: '项目1' },
+  { key: '2', label: '项目2' },
+  { key: '3', label: '项目3' },
+  { key: '4', label: '项目4' }
+]`
+
+const TransferCode1 = `${transferCommonCode}\n\n<w-transfer v-model="form.transfer" :data="transferData" />`
 </script>
 
 <style scoped>

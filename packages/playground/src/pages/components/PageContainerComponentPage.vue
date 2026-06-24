@@ -37,10 +37,16 @@ const breadcrumb = [
 
 const title = t('PageContainer 页面容器')
 
-const PageContainerCode1 = `<w-page-container title="用户管理" :breadcrumb="breadcrumb">
+const pageContainerBreadcrumbCode = `const breadcrumb = [
+  { label: '首页', path: '/' },
+  { label: '系统管理' },
+  { label: '用户管理' }
+]`
+
+const PageContainerCode1 = `${pageContainerBreadcrumbCode}\n\n<w-page-container title="用户管理" :breadcrumb="breadcrumb">
   <p>页面内容</p>
 </w-page-container>`
-const PageContainerCode2 = `<w-page-container title="用户管理" :breadcrumb="breadcrumb">
+const PageContainerCode2 = `${pageContainerBreadcrumbCode}\n\n<w-page-container title="用户管理" :breadcrumb="breadcrumb">
   <template #extra>
     <w-button type="primary">新增</w-button>
     <w-button>导出</w-button>

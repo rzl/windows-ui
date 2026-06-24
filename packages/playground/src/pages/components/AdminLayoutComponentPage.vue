@@ -49,7 +49,13 @@ const menuItems = [
 
 const title = t('AdminLayout 后台布局')
 
-const AdminLayoutCode1 = `<w-admin-layout title="管理系统">
+const adminLayoutMenuCode = `const menuItems = [
+  { label: '首页', path: '/' },
+  { label: '用户管理', path: '/user' },
+  { label: '系统设置', path: '/setting' }
+]`
+
+const AdminLayoutCode1 = `${adminLayoutMenuCode}\n\n<w-admin-layout title="管理系统">
   <template #menu>
     <w-menu :items="menuItems" />
   </template>
@@ -58,7 +64,7 @@ const AdminLayoutCode1 = `<w-admin-layout title="管理系统">
   </template>
   <div>主内容区域</div>
 </w-admin-layout>`
-const AdminLayoutCode2 = `<w-admin-layout title="管理系统" :collapsed="true">
+const AdminLayoutCode2 = `${adminLayoutMenuCode}\n\n<w-admin-layout title="管理系统" :collapsed="true">
   <template #menu>
     <w-menu :items="menuItems" />
   </template>

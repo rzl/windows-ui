@@ -38,10 +38,15 @@ function checkPermission(code: string) {
 
 const title = t('Permission 权限控制')
 
-const PermissionCode1 = `<w-permission code="user:view" :has="checkPermission">
+const permissionCommonCode = `function checkPermission(code) {
+  const permissions = ['user:view', 'user:edit']
+  return permissions.includes(code)
+}`
+
+const PermissionCode1 = `${permissionCommonCode}\n\n<w-permission code="user:view" :has="checkPermission">
   <w-button>查看用户</w-button>
 </w-permission>`
-const PermissionCode2 = `<w-permission code="user:delete" :has="checkPermission">
+const PermissionCode2 = `${permissionCommonCode}\n\n<w-permission code="user:delete" :has="checkPermission">
   <w-button type="danger">删除用户</w-button>
 </w-permission>`
 const PermissionCode3 = `<w-permission>

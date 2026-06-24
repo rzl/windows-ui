@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('多条件组合高级查询')" id="query-builder" doc="query-builder">
 
-      <demo-block :title="t('基础用法')" ::code="QueryBuilderCode1">
+      <demo-block :title="t('基础用法')" :code="QueryBuilderCode1">
         <w-query-builder :fields="fields" @search="handleSearch" @reset="handleReset" />
         <p class="demo-note">{{ t('当前条件：') }}{{ JSON.stringify(conditions) }}</p>
       </demo-block>
@@ -38,15 +38,33 @@ function handleReset() {
   conditions.value = []
 }
 
-const codeBasic = `&lt;w-query-builder :fields=&quot;fields&quot; @search=&quot;handleSearch&quot; @reset=&quot;handleReset&quot; /&gt;
+const codeBasic = `&lt;script setup&gt;
+import { ref } from 'vue'
 
 const fields = [
   { prop: 'username', label: '用户名' },
   { prop: 'age', label: '年龄' },
-  { prop: 'email', label: '邮箱' }
-]`
+  { prop: 'email', label: '邮箱' },
+  { prop: 'status', label: '状态' }
+]
 
-const QueryBuilderCode1 = `codeBasic`
+const conditions = ref([])
+
+function handleSearch(vals) {
+  conditions.value = vals
+}
+
+function handleReset() {
+  conditions.value = []
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;w-query-builder :fields=&quot;fields&quot; @search=&quot;handleSearch&quot; @reset=&quot;handleReset&quot; /&gt;
+  &lt;p&gt;当前条件：{{ JSON.stringify(conditions) }}&lt;/p&gt;
+&lt;/template&gt;`
+
+const QueryBuilderCode1 = codeBasic
 </script>
 
 <style scoped>

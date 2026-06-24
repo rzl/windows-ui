@@ -26,8 +26,13 @@ const { t } = useI18n()
 const title = t('Monaco Editor 在线编辑器')
 const code = ref('function hello() {\n  console.log("Hello Monaco")\n}')
 const sql = ref('SELECT * FROM users WHERE status = 1')
-const jsCode = `<w-monaco-editor v-model="code" language="javascript" :height="200" />`
-const sqlCode = `<w-monaco-editor v-model="sql" language="sql" :height="200" />`
+const monacoCommonCode = `import { ref } from 'vue'
+
+const code = ref('function hello() {\\n  console.log("Hello Monaco")\\n}')
+const sql = ref('SELECT * FROM users WHERE status = 1')`
+
+const jsCode = `${monacoCommonCode}\n\n<w-monaco-editor v-model="code" language="javascript" :height="200" />`
+const sqlCode = `${monacoCommonCode}\n\n<w-monaco-editor v-model="sql" language="sql" :height="200" />`
 </script>
 
 <style scoped>

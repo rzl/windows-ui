@@ -35,7 +35,16 @@ const message = (msg: string) => alert(msg)
 
 const title = t('Tree Select 树形选择')
 
-const TreeSelectCode1 = `<w-tree-select v-model="form.treeselect" :data="treeData" />`
+const treeSelectCommonCode = `import { reactive } from 'vue'
+
+const form = reactive({ treeselect: '' })
+
+const treeData = [
+  { label: '节点1', value: '1', children: [{ label: '子节点1-1', value: '1-1' }] },
+  { label: '节点2', value: '2' }
+]`
+
+const TreeSelectCode1 = `${treeSelectCommonCode}\n\n<w-tree-select v-model="form.treeselect" :data="treeData" />`
 </script>
 
 <style scoped>

@@ -147,9 +147,9 @@ const menuDataCode = `[
   { label: '关于我们', icon: 'user' }
 ]`
 
-const MenuCode1 = `<w-menu :items="menuItems" />\n\nconst menuItems = ${menuDataCode}`
-const MenuCode2 = `<w-menu mode="horizontal" :items="menuItems" />\n\nconst menuItems = ${menuDataCode}`
-const MenuCode3 = `<w-menu collapse :items="menuItems" />\n\nconst menuItems = ${menuDataCode}`
+const MenuCode1 = `const menuItems = ${menuDataCode}\n\n<w-menu :items="menuItems" />`
+const MenuCode2 = `const menuItems = ${menuDataCode}\n\n<w-menu mode="horizontal" :items="menuItems" />`
+const MenuCode3 = `const menuItems = ${menuDataCode}\n\n<w-menu collapse :items="menuItems" />`
 </script>
 
 <style scoped>

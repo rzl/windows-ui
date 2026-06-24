@@ -39,10 +39,23 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 
 const title = t('Tour 漫游式引导')
 
-const TourCode1 = `<w-button @click="showTour = true">开始漫游</w-button>
-      <w-tour v-model:visible="showTour" :steps="[{ title: '欢迎', description: '欢迎使用 Windows UI' }, { title: '功能介绍', description: '这里展示各种组件' }]" />`
-const TourCode2 = `<w-button @click="showTour2 = true">自定义漫游</w-button>
-      <w-tour v-model:visible="showTour2" :steps="[{ title: '欢迎', description: '欢迎使用' }, { title: '完成', description: '设置完成' }]"><template #header="{ step, index }"><w-icon name="info" size="small" /><span style="margin-left:4px">第{{ index + 1 }}步：{{ step.title }}</span></template><template #action="{ index }"><w-icon name="help" size="small" style="cursor:pointer" @click="alert('帮助 ' + index)" /></template></w-tour>`
+const tourCommonCode = `import { ref } from 'vue'
+
+const showTour = ref(false)
+const showTour2 = ref(false)`
+
+const TourCode1 = `${tourCommonCode}\n\n<w-button @click="showTour = true">开始漫游</w-button>
+<w-tour v-model:visible="showTour" :steps="[{ title: '欢迎', description: '欢迎使用 Windows UI' }, { title: '功能介绍', description: '这里展示各种组件' }]" />`
+const TourCode2 = `${tourCommonCode}\n\n<w-button @click="showTour2 = true">自定义漫游</w-button>
+<w-tour v-model:visible="showTour2" :steps="[{ title: '欢迎', description: '欢迎使用' }, { title: '完成', description: '设置完成' }]">
+  <template #header="{ step, index }">
+    <w-icon name="info" size="small" />
+    <span style="margin-left:4px">第{{ index + 1 }}步：{{ step.title }}</span>
+  </template>
+  <template #action="{ index }">
+    <w-icon name="help" size="small" style="cursor:pointer" @click="alert('帮助 ' + index)" />
+  </template>
+</w-tour>`
 </script>
 
 <style scoped>

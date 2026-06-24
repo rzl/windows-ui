@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('基于 WTable + WPagination + WSearchForm 的 CRUD 封装')" id="crud-table" doc="crud-table">
 
-      <demo-block :title="t('基础用法')" ::code="CrudTableCode1">
+      <demo-block :title="t('基础用法')" :code="CrudTableCode1">
         <w-crud-table
           :data="tableData"
           :columns="columns"
@@ -131,31 +131,128 @@ function handleDelete(row: any) {
   alert(t('删除：') + row.username)
 }
 
-const codeBasic = `&lt;w-crud-table
-  :data=&quot;tableData&quot;
-  :columns=&quot;columns&quot;
-  :query=&quot;query&quot;
-  :total=&quot;total&quot;
-  :current-page=&quot;query.page&quot;
-  :page-size=&quot;query.pageSize&quot;
-  @search=&quot;handleSearch&quot;
-  @reset=&quot;handleReset&quot;
-  @page-change=&quot;handlePageChange&quot;
-&gt;
-  &lt;template #search&gt;
-    &lt;w-form-item label=&quot;关键词&quot;&gt;
-      &lt;w-input v-model=&quot;query.keyword&quot; /&gt;
-    &lt;/w-form-item&gt;
-  &lt;/template&gt;
-  &lt;template #toolbar&gt;
-    &lt;w-button type=&quot;primary&quot;&gt;+ 新增&lt;/w-button&gt;
-  &lt;/template&gt;
-  &lt;template #status=&quot;{ row }&quot;&gt;
-    &lt;w-tag&gt;{{ row.status }}&lt;/w-tag&gt;
-  &lt;/template&gt;
-&lt;/w-crud-table&gt;`
+const codeBasic = `&lt;script setup&gt;
+import { reactive, ref } from 'vue'
 
-const CrudTableCode1 = `codeBasic`
+const allData = Array.from({ length: 35 }, (_, i) => ({
+  id: i + 1,
+  username: '用户' + (i + 1),
+  email: 'user' + (i + 1) + '@example.com',
+  department: ['技术部', '产品部', '设计部', '运营部'][i % 4],
+  status: i % 3 === 0 ? 0 : 1
+}))
+
+const columns = [
+  { type: 'selection', width: 48 },
+  { prop: 'id', label: 'ID', width: 60 },
+  { prop: 'username', label: '用户名' },
+  { prop: 'email', label: '邮箱' },
+  { prop: 'department', label: '部门' },
+  { prop: 'status', label: '状态' },
+  { prop: 'action', label: '操作', width: 140 }
+]
+
+const statusOptions = [
+  { label: '全部', value: '' },
+  { label: '启用', value: '1' },
+  { label: '禁用', value: '0' }
+]
+
+const query = reactive({
+  keyword: '',
+  status: '',
+  page: 1,
+  pageSize: 10
+})
+
+const tableData = ref([])
+const total = ref(0)
+const selected = ref([])
+
+function filterData() {
+  return allData.filter((item) => {
+    const matchKeyword = !query.keyword ||
+      item.username.includes(query.keyword) ||
+      item.email.includes(query.keyword)
+    const matchStatus = query.status === '' || String(item.status) === query.status
+    return matchKeyword && matchStatus
+  })
+}
+
+function refresh() {
+  const filtered = filterData()
+  total.value = filtered.length
+  const start = (query.page - 1) * query.pageSize
+  tableData.value = filtered.slice(start, start + query.pageSize)
+}
+
+refresh()
+
+function handleSearch() {
+  query.page = 1
+  refresh()
+}
+
+function handleReset() {
+  query.keyword = ''
+  query.status = ''
+  query.page = 1
+  refresh()
+}
+
+function handlePageChange(page) {
+  query.page = page
+  refresh()
+}
+
+function handleEdit(row) {
+  alert('编辑：' + row.username)
+}
+
+function handleDelete(row) {
+  alert('删除：' + row.username)
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;w-crud-table
+    :data=&quot;tableData&quot;
+    :columns=&quot;columns&quot;
+    :query=&quot;query&quot;
+    :total=&quot;total&quot;
+    :current-page=&quot;query.page&quot;
+    :page-size=&quot;query.pageSize&quot;
+    @search=&quot;handleSearch&quot;
+    @reset=&quot;handleReset&quot;
+    @page-change=&quot;handlePageChange&quot;
+  &gt;
+    &lt;template #search&gt;
+      &lt;w-form-item label=&quot;关键词&quot;&gt;
+        &lt;w-input v-model=&quot;query.keyword&quot; placeholder=&quot;用户名/邮箱&quot; /&gt;
+      &lt;/w-form-item&gt;
+      &lt;w-form-item label=&quot;状态&quot;&gt;
+        &lt;w-select v-model=&quot;query.status&quot; :options=&quot;statusOptions&quot; placeholder=&quot;请选择&quot; clearable /&gt;
+      &lt;/w-form-item&gt;
+    &lt;/template&gt;
+    &lt;template #toolbar&gt;
+      &lt;w-button type=&quot;primary&quot;&gt;+ 新增&lt;/w-button&gt;
+      &lt;w-button type=&quot;danger&quot; :disabled=&quot;selected.length === 0&quot;&gt;批量删除&lt;/w-button&gt;
+    &lt;/template&gt;
+    &lt;template #status=&quot;{ row }&quot;&gt;
+      &lt;w-tag :type=&quot;row.status === 1 ? 'success' : 'danger'&quot;&gt;
+        {{ row.status === 1 ? '启用' : '禁用' }}
+      &lt;/w-tag&gt;
+    &lt;/template&gt;
+    &lt;template #action=&quot;{ row }&quot;&gt;
+      &lt;w-space&gt;
+        &lt;w-button size=&quot;small&quot; @click=&quot;handleEdit(row)&quot;&gt;编辑&lt;/w-button&gt;
+        &lt;w-button size=&quot;small&quot; type=&quot;danger&quot; @click=&quot;handleDelete(row)&quot;&gt;删除&lt;/w-button&gt;
+      &lt;/w-space&gt;
+    &lt;/template&gt;
+  &lt;/w-crud-table&gt;
+&lt;/template&gt;`
+
+const CrudTableCode1 = codeBasic
 </script>
 
 <style scoped>
