@@ -98,6 +98,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
+import * as relationApi from '@/api/relation'
 import * as printApi from '@/api/print'
 import request from '@/api/request'
 import { useAuthStore } from '@/stores/auth'
@@ -141,6 +142,7 @@ const formFields = computed(() => {
   const fieldPermissions = permission.fieldPermissions || {}
   return formConfig.fields.map((f: any) => {
     const perm = fieldPermissions[f.field]
+    const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
     return {
       prop: f.field,
       label: f.label,
@@ -149,8 +151,9 @@ const formFields = computed(() => {
       validationRule: f.validationRule,
       dependsOn: f.dependsOn,
       options: f.options,
-      refModel: f.refModel,
-      refDisplayField: f.refDisplayField,
+      refModel: f.refModel || fieldMeta?.ref_model,
+      refDisplayField: f.refDisplayField || fieldMeta?.ref_display_field,
+      refRelation: fieldMeta?.ref_relation,
       disabled: perm && !perm.editable && perm.readable,
       hidden: perm?.hidden
     }
@@ -240,7 +243,9 @@ async function loadModel() {
       type: mapType(f.type),
       required: f.required === 1,
       validationRule: f.validation_rule || '',
-      options: f.options ? JSON.parse(f.options) : undefined
+      options: f.options ? JSON.parse(f.options) : undefined,
+      refModel: f.ref_model,
+      refDisplayField: f.ref_display_field
     }))
   }
 
@@ -337,8 +342,16 @@ function mapType(type: string) {
   return getFieldTypeMeta(type)?.formType || 'input'
 }
 
+function getExpandFields() {
+  const refFields = (model.fields || []).filter((f: any) => f.type === 'ref' && f.ref_relation)
+  return refFields.map((f: any) => f.field_name).join(',')
+}
+
 async function loadData() {
-  const result = await lowcodeApi.getDynamicList(modelCode.value, query)
+  const params: any = { ...query }
+  const expand = getExpandFields()
+  if (expand) params.expand = expand
+  const result = await lowcodeApi.getDynamicList(modelCode.value, params)
   list.value = result.list
   total.value = result.total
 }
@@ -369,7 +382,16 @@ async function generateCodeForField(ruleCode: string) {
   return lowcodeApi.generateCode(ruleCode)
 }
 
-async function loadRefOptions(modelCode: string, displayField: string, keyword: string) {
+async function loadRefOptions(modelCode: string, displayField: string, keyword: string, relationCode?: string) {
+  if (relationCode) {
+    const result = await relationApi.getRelationOptions(relationCode, { page: 1, pageSize: 50, keyword })
+    const fieldMeta = model.fields?.find((f: any) => f.ref_relation === relationCode)
+    const display = fieldMeta?.ref_display_field || displayField || 'name'
+    return result.list.map((row: any) => ({
+      label: row[display] || `ID:${row.id}`,
+      value: row.id
+    }))
+  }
   const result = await lowcodeApi.getDynamicList(modelCode, { page: 1, pageSize: 50, keyword })
   return result.list.map((row: any) => ({
     label: row[displayField] || `ID:${row.id}`,

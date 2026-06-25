@@ -39,6 +39,10 @@
 | [phase-17](by-phase/phase-17.md) | 消息通知与待办中心 |
 | [phase-18](by-phase/phase-18.md) | 在线 Monaco 接口编辑器 |
 | [phase-19](by-phase/phase-19.md) | 插件化扩展体系 |
+| [phase-20](by-phase/phase-20.md) | 数据模型关联关系 |
+| [phase-21](by-phase/phase-21.md) | 数据模型版本管理 |
+| [phase-22](by-phase/phase-22.md) | 物理表字段删除 |
+| [phase-23](by-phase/phase-23.md) | 数据模型导入导出 |
 
 ## 功能模块主子线
 

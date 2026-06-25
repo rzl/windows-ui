@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { success } from '../../utils/response'
 import type { AuthRequest } from '../../middleware/auth'
 import * as lowcodeService from './lowcode.service'
+import * as importExportService from './model-import-export.service'
 
 // 模型
 export async function getModels(req: Request, res: Response) {
@@ -39,6 +40,24 @@ export async function deleteModel(req: Request, res: Response) {
   res.json(success(null, '删除成功'))
 }
 
+export async function exportModel(req: Request, res: Response) {
+  const data = await importExportService.exportModel(Number(req.params.id))
+  const fileName = `model_${data.model.code}_${Date.now()}.json`
+  res.setHeader('Content-Type', 'application/json')
+  res.setHeader('Content-Disposition', `attachment; filename=${fileName}`)
+  res.send(JSON.stringify(data, null, 2))
+}
+
+export async function importModel(req: AuthRequest, res: Response) {
+  if (!req.file) {
+    res.status(400).json(success(null, '请上传 JSON 文件'))
+    return
+  }
+  const conflict = String(req.query.conflict || 'skip')
+  const result = await importExportService.importModel(req.file.buffer, conflict as any)
+  res.json(success(result, '导入成功'))
+}
+
 // 字段
 export async function createField(req: Request, res: Response) {
   const result = await lowcodeService.createField(req.body)
@@ -53,6 +72,11 @@ export async function updateField(req: Request, res: Response) {
 export async function deleteField(req: Request, res: Response) {
   await lowcodeService.deleteField(Number(req.params.id))
   res.json(success(null, '删除成功'))
+}
+
+export async function batchDeleteFields(req: Request, res: Response) {
+  await lowcodeService.batchDeleteFields(req.body.ids || [])
+  res.json(success(null, '批量删除成功'))
 }
 
 // 表单/列表配置
@@ -73,7 +97,7 @@ export async function dynamicList(req: Request, res: Response) {
 }
 
 export async function dynamicDetail(req: Request, res: Response) {
-  const result = await lowcodeService.dynamicDetail(req.params.modelCode, Number(req.params.id), (req as AuthRequest).user)
+  const result = await lowcodeService.dynamicDetail(req.params.modelCode, Number(req.params.id), (req as AuthRequest).user, req.query)
   res.json(success(result))
 }
 

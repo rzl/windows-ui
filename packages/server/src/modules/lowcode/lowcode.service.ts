@@ -10,6 +10,8 @@ import * as auditService from '../audit/audit.service'
 import { applyDataPermissionWhere, assertRowPermission as assertDataPermissionRow } from './data-permission.service'
 import { assertFieldWritable, filterHiddenFields, getFieldPermissionMap } from './field-permission.service'
 import * as pluginService from '../plugin/plugin.service'
+import * as relationService from './relation.service'
+import { rebuildTableWithoutColumns } from '../../utils/rebuildTable'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -131,11 +133,30 @@ async function fillDictOptions(fields: any[]) {
   })
 
   return fields.map((f) => {
-    if (f.dict_code && dictMap.has(f.dict_code)) {
-      return { ...f, options: JSON.stringify(dictMap.get(f.dict_code)) }
+    const field = parseFieldJson({ ...f })
+    if (field.dict_code && dictMap.has(field.dict_code)) {
+      field.options = dictMap.get(field.dict_code)
     }
-    return f
+    return field
   })
+}
+
+function parseFieldJson(field: any) {
+  if (field.ref_filter && typeof field.ref_filter === 'string') {
+    try {
+      field.ref_filter = JSON.parse(field.ref_filter)
+    } catch {
+      field.ref_filter = null
+    }
+  }
+  if (field.options && typeof field.options === 'string') {
+    try {
+      field.options = JSON.parse(field.options)
+    } catch {
+      field.options = null
+    }
+  }
+  return field
 }
 
 export async function createModel(data: any) {
@@ -221,6 +242,8 @@ export async function createField(data: any) {
     dict_code: data.dictCode || null,
     ref_model: data.refModel || null,
     ref_display_field: data.refDisplayField || null,
+    ref_relation: data.refRelation || null,
+    ref_filter: data.refFilter ? JSON.stringify(data.refFilter) : null,
     sort: data.sort ?? 0,
     status: data.status ?? 1
   })
@@ -251,6 +274,8 @@ export async function updateField(id: number, data: any) {
     dict_code: data.dictCode || null,
     ref_model: data.refModel || null,
     ref_display_field: data.refDisplayField || null,
+    ref_relation: data.refRelation || null,
+    ref_filter: data.refFilter ? JSON.stringify(data.refFilter) : null,
     sort: data.sort,
     status: data.status
   })
@@ -268,9 +293,58 @@ export async function deleteField(id: number) {
   const model = await db('lowcode_models').where({ id: field.model_id }).first()
   if (!model) throw new AppError('模型不存在', 404)
 
-  // SQLite 不支持 drop column（需重建表），这里仅删除元数据
-  await db('lowcode_fields').where({ id }).del()
+  await assertFieldNotReferencedByRelation(model.code, field.field_name)
+
+  await db.transaction(async (trx) => {
+    await trx('lowcode_fields').where({ id }).del()
+    await rebuildTableWithoutColumns(model.table_name, [field.field_name])
+  })
+
   return true
+}
+
+export async function batchDeleteFields(ids: number[]) {
+  if (!ids?.length) throw new AppError('字段 ID 不能为空', 400)
+
+  const fields = await db('lowcode_fields').whereIn('id', ids)
+  if (!fields.length) throw new AppError('字段不存在', 404)
+
+  const modelIds = [...new Set(fields.map((f) => f.model_id))]
+  if (modelIds.length > 1) throw new AppError('批量删除的字段必须属于同一个模型', 400)
+
+  const model = await db('lowcode_models').where({ id: modelIds[0] }).first()
+  if (!model) throw new AppError('模型不存在', 404)
+
+  for (const field of fields) {
+    await assertFieldNotReferencedByRelation(model.code, field.field_name)
+  }
+
+  const columnsToRemove = fields.map((f) => f.field_name)
+
+  await db.transaction(async (trx) => {
+    await trx('lowcode_fields').whereIn('id', ids).del()
+    await rebuildTableWithoutColumns(model.table_name, columnsToRemove)
+  })
+
+  return true
+}
+
+async function assertFieldNotReferencedByRelation(modelCode: string, fieldName: string) {
+  const relation = await db('lowcode_model_relations')
+    .where((builder) => {
+      builder.where('source_model', modelCode).andWhere('source_field', fieldName)
+    })
+    .orWhere((builder) => {
+      builder.where('target_model', modelCode).andWhere('target_field', fieldName)
+    })
+    .first()
+
+  if (relation) {
+    throw new AppError(
+      `字段 "${fieldName}" 已被关联关系 "${relation.name || relation.code}" 引用，请先解除关系后再删除`,
+      400
+    )
+  }
 }
 
 // ---------- 表单/列表配置 ----------
@@ -480,18 +554,20 @@ export async function getModelPermission(modelCode: string, user?: any) {
 
 export async function dynamicList(modelCode: string, query: any, user?: any) {
   const model = await getModelByCode(modelCode)
-  const { keyword, filters, page = 1, pageSize = 10, sortBy, sortOrder } = query
+  const { keyword, filters, page = 1, pageSize = 10, sortBy, sortOrder, expand } = query
 
   const fields = model.fields.filter((f: any) => f.status === 1)
   const fieldNames = fields.map((f: any) => f.field_name)
   const refFields = fields.filter((f: any) => f.type === 'ref' && f.ref_model && f.ref_display_field)
+  const expands = await relationService.resolveExpands(modelCode, expand)
+  const expandRelSet = new Set(expands.map((e) => e.field.field_name))
 
-  // 构建主查询，包含关联字段
-  const selectColumns = [`${model.table_name}.*`, ...refFields.map((f: any) => `ref_${f.field_name}.${f.ref_display_field} as ${f.field_name}_display`)]
+  // 构建主查询，包含旧版 ref 关联字段显示值
+  const displayRefFields = refFields.filter((f: any) => !expandRelSet.has(f.field_name))
+  const selectColumns = [`${model.table_name}.*`, ...displayRefFields.map((f: any) => `ref_${f.field_name}.${f.ref_display_field} as ${f.field_name}_display`)]
   const builder = db(model.table_name).select(selectColumns)
 
-  // 关联查询
-  for (const field of refFields) {
+  for (const field of displayRefFields) {
     const refModel = await getModelByCode(field.ref_model)
     builder.leftJoin(
       `${refModel.table_name} as ref_${field.field_name}`,
@@ -589,9 +665,12 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
     builder.orderBy(`${model.table_name}.id`, 'desc')
   }
 
-  const list = await builder
+  let list = await builder
     .offset((Number(page) - 1) * Number(pageSize))
     .limit(Number(pageSize))
+
+  // 填充 expand 关联数据
+  list = await relationService.fillAllExpands(list, expands, currentUser)
 
   // 附加流程状态
   const flowDef = await flowService.getFlowDefinitionByModelCode(modelCode)
@@ -626,13 +705,18 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
   }
 }
 
-export async function dynamicDetail(modelCode: string, id: number, user?: any) {
+export async function dynamicDetail(modelCode: string, id: number, user?: any, query: any = {}) {
   const model = await getModelByCode(modelCode)
   const row = await db(model.table_name).where({ id }).first()
   if (!row) throw new AppError('记录不存在', 404)
   const currentUser = normalizeUser(user)
   await assertDataPermissionRow(modelCode, id, currentUser)
-  return filterHiddenFields(modelCode, [row], currentUser).then((rows) => rows[0])
+
+  // 填充 expand 关联数据
+  const expands = await relationService.resolveExpands(modelCode, query.expand)
+  const [filledRow] = await relationService.fillAllExpands([row], expands, currentUser)
+
+  return filterHiddenFields(modelCode, [filledRow], currentUser).then((rows) => rows[0])
 }
 
 function computeDefaultValue(field: any, data: any, user?: any) {
@@ -689,6 +773,7 @@ export async function dynamicCreate(modelCode: string, data: any, user?: any, re
   await assertFieldWritable(modelCode, data, currentUser)
   const pluginFieldMap = await getPluginFieldMap()
   const cleanData = await sanitizeData(model.fields, data, pluginFieldMap)
+  await relationService.assertRelationValuesValid(modelCode, cleanData)
   if (user) {
     cleanData.create_by = user.id
     cleanData.update_by = user.id
@@ -730,6 +815,7 @@ export async function dynamicUpdate(modelCode: string, id: number, data: any, us
   await assertFieldWritable(modelCode, data, currentUser)
   const pluginFieldMap = await getPluginFieldMap()
   const cleanData = await sanitizeData(model.fields, data, pluginFieldMap)
+  await relationService.assertRelationValuesValid(modelCode, cleanData)
   cleanData.update_time = db.fn.now()
   if (user) {
     cleanData.update_by = user.id

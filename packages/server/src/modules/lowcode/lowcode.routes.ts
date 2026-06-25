@@ -4,6 +4,8 @@ import { authMiddleware } from '../../middleware/auth'
 import * as lowcodeController from './lowcode.controller'
 import * as dataPermissionController from './data-permission.controller'
 import * as fieldPermissionController from './field-permission.controller'
+import * as relationController from './relation.controller'
+import * as modelVersionController from './model-version.controller'
 
 const router: RouterType = Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -12,6 +14,12 @@ router.use(authMiddleware)
 
 // 数据模型
 router.get('/models', lowcodeController.getModels)
+router.get('/models/:id/export', lowcodeController.exportModel)
+router.post('/models/import', upload.single('file'), lowcodeController.importModel)
+router.get('/models/:id/versions', modelVersionController.getVersions)
+router.post('/models/:id/versions', modelVersionController.createVersion)
+router.post('/models/:id/versions/:versionId/rollback', modelVersionController.rollbackVersion)
+router.delete('/models/:id/versions/:versionId', modelVersionController.deleteVersion)
 router.get('/models/:id', lowcodeController.getModel)
 router.get('/models/code/:code', lowcodeController.getModelByCode)
 router.get('/models/code/:code/permission', lowcodeController.getModelPermission)
@@ -23,6 +31,7 @@ router.delete('/models/:id', lowcodeController.deleteModel)
 router.post('/fields', lowcodeController.createField)
 router.put('/fields/:id', lowcodeController.updateField)
 router.delete('/fields/:id', lowcodeController.deleteField)
+router.post('/fields/batch-delete', lowcodeController.batchDeleteFields)
 
 // 表单/列表配置
 router.post('/forms', lowcodeController.saveForm)
@@ -59,6 +68,14 @@ router.get('/field-permissions/:id', fieldPermissionController.getRuleById)
 router.post('/field-permissions', fieldPermissionController.createRule)
 router.put('/field-permissions/:id', fieldPermissionController.updateRule)
 router.delete('/field-permissions/:id', fieldPermissionController.deleteRule)
+
+// 关联关系
+router.get('/relations', relationController.getRelations)
+router.get('/relations/:id', relationController.getRelationById)
+router.get('/relations/:code/options', relationController.getRelationOptions)
+router.post('/relations', relationController.createRelation)
+router.put('/relations/:id', relationController.updateRelation)
+router.delete('/relations/:id', relationController.deleteRelation)
 
 // 动态 CRUD（放在最后避免路径冲突）
 router.get('/:modelCode', lowcodeController.dynamicList)

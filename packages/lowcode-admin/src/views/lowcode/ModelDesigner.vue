@@ -14,10 +14,16 @@
       <w-tabs v-model="activeTab">
         <w-tab-pane label="字段管理" name="fields">
           <div class="toolbar">
-            <w-button v-if="isAdmin" type="primary" size="small" @click="openFieldDialog()">+ 新增字段</w-button>
-            <w-tag v-else type="warning">只读模式</w-tag>
+            <template v-if="isAdmin">
+              <w-button type="primary" size="small" @click="openFieldDialog()">+ 新增字段</w-button>
+              <w-button type="danger" size="small" :disabled="!selectedFields.length" @click="handleBatchDeleteFields">批量删除</w-button>
+            </template>
+            <template v-else>
+              <w-tag type="warning">只读模式</w-tag>
+            </template>
+            <w-button size="small" @click="handleExportModel">导出模型</w-button>
           </div>
-          <w-table :data="fields" :columns="fieldColumns" stripe border>
+          <w-table :data="fields" :columns="fieldColumns" stripe border @selection-change="handleSelectionChange">
             <template #type="{ row }">
               {{ typeLabel(row.type) }}
             </template>
@@ -30,7 +36,9 @@
             <template #action="{ row }">
               <w-space>
                 <w-button v-if="isAdmin" size="small" @click="openFieldDialog(row)">编辑</w-button>
-                <w-button v-if="isAdmin" size="small" type="danger" @click="handleDeleteField(row)">删除</w-button>
+                <w-tooltip v-if="isAdmin" :content="getFieldRelationTip(row) || '删除字段会同时删除物理表列及历史数据'" placement="top">
+                  <w-button size="small" type="danger" :disabled="!!getFieldRelationTip(row)" @click="handleDeleteField(row)">删除</w-button>
+                </w-tooltip>
                 <w-tag v-else type="info">无权限</w-tag>
               </w-space>
             </template>
@@ -139,11 +147,19 @@
             </template>
           </w-table>
         </w-tab-pane>
+
+        <w-tab-pane label="关联关系" name="relations">
+          <relation-panel :model-code="model.code" />
+        </w-tab-pane>
+
+        <w-tab-pane label="版本" name="versions">
+          <model-version-panel :model-id="model.id" @rollback="loadData" />
+        </w-tab-pane>
       </w-tabs>
     </w-card>
 
     <!-- 字段表单 -->
-    <w-dialog v-model="fieldDialogVisible" title="字段" width="480">
+    <w-dialog v-model="fieldDialogVisible" title="字段" width="520">
       <w-form :model="fieldForm">
         <w-form-item label="字段名">
           <w-input v-model="fieldForm.fieldName" :disabled="!!fieldForm.id" placeholder="英文字段名" />
@@ -183,6 +199,12 @@
         </w-form-item>
         <w-form-item v-if="fieldForm.type === 'ref' && fieldForm.refModel" label="显示字段">
           <w-select v-model="fieldForm.refDisplayField" :options="refFieldOptions" />
+        </w-form-item>
+        <w-form-item v-if="fieldForm.type === 'ref'" label="关联关系">
+          <w-select v-model="fieldForm.refRelation" :options="relationOptions" clearable />
+        </w-form-item>
+        <w-form-item v-if="fieldForm.type === 'ref' && fieldForm.refRelation" label="筛选条件(JSON)">
+          <w-input v-model="fieldForm.refFilterText" type="textarea" :rows="2" placeholder='{"status": 1}' />
         </w-form-item>
         <w-form-item label="排序">
           <w-input-number v-model="fieldForm.sort" />
@@ -258,8 +280,11 @@ import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
 import * as externalDatasourceApi from '@/api/external-datasource'
+import * as relationApi from '@/api/relation'
 import { useAuthStore } from '@/stores/auth'
 import { getFieldTypeOptions, getFieldTypeMeta, mapFieldTypeToFormType } from '@/utils/pluginManager'
+import RelationPanel from '@/components/model-designer/RelationPanel.vue'
+import ModelVersionPanel from './ModelVersionPanel.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -269,6 +294,7 @@ const modelId = Number(route.params.id)
 const activeTab = ref('fields')
 const model = reactive<any>({})
 const fields = ref<any[]>([])
+const selectedFields = ref<any[]>([])
 const formConfig = reactive<any>({ fields: [] })
 const tableConfig = reactive<any>({
   fields: [],
@@ -282,6 +308,7 @@ const tableConfigMap = reactive<Record<string, any>>({})
 const validationRules = ref<any[]>([])
 const dicts = ref<any[]>([])
 const codingRules = ref<any[]>([])
+const relations = ref<any[]>([])
 
 const fieldDialogVisible = ref(false)
 const fieldForm = reactive<any>({})
@@ -361,6 +388,13 @@ const refFieldOptions = computed(() => {
   return target.fields.map((f: any) => ({ label: f.display_name || f.field_name, value: f.field_name }))
 })
 
+const relationOptions = computed(() => [
+  { label: '不使用关系', value: '' },
+  ...relations.value
+    .filter((r: any) => r.source_model === model.code || r.target_model === model.code)
+    .map((r: any) => ({ label: `${r.name}（${r.relation_type}）`, value: r.code }))
+])
+
 const dependFieldOptions = computed(() => [
   { label: '无', value: '' },
   ...fields.value.map((f) => ({ label: f.display_name || f.field_name, value: f.field_name }))
@@ -387,6 +421,7 @@ const formTypeOptions = [
 ]
 
 const fieldColumns = [
+  { type: 'selection', width: 50 },
   { prop: 'field_name', label: '字段名' },
   { prop: 'display_name', label: '显示名称' },
   { prop: 'type', label: '类型' },
@@ -543,13 +578,14 @@ function typeLabel(type: string) {
 const models = ref<any[]>([])
 
 async function loadData() {
-  const [data, rules, dictList, codingRuleList, modelList, dsList] = await Promise.all([
+  const [data, rules, dictList, codingRuleList, modelList, dsList, relationList] = await Promise.all([
     lowcodeApi.getModel(modelId),
     lowcodeApi.getValidationRules(),
     dictApi.getDicts(),
     lowcodeApi.getCodingRules(),
     lowcodeApi.getModels(),
-    externalDatasourceApi.getExternalDataSources()
+    externalDatasourceApi.getExternalDataSources(),
+    relationApi.getRelations()
   ])
   Object.assign(model, data)
   model.enableAudit = data.enable_audit === 1
@@ -559,6 +595,7 @@ async function loadData() {
   codingRules.value = codingRuleList || []
   models.value = modelList || []
   externalDataSources.value = dsList || []
+  relations.value = relationList || []
 
   if (data.forms?.length) {
     const saved = typeof data.forms[0].config === 'string'
@@ -593,9 +630,11 @@ function openFieldDialog(row?: any) {
     fieldForm.required = row.required === 1
     fieldForm.status = row.status === 1
     fieldForm.dictCode = row.dict_code || ''
-    fieldForm.optionsText = row.options && !row.dict_code ? JSON.stringify(JSON.parse(row.options)) : ''
+    fieldForm.optionsText = row.options && !row.dict_code ? JSON.stringify(row.options) : ''
     fieldForm.refModel = row.ref_model || ''
     fieldForm.refDisplayField = row.ref_display_field || ''
+    fieldForm.refRelation = row.ref_relation || ''
+    fieldForm.refFilterText = row.ref_filter ? JSON.stringify(row.ref_filter) : ''
     fieldForm.defaultValueType = row.default_value_type || 'constant'
     fieldForm.defaultValueExpr = row.default_value_expr || ''
   } else {
@@ -608,6 +647,8 @@ function openFieldDialog(row?: any) {
     fieldForm.defaultValueType = 'constant'
     fieldForm.defaultValueExpr = ''
     fieldForm.sort = 0
+    fieldForm.refRelation = ''
+    fieldForm.refFilterText = ''
   }
   fieldDialogVisible.value = true
 }
@@ -680,8 +721,19 @@ async function handleSaveField() {
   data.dictCode = data.dictCode || ''
   data.refModel = data.refModel || ''
   data.refDisplayField = data.refDisplayField || ''
+  data.refRelation = data.refRelation || ''
   data.defaultValueType = data.defaultValueType || 'constant'
   data.defaultValueExpr = data.defaultValueExpr || ''
+  if (data.refFilterText) {
+    try {
+      data.refFilter = JSON.parse(data.refFilterText)
+    } catch {
+      alert('筛选条件 JSON 格式错误')
+      return
+    }
+  } else {
+    data.refFilter = undefined
+  }
   if (['select', 'radio'].includes(data.type)) {
     if (data.dictCode) {
       data.options = undefined
@@ -700,8 +752,11 @@ async function handleSaveField() {
   if (data.type !== 'ref') {
     data.refModel = ''
     data.refDisplayField = ''
+    data.refRelation = ''
+    data.refFilter = undefined
   }
   delete data.optionsText
+  delete data.refFilterText
 
   if (data.id) {
     await lowcodeApi.updateField(data.id, data)
@@ -720,12 +775,60 @@ function handleDependsOnFieldChange(fieldName: string, val: any) {
   }
 }
 
+function getFieldRelationTip(row: any) {
+  const list = relations.value.filter((r: any) =>
+    (r.source_model === model.code && r.source_field === row.field_name) ||
+    (r.target_model === model.code && r.target_field === row.field_name)
+  )
+  if (!list.length) return ''
+  return `该字段被关联关系 ${list.map((r: any) => `"${r.name || r.code}"`).join('、')} 引用，无法删除。`
+}
+
 async function handleDeleteField(row: any) {
   if (!checkDesignPermission()) return
-  if (confirm(`确定删除字段 ${row.display_name} 吗？`)) {
+  const relationTip = getFieldRelationTip(row)
+  if (relationTip) {
+    alert(relationTip)
+    return
+  }
+  const message = `确定删除字段 "${row.display_name}" 吗？\n\n警告：该操作会从物理表中删除对应列，该列的历史数据将永久丢失且不可恢复。`
+  if (confirm(message)) {
     await lowcodeApi.deleteField(row.id)
     await loadData()
   }
+}
+
+function handleSelectionChange(selection: any[]) {
+  selectedFields.value = selection
+}
+
+async function handleBatchDeleteFields() {
+  if (!checkDesignPermission()) return
+  const rows = selectedFields.value
+  if (!rows.length) return
+  const relationTips = rows.map((row) => getFieldRelationTip(row)).filter(Boolean)
+  if (relationTips.length) {
+    alert(`以下字段无法删除：\n${relationTips.join('\n')}`)
+    return
+  }
+  const names = rows.map((row) => row.display_name).join('、')
+  const message = `确定批量删除以下字段吗？\n${names}\n\n警告：该操作会从物理表中删除对应列，这些列的历史数据将永久丢失且不可恢复。`
+  if (!confirm(message)) return
+  await lowcodeApi.batchDeleteFields(rows.map((row) => row.id))
+  selectedFields.value = []
+  await loadData()
+}
+
+async function handleExportModel() {
+  const blob = await lowcodeApi.exportModel(modelId)
+  const url = window.URL.createObjectURL(new Blob([blob.data]))
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `model_${model.code}_${Date.now()}.json`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
 }
 
 function checkDesignPermission() {

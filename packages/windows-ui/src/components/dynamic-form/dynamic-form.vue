@@ -43,6 +43,7 @@ export interface DynamicField {
   defaultValueExpr?: string
   refModel?: string
   refDisplayField?: string
+  refRelation?: string
   dependsOn?: {
     field: string
     value?: any
@@ -101,7 +102,7 @@ const props = defineProps({
     default: undefined
   },
   loadRefOptions: {
-    type: Function as PropType<(modelCode: string, displayField: string, keyword: string) => Promise<{ label: string; value: any }[]>>,
+    type: Function as PropType<(modelCode: string, displayField: string, keyword: string, relationCode?: string) => Promise<{ label: string; value: any }[]>>,
     default: undefined
   },
   userInfo: {
@@ -394,7 +395,18 @@ async function loadFieldOptions(field: DynamicField) {
 }
 
 async function loadRefOptions(field: DynamicField) {
-  if (!field.refModel || !field.refDisplayField || !props.loadRefOptions) return
+  if (!props.loadRefOptions) return
+  if (field.refRelation) {
+    try {
+      const options = await props.loadRefOptions('', '', '', field.refRelation)
+      refOptionsMap[field.prop] = options || []
+    } catch (error) {
+      console.error(`加载关联关系 ${field.refRelation} 选项失败`, error)
+      refOptionsMap[field.prop] = []
+    }
+    return
+  }
+  if (!field.refModel || !field.refDisplayField) return
   try {
     const options = await props.loadRefOptions(field.refModel, field.refDisplayField, '')
     refOptionsMap[field.prop] = options || []

@@ -11,6 +11,7 @@ lowcode_models
   ├── lowcode_tables
   ├── lowcode_coding_rules
   ├── lowcode_validation_rules
+  ├── lowcode_model_relations
   └── flow_definitions
 ```
 
@@ -48,7 +49,7 @@ lowcode_models
 | model_id | 所属模型 ID |
 | field_name | 字段名（英文） |
 | display_name | 显示名称 |
-| type | 字段类型：`string/text/number/boolean/date/datetime/select/radio` |
+| type | 字段类型：`string/text/number/boolean/date/datetime/select/radio/ref` |
 | length | 长度，默认 255 |
 | required | 是否必填：1 / 0 |
 | default_value | 默认值 |
@@ -56,6 +57,8 @@ lowcode_models
 | dict_code | 关联字典编码。`select/radio` 类型可配置，运行时自动从字典表读取选项 |
 | ref_model | 关联模型编码。`ref` 类型可配置，表示关联到哪个低代码模型 |
 | ref_display_field | 关联模型显示字段。`ref` 类型可配置，用于列表中展示关联记录的值 |
+| ref_relation | 关联关系编码。引用 `lowcode_model_relations.code`，用于动态 CRUD 的 `expand` 展开与选项加载 |
+| ref_filter | 关联数据筛选条件 JSON，用于限制下拉选项范围 |
 | default_value_type | 默认值类型：`constant`、`currentUser`、`currentTime`、`currentDept`、`field`、`expr` |
 | default_value_expr | 默认值表达式，根据类型存储常量值、字段名或表达式脚本 |
 | validation_rule | 后端校验规则编码 |
@@ -71,6 +74,28 @@ lowcode_models
 **字典选项**：
 
 当字段类型为 `select` 或 `radio` 且 `dict_code` 不为空时，后端在返回模型详情时会自动从 `dicts` / `dict_items` 表读取启用的字典项，并填充到字段的 `options` 字段。前端无需额外调用字典接口。
+
+## 关联关系（lowcode_model_relations）
+
+| 字段 | 说明 |
+|------|------|
+| id | 主键 |
+| code | 关系编码，唯一标识 |
+| name | 关系名称 |
+| source_model | 源模型编码 |
+| target_model | 目标模型编码 |
+| relation_type | 关系类型：`belongsTo` / `hasMany` / `manyToMany` |
+| source_field | 源模型中的关联字段 |
+| target_field | 目标模型中的关联字段，默认 `id` |
+| junction_table | 多对多中间表名 |
+| status | 状态：1 启用，0 禁用 |
+| create_time / update_time | 创建/更新时间 |
+
+**使用方式**：
+
+- 在模型设计器中创建 `ref` 类型字段时，可选择已定义的关联关系。
+- 动态 CRUD 接口支持通过 `?expand=fieldName` 展开关联对象。
+- 表单中 `ref` 字段会根据 `ref_relation` 自动加载目标模型下拉选项。
 
 ## 表单配置（lowcode_forms）
 
@@ -271,7 +296,7 @@ lowcode_models
 |------|------|
 | id | 主键 |
 | app_id | 所属应用 ID |
-| resource_type | 资源类型：`model` / `report` / `dashboard` / `print` |
+| resource_type | 资源类型：`model` / `report` / `dashboard` / `print` / `page` |
 | resource_code | 资源编码 |
 | sort | 排序 |
 

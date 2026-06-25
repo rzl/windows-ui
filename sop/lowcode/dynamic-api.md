@@ -68,6 +68,54 @@ GET /api/lowcode/:modelCode
 GET /api/lowcode/:modelCode/:id
 ```
 
+## 关联关系展开
+
+动态 CRUD 接口支持通过 `expand` 参数展开模型字段中配置的关联关系，便于一次性返回关联对象或关联列表。
+
+### 列表查询展开
+
+```http
+GET /api/lowcode/:modelCode?expand=fieldName1,fieldName2
+```
+
+返回结果中，每个展开字段（`ref` 字段名）会替换为关联数据对象或对象数组：
+
+```json
+{
+  "id": 1,
+  "customer_id_display": "张三",
+  "customer_id": {
+    "id": 5,
+    "name": "张三",
+    "phone": "13800000000"
+  }
+}
+```
+
+- `belongsTo` 关系：返回单个对象。
+- `hasMany` 关系：返回对象数组。
+- `manyToMany` 关系：通过中间表查询，返回对象数组。
+
+未指定 `expand` 时，`ref` 字段仍保留原始外键值，同时自动返回 `${field_name}_display` 作为显示文本。
+
+### 详情查询展开
+
+```http
+GET /api/lowcode/:modelCode/:id?expand=fieldName1,fieldName2
+```
+
+展开规则与列表查询一致。
+
+### 关联选项加载
+
+表单中的 `ref` 字段可通过如下接口加载关联模型列表作为下拉选项：
+
+```http
+GET /api/lowcode/:targetModelCode
+```
+
+前端会根据字段的 `ref_filter` 自动追加 `filters` 参数；列表接口返回 `data.list` 作为选项数据，展示字段使用 `ref_display_field` 指定的字段。
+
 ### 新增
 
 ```http

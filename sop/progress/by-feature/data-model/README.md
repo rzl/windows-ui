@@ -16,10 +16,11 @@
 | 审计字段 | [phase-7](../../by-phase/phase-7-data-permission-audit.md) | create_by/dept_id/update_by/create_time/update_time 自动填充 | ✅ |
 | 数据审计日志 | [phase-10](../../by-phase/phase-10.md) | 字段级数据变更历史记录 | ✅ |
 | 插件字段类型 | [phase-19](../../by-phase/phase-19.md) | 通过插件扩展自定义字段类型 | ✅ |
+| 模型关联关系 | [phase-20](../../by-phase/phase-20.md) | belongsTo / hasMany / manyToMany 关系定义与动态 CRUD 展开 | ✅ |
+| 模型版本管理 | [phase-21](../../by-phase/phase-21.md) | 模型快照、历史版本、回滚 | ✅ |
+| 物理表字段删除 | [phase-22](../../by-phase/phase-22.md) | SQLite 通过重建表真正删除字段列 | ✅ |
+| 数据模型导入导出 | [phase-23](../../by-phase/phase-23.md) | 模型元数据 JSON 导入导出与冲突处理 | ✅ |
 
 ## 待增强
 
-- [ ] 物理表字段删除（SQLite 不支持 DROP COLUMN，需重建表）
-- [ ] 模型版本管理
-- [ ] 模型间关联关系（一对多、多对多）
-- [ ] 数据模型导入导出
+无

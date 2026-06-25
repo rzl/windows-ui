@@ -318,6 +318,17 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 10,
       status: 1,
       permission: 'lowcode:plugin'
+    },
+    {
+      parent_id: lowcodeId,
+      name: 'RelationList',
+      path: '/lowcode/relation',
+      component: 'views/lowcode/RelationList.vue',
+      title: '关联关系',
+      icon: 'relation',
+      sort: 11,
+      status: 1,
+      permission: 'lowcode:relation'
     }
   ])
 

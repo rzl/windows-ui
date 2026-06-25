@@ -2,6 +2,7 @@
   <div class="list-page">
     <div class="toolbar">
       <w-button v-if="isAdmin" type="primary" @click="openDialog()">+ 新增模型</w-button>
+      <w-button v-if="isAdmin" @click="openImportDialog">导入模型</w-button>
     </div>
 
     <w-table :data="models" :columns="columns" stripe border>
@@ -14,6 +15,7 @@
           <w-button size="small" @click="goRun(row)">运行</w-button>
           <w-button v-if="isAdmin" size="small" @click="openFlowDialog(row)">流程</w-button>
           <w-button v-if="isAdmin" size="small" @click="openDialog(row)">编辑</w-button>
+          <w-button size="small" @click="handleExport(row)">导出</w-button>
           <w-button v-if="isAdmin" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
@@ -43,6 +45,21 @@
       <template #footer>
         <w-button @click="closeDialog">取消</w-button>
         <w-button type="primary" @click="handleSave">确定</w-button>
+      </template>
+    </w-dialog>
+
+    <w-dialog v-model="importDialogVisible" title="导入模型" width="480">
+      <w-form :model="importForm">
+        <w-form-item label="冲突处理">
+          <w-select v-model="importForm.conflict" :options="conflictOptions" />
+        </w-form-item>
+        <w-form-item label="JSON 文件">
+          <input ref="fileInput" type="file" accept=".json,application/json" @change="handleFileChange">
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="closeImportDialog">取消</w-button>
+        <w-button type="primary" :disabled="!importForm.file" @click="handleImport">确定</w-button>
       </template>
     </w-dialog>
 
@@ -83,6 +100,9 @@ const isAdmin = computed(() => authStore.userInfo?.roleId === 1 || authStore.per
 const models = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
+const importDialogVisible = ref(false)
+const importForm = reactive<any>({ conflict: 'skip', file: null })
+const fileInput = ref<HTMLInputElement | null>(null)
 const flowDialogVisible = ref(false)
 const flowForm = reactive<any>({})
 
@@ -101,6 +121,12 @@ const dataPermissionOptions = [
   { label: '仅本人', value: 'self' },
   { label: '本部门', value: 'dept' },
   { label: '本部门及子部门', value: 'dept_and_child' }
+]
+
+const conflictOptions = [
+  { label: '跳过已存在模型', value: 'skip' },
+  { label: '覆盖已存在模型', value: 'overwrite' },
+  { label: '存在时报错', value: 'error' }
 ]
 
 onMounted(() => loadData())
@@ -143,6 +169,41 @@ async function handleDelete(row: any) {
     await lowcodeApi.deleteModel(row.id)
     await loadData()
   }
+}
+
+async function handleExport(row: any) {
+  const blob = await lowcodeApi.exportModel(row.id)
+  const url = window.URL.createObjectURL(new Blob([blob.data]))
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', `model_${row.code}_${Date.now()}.json`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}
+
+function openImportDialog() {
+  importForm.conflict = 'skip'
+  importForm.file = null
+  if (fileInput.value) fileInput.value.value = ''
+  importDialogVisible.value = true
+}
+
+function closeImportDialog() {
+  importDialogVisible.value = false
+}
+
+function handleFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  importForm.file = target.files?.[0] || null
+}
+
+async function handleImport() {
+  if (!importForm.file) return
+  await lowcodeApi.importModel(importForm.file, importForm.conflict)
+  closeImportDialog()
+  await loadData()
 }
 
 function goDesign(row: any) {

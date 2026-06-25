@@ -110,6 +110,12 @@ const routes = [
         meta: { title: '校验规则', permission: 'lowcode:validate' }
       },
       {
+        path: 'lowcode/relation',
+        name: 'RelationList',
+        component: () => import('@/views/lowcode/RelationList.vue'),
+        meta: { title: '关联关系', permission: 'lowcode:relation' }
+      },
+      {
         path: 'flow/list',
         name: 'FlowList',
         component: () => import('@/views/flow/FlowList.vue'),

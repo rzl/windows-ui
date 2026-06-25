@@ -20,7 +20,15 @@ export interface FieldForm {
   length?: number
   required?: boolean
   defaultValue?: string
+  defaultValueType?: string
+  defaultValueExpr?: string
   options?: any[]
+  validationRule?: string
+  dictCode?: string
+  refModel?: string
+  refDisplayField?: string
+  refRelation?: string
+  refFilter?: any
   sort?: number
   status?: number
 }
@@ -87,6 +95,18 @@ export function deleteModel(id: number) {
   return request.delete(`/lowcode/models/${id}`)
 }
 
+export function exportModel(id: number) {
+  return request.get(`/lowcode/models/${id}/export`, { responseType: 'blob' })
+}
+
+export function importModel(file: File, conflict: 'skip' | 'overwrite' | 'error' = 'skip') {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post(`/lowcode/models/import?conflict=${conflict}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
 // 字段
 export function createField(data: FieldForm) {
   return request.post('/lowcode/fields', data)
@@ -98,6 +118,10 @@ export function updateField(id: number, data: FieldForm) {
 
 export function deleteField(id: number) {
   return request.delete(`/lowcode/fields/${id}`)
+}
+
+export function batchDeleteFields(ids: number[]) {
+  return request.post('/lowcode/fields/batch-delete', { ids })
 }
 
 // 表单/列表配置
@@ -114,8 +138,8 @@ export function getDynamicList(modelCode: string, params: any) {
   return request.get(`/lowcode/${modelCode}`, { params })
 }
 
-export function getDynamicDetail(modelCode: string, id: number) {
-  return request.get(`/lowcode/${modelCode}/${id}`)
+export function getDynamicDetail(modelCode: string, id: number, params?: any) {
+  return request.get(`/lowcode/${modelCode}/${id}`, { params })
 }
 
 export function createDynamic(modelCode: string, data: any) {

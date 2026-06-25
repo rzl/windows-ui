@@ -29,6 +29,7 @@ sop/manuals/
 │   └── message-center.md        # 通知中心与待办中心
 ├── lowcode/                     # 低代码开发
 │   ├── model.md                 # 数据模型
+│   ├── model-relation.md        # 数据模型关联关系
 │   ├── form-designer.md         # 表单设计器
 │   ├── table-designer.md        # 列表设计器
 │   ├── run-page.md              # 运行业务页面
