@@ -22,6 +22,8 @@
 - [x] 示例代码与 Playground 演示
 - [x] 文档同步更新
 - [x] 列宽拖拽调整（鼠标 + 触摸，所有列默认可拖拽）
+- [x] 列宽记忆（storageKey + localStorage 持久化）
+- [x] 列排序拖拽（columnDraggable + 表头拖拽调整顺序）
 - [x] 自适应列宽（最后一个未设 width 的普通列自动填充剩余空间）
 - [x] 树形表格（children 嵌套数据扁平化渲染 + 展开/收起）
 - [x] 树形懒加载（lazy + load 方法异步获取子节点）
@@ -50,3 +52,4 @@
 - 2026-06-06: Phase 3-4 增强（虚拟滚动、与固定列/表头兼容）
 - 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
 - 2026-06-24: 新增移动端响应式适配（≤768px 横向滚动，单元格内容不换行，避免列宽被压缩）
+- 2026-06-25: 新增列宽记忆（storageKey）与列排序拖拽（columnDraggable），支持 localStorage 持久化及 resetColumnWidths 重置

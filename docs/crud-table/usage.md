@@ -32,6 +32,35 @@ WCrudTable 是基于 WTable、WPagination、WSearchForm 封装的 CRUD 列表组
 </template>
 ```
 
+## 列宽记忆与拖拽排序
+
+通过 `storage-key` 开启列宽与列顺序的本地持久化，通过 `column-draggable` 开启表头拖拽排序。
+
+```vue
+<template>
+  <w-crud-table
+    ref="crudRef"
+    :data="list"
+    :columns="columns"
+    :query="query"
+    :total="total"
+    :current-page="query.page"
+    :page-size="query.pageSize"
+    storage-key="order-list"
+    column-draggable
+    @search="handleSearch"
+    @page-change="handlePageChange"
+  />
+  <w-button @click="crudRef?.resetColumnWidths()">重置列宽与顺序</w-button>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const crudRef = ref(null)
+</script>
+```
+
 ## Props
 
 | 属性 | 类型 | 默认值 | 说明 |
@@ -83,6 +112,8 @@ WCrudTable 是基于 WTable、WPagination、WSearchForm 封装的 CRUD 列表组
 | border | 是否纵向边框 | boolean | true |
 | highlightCurrentRow | 是否高亮当前行 | boolean | true |
 | size | 尺寸 | string | default（继承全局 size） |
+| storageKey | 列宽/列顺序持久化存储键（透传 WTable） | string | '' |
+| columnDraggable | 是否启用列拖拽排序（透传 WTable） | boolean | false |
 
 ### Events
 
@@ -95,8 +126,15 @@ WCrudTable 是基于 WTable、WPagination、WSearchForm 封装的 CRUD 列表组
 | selection-change | 选中项改变时触发 | selection |
 | row-click | 行点击时触发 | (row, column, event) |
 | sort-change | 排序改变时触发 | (column, prop, order) |
+| column-order-change | 列顺序改变时触发（透传 WTable） | string[] |
 | update:current-page | - | - |
 | update:page-size | - | - |
+
+### Methods
+
+| 方法名 | 说明 | 参数 |
+|--------|------|------|
+| resetColumnWidths | 清除当前 storageKey 下的列宽与顺序缓存，恢复默认（透传 WTable） | - |
 
 ### Slots
 

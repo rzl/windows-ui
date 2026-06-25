@@ -484,6 +484,46 @@ const tableData = Array.from({ length: 1000 }, (_, i) => {
 
 > 横向虚拟滚动通过左右 padding 占位列保持表格总宽度不变，固定列会始终渲染在可视区域两侧。
 
+### 列宽记忆与列排序拖拽
+
+通过 `storage-key` 开启列宽记忆与列顺序记忆，通过 `column-draggable` 开启表头拖拽排序。固定列、选择列、展开列不参与拖拽排序。
+
+```vue
+<template>
+  <w-table
+    ref="tableRef"
+    :data="tableData"
+    :columns="tableColumns"
+    storage-key="user-list"
+    column-draggable
+    border
+  />
+  <w-button @click="tableRef?.resetColumnWidths()">重置列宽与顺序</w-button>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { WTable, WButton } from '@windows-ui/core'
+
+const tableRef = ref(null)
+
+const tableColumns = [
+  { prop: 'name', label: '姓名', width: 120 },
+  { prop: 'age', label: '年龄', width: 80, align: 'center' },
+  { prop: 'department', label: '部门' },
+  { prop: 'address', label: '地址' }
+]
+
+const tableData = [
+  { name: '张三', age: 28, department: '技术部', address: '北京市' },
+  { name: '李四', age: 32, department: '产品部', address: '上海市' },
+  { name: '王五', age: 24, department: '设计部', address: '广州市' }
+]
+</script>
+```
+
+> 列宽和列顺序会持久化到 `localStorage`，键名为 `w-table-<storage-key>`。调用 `resetColumnWidths()` 可清除本地存储并恢复默认。
+
 ### 固定表头
 
 通过 `max-height` 属性限制表格最大高度，当内容超出时表头会自动固定，表格体滚动。
@@ -785,6 +825,8 @@ const tableData = [
 | rowHeight | - | number | 40 |
 | height | 高度 | - |  |
 | virtualX | - | boolean | - |
+| storageKey | 列宽/列顺序持久化存储键 | string | '' |
+| columnDraggable | 是否启用列拖拽排序 | boolean | false |
 
 ### Events
 
@@ -800,6 +842,13 @@ const tableData = [
 | filter-change | 筛选改变时触发 | filters |
 | current-change | 当前页改变时触发 | currentPage |
 | expand-change | 展开行改变时触发 | (row, expandedRows) |
+| column-order-change | 列顺序改变时触发 | string[] |
+
+### Methods
+
+| 方法名 | 说明 | 参数 |
+|--------|------|------|
+| resetColumnWidths | 清除当前 storageKey 下的列宽与顺序缓存，恢复默认 | - |
 
 ### Slots
 
