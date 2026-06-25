@@ -34,7 +34,7 @@ const fields = [
 | radio | 单选框 |
 | checkbox | 多选框 |
 | switch | 开关 |
-| ref | 关联模型选择（需配置 refModel / refDisplayField / loadRefOptions） |
+| ref | 关联模型选择（需配置 refModel / refDisplayField / refRelation 之一，并传入 loadRefOptions） |
 | date | 日期选择 |
 | datetime | 日期时间选择 |
 | upload | 文件上传（保存 URL，需配置 uploadRequest） |
@@ -54,6 +54,8 @@ const fields = [
 | dynamicOptions | object | 动态选项配置（见下文） |
 | refModel | string | 关联模型编码，`ref` 类型使用 |
 | refDisplayField | string | 关联模型显示字段，`ref` 类型使用 |
+| refRelation | string | 关联关系编码，`ref` 类型使用；配置后通过 loadRefOptions 加载关系选项 |
+| refFilter | object | 关联数据筛选条件，`ref` 类型使用 |
 | defaultValueType | string | 默认值类型：`constant`、`currentUser`、`currentTime`、`currentDept`、`field`、`expr` |
 | defaultValueExpr | string | 默认值表达式 |
 | required | boolean | 是否必填 |
@@ -75,7 +77,7 @@ const fields = [
 | mobileColumns | number | 1 | 移动端列数，视口宽度 ≤768px 时 grid 布局自动降为该列数 |
 | validateRules | (items) => Promise | - | 后端校验函数，用于校验绑定了 `validationRule` 的字段 |
 | loadOptions | (config, model) => Promise | - | 动态选项加载函数，用于加载 `dynamicOptions` 配置的选项 |
-| loadRefOptions | (modelCode, displayField, keyword) => Promise | - | 关联模型选项加载函数，用于 `ref` 字段查询关联记录 |
+| loadRefOptions | (modelCode, displayField, keyword, relationCode?) => Promise | - | 关联模型选项加载函数，用于 `ref` 字段查询关联记录；当字段配置了 `refRelation` 时，relationCode 有值，modelCode 与 displayField 为空字符串 |
 | uploadRequest | (file) => Promise | - | 文件上传函数，用于 `upload` 字段真实上传文件并返回 URL |
 | generateCode | (ruleCode) => Promise<string> | - | 编码规则生成函数，用于 `codingRule` 字段自动生成编码 |
 | userInfo | object | - | 当前用户信息，用于 `currentUser` / `currentDept` 默认值 |
@@ -277,6 +279,37 @@ const fields = [
 
 <script setup>
 async function loadRefOptions(modelCode, displayField, keyword) {
+  const result = await request.get(`/lowcode/${modelCode}`, { params: { page: 1, pageSize: 50, keyword } })
+  return result.data.list.map(row => ({
+    label: row[displayField] || `ID:${row.id}`,
+    value: row.id
+  }))
+}
+</script>
+```
+
+### 通过关联关系加载选项
+
+当字段配置了 `refRelation` 时，`loadRefOptions` 会收到 `relationCode`，可直接调用关联关系选项接口：
+
+```ts
+const fields = [
+  { prop: 'customerId', label: '客户', type: 'ref', refRelation: 'order_customer' }
+]
+```
+
+```vue
+<w-dynamic-form v-model="form" :fields="fields" :load-ref-options="loadRefOptions" />
+
+<script setup>
+async function loadRefOptions(modelCode, displayField, keyword, relationCode) {
+  if (relationCode) {
+    const result = await request.get(`/lowcode/relations/${relationCode}/options`, { params: { keyword } })
+    return result.data.list.map(row => ({
+      label: row.label || row.name || `ID:${row.id}`,
+      value: row.id
+    }))
+  }
   const result = await request.get(`/lowcode/${modelCode}`, { params: { page: 1, pageSize: 50, keyword } })
   return result.data.list.map(row => ({
     label: row[displayField] || `ID:${row.id}`,

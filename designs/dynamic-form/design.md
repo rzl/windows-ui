@@ -15,6 +15,7 @@ Form / 低代码表单组件
 - 根据字段类型自动渲染对应组件
 - 支持字段级 disabled/hidden 动态规则
 - 支持 required 与自定义 rules 校验
+- `ref` 类型字段以下拉选择形式展示关联模型/关联关系数据，支持通过 `refModel` / `refDisplayField` 或 `refRelation` 配置数据来源
 - custom 类型通过插槽由调用方实现
 
 ### 移动端适配

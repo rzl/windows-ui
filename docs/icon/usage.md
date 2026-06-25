@@ -62,7 +62,7 @@ const customSvg = ref('<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="
 
 ## 图标颜色
 
-通过 `color` 属性统一覆盖图标的填充色与描边色：
+通过 `color` 属性统一覆盖图标的填充色与描边色。未指定 `color` 时，图标继承父元素文本颜色，可随主题或 CSS 变量自动变化：
 
 ```vue
 <w-space>
