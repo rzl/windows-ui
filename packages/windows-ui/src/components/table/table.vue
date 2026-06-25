@@ -101,8 +101,13 @@
             <th
               v-for="(col, ci) in renderColumns"
               :key="col.__key"
-              :class="[headerCellClass(col), stickyClass(col)]"
+              :class="[headerCellClass(col), stickyClass(col), { 'is-drag-over': dragOverColKey === (col.prop || String(col.type)) }]"
               :style="[leafHeaderCellStyle(col, ci), stickyStyle(col)]"
+              :draggable="isDraggableColumn(col)"
+              @dragstart.stop="handleColumnDragStart($event, col)"
+              @dragover.stop="handleColumnDragOver($event, col)"
+              @drop.stop="handleColumnDrop($event, col)"
+              @dragend.stop="handleColumnDragEnd"
             >
               <template v-if="!col.__isPadding">
                 <div class="w-table__cell-content">
@@ -340,7 +345,9 @@ const props = defineProps({
   virtualized: Boolean,
   rowHeight: { type: Number, default: 40 },
   height: { type: [String, Number] as PropType<string | number>, default: '' },
-  virtualX: Boolean
+  virtualX: Boolean,
+  storageKey: { type: String, default: '' },
+  columnDraggable: Boolean
 })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
@@ -355,7 +362,8 @@ const emit = defineEmits([
   'sort-change',
   'filter-change',
   'current-change',
-  'expand-change'
+  'expand-change',
+  'column-order-change'
 ])
 
 // ----- 多级表头辅助函数 -----
@@ -620,8 +628,58 @@ watch(() => props.data, rebuildFlatRows, { deep: true, immediate: true })
 watch(expandedTreeKeys, rebuildFlatRows, { deep: true })
 watch(() => props.defaultExpandAll, rebuildFlatRows)
 
+// ----- 列顺序与列宽持久化 -----
+const savedColumnOrder = ref<string[]>([])
+const columnWidths = ref<Record<string, number>>({})
+
+const orderedColumns = computed((): ColumnItem[] => {
+  if (!props.storageKey || !savedColumnOrder.value.length) return props.columns
+  const orderMap = new Map(savedColumnOrder.value.map((k, i) => [k, i]))
+  const movable = props.columns.filter(c => !c.fixed && c.type !== 'selection' && c.type !== 'expand')
+  const sortedMovable = [...movable].sort((a, b) => {
+    const ak = a.prop || String(a.type)
+    const bk = b.prop || String(b.type)
+    const ai = orderMap.has(ak) ? orderMap.get(ak)! : Number.MAX_SAFE_INTEGER
+    const bi = orderMap.has(bk) ? orderMap.get(bk)! : Number.MAX_SAFE_INTEGER
+    return ai - bi
+  })
+  const result: ColumnItem[] = []
+  let mi = 0
+  props.columns.forEach(col => {
+    if (col.fixed || col.type === 'selection' || col.type === 'expand') {
+      result.push(col)
+    } else {
+      result.push(sortedMovable[mi++])
+    }
+  })
+  return result
+})
+
+function loadColumnState() {
+  if (!props.storageKey) return
+  try {
+    const raw = localStorage.getItem(`w-table-${props.storageKey}`)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed.order)) savedColumnOrder.value = parsed.order
+      if (parsed.widths) Object.assign(columnWidths.value, parsed.widths)
+    }
+  } catch {
+    // ignore
+  }
+}
+
+function saveColumnState() {
+  if (!props.storageKey) return
+  const data = {
+    order: savedColumnOrder.value,
+    widths: columnWidths.value
+  }
+  localStorage.setItem(`w-table-${props.storageKey}`, JSON.stringify(data))
+}
+
 // ----- 多级表头 computed -----
-const headerNodes = computed(() => analyzeColumns(props.columns))
+const headerNodes = computed(() => analyzeColumns(orderedColumns.value))
 const leafColumns = computed(() => {
   const leaves: HeaderNode[] = []
   const collect = (nodes: HeaderNode[]) => {
@@ -635,8 +693,7 @@ const leafColumns = computed(() => {
 })
 const headerRowCount = computed(() => getMaxDepth(headerNodes.value))
 
-// ----- 列宽拖拽 -----
-const columnWidths = ref<Record<string, number>>({})
+// ----- 列宽辅助 -----
 const normalizedColumns = computed(() => leafColumns.value)
 
 const hasExpandColumn = computed(() => normalizedColumns.value.some(c => c.type === 'expand'))
@@ -674,6 +731,7 @@ const initColumnWidths = () => {
   }
   walk(props.columns)
   columnWidths.value = widths
+  loadColumnState()
 }
 watch(() => props.columns, initColumnWidths, { deep: true, immediate: true })
 
@@ -720,6 +778,66 @@ const stopResize = () => {
   document.removeEventListener('mouseup', stopResize)
   document.removeEventListener('touchmove', handleResize)
   document.removeEventListener('touchend', stopResize)
+  saveColumnState()
+}
+
+// ----- 列排序拖拽 -----
+const dragColKey = ref<string | null>(null)
+const dragOverColKey = ref<string | null>(null)
+
+function isDraggableColumn(col: any) {
+  return props.columnDraggable && col && !col.__isPadding && !col.fixed && col.type !== 'selection' && col.type !== 'expand'
+}
+
+function handleColumnDragStart(e: DragEvent, col: any) {
+  if (!isDraggableColumn(col)) {
+    e.preventDefault()
+    return
+  }
+  dragColKey.value = col.prop || String(col.type)
+  if (e.dataTransfer && dragColKey.value) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', dragColKey.value)
+  }
+}
+
+function handleColumnDragOver(e: DragEvent, col: any) {
+  if (!props.columnDraggable || !dragColKey.value) return
+  if (!isDraggableColumn(col)) return
+  const key = col.prop || String(col.type)
+  if (key === dragColKey.value) return
+  e.preventDefault()
+  dragOverColKey.value = key
+}
+
+function handleColumnDrop(e: DragEvent, targetCol: any) {
+  if (!props.columnDraggable || !dragColKey.value) return
+  if (!isDraggableColumn(targetCol)) return
+  const targetKey = targetCol.prop || String(targetCol.type)
+  if (targetKey === dragColKey.value) return
+  e.preventDefault()
+
+  const currentOrder = orderedColumns.value
+    .filter(c => !c.fixed && c.type !== 'selection' && c.type !== 'expand')
+    .map(c => c.prop || String(c.type))
+  const fromIndex = currentOrder.indexOf(dragColKey.value)
+  const toIndex = currentOrder.indexOf(targetKey)
+  if (fromIndex === -1 || toIndex === -1) return
+
+  const newOrder = [...currentOrder]
+  newOrder.splice(fromIndex, 1)
+  newOrder.splice(toIndex, 0, dragColKey.value)
+
+  savedColumnOrder.value = newOrder
+  dragColKey.value = null
+  dragOverColKey.value = null
+  saveColumnState()
+  emit('column-order-change', newOrder)
+}
+
+function handleColumnDragEnd() {
+  dragColKey.value = null
+  dragOverColKey.value = null
 }
 
 // ----- 固定列偏移计算 -----
@@ -1233,6 +1351,16 @@ const computedFlatRows = computed(() => {
   return result
 })
 
+const resetColumnWidths = () => {
+  if (props.storageKey) {
+    localStorage.removeItem(`w-table-${props.storageKey}`)
+  }
+  savedColumnOrder.value = []
+  initColumnWidths()
+}
+
+defineExpose({ resetColumnWidths })
+
 </script>
 
 <style scoped>
@@ -1348,6 +1476,7 @@ const computedFlatRows = computed(() => {
 .w-table th { position: relative; }
 .w-table__resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 10; }
 .w-table__resize-handle:hover { background: var(--w-color-primary); opacity: 0.4; }
+.w-table th.is-drag-over { background: var(--w-color-primary); color: #fff; }
 
 /* table layout */
 .w-table table { width: 100%; }

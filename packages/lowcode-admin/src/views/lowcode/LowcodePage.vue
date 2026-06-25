@@ -16,6 +16,8 @@
       :current-page="query.page"
       :page-size="query.pageSize"
       :searchable="false"
+      :storage-key="`lowcode-table-${modelCode}`"
+      column-draggable
       @page-change="handlePageChange"
       @sort-change="handleSortChange"
       @selection-change="handleSelectionChange"

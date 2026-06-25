@@ -21,9 +21,12 @@
       :border="border"
       :size="size"
       :highlight-current-row="highlightCurrentRow"
+      :storage-key="storageKey"
+      :column-draggable="columnDraggable"
       @selection-change="handleSelectionChange"
       @row-click="(...args: any[]) => $emit('row-click', ...args)"
       @sort-change="(...args: any[]) => $emit('sort-change', ...args)"
+      @column-order-change="(...args: any[]) => $emit('column-order-change', ...args)"
     >
       <template v-for="slot in tableSlots" :key="slot" #[slot]="scope">
         <slot :name="slot" v-bind="scope" />
@@ -64,7 +67,9 @@ const props = defineProps({
   stripe: { type: Boolean, default: true },
   border: { type: Boolean, default: true },
   highlightCurrentRow: { type: Boolean, default: true },
-  size: { type: String as () => 'large' | 'default' | 'small', default: undefined }
+  size: { type: String as () => 'large' | 'default' | 'small', default: undefined },
+  storageKey: { type: String, default: '' },
+  columnDraggable: Boolean
 })
 
 const emit = defineEmits([
@@ -75,6 +80,7 @@ const emit = defineEmits([
   'selection-change',
   'row-click',
   'sort-change',
+  'column-order-change',
   'update:current-page',
   'update:page-size'
 ])
