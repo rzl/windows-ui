@@ -17,10 +17,15 @@
         <w-space>
           <w-button size="small" @click="router.push(`/lowcode/custom-api/edit/${row.id}`)">编辑</w-button>
           <w-button size="small" @click="handleTest(row)">测试</w-button>
+          <w-button size="small" @click="openVersionDrawer(row)">版本</w-button>
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
     </w-table>
+
+    <w-drawer v-model="versionVisible" title="接口版本管理" size="680">
+      <custom-api-version-panel :api-id="versionApiId" @rollback="loadData" />
+    </w-drawer>
 
     <w-dialog v-model="testVisible" title="测试结果" width="620">
       <w-alert v-if="testResult?.code === 200 || testResult?.success" type="success" title="执行成功" />
@@ -37,11 +42,14 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as customApiApi from '@/api/customApi'
+import CustomApiVersionPanel from './CustomApiVersionPanel.vue'
 
 const router = useRouter()
 const apis = ref<any[]>([])
 const testVisible = ref(false)
 const testResult = ref<any>(null)
+const versionVisible = ref(false)
+const versionApiId = ref<number>(0)
 
 const columns = [
   { prop: 'code', label: '编码' },
@@ -89,6 +97,11 @@ async function handleDelete(row: any) {
     await customApiApi.deleteCustomApi(row.id)
     await loadData()
   }
+}
+
+function openVersionDrawer(row: any) {
+  versionApiId.value = row.id
+  versionVisible.value = true
 }
 </script>
 

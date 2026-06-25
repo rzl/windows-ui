@@ -30,6 +30,12 @@
       </w-form>
     </div>
 
+    <custom-api-version-panel
+      v-if="isEdit"
+      :api-id="Number(route.params.id)"
+      @rollback="reloadApi"
+    />
+
     <div class="editor-main">
       <div class="editor-section">
         <div class="section-title">接口脚本（支持 JavaScript）</div>
@@ -68,6 +74,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as customApiApi from '@/api/customApi'
+import CustomApiVersionPanel from './CustomApiVersionPanel.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -118,17 +125,21 @@ const methodOptions = [
 
 onMounted(async () => {
   if (isEdit.value) {
-    const data = await customApiApi.getCustomApi(Number(route.params.id))
-    form.code = data.code
-    form.name = data.name
-    form.method = data.method || 'ALL'
-    form.path = data.path || ''
-    form.description = data.description || ''
-    form.script = data.script || ''
-    form.isPublic = data.is_public === 1
-    form.status = data.status === 1
+    await reloadApi()
   }
 })
+
+async function reloadApi() {
+  const data = await customApiApi.getCustomApi(Number(route.params.id))
+  form.code = data.code
+  form.name = data.name
+  form.method = data.method || 'ALL'
+  form.path = data.path || ''
+  form.description = data.description || ''
+  form.script = data.script || ''
+  form.isPublic = data.is_public === 1
+  form.status = data.status === 1
+}
 
 async function handleSave() {
   try {
