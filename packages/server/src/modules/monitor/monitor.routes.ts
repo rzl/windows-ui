@@ -27,10 +27,32 @@ router.get('/operation-logs', monitorController.getOperationLogs)
 // 数据日志
 router.get('/data-logs', monitorController.getDataLogs)
 
+// API 性能指标
+router.get('/api-metrics', monitorController.getApiMetrics)
+router.get('/api-performance-stats', monitorController.getApiPerformanceStats)
+router.get('/api-trend', monitorController.getApiTrend)
+
+// 慢 SQL
+router.get('/slow-sqls', monitorController.getSlowSqls)
+router.get('/sql-performance-stats', monitorController.getSqlPerformanceStats)
+
 // 服务器信息
 router.get('/server-info', monitorController.getServerInfo)
 
 // 在线用户
 router.get('/online-users', monitorController.getOnlineUsers)
+
+// 告警规则
+router.get('/alert-rules', monitorController.getAlertRules)
+router.post('/alert-rules', monitorController.createAlertRule)
+router.put('/alert-rules/:id', monitorController.updateAlertRule)
+router.delete('/alert-rules/:id', monitorController.deleteAlertRule)
+
+// 告警记录
+router.get('/alert-records', monitorController.getAlertRecords)
+router.get('/alert-records/unread-count', monitorController.getUnreadAlertCount)
+router.put('/alert-records/:id/read', monitorController.markAlertRecordRead)
+router.put('/alert-records/:id/resolve', monitorController.resolveAlertRecord)
+router.post('/check-alerts', monitorController.checkAlerts)
 
 export default router

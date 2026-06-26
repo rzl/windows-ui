@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { success } from '../../utils/response'
 import type { AuthRequest } from '../../middleware/auth'
 import * as monitorService from './monitor.service'
+import * as alertService from './alert.service'
 
 // 消息模板
 export async function getMessageTemplates(_req: Request, res: Response) {
@@ -76,6 +77,33 @@ export async function getDataLogs(req: Request, res: Response) {
   res.json(success(result))
 }
 
+// API 性能指标
+export async function getApiMetrics(req: Request, res: Response) {
+  const result = await monitorService.getApiMetrics(req.query)
+  res.json(success(result))
+}
+
+export async function getApiPerformanceStats(req: Request, res: Response) {
+  const result = await monitorService.getApiPerformanceStats(req.query)
+  res.json(success(result))
+}
+
+export async function getApiTrend(req: Request, res: Response) {
+  const result = await monitorService.getApiTrend(req.query)
+  res.json(success(result))
+}
+
+// 慢 SQL
+export async function getSlowSqls(req: Request, res: Response) {
+  const result = await monitorService.getSlowSqls(req.query)
+  res.json(success(result))
+}
+
+export async function getSqlPerformanceStats(req: Request, res: Response) {
+  const result = await monitorService.getSqlPerformanceStats(req.query)
+  res.json(success(result))
+}
+
 // 服务器信息
 export function getServerInfo(_req: Request, res: Response) {
   res.json(success(monitorService.getServerInfo()))
@@ -84,5 +112,54 @@ export function getServerInfo(_req: Request, res: Response) {
 // 在线用户
 export async function getOnlineUsers(_req: Request, res: Response) {
   const result = await monitorService.getOnlineUsers()
+  res.json(success(result))
+}
+
+// ---------- 告警规则 ----------
+
+export async function getAlertRules(req: Request, res: Response) {
+  const result = await alertService.getAlertRules(req.query)
+  res.json(success(result))
+}
+
+export async function createAlertRule(req: Request, res: Response) {
+  const result = await alertService.createAlertRule(req.body)
+  res.json(success(result, '创建成功'))
+}
+
+export async function updateAlertRule(req: Request, res: Response) {
+  const result = await alertService.updateAlertRule(Number(req.params.id), req.body)
+  res.json(success(result, '更新成功'))
+}
+
+export async function deleteAlertRule(req: Request, res: Response) {
+  await alertService.deleteAlertRule(Number(req.params.id))
+  res.json(success(null, '删除成功'))
+}
+
+// ---------- 告警记录 ----------
+
+export async function getAlertRecords(req: Request, res: Response) {
+  const result = await alertService.getAlertRecords(req.query)
+  res.json(success(result))
+}
+
+export async function markAlertRecordRead(req: Request, res: Response) {
+  const result = await alertService.markAlertRecordRead(Number(req.params.id))
+  res.json(success(result))
+}
+
+export async function resolveAlertRecord(req: Request, res: Response) {
+  const result = await alertService.resolveAlertRecord(Number(req.params.id))
+  res.json(success(result))
+}
+
+export async function getUnreadAlertCount(_req: Request, res: Response) {
+  const result = await alertService.getUnreadAlertCount()
+  res.json(success(result))
+}
+
+export async function checkAlerts(_req: Request, res: Response) {
+  const result = await alertService.checkAlerts()
   res.json(success(result))
 }

@@ -13,7 +13,7 @@ export function requestLogMiddleware(req: AuthRequest, res: Response, next: Next
     // 忽略健康检查与静态资源
     if (req.path === '/health' || req.path.startsWith('/public/')) return
 
-    monitorService.createOperationLog({
+    const logData = {
       userId: req.user?.id,
       username: req.user?.username,
       module: req.path.split('/')[2] || 'unknown',
@@ -24,8 +24,23 @@ export function requestLogMiddleware(req: AuthRequest, res: Response, next: Next
       ip: req.ip || 'unknown',
       duration,
       status: res.statusCode < 400 ? 1 : 0
-    }).catch(() => {
+    }
+
+    monitorService.createOperationLog(logData).catch(() => {
       // ignore log error
+    })
+
+    monitorService.createApiMetric({
+      method: logData.method,
+      path: logData.path,
+      statusCode: res.statusCode,
+      duration: logData.duration,
+      userId: logData.userId,
+      username: logData.username,
+      ip: logData.ip,
+      params: logData.params
+    }).catch(() => {
+      // ignore metric error
     })
   } as any
 

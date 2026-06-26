@@ -199,6 +199,153 @@ export async function createDataLog(data: any) {
   return db('data_logs').where({ id }).first()
 }
 
+// ---------- API 性能指标 ----------
+
+export async function createApiMetric(data: {
+  method: string
+  path: string
+  statusCode: number
+  duration: number
+  userId?: number
+  username?: string
+  ip?: string
+  params?: any
+}) {
+  return db('api_metrics').insert({
+    method: data.method,
+    path: data.path,
+    status_code: data.statusCode,
+    duration: data.duration,
+    user_id: data.userId || null,
+    username: data.username || null,
+    ip: data.ip || 'unknown',
+    params: data.params ? JSON.stringify(data.params) : null,
+    created_at: new Date().toISOString()
+  })
+}
+
+export async function getApiMetrics(query: any) {
+  const { path, startTime, endTime, page = 1, pageSize = 10 } = query
+  const builder = db('api_metrics').orderBy('id', 'desc')
+
+  if (path) builder.where('path', 'like', `%${path}%`)
+  if (startTime) builder.where('created_at', '>=', startTime)
+  if (endTime) builder.where('created_at', '<=', endTime)
+
+  const total = await builder.clone().count({ count: '*' }).first()
+  const list = await builder
+    .offset((Number(page) - 1) * Number(pageSize))
+    .limit(Number(pageSize))
+
+  return {
+    list,
+    total: Number(total?.count || 0),
+    page: Number(page),
+    pageSize: Number(pageSize)
+  }
+}
+
+export async function getApiPerformanceStats(query: any) {
+  const { startTime, endTime, topN = 10 } = query
+  const builder = db('api_metrics')
+
+  if (startTime) builder.where('created_at', '>=', startTime)
+  if (endTime) builder.where('created_at', '<=', endTime)
+
+  const totalCount = await builder.clone().count({ count: '*' }).first()
+  const slowCount = await builder.clone().where('duration', '>', 1000).count({ count: '*' }).first()
+  const errorCount = await builder.clone().where('status_code', '>=', 500).count({ count: '*' }).first()
+
+  const topSlow = await builder
+    .clone()
+    .select('path')
+    .max('duration as maxDuration')
+    .avg('duration as avgDuration')
+    .count('* as count')
+    .groupBy('path')
+    .orderBy('maxDuration', 'desc')
+    .limit(Number(topN))
+
+  return {
+    totalCount: Number(totalCount?.count || 0),
+    slowCount: Number(slowCount?.count || 0),
+    errorCount: Number(errorCount?.count || 0),
+    topSlow
+  }
+}
+
+export async function getApiTrend(query: any) {
+  const { startTime, endTime, interval = 60 } = query
+  const start = startTime ? new Date(startTime).toISOString() : new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const end = endTime ? new Date(endTime).toISOString() : new Date().toISOString()
+
+  // SQLite 不支持 DATE_TRUNC，按分钟字符串聚合
+  const rows = await db('api_metrics')
+    .select(db.raw(`substr(created_at, 1, 16) as time`))
+    .count('* as count')
+    .avg('duration as avgDuration')
+    .where('created_at', '>=', start)
+    .where('created_at', '<=', end)
+    .groupBy('time')
+    .orderBy('time')
+
+  return rows.map((r) => ({
+    time: r.time,
+    count: Number(r.count),
+    avgDuration: Number(r.avgDuration || 0).toFixed(2)
+  }))
+}
+
+// ---------- 慢 SQL 指标 ----------
+
+export async function createSqlMetric(data: { sql: string; bindings?: string | null; duration: number }) {
+  return db('sql_metrics').insert({
+    sql: data.sql,
+    bindings: data.bindings || null,
+    duration: data.duration,
+    created_at: new Date().toISOString()
+  })
+}
+
+export async function getSlowSqls(query: any) {
+  const { keyword, minDuration = 100, startTime, endTime, page = 1, pageSize = 10 } = query
+  const builder = db('sql_metrics').where('duration', '>=', Number(minDuration)).orderBy('id', 'desc')
+
+  if (keyword) builder.where('sql', 'like', `%${keyword}%`)
+  if (startTime) builder.where('created_at', '>=', startTime)
+  if (endTime) builder.where('created_at', '<=', endTime)
+
+  const total = await builder.clone().count({ count: '*' }).first()
+  const list = await builder
+    .offset((Number(page) - 1) * Number(pageSize))
+    .limit(Number(pageSize))
+
+  return {
+    list,
+    total: Number(total?.count || 0),
+    page: Number(page),
+    pageSize: Number(pageSize)
+  }
+}
+
+export async function getSqlPerformanceStats(query: any) {
+  const { startTime, endTime } = query
+  const builder = db('sql_metrics')
+
+  if (startTime) builder.where('created_at', '>=', startTime)
+  if (endTime) builder.where('created_at', '<=', endTime)
+
+  const totalCount = await builder.clone().count({ count: '*' }).first()
+  const slowCount = await builder.clone().where('duration', '>', 1000).count({ count: '*' }).first()
+  const maxDuration = await builder.clone().max('duration as maxDuration').first()
+
+  return {
+    totalCount: Number(totalCount?.count || 0),
+    slowCount: Number(slowCount?.count || 0),
+    maxDuration: Number(maxDuration?.maxDuration || 0)
+  }
+}
+
 // ---------- 服务器信息 ----------
 
 export function getServerInfo() {

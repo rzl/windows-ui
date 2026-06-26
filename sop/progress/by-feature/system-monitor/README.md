@@ -13,10 +13,10 @@
 | 操作日志 | [phase-4](../../by-phase/phase-4.md)、[phase-7](../../by-phase/phase-7-data-permission-audit.md) | 请求日志中间件、动态 CRUD 操作记录 | ✅ |
 | SQL/请求日志 | [phase-4](../../by-phase/phase-4.md) | 记录所有 API 请求 | ✅ |
 | 数据日志 | [phase-4](../../by-phase/phase-4.md) | 基于 lowcode_models 变更的数据快照 | ✅ |
+| 系统监控增强 | [phase-27](../../by-phase/phase-27.md) | API 性能统计、慢 SQL 分析、告警规则与告警记录 | ✅ |
 
 ## 待增强
 
-- [ ] 慢 SQL 分析与告警
-- [ ] 接口性能统计
-- [ ] 监控数据持久化与图表展示
-- [ ] 异常告警通知
+- [ ] 监控数据自动清理策略
+- [ ] 邮件 / 短信 / WebSocket 实时告警推送
+- [ ] 接口性能 P95/P99 分位数统计
