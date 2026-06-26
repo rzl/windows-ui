@@ -9,7 +9,7 @@ export interface ScriptContext {
   data?: any
 }
 
-export async function runScript(script: string, context: ScriptContext = {}) {
+export async function runScript(script: string, context: ScriptContext = {}, timeout = 5000) {
   if (!script) throw new AppError('脚本不能为空', 400)
 
   const http = async (cfg: any) => {
@@ -41,7 +41,7 @@ export async function runScript(script: string, context: ScriptContext = {}) {
   }
 
   const vm = new VM({
-    timeout: 5000,
+    timeout,
     sandbox: {
       ctx: context.ctx,
       data: context.data,

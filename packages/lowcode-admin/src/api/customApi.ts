@@ -10,6 +10,11 @@ export interface CustomApiForm {
   script?: string
   status?: number
   isPublic?: number
+  rateLimit?: number
+  rateLimitWindow?: string
+  ipWhitelist?: string
+  ipBlacklist?: string
+  timeout?: number
 }
 
 export function getCustomApis() {
@@ -34,4 +39,8 @@ export function deleteCustomApi(id: number) {
 
 export function testCustomApi(id: number, ctx: any = {}) {
   return request.post(`/custom-apis/${id}/test`, ctx)
+}
+
+export function getCustomApiLogs(id: number, params?: any) {
+  return request.get(`/custom-apis/${id}/logs`, { params })
 }

@@ -65,8 +65,39 @@
           <w-alert v-else type="error" :title="testResult.message || '执行失败'" />
           <pre>{{ JSON.stringify(testResult, null, 2) }}</pre>
         </div>
+
+        <w-card header="安全配置" size="small" style="margin-top: 12px;">
+          <w-form label-width="100px">
+            <w-form-item label="频率限制">
+              <div style="display: flex; gap: 8px;">
+                <w-input-number v-model="form.rateLimit" placeholder="0 为不限制" style="flex: 1" />
+                <w-select v-model="form.rateLimitWindow" :options="rateLimitWindowOptions" style="width: 120px" />
+              </div>
+            </w-form-item>
+            <w-form-item label="IP 白名单">
+              <w-input v-model="form.ipWhitelist" type="textarea" :rows="3" placeholder="每行一个 IP，支持 CIDR，如 192.168.1.0/24" />
+            </w-form-item>
+            <w-form-item label="IP 黑名单">
+              <w-input v-model="form.ipBlacklist" type="textarea" :rows="3" placeholder="每行一个 IP，支持 CIDR" />
+            </w-form-item>
+            <w-form-item label="超时时间(ms)">
+              <w-input-number v-model="form.timeout" :min="100" :max="60000" />
+            </w-form-item>
+          </w-form>
+        </w-card>
       </div>
     </div>
+
+    <w-card v-if="isEdit" header="执行日志" style="flex-shrink: 0; margin-top: 12px;">
+      <w-table :data="logList" :columns="logColumns" stripe border />
+      <w-pagination
+        v-model:current-page="logQuery.page"
+        :page-size="logQuery.pageSize"
+        :total="logTotal"
+        layout="prev, pager, next"
+        @change="loadLogs"
+      />
+    </w-card>
   </div>
 </template>
 
@@ -88,7 +119,7 @@ const form = reactive<any>({
   path: '',
   description: '',
   script: `// 可用变量：ctx, db, http, axios
-// ctx 包含 params/query/body/headers/method/user
+// ctx 包含 params/query/body/headers/method/user/ip
 // 脚本需返回一个对象
 async function main() {
   const rows = await db.raw("SELECT COUNT(*) as count FROM users")
@@ -102,7 +133,12 @@ async function main() {
 return await main()
 `,
   isPublic: false,
-  status: true
+  status: true,
+  rateLimit: 0,
+  rateLimitWindow: 'minute',
+  ipWhitelist: '',
+  ipBlacklist: '',
+  timeout: 5000
 })
 
 const testParams = reactive({
@@ -115,6 +151,10 @@ const isTestSuccess = computed(() => {
   return testResult.value && (testResult.value.code === 200 || testResult.value.success === true)
 })
 
+const logList = ref<any[]>([])
+const logTotal = ref(0)
+const logQuery = reactive({ page: 1, pageSize: 10 })
+
 const methodOptions = [
   { label: 'ALL', value: 'ALL' },
   { label: 'GET', value: 'GET' },
@@ -123,9 +163,27 @@ const methodOptions = [
   { label: 'DELETE', value: 'DELETE' }
 ]
 
+const rateLimitWindowOptions = [
+  { label: '每秒', value: 'second' },
+  { label: '每分钟', value: 'minute' },
+  { label: '每小时', value: 'hour' },
+  { label: '每天', value: 'day' }
+]
+
+const logColumns = [
+  { prop: 'create_time', label: '时间', width: 160 },
+  { prop: 'ip', label: 'IP', width: 130 },
+  { prop: 'username', label: '用户', width: 100 },
+  { prop: 'method', label: '方法', width: 80 },
+  { prop: 'duration', label: '耗时(ms)', width: 90 },
+  { prop: 'status', label: '状态', width: 80, formatter: (row: any) => row.status === 1 ? '成功' : '失败' },
+  { prop: 'error_message', label: '错误信息', formatter: (row: any) => row.error_message || '-' }
+]
+
 onMounted(async () => {
   if (isEdit.value) {
     await reloadApi()
+    await loadLogs()
   }
 })
 
@@ -139,11 +197,37 @@ async function reloadApi() {
   form.script = data.script || ''
   form.isPublic = data.is_public === 1
   form.status = data.status === 1
+  form.rateLimit = data.rate_limit ?? 0
+  form.rateLimitWindow = data.rate_limit_window || 'minute'
+  form.ipWhitelist = formatIpList(data.ip_whitelist)
+  form.ipBlacklist = formatIpList(data.ip_blacklist)
+  form.timeout = data.timeout ?? 5000
+}
+
+async function loadLogs() {
+  if (!isEdit.value) return
+  const result = await customApiApi.getCustomApiLogs(Number(route.params.id), {
+    page: logQuery.page,
+    pageSize: logQuery.pageSize
+  })
+  logList.value = result.list
+  logTotal.value = result.total
+}
+
+function formatIpList(value: any): string {
+  if (!value) return ''
+  try {
+    const parsed = JSON.parse(value)
+    if (Array.isArray(parsed)) return parsed.join('\n')
+  } catch {
+    return value
+  }
+  return ''
 }
 
 async function handleSave() {
   try {
-    const data = {
+    const data: customApiApi.CustomApiForm = {
       code: form.code,
       name: form.name,
       method: form.method,
@@ -151,7 +235,12 @@ async function handleSave() {
       description: form.description,
       script: form.script,
       isPublic: form.isPublic ? 1 : 0,
-      status: form.status ? 1 : 0
+      status: form.status ? 1 : 0,
+      rateLimit: Number(form.rateLimit) || 0,
+      rateLimitWindow: form.rateLimitWindow,
+      ipWhitelist: form.ipWhitelist,
+      ipBlacklist: form.ipBlacklist,
+      timeout: Number(form.timeout) || 5000
     }
     if (isEdit.value) {
       await customApiApi.updateCustomApi(Number(route.params.id), data)
@@ -193,7 +282,7 @@ async function handleTest() {
 </script>
 
 <style scoped>
-.editor-page { padding: 8px; height: calc(100vh - 120px); display: flex; flex-direction: column; gap: 12px; }
+.editor-page { padding: 8px; display: flex; flex-direction: column; gap: 12px; }
 .editor-form { flex-shrink: 0; }
 .form-row { display: flex; gap: 12px; }
 .form-row .w-form-item { flex: 1; min-width: 0; }

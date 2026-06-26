@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { success, error } from '../../utils/response'
 import type { AuthRequest } from '../../middleware/auth'
 import * as customApiService from './custom-api.service'
+import * as securityService from './custom-api-security.service'
 
 export async function getCustomApis(_req: Request, res: Response) {
   const result = await customApiService.getCustomApis()
@@ -31,6 +32,11 @@ export async function deleteCustomApi(req: Request, res: Response) {
 export async function testCustomApi(req: Request, res: Response) {
   const ctx = buildContext(req)
   const result = await customApiService.executeApiById(Number(req.params.id), ctx)
+  res.json(success(result))
+}
+
+export async function getApiLogs(req: Request, res: Response) {
+  const result = await securityService.getApiLogs(req.query)
   res.json(success(result))
 }
 
@@ -66,6 +72,7 @@ function buildContext(req: Request) {
     body: req.body,
     headers: req.headers,
     method: req.method,
+    ip: req.ip || (req.headers['x-forwarded-for'] as string) || 'unknown',
     user: (req as AuthRequest).user
   }
 }
