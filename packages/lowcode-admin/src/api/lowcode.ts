@@ -235,3 +235,32 @@ export function validateBatch(items: { code: string; value: any }[]) {
 export function executeFieldOptions(config: any, ctx?: any) {
   return request.post('/lowcode/options/execute', { config, ctx })
 }
+
+// 常用查询
+export interface SavedQuery {
+  id?: number
+  name: string
+  modelCode?: string
+  filters: any
+  isDefault?: boolean
+}
+
+export function getSavedQueries(modelCode: string) {
+  return request.get(`/lowcode/${modelCode}/saved-queries`)
+}
+
+export function createSavedQuery(modelCode: string, data: SavedQuery) {
+  return request.post(`/lowcode/${modelCode}/saved-queries`, data)
+}
+
+export function updateSavedQuery(modelCode: string, id: number, data: SavedQuery) {
+  return request.put(`/lowcode/${modelCode}/saved-queries/${id}`, data)
+}
+
+export function deleteSavedQuery(modelCode: string, id: number) {
+  return request.delete(`/lowcode/${modelCode}/saved-queries/${id}`)
+}
+
+export function setDefaultSavedQuery(modelCode: string, id: number) {
+  return request.post(`/lowcode/${modelCode}/saved-queries/${id}/default`)
+}

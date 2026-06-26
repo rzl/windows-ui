@@ -1,11 +1,39 @@
 <template>
   <div class="list-page">
-    <w-query-builder
+    <w-advanced-query-builder
       v-if="queryFields.length"
+      ref="advancedQueryRef"
+      v-model="advancedQuery"
       :fields="queryFields"
-      @search="handleQuerySearch"
-      @reset="handleQueryReset"
-    />
+      @search="handleAdvancedSearch"
+      @reset="handleAdvancedReset"
+    >
+      <template #toolbar>
+        <w-select
+          v-if="savedQueries.length"
+          v-model="selectedSavedQuery"
+          :options="savedQueryOptions"
+          placeholder="常用查询"
+          style="width: 140px"
+          clearable
+          @change="handleSavedQueryChange"
+        />
+        <w-button size="small" @click="openSaveQueryDialog">保存查询</w-button>
+        <w-button
+          v-if="savedQueries.length"
+          size="small"
+          :disabled="!selectedSavedQuery"
+          @click="handleSetDefaultSavedQuery(selectedSavedQuery!)"
+        >设为默认</w-button>
+        <w-button
+          v-if="savedQueries.length"
+          type="danger"
+          size="small"
+          :disabled="!selectedSavedQuery"
+          @click="handleDeleteSavedQuery(selectedSavedQuery!)"
+        >删除</w-button>
+      </template>
+    </w-advanced-query-builder>
     <w-alert v-if="!canAccess" type="error" title="无权限访问" description="您没有该数据模型的访问权限，请联系管理员。" :closable="false" />
     <w-crud-table
       v-else
@@ -92,6 +120,21 @@
         <w-button type="primary" @click="doPrint">打印</w-button>
       </template>
     </w-dialog>
+
+    <w-dialog v-model="saveQueryDialogVisible" title="保存查询" width="420">
+      <w-form :model="saveQueryForm">
+        <w-form-item label="查询名称" required>
+          <w-input v-model="saveQueryForm.name" placeholder="请输入查询名称" />
+        </w-form-item>
+        <w-form-item label="设为默认">
+          <w-switch v-model="saveQueryForm.isDefault" />
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="saveQueryDialogVisible = false">取消</w-button>
+        <w-button type="primary" @click="handleSaveQuery">确定</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -135,6 +178,19 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const printTemplates = ref<any[]>([])
 const printPreviewVisible = ref(false)
 const previewHtml = ref('')
+const advancedQuery = reactive<any>({ logic: 'and', conditions: [] })
+const advancedQueryRef = ref<any>(null)
+const savedQueries = ref<any[]>([])
+const selectedSavedQuery = ref<number | undefined>(undefined)
+const saveQueryDialogVisible = ref(false)
+const saveQueryForm = reactive({ name: '', isDefault: false })
+
+const savedQueryOptions = computed(() => {
+  return savedQueries.value.map((q) => ({
+    label: `${q.name}${q.is_default ? ' (默认)' : ''}`,
+    value: q.id
+  }))
+})
 
 const printTemplateItems = computed(() => {
   return printTemplates.value.map((t: any) => ({ label: t.name, value: t.code }))
@@ -214,7 +270,14 @@ const formattedColumns = computed(() => {
 const queryFields = computed(() => {
   return tableConfig.fields
     .filter((f: any) => f.searchable)
-    .map((f: any) => ({ prop: f.field, label: f.label, searchMode: f.searchMode || 'like' }))
+    .map((f: any) => {
+      const fieldMeta = model.fields?.find((mf: any) => mf.field_name === f.field)
+      return {
+        prop: f.field,
+        label: f.label,
+        type: mapAdvancedQueryFieldType(fieldMeta?.type || 'string')
+      }
+    })
 })
 
 watch(modelCode, () => loadModel(), { immediate: true })
@@ -270,6 +333,8 @@ async function loadModel() {
   }
 
   await loadDicts()
+  await loadSavedQueries()
+  await applyDefaultSavedQuery()
   await loadData()
 }
 
@@ -431,16 +496,129 @@ async function handleDelete(row: any) {
   }
 }
 
-async function handleQuerySearch(conditions: any[]) {
+async function handleAdvancedSearch(condition: any) {
   query.page = 1
-  query.filters = JSON.stringify(conditions)
+  query.filters = JSON.stringify(condition)
   await loadData()
 }
 
-async function handleQueryReset() {
+async function handleAdvancedReset() {
   query.page = 1
   query.filters = ''
+  selectedSavedQuery.value = undefined
   await loadData()
+}
+
+async function loadSavedQueries() {
+  if (!modelCode.value) return
+  try {
+    const data = await lowcodeApi.getSavedQueries(modelCode.value)
+    savedQueries.value = data || []
+  } catch (e) {
+    savedQueries.value = []
+  }
+}
+
+async function applyDefaultSavedQuery() {
+  const defaultQuery = savedQueries.value.find((q) => q.is_default)
+  if (!defaultQuery) return
+  selectedSavedQuery.value = defaultQuery.id
+  applySavedQuery(defaultQuery)
+}
+
+function applySavedQuery(q: any) {
+  if (!q) return
+  const filters = typeof q.filters === 'string' ? JSON.parse(q.filters) : q.filters
+  Object.assign(advancedQuery, filters)
+  query.page = 1
+  query.filters = JSON.stringify(filters)
+  loadData()
+}
+
+function handleSavedQueryChange(id: any) {
+  const q = savedQueries.value.find((item) => item.id === id)
+  if (!q) {
+    advancedQuery.logic = 'and'
+    advancedQuery.conditions = []
+    query.filters = ''
+    loadData()
+    return
+  }
+  applySavedQuery(q)
+}
+
+function openSaveQueryDialog() {
+  saveQueryForm.name = ''
+  saveQueryForm.isDefault = false
+  saveQueryDialogVisible.value = true
+}
+
+async function handleSaveQuery() {
+  if (!saveQueryForm.name.trim()) {
+    alert('请输入查询名称')
+    return
+  }
+  const existing = savedQueries.value.find((q) => q.name === saveQueryForm.name.trim())
+  const payload: lowcodeApi.SavedQuery = {
+    name: saveQueryForm.name.trim(),
+    filters: advancedQuery,
+    isDefault: saveQueryForm.isDefault
+  }
+  try {
+    if (existing) {
+      if (!confirm('已存在同名查询，是否覆盖？')) return
+      await lowcodeApi.updateSavedQuery(modelCode.value, existing.id, payload)
+    } else {
+      await lowcodeApi.createSavedQuery(modelCode.value, payload)
+    }
+    saveQueryDialogVisible.value = false
+    await loadSavedQueries()
+    alert('保存成功')
+  } catch (err: any) {
+    alert(err.message || '保存失败')
+  }
+}
+
+async function handleDeleteSavedQuery(id: number) {
+  if (!confirm('确定删除该常用查询吗？')) return
+  try {
+    await lowcodeApi.deleteSavedQuery(modelCode.value, id)
+    if (selectedSavedQuery.value === id) selectedSavedQuery.value = undefined
+    await loadSavedQueries()
+  } catch (err: any) {
+    alert(err.message || '删除失败')
+  }
+}
+
+async function handleSetDefaultSavedQuery(id: number) {
+  try {
+    await lowcodeApi.setDefaultSavedQuery(modelCode.value, id)
+    await loadSavedQueries()
+  } catch (err: any) {
+    alert(err.message || '设置失败')
+  }
+}
+
+function mapAdvancedQueryFieldType(type: string): string {
+  switch (type) {
+    case 'string':
+    case 'text':
+      return 'string'
+    case 'number':
+    case 'int':
+    case 'float':
+      return 'number'
+    case 'date':
+    case 'datetime':
+      return 'date'
+    case 'select':
+    case 'radio':
+    case 'checkbox':
+    case 'ref':
+      return 'select'
+    default:
+      return 'string'
+  }
 }
 
 async function handlePageChange(page: number) {

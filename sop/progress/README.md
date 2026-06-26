@@ -45,6 +45,7 @@
 | [phase-23](by-phase/phase-23.md) | 数据模型导入导出 |
 | [phase-24](by-phase/phase-24.md) | 自定义接口版本管理 |
 | [phase-25](by-phase/phase-25.md) | 列表设计器增强（列宽记忆 + 列排序拖拽） |
+| [phase-26](by-phase/phase-26.md) | 高级查询面板 |
 
 ## 功能模块主子线
 

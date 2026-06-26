@@ -12,6 +12,7 @@ import { assertFieldWritable, filterHiddenFields, getFieldPermissionMap } from '
 import * as pluginService from '../plugin/plugin.service'
 import * as relationService from './relation.service'
 import { rebuildTableWithoutColumns } from '../../utils/rebuildTable'
+import * as queryService from './query.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
 
@@ -600,57 +601,27 @@ export async function dynamicList(modelCode: string, query: any, user?: any) {
   }
 
   // 高级查询条件
-  let filterList: any[] = []
-  if (filters) {
-    try {
-      filterList = JSON.parse(filters)
-      if (!Array.isArray(filterList)) filterList = []
-    } catch {
-      filterList = []
-    }
+  const parsedFilters = queryService.parseFilters(filters)
+
+  const resolveField = (f: string) => {
+    const refField = refFields.find((rf: any) => rf.field_name === f)
+    if (refField) return `ref_${f}.${refField.ref_display_field}`
+    return `${model.table_name}.${f}`
   }
 
-  filterList.forEach((condition: any) => {
-    const { field, operator, value } = condition
-    if (value === undefined || value === '' || value === null || !field) return
-
-    const resolveField = (f: string) => {
-      const refField = refFields.find((rf: any) => rf.field_name === f)
-      if (refField) return `ref_${f}.${refField.ref_display_field}`
-      return `${model.table_name}.${f}`
+  if (parsedFilters) {
+    if (Array.isArray(parsedFilters)) {
+      // 旧格式简单条件数组
+      parsedFilters.forEach((condition: any) => {
+        const { field, operator, value } = condition
+        if (value === undefined || value === '' || value === null || !field) return
+        queryService.applyCondition(builder, { field, op: operator, value }, resolveField)
+      })
+    } else {
+      // 新格式复杂条件对象
+      queryService.applyCondition(builder, parsedFilters, resolveField)
     }
-
-    switch (operator) {
-      case 'eq':
-        builder.where(resolveField(field), value)
-        break
-      case 'ne':
-        builder.whereNot(resolveField(field), value)
-        break
-      case 'like':
-        builder.where(resolveField(field), 'like', `%${value}%`)
-        break
-      case 'between':
-        if (Array.isArray(value) && value.length === 2) {
-          builder.whereBetween(resolveField(field), [value[0], value[1]])
-        }
-        break
-      case 'gt':
-        builder.where(resolveField(field), '>', value)
-        break
-      case 'lt':
-        builder.where(resolveField(field), '<', value)
-        break
-      case 'gte':
-        builder.where(resolveField(field), '>=', value)
-        break
-      case 'lte':
-        builder.where(resolveField(field), '<=', value)
-        break
-      default:
-        builder.where(resolveField(field), value)
-    }
-  })
+  }
 
   const total = await builder.clone().count({ count: '*' }).first()
 

@@ -6,6 +6,7 @@ import * as dataPermissionController from './data-permission.controller'
 import * as fieldPermissionController from './field-permission.controller'
 import * as relationController from './relation.controller'
 import * as modelVersionController from './model-version.controller'
+import * as savedQueryController from './saved-query.controller'
 
 const router: RouterType = Router()
 const upload = multer({ storage: multer.memoryStorage() })
@@ -76,6 +77,13 @@ router.get('/relations/:code/options', relationController.getRelationOptions)
 router.post('/relations', relationController.createRelation)
 router.put('/relations/:id', relationController.updateRelation)
 router.delete('/relations/:id', relationController.deleteRelation)
+
+// 常用查询
+router.get('/:modelCode/saved-queries', savedQueryController.getSavedQueries)
+router.post('/:modelCode/saved-queries', savedQueryController.createSavedQuery)
+router.put('/:modelCode/saved-queries/:id', savedQueryController.updateSavedQuery)
+router.delete('/:modelCode/saved-queries/:id', savedQueryController.deleteSavedQuery)
+router.post('/:modelCode/saved-queries/:id/default', savedQueryController.setDefaultSavedQuery)
 
 // 动态 CRUD（放在最后避免路径冲突）
 router.get('/:modelCode', lowcodeController.dynamicList)
