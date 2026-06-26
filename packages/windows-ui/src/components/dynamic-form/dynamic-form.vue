@@ -39,7 +39,7 @@ export interface DynamicField {
   validationRule?: string
   rules?: FormRule[]
   codingRule?: string
-  defaultValueType?: 'constant' | 'currentUser' | 'currentTime' | 'currentDept' | 'field' | 'expr'
+  defaultValueType?: 'constant' | 'currentUser' | 'currentTime' | 'currentDept' | 'currentRole' | 'field' | 'expr' | 'urlParam' | 'parentField'
   defaultValueExpr?: string
   refModel?: string
   refDisplayField?: string
@@ -58,6 +58,7 @@ export interface DynamicField {
     script?: string
     option?: any
   }
+  linkageRules?: LinkageRule[]
   clearable?: boolean
   min?: number
   max?: number
@@ -65,6 +66,24 @@ export interface DynamicField {
   activeText?: string
   inactiveText?: string
   span?: number
+}
+
+export interface LinkageCondition {
+  field: string
+  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'notContains' | 'empty' | 'notEmpty' | 'in' | 'notIn'
+  value?: any
+}
+
+export interface LinkageAction {
+  type: 'show' | 'hide' | 'required' | 'unrequired' | 'enable' | 'disable' | 'setValue' | 'clear' | 'filterOptions'
+  value?: any
+  options?: { label: string; value: any }[]
+}
+
+export interface LinkageRule {
+  conditions: LinkageCondition[]
+  logic: 'and' | 'or'
+  actions: LinkageAction[]
 }
 
 export interface FormLayout {
@@ -106,7 +125,15 @@ const props = defineProps({
     default: undefined
   },
   userInfo: {
-    type: Object as PropType<{ id?: number | string; deptId?: number | string; [key: string]: any }>,
+    type: Object as PropType<{ id?: number | string; deptId?: number | string; roleId?: number | string; [key: string]: any }>,
+    default: undefined
+  },
+  parentModel: {
+    type: Object as () => Record<string, any>,
+    default: undefined
+  },
+  urlParams: {
+    type: Object as () => Record<string, any>,
     default: undefined
   },
   generateCode: {
@@ -123,6 +150,7 @@ const visibleFields = computed(() => {
   return props.fields.filter((field) => {
     if (typeof field.hidden === 'function') return !field.hidden(props.model)
     if (field.hidden) return false
+    if (linkageHiddenMap[field.prop]) return false
     return !isDependsOnHidden(field)
   })
 })
@@ -174,6 +202,7 @@ const updateScreenWidth = () => {
 
 onMounted(() => {
   window.addEventListener('resize', updateScreenWidth)
+  evaluateLinkageRules()
 })
 
 onBeforeUnmount(() => {
@@ -185,6 +214,12 @@ const fieldOptionsMap = reactive<Record<string, { label: string; value: any }[]>
 const refOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
 const generatedCodeSet = new Set<string>()
 const activeTabMap = reactive<Record<string, number>>({})
+
+const linkageHiddenMap = reactive<Record<string, boolean>>({})
+const linkageRequiredMap = reactive<Record<string, boolean>>({})
+const linkageDisabledMap = reactive<Record<string, boolean>>({})
+const linkageFilteredOptionsMap = reactive<Record<string, { label: string; value: any }[]>>({})
+
 
 function getField(prop: string): DynamicField | undefined {
   return props.fields.find((f) => f.prop === prop)
@@ -363,6 +398,9 @@ function computeDefaultValue(field: DynamicField): any {
   if (field.defaultValueType === 'currentDept') {
     return props.userInfo?.deptId ?? undefined
   }
+  if (field.defaultValueType === 'currentRole') {
+    return props.userInfo?.roleId ?? undefined
+  }
   if (field.defaultValueType === 'currentTime') {
     const now = new Date()
     if (field.type === 'date') return now.toISOString().slice(0, 10)
@@ -372,6 +410,12 @@ function computeDefaultValue(field: DynamicField): any {
   if (field.defaultValueType === 'field') {
     return field.defaultValueExpr ? props.model[field.defaultValueExpr] : undefined
   }
+  if (field.defaultValueType === 'urlParam') {
+    return field.defaultValueExpr ? props.urlParams?.[field.defaultValueExpr] : undefined
+  }
+  if (field.defaultValueType === 'parentField') {
+    return field.defaultValueExpr ? props.parentModel?.[field.defaultValueExpr] : undefined
+  }
   if (field.defaultValueType === 'expr') {
     return evalExpr(field.defaultValueExpr || '', props.model)
   }
@@ -379,6 +423,7 @@ function computeDefaultValue(field: DynamicField): any {
 }
 
 function getFieldOptions(field: DynamicField) {
+  if (linkageFilteredOptionsMap[field.prop]) return linkageFilteredOptionsMap[field.prop]
   if (fieldOptionsMap[field.prop]) return fieldOptionsMap[field.prop]
   return field.options || []
 }
@@ -493,7 +538,7 @@ const rules = computed(() => {
   const result: Record<string, FormRule[]> = {}
   visibleFields.value.forEach((field) => {
     const list: FormRule[] = []
-    if (field.required) {
+    if (field.required || linkageRequiredMap[field.prop]) {
       list.push({ required: true, message: `${field.label} 不能为空` })
     }
     if (field.rules) {
@@ -508,7 +553,8 @@ const rules = computed(() => {
 
 function isDisabled(field: DynamicField): boolean {
   if (typeof field.disabled === 'function') return field.disabled(props.model)
-  return !!field.disabled
+  if (field.disabled) return true
+  return !!linkageDisabledMap[field.prop]
 }
 
 async function validate(): Promise<boolean> {
@@ -547,6 +593,105 @@ async function validate(): Promise<boolean> {
     return false
   }
 }
+
+function evaluateLinkageRules() {
+  props.fields.forEach((field) => {
+    if (!field.linkageRules?.length) return
+
+    // 重置该字段的联动状态
+    linkageHiddenMap[field.prop] = false
+    linkageRequiredMap[field.prop] = false
+    linkageDisabledMap[field.prop] = false
+    delete linkageFilteredOptionsMap[field.prop]
+
+    field.linkageRules.forEach((rule) => {
+      const matched = evaluateConditions(rule.conditions || [], rule.logic || 'and')
+      if (!matched) return
+
+      rule.actions.forEach((action) => {
+        switch (action.type) {
+          case 'show':
+            linkageHiddenMap[field.prop] = false
+            break
+          case 'hide':
+            linkageHiddenMap[field.prop] = true
+            break
+          case 'required':
+            linkageRequiredMap[field.prop] = true
+            break
+          case 'unrequired':
+            linkageRequiredMap[field.prop] = false
+            break
+          case 'enable':
+            linkageDisabledMap[field.prop] = false
+            break
+          case 'disable':
+            linkageDisabledMap[field.prop] = true
+            break
+          case 'setValue':
+            props.model[field.prop] = action.value
+            break
+          case 'clear':
+            props.model[field.prop] = undefined
+            break
+          case 'filterOptions':
+            linkageFilteredOptionsMap[field.prop] = action.options || []
+            break
+        }
+      })
+    })
+  })
+}
+
+function evaluateConditions(conditions: LinkageCondition[], logic: 'and' | 'or'): boolean {
+  if (!conditions.length) return true
+  const results = conditions.map((c) => evaluateCondition(c))
+  if (logic === 'or') return results.some(Boolean)
+  return results.every(Boolean)
+}
+
+function evaluateCondition(condition: LinkageCondition): boolean {
+  const targetValue = props.model[condition.field]
+  const op = condition.operator || 'eq'
+  const expected = condition.value
+
+  switch (op) {
+    case 'eq':
+      return targetValue === expected
+    case 'ne':
+      return targetValue !== expected
+    case 'gt':
+      return Number(targetValue) > Number(expected)
+    case 'gte':
+      return Number(targetValue) >= Number(expected)
+    case 'lt':
+      return Number(targetValue) < Number(expected)
+    case 'lte':
+      return Number(targetValue) <= Number(expected)
+    case 'contains':
+      return String(targetValue).includes(String(expected))
+    case 'notContains':
+      return !String(targetValue).includes(String(expected))
+    case 'empty':
+      return targetValue === undefined || targetValue === '' || targetValue === null
+    case 'notEmpty':
+      return targetValue !== undefined && targetValue !== '' && targetValue !== null
+    case 'in':
+      return Array.isArray(expected) ? expected.includes(targetValue) : String(expected).split(',').includes(String(targetValue))
+    case 'notIn':
+      return Array.isArray(expected) ? !expected.includes(targetValue) : !String(expected).split(',').includes(String(targetValue))
+    default:
+      return false
+  }
+}
+
+watch(
+  () => [props.fields, props.model],
+  () => {
+    evaluateLinkageRules()
+  },
+  { immediate: true, deep: true }
+)
 
 defineExpose({ validate })
 </script>

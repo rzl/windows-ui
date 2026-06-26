@@ -82,6 +82,11 @@
                 />
               </div>
             </template>
+            <template #linkageRules="{ row }">
+              <w-button size="small" @click="openLinkageRuleDialog(row.field_name)">
+                {{ formConfigMap[row.field_name].linkageRules?.length ? `已配置 ${formConfigMap[row.field_name].linkageRules.length} 条` : '配置' }}
+              </w-button>
+            </template>
             <template #dynamicOptions="{ row }">
               <w-button size="small" @click="openOptionDialog(row.field_name)">
                 {{ formConfigMap[row.field_name].dynamicOptions?.type ? '已配置' : '配置' }}
@@ -271,6 +276,15 @@
         <w-button type="primary" @click="saveOptionConfig">确定</w-button>
       </template>
     </w-dialog>
+
+    <!-- 联动规则配置弹窗 -->
+    <linkage-rule-dialog
+      :visible="linkageRuleDialogVisible"
+      :rules="linkageRuleForm.rules"
+      :fields="fields"
+      @update:visible="linkageRuleDialogVisible = $event"
+      @save="handleSaveLinkageRules"
+    />
   </div>
 </template>
 
@@ -285,6 +299,7 @@ import { useAuthStore } from '@/stores/auth'
 import { getFieldTypeOptions, getFieldTypeMeta, mapFieldTypeToFormType } from '@/utils/pluginManager'
 import RelationPanel from '@/components/model-designer/RelationPanel.vue'
 import ModelVersionPanel from './ModelVersionPanel.vue'
+import LinkageRuleDialog from '@/components/model-designer/LinkageRuleDialog.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -315,6 +330,9 @@ const fieldForm = reactive<any>({})
 const optionDialogVisible = ref(false)
 const layoutDialogVisible = ref(false)
 const layoutText = ref('')
+const linkageRuleDialogVisible = ref(false)
+const currentLinkageField = ref('')
+const linkageRuleForm = reactive<any>({ rules: [] })
 const optionForm = reactive<any>({
   fieldName: '',
   type: '',
@@ -348,7 +366,10 @@ const defaultValueTypeOptions = [
   { label: '当前用户', value: 'currentUser' },
   { label: '当前时间', value: 'currentTime' },
   { label: '当前部门', value: 'currentDept' },
+  { label: '当前角色', value: 'currentRole' },
   { label: '关联字段', value: 'field' },
+  { label: 'URL 参数', value: 'urlParam' },
+  { label: '父表单字段', value: 'parentField' },
   { label: '表达式', value: 'expr' }
 ]
 
@@ -440,6 +461,7 @@ const formDesignColumns = [
   { prop: 'formRequired', label: '必填', width: 80 },
   { prop: 'validationRule', label: '校验规则', width: 150 },
   { prop: 'dependsOn', label: '联动显示', width: 180 },
+  { prop: 'linkageRules', label: '联动规则', width: 100 },
   { prop: 'dynamicOptions', label: '动态选项', width: 100 },
   { prop: 'codingRule', label: '编码规则', width: 150 }
 ]
@@ -524,6 +546,7 @@ function syncConfigMaps() {
         required: field.required === 1,
         validationRule: field.validation_rule || '',
         dependsOn: { field: '', value: '', operator: 'eq' },
+        linkageRules: [],
         dynamicOptions: { type: '' },
         codingRule: '',
         refModel: field.ref_model || '',
@@ -775,6 +798,16 @@ function handleDependsOnFieldChange(fieldName: string, val: any) {
   }
 }
 
+function openLinkageRuleDialog(fieldName: string) {
+  currentLinkageField.value = fieldName
+  linkageRuleForm.rules = formConfigMap[fieldName].linkageRules || []
+  linkageRuleDialogVisible.value = true
+}
+
+function handleSaveLinkageRules(rules: any[]) {
+  formConfigMap[currentLinkageField.value].linkageRules = rules
+}
+
 function getFieldRelationTip(row: any) {
   const list = relations.value.filter((r: any) =>
     (r.source_model === model.code && r.source_field === row.field_name) ||
@@ -849,6 +882,9 @@ async function saveFormConfig() {
       }
       if (!config.dynamicOptions || !config.dynamicOptions.type) {
         delete config.dynamicOptions
+      }
+      if (!config.linkageRules || !config.linkageRules.length) {
+        delete config.linkageRules
       }
       if (!config.codingRule) {
         delete config.codingRule

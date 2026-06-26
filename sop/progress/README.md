@@ -47,6 +47,7 @@
 | [phase-25](by-phase/phase-25.md) | 列表设计器增强（列宽记忆 + 列排序拖拽） |
 | [phase-26](by-phase/phase-26.md) | 高级查询面板 |
 | [phase-27](by-phase/phase-27.md) | 系统监控增强 |
+| [phase-28](by-phase/phase-28.md) | 表单设计器增强 |
 
 ## 功能模块主子线
 

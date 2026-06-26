@@ -106,6 +106,8 @@
         :load-ref-options="loadRefOptions"
         :upload-request="uploadFile"
         :generate-code="generateCodeForField"
+        :user-info="authStore.userInfo"
+        :url-params="route.query"
       />
       <template #footer>
         <w-button @click="closeDialog">取消</w-button>

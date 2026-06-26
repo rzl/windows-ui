@@ -76,4 +76,54 @@ describe('DynamicForm', () => {
     expect(wrapper.findComponent({ name: 'WCascader' }).exists()).toBe(true)
     expect(wrapper.findComponent({ name: 'WRichText' }).exists()).toBe(true)
   })
+
+  it('linkageRules 满足条件时应隐藏字段', async () => {
+    const model = reactive({ type: '1' })
+    const fields = [
+      { prop: 'type', label: '类型', type: 'input' as const },
+      {
+        prop: 'extra',
+        label: '扩展',
+        type: 'input' as const,
+        linkageRules: [
+          {
+            logic: 'and' as const,
+            conditions: [{ field: 'type', operator: 'eq' as const, value: '2' }],
+            actions: [{ type: 'hide' as const }]
+          }
+        ]
+      }
+    ]
+    const wrapper = mountDynamicForm({ model, fields })
+    await nextTick()
+    await nextTick()
+    expect(wrapper.findAll('.w-form-item').length).toBe(2)
+
+    model.type = '2'
+    await nextTick()
+    await nextTick()
+    expect(wrapper.findAll('.w-form-item').length).toBe(1)
+  })
+
+  it('linkageRules 满足条件时应设置字段值', async () => {
+    const model = reactive<any>({ level: 'vip' })
+    const fields = [
+      { prop: 'level', label: '等级', type: 'input' as const },
+      {
+        prop: 'discount',
+        label: '折扣',
+        type: 'input' as const,
+        linkageRules: [
+          {
+            logic: 'and' as const,
+            conditions: [{ field: 'level', operator: 'eq' as const, value: 'vip' }],
+            actions: [{ type: 'setValue' as const, value: '0.8' }]
+          }
+        ]
+      }
+    ]
+    mountDynamicForm({ model, fields })
+    await nextTick()
+    expect(model.discount).toBe('0.8')
+  })
 })

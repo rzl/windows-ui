@@ -317,6 +317,7 @@ export type { FormRule } from './components/form/form.vue'
 export type { DynamicField } from './components/dynamic-form/dynamic-form.vue'
 export type { QueryField, QueryCondition } from './components/query-builder/query-builder.vue'
 export type { AdvancedQueryField, AdvancedCondition, AdvancedConditionGroup, AdvancedQueryCondition } from './components/advanced-query-builder/advanced-query-builder.vue'
+export type { LinkageRule, LinkageCondition, LinkageAction } from './components/dynamic-form/dynamic-form.vue'
 export {
   useLocale,
   setGlobalLocale,
