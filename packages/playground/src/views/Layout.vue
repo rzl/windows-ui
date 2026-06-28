@@ -2,64 +2,75 @@
   <w-config-provider prefix="w" :size="globalSize" :theme="globalTheme" :locale="globalLocale" :mode="globalMode">
     <div class="playground">
       <header class="playground-header">
-        <h1>🖥️ Windows UI</h1>
-        <p>Vue 3 UI Library - Windows XP Style</p>
-        <div class="global-controls">
-          <a href="admin.html" class="admin-link" title="Admin">🏢 {{ t('Admin后台') }}</a>
-          <div class="control-group">
-            <span class="control-label">{{ t('尺寸') }}</span>
-            <button
-              v-for="s in ['small', 'default', 'large']"
-              :key="s"
-              :class="['size-btn', { active: globalSize === s }]"
-              @click="globalSize = s as any"
-            >
-              {{ s }}
-            </button>
+        <div class="header-left">
+          <h1>🖥️ Windows UI</h1>
+          <p>Vue 3 UI Library - Windows XP Style</p>
+        </div>
+        <div class="mobile-actions">
+          <button class="mobile-nav-toggle" @click="showMobileNav = !showMobileNav" aria-label="切换导航">☰</button>
+          <button class="mobile-controls-toggle" @click="showMobileControls = !showMobileControls" aria-label="切换配置">⚙️</button>
+        </div>
+        <div class="header-right" :class="{ 'mobile-open': showMobileControls }">
+          <div class="global-controls-row">
+            <a href="admin.html" class="admin-link" title="Admin">🏢 {{ t('Admin后台') }}</a>
+            <div class="control-group">
+              <span class="control-label">{{ t('尺寸') }}</span>
+              <button
+                v-for="s in ['small', 'default', 'large']"
+                :key="s"
+                :class="['size-btn', { active: globalSize === s }]"
+                @click="globalSize = s as any"
+              >
+                {{ s }}
+              </button>
+            </div>
+            <div class="control-group">
+              <span class="control-label">{{ t('语言') }}</span>
+              <button
+                v-for="lang in [{ k: 'zh-CN', l: '中文' }, { k: 'en-US', l: 'English' }]"
+                :key="lang.k"
+                :class="['size-btn', { active: globalLocale === lang.k }]"
+                @click="switchLang(lang.k as 'zh-CN' | 'en-US')"
+              >
+                {{ lang.l }}
+              </button>
+            </div>
           </div>
-          <div class="control-group">
-            <span class="control-label">{{ t('语言') }}</span>
-            <button
-              v-for="lang in [{ k: 'zh-CN', l: '中文' }, { k: 'en-US', l: 'English' }]"
-              :key="lang.k"
-              :class="['size-btn', { active: globalLocale === lang.k }]"
-              @click="switchLang(lang.k as 'zh-CN' | 'en-US')"
-            >
-              {{ lang.l }}
-            </button>
-          </div>
-          <div class="control-group">
-            <span class="control-label">{{ t('主题色') }}</span>
-            <button class="preset-btn" style="background:#245edb" @click="themeColors.primary = '#245edb'; updateTheme()" />
-            <button class="preset-btn" style="background:#ff69b4" @click="themeColors.primary = '#ff69b4'; updateTheme()" />
-            <button class="preset-btn" style="background:#d92b2b" @click="themeColors.primary = '#d92b2b'; updateTheme()" />
-            <button class="preset-btn" style="background:#3a9e3a" @click="themeColors.primary = '#3a9e3a'; updateTheme()" />
-            <input type="color" :value="themeColors.primary" @change="e => { themeColors.primary = (e.target as HTMLInputElement).value; updateTheme() }" class="color-input" title="primary" />
-            <button class="reset-btn" @click="resetTheme">{{ t('重置') }}</button>
-            <div class="color-preview" :style="{ backgroundColor: themeColors.primary }"></div>
-          </div>
-          <div class="control-group">
-            <span class="control-label">{{ t('模式') }}</span>
-            <button
-              v-for="m in modeOptions"
-              :key="m"
-              :class="['size-btn', { active: globalMode === m }]"
-              @click="switchMode(m)"
-            >
-              {{ t(modeLabels[m]) }}
-            </button>
+          <div class="global-controls-row">
+            <div class="control-group">
+              <span class="control-label">{{ t('模式') }}</span>
+              <button
+                v-for="m in modeOptions"
+                :key="m"
+                :class="['size-btn', { active: globalMode === m }]"
+                @click="switchMode(m)"
+              >
+                {{ t(modeLabels[m]) }}
+              </button>
+            </div>
+            <div class="control-group">
+              <span class="control-label">{{ t('主题色') }}</span>
+              <button class="preset-btn" style="background:#245edb" @click="themeColors.primary = '#245edb'; updateTheme()" />
+              <button class="preset-btn" style="background:#ff69b4" @click="themeColors.primary = '#ff69b4'; updateTheme()" />
+              <button class="preset-btn" style="background:#d92b2b" @click="themeColors.primary = '#d92b2b'; updateTheme()" />
+              <button class="preset-btn" style="background:#3a9e3a" @click="themeColors.primary = '#3a9e3a'; updateTheme()" />
+              <input type="color" :value="themeColors.primary" @change="e => { themeColors.primary = (e.target as HTMLInputElement).value; updateTheme() }" class="color-input" title="primary" />
+              <button class="reset-btn" @click="resetTheme">{{ t('重置') }}</button>
+              <div class="color-preview" :style="{ backgroundColor: themeColors.primary }"></div>
+            </div>
           </div>
         </div>
       </header>
 
       <div class="playground-body">
-        <aside class="playground-sidebar">
+        <aside class="playground-sidebar" :class="{ 'mobile-open': showMobileNav }">
           <nav class="sidebar-nav">
             <router-link
               v-for="item in navItems"
               :key="item.path"
               :to="item.path"
               :class="['sidebar-link', { 'is-active': isActive(item.path) }, { 'is-indented': item.indent }]"
+              @click="closeMobileNav"
             >
               <w-icon v-if="item.icon && !item.indent" :name="item.icon" size="small" />
               <span>{{ navLabel(item.label) }}</span>
@@ -83,6 +94,10 @@ import i18n, { setPlaygroundLang } from '../i18n'
 
 const $route = useRoute()
 const { t } = useI18n()
+
+const showMobileNav = ref(false)
+const showMobileControls = ref(false)
+const closeMobileNav = () => { showMobileNav.value = false }
 
 const isActive = (path: string) => {
   return $route.path === path || (path !== '/' && $route.path.startsWith(path + '/'))
@@ -239,11 +254,13 @@ const navItems = [
 </script>
 
 <style scoped>
-.playground { min-height: 100vh; display: flex; flex-direction: column; }
-.playground-header { text-align: center; padding: 20px; background: var(--w-xp-title-bar); color: #fff; flex-shrink: 0; }
+.playground { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+.playground-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--w-xp-title-bar); color: #fff; flex-shrink: 0; overflow: hidden; }
+.header-left { text-align: left; flex-shrink: 0; }
 .playground-header h1 { margin: 0 0 6px; font-size: 28px; }
-.playground-header p { margin: 0 0 12px; opacity: 0.9; font-size: 13px; }
-.global-controls { display: inline-flex; align-items: center; gap: 24px; background: rgba(0,0,0,0.15); padding: 8px 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); }
+.playground-header p { margin: 0; opacity: 0.9; font-size: 13px; }
+.header-right { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; flex: 1; min-width: 0; }
+.global-controls-row { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; background: rgba(0,0,0,0.15); padding: 8px 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); }
 .control-group { display: flex; align-items: center; gap: 8px; }
 .control-label { font-size: 12px; opacity: 0.9; }
 .size-btn { padding: 3px 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); color: #fff; cursor: pointer; font-size: 12px; border-radius: 2px; }
@@ -256,8 +273,12 @@ const navItems = [
 .reset-btn:hover { background: rgba(255,255,255,0.25); }
 .admin-link { padding: 4px 12px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.15); color: #fff; text-decoration: none; font-size: 12px; border-radius: 2px; margin-right: 8px; }
 .admin-link:hover { background: rgba(255,255,255,0.3); }
-.playground-body { display: flex; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; padding: 16px; gap: 16px; }
-.playground-sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 16px; align-self: flex-start; max-height: calc(100vh - 32px); overflow-y: auto; }
+.mobile-actions { display: none; }
+.mobile-nav-toggle, .mobile-controls-toggle { padding: 6px 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.15); color: #fff; font-size: 16px; border-radius: 2px; cursor: pointer; }
+.mobile-nav-toggle:hover, .mobile-controls-toggle:hover { background: rgba(255,255,255,0.3); }
+.playground-body { display: flex; flex: 1; min-height: 0; max-width: 1600px; margin: 0 auto; width: 100%; gap: 16px; overflow: hidden; box-sizing: border-box; }
+.playground-sidebar { width: 220px; flex-shrink: 0; height: 100%; overflow-x: hidden; overflow-y: auto; }
+.playground-content { flex: 1; min-width: 0; height: 100%; overflow-x: hidden; overflow-y: auto; }
 .sidebar-nav { background: var(--w-bg-color); border: 2px solid; border-color: var(--w-border-color-light) var(--w-border-color-dark) var(--w-border-color-dark) var(--w-border-color-light); }
 .sidebar-link { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: var(--w-text-color-primary); text-decoration: none; font-size: 13px; border-bottom: 1px solid var(--w-border-color); transition: background 0.15s; }
 .sidebar-link:last-child { border-bottom: none; }
@@ -266,5 +287,18 @@ const navItems = [
 .sidebar-link.is-indented { padding-left: 28px; font-size: 12px; background: var(--w-fill-color); }
 .sidebar-link.is-indented:hover { background: var(--w-fill-color-dark); color: var(--w-color-primary); }
 .sidebar-link.is-indented.is-active { background: var(--w-color-primary-lighter); color: var(--w-color-primary); }
-.playground-content { flex: 1; min-width: 0; }
+
+@media (max-width: 768px) {
+  .playground-header { flex-direction: column; align-items: flex-start; padding: 12px 16px; position: relative; }
+  .mobile-actions { display: flex; position: absolute; top: 12px; right: 16px; gap: 8px; }
+  .header-left { margin-bottom: 12px; }
+  .playground-header h1 { font-size: 22px; }
+  .header-right { display: none; align-items: flex-start; width: 100%; }
+  .header-right.mobile-open { display: flex; }
+  .global-controls-row { width: 100%; justify-content: flex-start; }
+  .playground-body { flex-direction: column; gap: 12px; }
+  .playground-sidebar { display: none; width: 100%; height: auto; max-height: 40vh; flex-shrink: 0; }
+  .playground-sidebar.mobile-open { display: block; }
+  .playground-content { width: 100%; flex: 1; min-height: 0; }
+}
 </style>
