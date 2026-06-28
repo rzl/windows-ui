@@ -50,18 +50,18 @@ const message = (msg: string) => alert(msg)
 const title = t('Form 表单')
 
 const FormCode1 = `<w-form>
-        <w-form-item label="用户名"><w-input v-model="form.name" /></w-form-item>
-        <w-form-item label="邮箱"><w-input v-model="form.email" /></w-form-item>
-        <w-form-item label="性别">
-          <w-radio v-model="form.gender" label="male">男</w-radio>
-          <w-radio v-model="form.gender" label="female">女</w-radio>
-        </w-form-item>
-        <w-form-item label="爱好">
-          <w-checkbox v-model="form.hobbies" label="reading">阅读</w-checkbox>
-          <w-checkbox v-model="form.hobbies" label="sports">运动</w-checkbox>
-        </w-form-item>
-        <w-form-item><w-button type="primary">提交</w-button></w-form-item>
-      </w-form>`
+  <w-form-item label="用户名"><w-input v-model="form.name" /></w-form-item>
+  <w-form-item label="邮箱"><w-input v-model="form.email" /></w-form-item>
+  <w-form-item label="性别">
+    <w-radio v-model="form.gender" label="male">男</w-radio>
+    <w-radio v-model="form.gender" label="female">女</w-radio>
+  </w-form-item>
+  <w-form-item label="爱好">
+    <w-checkbox v-model="form.hobbies" label="reading">阅读</w-checkbox>
+    <w-checkbox v-model="form.hobbies" label="sports">运动</w-checkbox>
+  </w-form-item>
+  <w-form-item><w-button type="primary">提交</w-button></w-form-item>
+</w-form>`
 </script>
 
 <style scoped>

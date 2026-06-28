@@ -45,15 +45,15 @@ const alert = (msg: string) => window.alert(msg)
 const title = t('Notification 通知')
 
 const NotificationCode1 = `<w-space>
-        <w-button @click="notifyRef?.show({ message: '系统将于今晚维护', type: 'info' })">信息</w-button>
-        <w-button @click="notifyRef?.show({ message: '文件上传成功', type: 'success' })">成功</w-button>
-        <w-button @click="notifyRef?.show({ message: '磁盘空间不足', type: 'warning' })">警告</w-button>
-        <w-button @click="notifyRef?.show({ message: '连接超时', type: 'error' })">错误</w-button>
-      </w-space>`
+  <w-button @click="notifyRef?.show({ message: '系统将于今晚维护', type: 'info' })">信息</w-button>
+  <w-button @click="notifyRef?.show({ message: '文件上传成功', type: 'success' })">成功</w-button>
+  <w-button @click="notifyRef?.show({ message: '磁盘空间不足', type: 'warning' })">警告</w-button>
+  <w-button @click="notifyRef?.show({ message: '连接超时', type: 'error' })">错误</w-button>
+</w-space>`
 const NotificationCode2 = `<w-space>
-        <w-button @click="notifyRef?.show({ title: '新消息', message: '您有3条未读消息', type: 'info' })">新消息</w-button>
-        <w-button @click="notifyRef?.show({ title: '订单通知', message: '您的订单已发货', type: 'success' })">订单通知</w-button>
-      </w-space>`
+  <w-button @click="notifyRef?.show({ title: '新消息', message: '您有3条未读消息', type: 'info' })">新消息</w-button>
+  <w-button @click="notifyRef?.show({ title: '订单通知', message: '您的订单已发货', type: 'success' })">订单通知</w-button>
+</w-space>`
 const NotificationCode3 = `<w-button @click="notifyRef?.show({ title: '更新说明', message: '本次更新修复了多个已知问题，优化了性能表现，建议尽快升级到最新版本。', type: 'info' })">长内容</w-button>`
 </script>
 

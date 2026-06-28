@@ -48,19 +48,19 @@ const alert = (msg: string) => window.alert(msg)
 const title = t('Message 消息提示')
 
 const MessageCode1 = `<w-space>
-        <w-button @click="msgRef?.info('这是一条信息消息')">信息</w-button>
-        <w-button @click="msgRef?.success('操作成功完成！')">成功</w-button>
-        <w-button @click="msgRef?.warning('请注意此警告')">警告</w-button>
-        <w-button @click="msgRef?.error('发生错误，请重试')">错误</w-button>
-      </w-space>`
+  <w-button @click="msgRef?.info('这是一条信息消息')">信息</w-button>
+  <w-button @click="msgRef?.success('操作成功完成！')">成功</w-button>
+  <w-button @click="msgRef?.warning('请注意此警告')">警告</w-button>
+  <w-button @click="msgRef?.error('发生错误，请重试')">错误</w-button>
+</w-space>`
 const MessageCode2 = `<w-space>
-        <w-button @click="msgRef?.info('这是一个比较长的消息文本，用于测试消息框的宽度自适应能力')">长文本</w-button>
-        <w-button @click="msgRef?.success('数据保存成功！共保存了 128 条记录')">带数据</w-button>
-      </w-space>`
+  <w-button @click="msgRef?.info('这是一个比较长的消息文本，用于测试消息框的宽度自适应能力')">长文本</w-button>
+  <w-button @click="msgRef?.success('数据保存成功！共保存了 128 条记录')">带数据</w-button>
+</w-space>`
 const MessageCode3 = `<w-space>
-        <w-button @click="msgRef?.show('2秒后消失', 'info', 2000)">2秒消失</w-button>
-        <w-button @click="msgRef?.show('5秒后消失', 'success', 5000)">5秒消失</w-button>
-      </w-space>`
+  <w-button @click="msgRef?.show('2秒后消失', 'info', 2000)">2秒消失</w-button>
+  <w-button @click="msgRef?.show('5秒后消失', 'success', 5000)">5秒消失</w-button>
+</w-space>`
 </script>
 
 <style scoped>

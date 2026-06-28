@@ -3,9 +3,21 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('徽标数字/状态')" id="badge" doc="badge">
 
-            <demo-block :title="t('数字徽标')" :code="BadgeCode1"><w-badge :value="12"><w-button>{{ t('消息') }}</w-button></w-badge></demo-block>
-            <demo-block :title="t('文字徽标')" :code="BadgeCode2"><w-badge value="new"><w-button>{{ t('新闻') }}</w-button></w-badge></demo-block>
-            <demo-block :title="t('圆点徽标')" :code="BadgeCode3"><w-badge is-dot><w-button>{{ t('通知') }}</w-button></w-badge></demo-block>
+            <demo-block :title="t('数字徽标')" :code="BadgeCode1">
+              <w-badge :value="12">
+                <w-button>{{ t('消息') }}</w-button>
+              </w-badge>
+            </demo-block>
+            <demo-block :title="t('文字徽标')" :code="BadgeCode2">
+              <w-badge value="new">
+                <w-button>{{ t('新闻') }}</w-button>
+              </w-badge>
+            </demo-block>
+            <demo-block :title="t('圆点徽标')" :code="BadgeCode3">
+              <w-badge is-dot>
+                <w-button>{{ t('通知') }}</w-button>
+              </w-badge>
+            </demo-block>
             <demo-block :title="t('不同类型')" :code="BadgeCode4">
               <w-space>
                 <w-badge :value="5" type="primary"><w-button>{{ t('主要') }}</w-button></w-badge>
@@ -36,15 +48,21 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 
 const title = t('Badge 徽章')
 
-const BadgeCode1 = `<w-badge :value="12"><w-button>消息</w-button></w-badge>`
-const BadgeCode2 = `<w-badge value="new"><w-button>新闻</w-button></w-badge>`
-const BadgeCode3 = `<w-badge is-dot><w-button>通知</w-button></w-badge>`
+const BadgeCode1 = `<w-badge :value="12">
+  <w-button>消息</w-button>
+</w-badge>`
+const BadgeCode2 = `<w-badge value="new">
+  <w-button>新闻</w-button>
+</w-badge>`
+const BadgeCode3 = `<w-badge is-dot>
+  <w-button>通知</w-button>
+</w-badge>`
 const BadgeCode4 = `<w-space>
-        <w-badge :value="5" type="primary"><w-button>主要</w-button></w-badge>
-        <w-badge :value="5" type="success"><w-button>成功</w-button></w-badge>
-        <w-badge :value="5" type="warning"><w-button>警告</w-button></w-badge>
-        <w-badge :value="5" type="info"><w-button>信息</w-button></w-badge>
-      </w-space>`
+  <w-badge :value="5" type="primary"><w-button>主要</w-button></w-badge>
+  <w-badge :value="5" type="success"><w-button>成功</w-button></w-badge>
+  <w-badge :value="5" type="warning"><w-button>警告</w-button></w-badge>
+  <w-badge :value="5" type="info"><w-button>信息</w-button></w-badge>
+</w-space>`
 </script>
 
 <style scoped>

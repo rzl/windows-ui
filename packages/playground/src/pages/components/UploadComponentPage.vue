@@ -57,13 +57,13 @@ const UploadCode2 = `<w-upload multiple />`
 const UploadCode3 = `const url = ref('')
 
 async function customUpload(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      resolve({ url: reader.result, name: file.name, size: file.size })
-    }
-    reader.readAsDataURL(file)
-  })
+return new Promise((resolve) => {
+const reader = new FileReader()
+reader.onload = () => {
+resolve({ url: reader.result, name: file.name, size: file.size })
+}
+reader.readAsDataURL(file)
+})
 }
 
 <div>url: {{ url }}</div>

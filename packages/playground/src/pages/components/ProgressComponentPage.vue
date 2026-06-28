@@ -36,10 +36,10 @@ const title = t('Progress 进度条')
 
 const ProgressCode1 = `<w-progress :percentage="30" />`
 const ProgressCode2 = `<w-space direction="vertical">
-        <w-progress :percentage="100" status="success" />
-        <w-progress :percentage="80" status="warning" />
-        <w-progress :percentage="60" status="danger" />
-      </w-space>`
+  <w-progress :percentage="100" status="success" />
+  <w-progress :percentage="80" status="warning" />
+  <w-progress :percentage="60" status="danger" />
+</w-space>`
 const ProgressCode3 = `<w-progress :percentage="50" :show-text="false" />`
 </script>
 

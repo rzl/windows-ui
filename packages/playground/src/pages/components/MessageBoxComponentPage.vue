@@ -6,7 +6,13 @@
       <demo-block :title="t('确认对话框')" :code="MessageBoxCode1"><w-button @click="msgBoxRef?.open({ message: '确认删除此文件？' })">{{ t('确认框') }}</w-button></demo-block>
       <demo-block :title="t('带取消按钮')" :code="MessageBoxCode2"><w-button @click="msgBoxRef?.open({ message: '是否保存更改？', showCancelButton: true })">{{ t('保存确认') }}</w-button></demo-block>
       <demo-block :title="t('自定义按钮文字')" :code="MessageBoxCode3"><w-button @click="msgBoxRef?.open({ message: '提交审核？', showCancelButton: true, confirmButtonText: '提交', cancelButtonText: '再想想' })">{{ t('自定义文字') }}</w-button></demo-block>
-      <demo-block :title="t('不同类型')" :code="MessageBoxCode4"><w-space><w-button @click="msgBoxRef?.open({ message: '操作成功！', type: 'success' })">{{ t('成功') }}</w-button><w-button @click="msgBoxRef?.open({ message: '发生错误！', type: 'error' })">{{ t('错误') }}</w-button><w-button @click="msgBoxRef?.open({ message: '请注意！', type: 'warning' })">{{ t('警告') }}</w-button></w-space></demo-block>
+      <demo-block :title="t('不同类型')" :code="MessageBoxCode4">
+        <w-space>
+          <w-button @click="msgBoxRef?.open({ message: '操作成功！', type: 'success' })">{{ t('成功') }}</w-button>
+          <w-button @click="msgBoxRef?.open({ message: '发生错误！', type: 'error' })">{{ t('错误') }}</w-button>
+          <w-button @click="msgBoxRef?.open({ message: '请注意！', type: 'warning' })">{{ t('警告') }}</w-button>
+        </w-space>
+      </demo-block>
       <w-message-box ref="msgBoxRef" />
 
     </demo-section>
@@ -33,7 +39,11 @@ const title = t('Message Box 消息弹出框')
 const MessageBoxCode1 = `<w-button @click="msgBoxRef?.open({ message: '确认删除此文件？' })">确认框</w-button>`
 const MessageBoxCode2 = `<w-button @click="msgBoxRef?.open({ message: '是否保存更改？', showCancelButton: true })">保存确认</w-button>`
 const MessageBoxCode3 = `<w-button @click="msgBoxRef?.open({ message: '提交审核？', showCancelButton: true, confirmButtonText: '提交', cancelButtonText: '再想想' })">自定义文字</w-button>`
-const MessageBoxCode4 = `<w-space><w-button @click="msgBoxRef?.open({ message: '操作成功！', type: 'success' })">成功</w-button><w-button @click="msgBoxRef?.open({ message: '发生错误！', type: 'error' })">错误</w-button><w-button @click="msgBoxRef?.open({ message: '请注意！', type: 'warning' })">警告</w-button></w-space>`
+const MessageBoxCode4 = `<w-space>
+  <w-button @click="msgBoxRef?.open({ message: '操作成功！', type: 'success' })">成功</w-button>
+  <w-button @click="msgBoxRef?.open({ message: '发生错误！', type: 'error' })">错误</w-button>
+  <w-button @click="msgBoxRef?.open({ message: '请注意！', type: 'warning' })">警告</w-button>
+</w-space>`
 </script>
 
 <style scoped>

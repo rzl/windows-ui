@@ -3,7 +3,12 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('固定元素')" id="affix" doc="affix">
 
-      <demo-block :title="t('基础用法')" :code="AffixCode1"><p>滚动页面时，下方元素会固定在顶部</p><w-affix :offset="0"><w-alert title="固钉提示" :description="t('我会固定在顶部')" /></w-affix></demo-block>
+      <demo-block :title="t('基础用法')" :code="AffixCode1">
+        <p>滚动页面时，下方元素会固定在顶部</p>
+        <w-affix :offset="0">
+          <w-alert title="固钉提示" :description="t('我会固定在顶部')" />
+        </w-affix>
+      </demo-block>
 
     </demo-section>
   </div>
@@ -19,7 +24,10 @@ const alert = (msg: string) => window.alert(msg)
 
 const title = t('Affix 固钉')
 
-const AffixCode1 = `<p>滚动页面时，下方元素会固定在顶部</p><w-affix :offset="0"><w-alert title="固钉提示" description="我会固定在顶部" /></w-affix>`
+const AffixCode1 = `<p>滚动页面时，下方元素会固定在顶部</p>
+<w-affix :offset="0">
+  <w-alert title="固钉提示" description="我会固定在顶部" />
+</w-affix>`
 </script>
 
 <style scoped>

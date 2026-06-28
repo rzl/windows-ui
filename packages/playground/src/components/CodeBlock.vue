@@ -94,7 +94,8 @@ watch(() => props.code, () => {
   display: block;
   padding: 12px;
   font-family: Consolas, Menlo, 'Courier New', monospace;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .code-slide-enter-active, .code-slide-leave-active { transition: all .2s ease; }

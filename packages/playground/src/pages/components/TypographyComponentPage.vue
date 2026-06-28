@@ -28,12 +28,12 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('Typography 排版')
 
 const TypographyCode1 = `<w-typography>
-        <h1>一级标题</h1>
-        <h2>二级标题</h2>
-        <h3>三级标题</h3>
-        <p>这是一段普通文本，<strong>加粗文本</strong>，<em>斜体文本</em>。</p>
-        <p>代码片段：<code>const app = createApp(App)</code></p>
-      </w-typography>`
+  <h1>一级标题</h1>
+  <h2>二级标题</h2>
+  <h3>三级标题</h3>
+  <p>这是一段普通文本，<strong>加粗文本</strong>，<em>斜体文本</em>。</p>
+  <p>代码片段：<code>const app = createApp(App)</code></p>
+</w-typography>`
 </script>
 
 <style scoped>

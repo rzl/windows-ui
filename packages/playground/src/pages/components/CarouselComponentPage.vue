@@ -35,12 +35,12 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 const title = t('Carousel 走马灯')
 
 const CarouselCode1 = `<w-carousel :items="[{ color: '#245edb' }, { color: '#3a9e3a' }, { color: '#e4a010' }]">
-        <template #default="{ item }">
-          <div :style="{ background: item.color, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
-            <span style="color:#fff;font-size:20px">Slide</span>
-          </div>
-        </template>
-      </w-carousel>`
+  <template #default="{ item }">
+    <div :style="{ background: item.color, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+      <span style="color:#fff;font-size:20px">Slide</span>
+    </div>
+  </template>
+</w-carousel>`
 </script>
 
 <style scoped>

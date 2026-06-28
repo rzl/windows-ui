@@ -24,8 +24,8 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('Scrollbar 滚动条')
 
 const ScrollbarCode1 = `<w-scrollbar height="100px">
-        <p v-for="i in 20" :key="i">滚动内容行 {{ i }}</p>
-      </w-scrollbar>`
+  <p v-for="i in 20" :key="i">滚动内容行 {{ i }}</p>
+</w-scrollbar>`
 </script>
 
 <style scoped>

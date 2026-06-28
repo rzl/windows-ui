@@ -44,22 +44,22 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('Space 间距')
 
 const SpaceCode1 = `<w-space>
-        <w-tag>标签1</w-tag>
-        <w-tag>标签2</w-tag>
-        <w-tag>标签3</w-tag>
-      </w-space>`
+  <w-tag>标签1</w-tag>
+  <w-tag>标签2</w-tag>
+  <w-tag>标签3</w-tag>
+</w-space>`
 const SpaceCode2 = `<w-space direction="vertical">
-        <w-tag>标签1</w-tag>
-        <w-tag>标签2</w-tag>
-        <w-tag>标签3</w-tag>
-      </w-space>`
+  <w-tag>标签1</w-tag>
+  <w-tag>标签2</w-tag>
+  <w-tag>标签3</w-tag>
+</w-space>`
 const SpaceCode3 = `<w-space :size="24">
-        <w-button>按钮1</w-button>
-        <w-button>按钮2</w-button>
-      </w-space>`
+  <w-button>按钮1</w-button>
+  <w-button>按钮2</w-button>
+</w-space>`
 const SpaceCode4 = `<w-space wrap>
-        <w-tag v-for="i in 10" :key="i">标签{{ i }}</w-tag>
-      </w-space>`
+  <w-tag v-for="i in 10" :key="i">标签{{ i }}</w-tag>
+</w-space>`
 </script>
 
 <style scoped>

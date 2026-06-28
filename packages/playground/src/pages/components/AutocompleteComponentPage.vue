@@ -29,9 +29,9 @@ const AutocompleteCode1 = `import { reactive } from 'vue'
 const form = reactive({ auto: '' })
 
 const autocompleteOptions = [
-  { value: '苹果', label: '苹果' },
-  { value: '香蕉', label: '香蕉' },
-  { value: '橙子', label: '橙子' }
+{ value: '苹果', label: '苹果' },
+{ value: '香蕉', label: '香蕉' },
+{ value: '橙子', label: '橙子' }
 ]
 
 <w-autocomplete v-model="form.auto" :options="autocompleteOptions" placeholder="输入水果名称" />`

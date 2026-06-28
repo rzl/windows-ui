@@ -40,8 +40,8 @@ const CascaderCode1 = `import { reactive } from 'vue'
 const form = reactive({ cascader: [] })
 
 const cascaderOptions = [
-  { label: '北京', value: 'beijing', children: [{ label: '朝阳区', value: 'chaoyang' }, { label: '海淀区', value: 'haidian' }] },
-  { label: '上海', value: 'shanghai', children: [{ label: '浦东新区', value: 'pudong' }] }
+{ label: '北京', value: 'beijing', children: [{ label: '朝阳区', value: 'chaoyang' }, { label: '海淀区', value: 'haidian' }] },
+{ label: '上海', value: 'shanghai', children: [{ label: '浦东新区', value: 'pudong' }] }
 ]
 
 <w-cascader v-model="form.cascader" :options="cascaderOptions" placeholder="选择地址" />`

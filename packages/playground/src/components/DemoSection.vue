@@ -121,7 +121,7 @@ onUnmounted(() => {
 .markdown-body p { margin: 8px 0; line-height: 1.6; }
 .markdown-body pre { background: #1e1e1e; color: #d4d4d4; padding: 12px; overflow-x: auto; border-radius: 0; }
 .markdown-body code { font-family: Consolas, Menlo, monospace; font-size: 12px; }
-.markdown-body pre code { display: block; }
+.markdown-body pre code { display: block; white-space: pre-wrap; overflow-wrap: break-word; }
 .markdown-body table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
 .markdown-body th, .markdown-body td { border: 1px solid var(--w-border-color); padding: 6px 10px; text-align: left; }
 .markdown-body th { background: var(--w-fill-color-dark); }

@@ -4,10 +4,23 @@
     <demo-section :title="title" :description="t('标记与分类')" id="tag" doc="tag">
 
       <demo-block :title="t('基础用法')" :code="TagCode1">
-        <w-space><w-tag>默认</w-tag><w-tag type="primary">主要</w-tag><w-tag type="success">成功</w-tag><w-tag type="warning">警告</w-tag><w-tag type="danger">危险</w-tag><w-tag type="info">信息</w-tag></w-space>
+        <w-space>
+          <w-tag>默认</w-tag>
+          <w-tag type="primary">主要</w-tag>
+          <w-tag type="success">成功</w-tag>
+          <w-tag type="warning">警告</w-tag>
+          <w-tag type="danger">危险</w-tag>
+          <w-tag type="info">信息</w-tag>
+        </w-space>
       </demo-block>
       <demo-block :title="t('可关闭')" :code="TagCode2"><w-tag closable @close="alert('关闭')">可关闭</w-tag></demo-block>
-      <demo-block :title="t('尺寸')" :code="TagCode3"><w-space><w-tag size="small">小</w-tag><w-tag>中</w-tag><w-tag size="large">大</w-tag></w-space></demo-block>
+      <demo-block :title="t('尺寸')" :code="TagCode3">
+        <w-space>
+          <w-tag size="small">小</w-tag>
+          <w-tag>中</w-tag>
+          <w-tag size="large">大</w-tag>
+        </w-space>
+      </demo-block>
 
     </demo-section>
   </div>
@@ -31,9 +44,20 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 
 const title = t('Tag 标签')
 
-const TagCode1 = `<w-space><w-tag>默认</w-tag><w-tag type="primary">主要</w-tag><w-tag type="success">成功</w-tag><w-tag type="warning">警告</w-tag><w-tag type="danger">危险</w-tag><w-tag type="info">信息</w-tag></w-space>`
+const TagCode1 = `<w-space>
+  <w-tag>默认</w-tag>
+  <w-tag type="primary">主要</w-tag>
+  <w-tag type="success">成功</w-tag>
+  <w-tag type="warning">警告</w-tag>
+  <w-tag type="danger">危险</w-tag>
+  <w-tag type="info">信息</w-tag>
+</w-space>`
 const TagCode2 = `<w-tag closable @close="alert('关闭')">可关闭</w-tag>`
-const TagCode3 = `<w-space><w-tag size="small">小</w-tag><w-tag>中</w-tag><w-tag size="large">大</w-tag></w-space>`
+const TagCode3 = `<w-space>
+  <w-tag size="small">小</w-tag>
+  <w-tag>中</w-tag>
+  <w-tag size="large">大</w-tag>
+</w-space>`
 </script>
 
 <style scoped>

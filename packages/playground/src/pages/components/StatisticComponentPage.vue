@@ -3,7 +3,12 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('数值展示')" id="statistic" doc="statistic">
 
-      <demo-block :title="t('基础用法')" :code="StatisticCode1"><w-space><w-statistic title="用户总数" :value="12345" suffix="人" /><w-statistic title="增长率" :value="12.5" suffix="%" :precision="1" /></w-space></demo-block>
+      <demo-block :title="t('基础用法')" :code="StatisticCode1">
+        <w-space>
+          <w-statistic title="用户总数" :value="12345" suffix="人" />
+          <w-statistic title="增长率" :value="12.5" suffix="%" :precision="1" />
+        </w-space>
+      </demo-block>
       <demo-block :title="t('自定义样式')" :code="StatisticCode2"><w-statistic title="销售额" :value="888888" prefix="¥" :value-style="{ color: '#d92b2b' }" /></demo-block>
 
     </demo-section>
@@ -27,7 +32,10 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 
 const title = t('Statistic 统计组件')
 
-const StatisticCode1 = `<w-space><w-statistic title="用户总数" :value="12345" suffix="人" /><w-statistic title="增长率" :value="12.5" suffix="%" :precision="1" /></w-space>`
+const StatisticCode1 = `<w-space>
+  <w-statistic title="用户总数" :value="12345" suffix="人" />
+  <w-statistic title="增长率" :value="12.5" suffix="%" :precision="1" />
+</w-space>`
 const StatisticCode2 = `<w-statistic title="销售额" :value="888888" prefix="¥" :value-style="{ color: '#d92b2b' }" />`
 </script>
 

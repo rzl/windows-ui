@@ -31,8 +31,8 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 const title = t('Infinite Scroll 无限滚动')
 
 const InfiniteScrollCode1 = `<w-infinite-scroll :loading="false" :no-more="true">
-        <div v-for="i in 5" :key="i" style="padding:8px;border-bottom:1px solid #e0e0e0">项目 {{ i }}</div>
-      </w-infinite-scroll>`
+  <div v-for="i in 5" :key="i" style="padding:8px;border-bottom:1px solid #e0e0e0">项目 {{ i }}</div>
+</w-infinite-scroll>`
 </script>
 
 <style scoped>

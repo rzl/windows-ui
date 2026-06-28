@@ -41,8 +41,8 @@ const message = (msg: string) => alert(msg)
 const title = t('Radio 单选框')
 
 const RadioCode1 = `<w-radio v-model="form.radio" label="A">选项A</w-radio>
-      <w-radio v-model="form.radio" label="B">选项B</w-radio>
-      <w-radio v-model="form.radio" label="C">选项C</w-radio>`
+<w-radio v-model="form.radio" label="B">选项B</w-radio>
+<w-radio v-model="form.radio" label="C">选项C</w-radio>`
 const RadioCode2 = `<w-radio v-model="form.radio" label="D" disabled>禁用选项</w-radio>`
 </script>
 

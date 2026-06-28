@@ -3,12 +3,30 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('内容折叠展开')" id="collapse" doc="collapse">
 
-      <demo-block :title="t('基础用法')" :code="CollapseCode1"><w-collapse :items="[{ title: '标题1', content: '内容1' }, { title: '标题2', content: '内容2' }]" /></demo-block>
-      <demo-block :title="t('手风琴模式')" :code="CollapseCode2"><w-collapse :items="[{ title: 'A', content: '内容A' }, { title: 'B', content: '内容B' }]" accordion /></demo-block>
+      <demo-block :title="t('基础用法')" :code="CollapseCode1">
+        <w-collapse :items="[
+          { title: '标题1', content: '内容1' },
+          { title: '标题2', content: '内容2' }
+        ]" />
+      </demo-block>
+      <demo-block :title="t('手风琴模式')" :code="CollapseCode2">
+        <w-collapse :items="[
+          { title: 'A', content: '内容A' },
+          { title: 'B', content: '内容B' }
+        ]" accordion />
+      </demo-block>
       <demo-block :title="t('自定义标题与操作')" :code="CollapseCode3">
-        <w-collapse :items="[{ title: '标题A', content: '内容A' }, { title: '标题B', content: '内容B' }]">
-          <template #header="{ item, index }"><w-icon name="folder" size="small" /><span>{{ index + 1 }}. {{ item.title }}</span></template>
-          <template #action="{ index }"><w-icon name="delete" size="small" style="cursor:pointer" @click="alert('删除 ' + index)" /></template>
+        <w-collapse :items="[
+          { title: '标题A', content: '内容A' },
+          { title: '标题B', content: '内容B' }
+        ]">
+          <template #header="{ item, index }">
+            <w-icon name="folder" size="small" />
+            <span>{{ index + 1 }}. {{ item.title }}</span>
+          </template>
+          <template #action="{ index }">
+            <w-icon name="delete" size="small" style="cursor:pointer" @click="alert('删除 ' + index)" />
+          </template>
         </w-collapse>
       </demo-block>
 
@@ -35,9 +53,26 @@ const alert = (msg: string) => window.alert(msg)
 
 const title = t('Collapse 折叠面板')
 
-const CollapseCode1 = `<w-collapse :items="[{ title: '标题1', content: '内容1' }, { title: '标题2', content: '内容2' }]" />`
-const CollapseCode2 = `<w-collapse :items="[{ title: 'A', content: '内容A' }, { title: 'B', content: '内容B' }]" accordion />`
-const CollapseCode3 = `<w-collapse :items="[{ title: '标题A', content: '内容A' }, { title: '标题B', content: '内容B' }]"><template #header="{ item, index }"><w-icon name="folder" size="small" /><span>{{ index + 1 }}. {{ item.title }}</span></template><template #action="{ index }"><w-icon name="delete" size="small" style="cursor:pointer" @click="alert('删除 ' + index)" /></template></w-collapse>`
+const CollapseCode1 = `<w-collapse :items="[
+  { title: '标题1', content: '内容1' },
+  { title: '标题2', content: '内容2' }
+]" />`
+const CollapseCode2 = `<w-collapse :items="[
+  { title: 'A', content: '内容A' },
+  { title: 'B', content: '内容B' }
+]" accordion />`
+const CollapseCode3 = `<w-collapse :items="[
+  { title: '标题A', content: '内容A' },
+  { title: '标题B', content: '内容B' }
+]">
+  <template #header="{ item, index }">
+    <w-icon name="folder" size="small" />
+    <span>{{ index + 1 }}. {{ item.title }}</span>
+  </template>
+  <template #action="{ index }">
+    <w-icon name="delete" size="small" style="cursor:pointer" @click="alert('删除 ' + index)" />
+  </template>
+</w-collapse>`
 </script>
 
 <style scoped>

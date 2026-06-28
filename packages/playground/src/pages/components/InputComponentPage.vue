@@ -7,7 +7,13 @@
       <demo-block :title="t('前缀/后缀图标')" :code="InputCode2"><w-input v-model="form.input" prefix-icon="search" suffix-icon="close" /></demo-block>
       <demo-block :title="t('可清空')" :code="InputCode3"><w-input v-model="form.input2" clearable :placeholder="t('输入后可清空')" /></demo-block>
       <demo-block :title="t('禁用状态')" :code="InputCode4"><w-input v-model="form.input" disabled /></demo-block>
-      <demo-block :title="t('尺寸')" :code="InputCode5"><w-space><w-input v-model="form.input" size="small" placeholder="small" /><w-input v-model="form.input" placeholder="default" /><w-input v-model="form.input" size="large" placeholder="large" /></w-space></demo-block>
+      <demo-block :title="t('尺寸')" :code="InputCode5">
+        <w-space>
+          <w-input v-model="form.input" size="small" placeholder="small" />
+          <w-input v-model="form.input" placeholder="default" />
+          <w-input v-model="form.input" size="large" placeholder="large" />
+        </w-space>
+      </demo-block>
 
     </demo-section>
   </div>
@@ -43,7 +49,11 @@ const InputCode1 = `<w-input v-model="form.input" placeholder="请输入内容" 
 const InputCode2 = `<w-input v-model="form.input" prefix-icon="search" suffix-icon="close" />`
 const InputCode3 = `<w-input v-model="form.input2" clearable placeholder="输入后可清空" />`
 const InputCode4 = `<w-input v-model="form.input" disabled />`
-const InputCode5 = `<w-space><w-input v-model="form.input" size="small" placeholder="small" /><w-input v-model="form.input" placeholder="default" /><w-input v-model="form.input" size="large" placeholder="large" /></w-space>`
+const InputCode5 = `<w-space>
+  <w-input v-model="form.input" size="small" placeholder="small" />
+  <w-input v-model="form.input" placeholder="default" />
+  <w-input v-model="form.input" size="large" placeholder="large" />
+</w-space>`
 </script>
 
 <style scoped>

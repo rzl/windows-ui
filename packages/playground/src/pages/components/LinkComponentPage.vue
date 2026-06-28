@@ -34,12 +34,12 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('Link 链接')
 
 const LinkCode1 = `<w-space>
-        <w-link>默认链接</w-link>
-        <w-link type="primary">主要链接</w-link>
-        <w-link type="success">成功链接</w-link>
-        <w-link type="warning">警告链接</w-link>
-        <w-link type="danger">危险链接</w-link>
-      </w-space>`
+  <w-link>默认链接</w-link>
+  <w-link type="primary">主要链接</w-link>
+  <w-link type="success">成功链接</w-link>
+  <w-link type="warning">警告链接</w-link>
+  <w-link type="danger">危险链接</w-link>
+</w-space>`
 const LinkCode2 = `<w-link :underline="false">无下划线</w-link>`
 const LinkCode3 = `<w-link disabled>禁用链接</w-link>`
 </script>

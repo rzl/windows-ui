@@ -4,7 +4,13 @@
     <demo-section :title="title" :description="t('加载占位')" id="skeleton" doc="skeleton">
 
       <demo-block :title="t('基础用法')" :code="SkeletonCode1"><w-skeleton :rows="3" /></demo-block>
-      <demo-block :title="t('非加载状态')" :code="SkeletonCode2"><w-skeleton :loading="false"><w-card :header="t('内容已加载')"><p>真实内容区域</p></w-card></w-skeleton></demo-block>
+      <demo-block :title="t('非加载状态')" :code="SkeletonCode2">
+        <w-skeleton :loading="false">
+          <w-card :header="t('内容已加载')">
+            <p>真实内容区域</p>
+          </w-card>
+        </w-skeleton>
+      </demo-block>
 
     </demo-section>
   </div>
@@ -28,7 +34,11 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 const title = t('Skeleton 骨架屏')
 
 const SkeletonCode1 = `<w-skeleton :rows="3" />`
-const SkeletonCode2 = `<w-skeleton :loading="false"><w-card header="内容已加载"><p>真实内容区域</p></w-card></w-skeleton>`
+const SkeletonCode2 = `<w-skeleton :loading="false">
+  <w-card header="内容已加载">
+    <p>真实内容区域</p>
+  </w-card>
+</w-skeleton>`
 </script>
 
 <style scoped>

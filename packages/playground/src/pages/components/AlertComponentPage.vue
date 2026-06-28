@@ -16,13 +16,18 @@
             <demo-block :title="t('仅标题')" :code="AlertCode4"><w-alert title="这是一个没有描述的提示" type="success" /></demo-block>
             <demo-block :title="t('自定义标题')" :code="AlertCode5">
               <w-alert type="info">
-                <template #title><w-icon name="warning" size="small" style="margin-right:4px" /><span>自定义标题</span></template>
+                <template #title>
+                  <w-icon name="warning" size="small" style="margin-right:4px" />
+                  <span>自定义标题</span>
+                </template>
                 <template #default>使用 title 插槽自定义标题内容。</template>
               </w-alert>
             </demo-block>
             <demo-block :title="t('自定义操作')" :code="AlertCode6">
               <w-alert title="可执行操作" type="info" closable>
-                <template #action><w-link type="primary" style="font-size:12px">查看详情</w-link></template>
+                <template #action>
+                  <w-link type="primary" style="font-size:12px">查看详情</w-link>
+                </template>
                 使用 action 插槽在关闭按钮左侧插入自定义操作。
               </w-alert>
             </demo-block>
@@ -49,16 +54,27 @@ const alert = (msg: string) => window.alert(msg)
 const title = t('Alert 提示')
 
 const AlertCode1 = `<w-space direction="vertical" style="width:100%">
-        <w-alert title="信息提示" description="这是一条普通信息消息" type="info" />
-        <w-alert title="成功提示" description="操作成功完成！" type="success" />
-        <w-alert title="警告提示" description="请注意此操作的潜在风险" type="warning" />
-        <w-alert title="错误提示" description="操作失败，请重试" type="error" />
-      </w-space>`
+  <w-alert title="信息提示" description="这是一条普通信息消息" type="info" />
+  <w-alert title="成功提示" description="操作成功完成！" type="success" />
+  <w-alert title="警告提示" description="请注意此操作的潜在风险" type="warning" />
+  <w-alert title="错误提示" description="操作失败，请重试" type="error" />
+</w-space>`
 const AlertCode2 = `<w-alert title="可关闭提示" description="点击右侧 X 关闭此消息" type="info" closable @close="alert('已关闭')" />`
 const AlertCode3 = `<w-alert title="居中提示" description="内容居中对齐" type="info" center />`
 const AlertCode4 = `<w-alert title="这是一个没有描述的提示" type="success" />`
-const AlertCode5 = `<w-alert type="info"><template #title><w-icon name="warning" size="small" style="margin-right:4px" /><span>自定义标题</span></template><template #default>使用 title 插槽自定义标题内容。</template></w-alert>`
-const AlertCode6 = `<w-alert title="可执行操作" type="info" closable><template #action><w-link type="primary" style="font-size:12px">查看详情</w-link></template>使用 action 插槽在关闭按钮左侧插入自定义操作。</w-alert>`
+const AlertCode5 = `<w-alert type="info">
+  <template #title>
+    <w-icon name="warning" size="small" style="margin-right:4px" />
+    <span>自定义标题</span>
+  </template>
+  <template #default>使用 title 插槽自定义标题内容。</template>
+</w-alert>`
+const AlertCode6 = `<w-alert title="可执行操作" type="info" closable>
+  <template #action>
+    <w-link type="primary" style="font-size:12px">查看详情</w-link>
+  </template>
+  使用 action 插槽在关闭按钮左侧插入自定义操作。
+</w-alert>`
 </script>
 
 <style scoped>

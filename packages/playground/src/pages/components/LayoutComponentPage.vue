@@ -33,15 +33,15 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('Layout 布局')
 
 const LayoutCode1 = `<w-layout direction="vertical">
-        <w-button>上</w-button>
-        <w-button>中</w-button>
-        <w-button>下</w-button>
-      </w-layout>`
+  <w-button>上</w-button>
+  <w-button>中</w-button>
+  <w-button>下</w-button>
+</w-layout>`
 const LayoutCode2 = `<w-layout direction="horizontal">
-        <w-button>左</w-button>
-        <w-button>中</w-button>
-        <w-button>右</w-button>
-      </w-layout>`
+  <w-button>左</w-button>
+  <w-button>中</w-button>
+  <w-button>右</w-button>
+</w-layout>`
 </script>
 
 <style scoped>

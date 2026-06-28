@@ -42,8 +42,8 @@ const message = (msg: string) => alert(msg)
 const title = t('Checkbox 多选框')
 
 const CheckboxCode1 = `<w-checkbox v-model="form.checkbox" label="A">选项A</w-checkbox>
-      <w-checkbox v-model="form.checkbox" label="B">选项B</w-checkbox>
-      <w-checkbox v-model="form.checkbox" label="C">选项C</w-checkbox>`
+<w-checkbox v-model="form.checkbox" label="B">选项B</w-checkbox>
+<w-checkbox v-model="form.checkbox" label="C">选项C</w-checkbox>`
 const CheckboxCode2 = `<w-checkbox v-model="form.checkbox" label="D" disabled>禁用选项</w-checkbox>`
 const CheckboxCode3 = `<w-checkbox :indeterminate="true">半选</w-checkbox>`
 </script>

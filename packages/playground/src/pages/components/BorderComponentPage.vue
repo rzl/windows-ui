@@ -26,10 +26,10 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('Border 边框')
 
 const BorderCode1 = `<w-space>
-        <w-border type="raised" style="padding:16px">凸起边框 (Raised)</w-border>
-        <w-border type="sunken" style="padding:16px">凹陷边框 (Sunken)</w-border>
-        <w-border type="field" style="padding:16px">字段边框 (Field)</w-border>
-      </w-space>`
+  <w-border type="raised" style="padding:16px">凸起边框 (Raised)</w-border>
+  <w-border type="sunken" style="padding:16px">凹陷边框 (Sunken)</w-border>
+  <w-border type="field" style="padding:16px">字段边框 (Field)</w-border>
+</w-space>`
 </script>
 
 <style scoped>

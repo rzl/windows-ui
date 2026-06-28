@@ -35,17 +35,17 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('Text 文本')
 
 const TextCode1 = `<w-space direction="vertical">
-        <w-text size="large">大号文本</w-text>
-        <w-text>默认文本</w-text>
-        <w-text size="small">小号文本</w-text>
-      </w-space>`
+  <w-text size="large">大号文本</w-text>
+  <w-text>默认文本</w-text>
+  <w-text size="small">小号文本</w-text>
+</w-space>`
 const TextCode2 = `<w-space direction="vertical">
-        <w-text type="primary">主要文本</w-text>
-        <w-text type="success">成功文本</w-text>
-        <w-text type="warning">警告文本</w-text>
-        <w-text type="danger">危险文本</w-text>
-        <w-text type="info">信息文本</w-text>
-      </w-space>`
+  <w-text type="primary">主要文本</w-text>
+  <w-text type="success">成功文本</w-text>
+  <w-text type="warning">警告文本</w-text>
+  <w-text type="danger">危险文本</w-text>
+  <w-text type="info">信息文本</w-text>
+</w-space>`
 </script>
 
 <style scoped>

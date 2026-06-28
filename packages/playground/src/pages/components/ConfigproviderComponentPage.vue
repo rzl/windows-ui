@@ -40,18 +40,18 @@ const iconNames = ['info','warning','error','success','close','folder','file','s
 const title = t('ConfigProvider 全局配置')
 
 const ConfigproviderCode1 = `<w-config-provider prefix="xp">
-        <xp-button type="primary">自定义前缀按钮</xp-button>
-      </w-config-provider>`
+  <xp-button type="primary">自定义前缀按钮</xp-button>
+</w-config-provider>`
 const ConfigproviderCode2 = `<w-config-provider size="large">
-        <w-button>大按钮</w-button>
-        <w-input placeholder="大输入框" />
-        <w-tag>大标签</w-tag>
-      </w-config-provider>`
+  <w-button>大按钮</w-button>
+  <w-input placeholder="大输入框" />
+  <w-tag>大标签</w-tag>
+</w-config-provider>`
 const ConfigproviderCode3 = `<w-config-provider :theme="{ primary: '#c43e3e', danger: '#c43e3e' }">
-        <w-button type="primary">主题按钮</w-button>
-        <w-link type="primary">主题链接</w-link>
-        <w-tag type="primary">主题标签</w-tag>
-      </w-config-provider>`
+  <w-button type="primary">主题按钮</w-button>
+  <w-link type="primary">主题链接</w-link>
+  <w-tag type="primary">主题标签</w-tag>
+</w-config-provider>`
 </script>
 
 <style scoped>

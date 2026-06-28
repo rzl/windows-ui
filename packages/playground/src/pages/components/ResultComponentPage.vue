@@ -3,7 +3,13 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('操作结果反馈')" id="result" doc="result">
 
-      <demo-block :title="t('成功')" :code="ResultCode1"><w-result icon="success" title="操作成功" subtitle="您的操作已成功完成"><template #extra><w-button type="primary">{{ t('返回') }}</w-button></template></w-result></demo-block>
+      <demo-block :title="t('成功')" :code="ResultCode1">
+        <w-result icon="success" title="操作成功" subtitle="您的操作已成功完成">
+          <template #extra>
+            <w-button type="primary">{{ t('返回') }}</w-button>
+          </template>
+        </w-result>
+      </demo-block>
       <demo-block :title="t('警告')" :code="ResultCode2"><w-result icon="warning" title="操作警告" subtitle="请注意潜在风险" /></demo-block>
       <demo-block :title="t('错误')" :code="ResultCode3"><w-result icon="error" title="操作失败" subtitle="请稍后重试" /></demo-block>
 
@@ -28,7 +34,11 @@ const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子�
 
 const title = t('Result 结果')
 
-const ResultCode1 = `<w-result icon="success" title="操作成功" subtitle="您的操作已成功完成"><template #extra><w-button type="primary">返回</w-button></template></w-result>`
+const ResultCode1 = `<w-result icon="success" title="操作成功" subtitle="您的操作已成功完成">
+  <template #extra>
+    <w-button type="primary">返回</w-button>
+  </template>
+</w-result>`
 const ResultCode2 = `<w-result icon="warning" title="操作警告" subtitle="请注意潜在风险" />`
 const ResultCode3 = `<w-result icon="error" title="操作失败" subtitle="请稍后重试" />`
 </script>

@@ -24,8 +24,12 @@ const alert = (msg: string) => window.alert(msg)
 const title = t('Tabs 标签页')
 
 const TabsCode1 = `<w-tabs :tabs="[{ label: '标签1' }, { label: '标签2' }, { label: '标签3' }]">
-        <template #default="{ active }"><div v-if="active === 0">内容1</div><div v-if="active === 1">内容2</div><div v-if="active === 2">内容3</div></template>
-      </w-tabs>`
+  <template #default="{ active }">
+    <div v-if="active === 0">内容1</div>
+    <div v-if="active === 1">内容2</div>
+    <div v-if="active === 2">内容3</div>
+  </template>
+</w-tabs>`
 </script>
 
 <style scoped>
