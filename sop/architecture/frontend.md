@@ -70,8 +70,17 @@ packages/lowcode-admin/src/
 ## API 请求
 
 - axios 实例统一配置 baseURL、超时、请求/响应拦截
-- 请求拦截：自动附加 `Authorization: Bearer <token>`
-- 响应拦截：统一错误提示，401 跳转登录
+- 请求拦截：自动从 `localStorage` 读取并附加 `Authorization: Bearer <token>`
+- 响应拦截：统一错误提示；对后端返回的 `code === 401` 或 HTTP 401 统一处理
+
+### 认证与会话
+
+- **双令牌**：登录后返回 `accessToken`（默认 2 小时有效）与 `refreshToken`（默认 7 天有效），分别保存在 `lowcode_token` 与 `lowcode_refresh_token`。
+- **启动校验**：`main.ts` 启动时若存在 `lowcode_token` 但未恢复用户信息，会调用 `/auth/profile` 校验令牌；若令牌已过期，自动清理并跳转登录页。
+- **路由守卫**：未登录访问非公开路由时，跳转登录页并携带 `?redirect=<来源页路径>`。
+- **自动刷新**：接口返回 401 且 `refreshToken` 有效时，自动换取新 `accessToken` 并重试原请求；无需用户重新登录。
+- **自动跳转**：`refreshToken` 也过期、未登录或令牌被后端禁用时，自动跳转登录页并携带来源页参数。
+- **登录回源**：登录成功后读取 `redirect` 查询参数，返回之前的页面；仅允许站内相对路径，无来源页时默认进入 `/`。
 
 ## 通用页面模式
 

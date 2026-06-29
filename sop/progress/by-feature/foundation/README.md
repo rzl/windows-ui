@@ -11,6 +11,7 @@
 | 项目基础框架 | [phase-1](../../by-phase/phase-1.md) | SOP 目录结构、README、架构与数据库文档 | ✅ |
 | 后端脚手架 | [phase-1](../../by-phase/phase-1.md) | Express + Knex + SQLite、迁移种子、统一响应/错误/日志 | ✅ |
 | lowcode-admin 初始化 | [phase-1](../../by-phase/phase-1.md) | Vite 配置、axios 封装、Pinia、路由与布局 | ✅ |
+| 认证与会话管理 | - | 双令牌刷新、启动校验、未登录/过期自动跳转登录、登录后回源 | ✅ |
 | 通用组件扩展 | [phase-1](../../by-phase/phase-1.md) | WCrudTable、WDynamicForm、WQueryBuilder | ✅ |
 | 页面模板 | [phase-4](../../by-phase/phase-4.md) | 结果页、异常页（403/404/500）、个人页 | ✅ |
 
