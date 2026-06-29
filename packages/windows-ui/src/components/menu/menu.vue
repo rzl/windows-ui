@@ -48,8 +48,18 @@ const size = computed(() => props.size || globalSize.value)
 provide('menuSize', size)
 const emit = defineEmits(['select'])
 
-const activeIndex = ref<number | null>(null)
-const subActive = ref<string | undefined>(undefined)
+const resolveDefaultActive = () => {
+  const v = props.defaultActive
+  if (v === undefined || v === null) return { index: null as number | null, sub: undefined as string | undefined }
+  if (typeof v === 'number') return { index: v, sub: undefined }
+  if (typeof v === 'string' && v.includes('-')) return { index: null, sub: v }
+  const num = Number(v)
+  if (!isNaN(num)) return { index: num, sub: undefined }
+  return { index: null, sub: undefined }
+}
+const { index: defaultIndex, sub: defaultSub } = resolveDefaultActive()
+const activeIndex = ref<number | null>(defaultIndex)
+const subActive = ref<string | undefined>(defaultSub)
 const openSet = ref(new Set<number>())
 const hoverIndex = ref<number | null>(null)
 

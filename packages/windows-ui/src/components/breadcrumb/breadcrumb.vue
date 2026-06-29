@@ -5,7 +5,7 @@
       :key="i"
       :class="['w-breadcrumb__item', { 'is-last': i === items.length - 1 }]"
     >
-      <a v-if="item.href && i < items.length - 1" :href="item.href">{{ item.label }}</a>
+      <a v-if="resolveHref(item) && i < items.length - 1" :href="resolveHref(item)">{{ item.label }}</a>
       <span v-else>{{ item.label }}</span>
       <span v-if="i < items.length - 1" class="w-breadcrumb__separator">{{ separator }}</span>
     </span>
@@ -18,10 +18,18 @@ import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WBreadcrumb' })
 const props = defineProps({
-  items: { type: Array as () => { label: string; href?: string }[], default: () => [] },
+  items: { type: Array as () => { label: string; href?: string; to?: string | { path?: string; name?: string; [k: string]: any } }[], default: () => [] },
   separator: { type: String, default: '>' },
   size: { type: String, default: undefined }
 })
+
+const resolveHref = (item: { href?: string; to?: string | object }) => {
+  if (!item.href && !item.to) return undefined
+  if (item.href) return item.href
+  if (typeof item.to === 'string') return item.to
+  if (item.to && typeof item.to === 'object') return item.to.path || '#'
+  return undefined
+}
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 </script>

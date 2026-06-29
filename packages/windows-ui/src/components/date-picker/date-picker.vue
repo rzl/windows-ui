@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import WInput from '../input/input.vue'
 import WDatePickerPanel from '../date-picker-panel/date-picker-panel.vue'
 import { useGlobalSize } from '../../utils/prefix'
@@ -19,6 +19,7 @@ const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
 const inputValue = ref(props.modelValue || '')
+watch(() => props.modelValue, (v) => { inputValue.value = v || '' })
 const displayValue = computed(() => inputValue.value)
 const handleChange = (v: string) => { inputValue.value = v; emit('update:modelValue', v); emit('change', v); open.value = false }
 const handleClear = () => { inputValue.value = ''; emit('update:modelValue', ''); emit('change', ''); emit('clear') }

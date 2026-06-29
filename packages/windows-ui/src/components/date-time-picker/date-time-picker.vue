@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import WInput from '../input/input.vue'
 import WDatePickerPanel from '../date-picker-panel/date-picker-panel.vue'
 import WInputNumber from '../input-number/input-number.vue'
@@ -36,6 +36,14 @@ const hour = ref(parts[0] || 0)
 const minute = ref(parts[1] || 0)
 const second = ref(parts[2] || 0)
 const displayValue = computed(() => props.modelValue || '')
+const syncFromModel = (v?: string) => {
+  dateValue.value = v ? v.split(' ')[0] : todayStr
+  const timeParts = v?.split(' ')?.[1]?.split(':').map(Number) || [now.getHours(), now.getMinutes(), now.getSeconds()]
+  hour.value = timeParts[0] || 0
+  minute.value = timeParts[1] || 0
+  second.value = timeParts[2] || 0
+}
+watch(() => props.modelValue, syncFromModel)
 const handleDateChange = (v: string) => { dateValue.value = v }
 const confirm = () => { const time = `${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')}:${String(second.value).padStart(2, '0')}`; const val = `${dateValue.value} ${time}`; emit('update:modelValue', val); emit('change', val); open.value = false }
 const handleClear = () => { emit('update:modelValue', ''); emit('change', ''); emit('clear') }

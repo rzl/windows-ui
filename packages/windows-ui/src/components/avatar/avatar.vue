@@ -33,7 +33,8 @@ const avatarStyle = computed(() => {
   if (typeof size.value === 'number') { style.width = `${size.value}px`; style.height = `${size.value}px` }
   return style
 })
-const handleError = () => {}
+const emit = defineEmits(['error'])
+const handleError = () => emit('error')
 </script>
 
 <style scoped>
