@@ -32,15 +32,16 @@
 - [x] 虚拟滚动（固定行高 + 可视区域渲染 + 上下占位行 + 与固定列兼容）
 - [x] 横向虚拟滚动（virtual-x + 左右固定列 + 占位列保持宽度 + 与纵向虚拟滚动兼容）
 - [x] 移动端响应式适配（≤768px 横向滚动 + 单元格内容不换行）
-
+- [x] 行拖拽排序
+- [x] empty-text 国际化
 ## 待优化项（Phase 3）
 - [x] 树形数据（tree-props + lazy + default-expand-all + 父子多选联动）
 - [x] 多级表头（children 嵌套列 + rowspan/colspan）
 - [x] 虚拟滚动与固定列混合
-- [ ] 行拖拽排序
+- [x] 行拖拽排序
 - [ ] 键盘导航与 ARIA 属性完善
 - [ ] 单元测试覆盖（Vitest + @vue/test-utils）
-- [ ] 国际化支持（empty-text 接入 ConfigProvider）
+- [x] 国际化支持（empty-text 接入 ConfigProvider）
 
 ## 变更记录
 - 2024-06-01: 初始版本实现（基础数据展示 + 列插槽 + 空状态）
@@ -53,3 +54,4 @@
 - 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
 - 2026-06-24: 新增移动端响应式适配（≤768px 横向滚动，单元格内容不换行，避免列宽被压缩）
 - 2026-06-25: 新增列宽记忆（storageKey）与列排序拖拽（columnDraggable），支持 localStorage 持久化及 resetColumnWidths 重置
+- 2026-06-29: 新增行拖拽排序（rowDraggable）与 empty-text 国际化支持；暴露 resetColumnWidths 方法

@@ -63,9 +63,11 @@ Others
 - 图标默认色: #000 / #808080
 
 ### 尺寸规范
-- 侧边栏宽度: 220px（展开），64px（折叠）
-- 过渡动画: width 0.2s
-- 内容区内边距: 16px
+- 尺寸可选：small / default / large
+- 默认高度：32px（default），跟随 CSS 变量 `--w-component-size`
+- 小尺寸：24px（`--w-component-size-small`）
+- 大尺寸：40px（`--w-component-size-large`）
+- 组件内部图标（如有）随组件 size 联动
 
 ## 交互设计
 - 侧边栏折叠/展开: 宽度过渡动画

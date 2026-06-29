@@ -24,3 +24,4 @@
 - 2024-06-01: 初始版本实现，仅支持 `items` 属性传入数据
 - 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
 - 2026-06-19: 新增 `w-descriptions-item` 子组件，支持通过默认插槽方式组织描述项；补充单元测试；修复低代码平台服务器监控、个人信息等页面因使用子组件形式导致内容不显示的问题
+- 2026-06-29: 补齐文档中已声明但缺失的 Props/API（如 size、border、contentPosition、preview-src-list、row/col 等）

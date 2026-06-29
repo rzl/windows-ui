@@ -31,6 +31,9 @@ Data
 - 禁用状态: 透明度 0.5
 - 聚焦状态: 蓝色边框高亮
 
+## 指令形态
+除 `WInfiniteScroll` 组件外，还提供 `v-infinite-scroll` 指令，直接绑定到滚动容器上即可实现触底加载，支持 `infinite-scroll-disabled`、`infinite-scroll-distance`、`infinite-scroll-immediate` 等自定义属性。
+
 ## 可访问性
 - 支持键盘导航
 - 颜色对比度符合 WCAG 2.0 AA 标准

@@ -54,6 +54,15 @@ const load = () => {
 |--------|------|
 | default | 默认内容 |
 
+### 指令属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+|------|------|------|--------|
+| v-infinite-scroll | 滚动到底部时的加载回调函数 | function | - |
+| infinite-scroll-disabled | 是否禁用加载 | boolean | false |
+| infinite-scroll-distance | 触发加载的剩余距离 | number | 0 |
+| infinite-scroll-immediate | 挂载后是否立即检测一次 | boolean | true |
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

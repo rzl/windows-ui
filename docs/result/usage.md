@@ -23,8 +23,10 @@ import { WResult, WButton } from '@windows-ui/core'
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | icon | 图标名称 | string | info |
+| status | 状态 | string | - |
 | title | 标题 | string | - |
 | subtitle | - | string | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Slots
 

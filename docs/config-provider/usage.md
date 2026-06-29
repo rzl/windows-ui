@@ -150,11 +150,9 @@ const theme = {
 ```css
 :root {
   --w-color-primary: #245edb;
-  --w-bg-color: #ffffff;
+  --w-bg-color: #ece9d8;
   --w-text-color-primary: #000;
   --w-border-radius-base: 3px;
   --w-font-family: 'Tahoma', 'Microsoft YaHei', sans-serif;
-  --w-font-size-base: 14px;
-  --w-font-size-small: 12px;
 }
 ```

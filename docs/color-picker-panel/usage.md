@@ -15,10 +15,17 @@ const handleChange = (color) => console.log(color)
 
 ## API
 
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| modelValue | 绑定值（支持 v-model） | string | - |
+
 ### Events
 
 | 事件名 | 说明 | 回调参数 |
 |--------|------|----------|
+| update:modelValue | 绑定值更新 | value |
 | change | 值改变时触发 | value |
 
 ## 主题定制

@@ -21,3 +21,4 @@
 - 2024-06-01: 初始版本实现
 - 2026-06-06: 增加 action 插槽，支持自定义头部操作按钮
 - 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
+- 2026-06-29: 补齐文档中已声明但缺失的 Props/API（如 size、border、contentPosition、preview-src-list、row/col 等）

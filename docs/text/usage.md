@@ -31,6 +31,7 @@ import { WText, WSpace } from '@windows-ui/core'
 | tag | - | string | span |
 | size | 尺寸 | string | default（继承全局 size） |
 | type | 类型 | string | default |
+| truncated | - | boolean | - |
 
 ### Slots
 

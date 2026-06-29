@@ -24,13 +24,11 @@ Data
 - 值文字: `#000`（主要文字色）
 
 ### 尺寸规范
-
-- 组件内边距: `8px`
-- 标题字体大小: `var(--w-font-size-medium)`
-- 标签字体大小: `var(--w-font-size-small)`
-- 值字体大小: `var(--w-font-size-base)`
-- 单元格内边距: `6px 8px`
-- 默认每行显示 3 列，可通过 `column` 调整
+- 尺寸可选：small / default / large
+- 默认高度：32px（default），跟随 CSS 变量 `--w-component-size`
+- 小尺寸：24px（`--w-component-size-small`）
+- 大尺寸：40px（`--w-component-size-large`）
+- 组件内部图标（如有）随组件 size 联动
 
 ### 布局规则
 

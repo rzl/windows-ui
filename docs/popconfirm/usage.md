@@ -23,6 +23,10 @@ const handleConfirm = () => console.log('确认删除')
 |--------|------|------|--------|
 | title | 标题 | string | 确认操作？ |
 | type | 类型 | string | warning |
+| size | 尺寸 | string | default（继承全局 size） |
+| confirmButtonText | 确认按钮文本 | string | 确定 |
+| cancelButtonText | 取消按钮文本 | string | 取消 |
+| placement | 弹出位置 | string | bottom |
 
 ### Events
 

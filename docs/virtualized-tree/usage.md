@@ -24,8 +24,10 @@ const data = Array.from({ length: 100 }, (_, i) => ({
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | data | 数据 | array | [] |
+| props | 配置选项 | object | {} |
 | rowHeight | - | number | 28 |
 | visibleCount | - | number | 10 |
+| height | 高度 | - | - |
 | size | 尺寸 | string | default（继承全局 size） |
 
 ### Events

@@ -50,6 +50,8 @@ const items = ref([
 | title | 标题 | string | - |
 | items | 菜单项列表 | array | [] |
 | column | - | number | 3 |
+| border | 是否纵向边框 | boolean | - |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ## 主题定制
 

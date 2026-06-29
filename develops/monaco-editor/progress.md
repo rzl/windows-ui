@@ -15,16 +15,18 @@
 - [x] 在 `windows-ui/src/index.ts` 注册并导出
 - [x] 编写 playground 演示页面与路由
 - [x] 编写 docs/designs/develops 三份文档
-
+- [x] theme/options 配置
+- [x] width/loading props
 ## 待优化项
 
-- [ ] 支持 `theme` 主题切换（vs / vs-dark / hc-black）
-- [ ] 支持 `options` 透传 Monaco 编辑器选项
-- [ ] 支持 `width` 自适应或固定宽度
-- [ ] 增加加载状态提示
+- [x] 支持 `theme` 主题切换（vs / vs-dark / hc-black）
+- [x] 支持 `options` 透传 Monaco 编辑器选项
+- [x] 支持 `width` 自适应或固定宽度
+- [x] 增加加载状态提示
 - [ ] 支持 TypeScript 类型声明文件提示
 
 ## 变更记录
 
 - 2026-06-13：初始实现，iframe + CDN 方案
 - 2026-06-20：改为本地 `/monaco-editor/min` 资源默认加载，新增 `cdn` prop；修复 iframe 与父页面初始化时序；增加加载失败回退 textarea
+- 2026-06-29: 新增 theme、options、width、loading 等 props，支持自定义 Monaco 配置

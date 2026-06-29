@@ -112,8 +112,8 @@ const crudRef = ref(null)
 | border | 是否纵向边框 | boolean | true |
 | highlightCurrentRow | 是否高亮当前行 | boolean | true |
 | size | 尺寸 | string | default（继承全局 size） |
-| storageKey | 列宽/列顺序持久化存储键（透传 WTable） | string | '' |
-| columnDraggable | 是否启用列拖拽排序（透传 WTable） | boolean | false |
+| storageKey | - | string |  |
+| columnDraggable | - | boolean | - |
 
 ### Events
 
@@ -126,15 +126,9 @@ const crudRef = ref(null)
 | selection-change | 选中项改变时触发 | selection |
 | row-click | 行点击时触发 | (row, column, event) |
 | sort-change | 排序改变时触发 | (column, prop, order) |
-| column-order-change | 列顺序改变时触发（透传 WTable） | string[] |
+| column-order-change | - | - |
 | update:current-page | - | - |
 | update:page-size | - | - |
-
-### Methods
-
-| 方法名 | 说明 | 参数 |
-|--------|------|------|
-| resetColumnWidths | 清除当前 storageKey 下的列宽与顺序缓存，恢复默认（透传 WTable） | - |
 
 ### Slots
 
@@ -143,22 +137,6 @@ const crudRef = ref(null)
 | default | 默认内容 |
 | search | 自定义内容 |
 | toolbar | 工具栏插槽 |
-
-## 移动端适配
-
-WCrudTable 内部集成的 `dialog`、`table`、`form` / `form-item`、`search-form`、`query-builder`、`dynamic-form`、`pagination` 等子组件均已针对移动端（视口宽度 ≤768px）做响应式处理，无需额外配置即可自动生效：
-
-- **工具栏**：移动端自动换行，按钮不再挤在同一行，避免溢出。
-- **表格**：移动端支持横向滚动，单元格内容保持不换行，防止列宽被压缩变形。
-- **搜索区域**：搜索字段垂直排列，操作按钮换行展示，便于触控操作。
-- **弹窗编辑**：移动端弹窗打开时自动切换为全屏，可通过全屏按钮退出；退出全屏后支持拖拽，切回桌面端时自动恢复之前的状态。
-- **分页**：移动端隐藏总条数文字，分页组件允许换行并居中显示。
-
-### 使用注意事项
-
-- 组件通过 CSS 媒体查询 `@media (max-width: 768px)` 检测移动端，无需调用方手动切换布局。
-- 若查询区使用了 `dynamic-form` 字段布局，移动端 grid 会自动降为 1 列，也可通过 `dynamic-form` 的 `mobileColumns` prop 自定义移动端列数。
-- 在移动端使用自定义列插槽时，建议控制单元格内容宽度，避免单个单元格过宽导致横向滚动条过长。
 
 ## 主题定制
 

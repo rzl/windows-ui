@@ -22,6 +22,12 @@ import { WAffix, WButton } from '@windows-ui/core'
 |--------|------|------|--------|
 | offset | 偏移量 | number | 0 |
 
+### Events
+
+| 事件名 | 说明 | 回调参数 |
+|--------|------|----------|
+| change | 值改变时触发 | value |
+
 ### Slots
 
 | 插槽名 | 说明 |

@@ -42,6 +42,7 @@ const handleCommand = (cmd) => console.log(cmd)
 
 | 插槽名 | 说明 |
 |--------|------|
+| default | 默认内容 |
 | trigger | 触发元素插槽 |
 
 ## 主题定制

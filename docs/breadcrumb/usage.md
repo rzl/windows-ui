@@ -26,6 +26,12 @@ import { WBreadcrumb, WBreadcrumbItem } from '@windows-ui/core'
 | separator | 分隔符 | string | > |
 | size | 尺寸 | string | default（继承全局 size） |
 
+### Slots
+
+| 插槽名 | 说明 |
+|--------|------|
+| default | 默认内容 |
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

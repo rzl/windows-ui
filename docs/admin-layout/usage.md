@@ -140,15 +140,39 @@ interface TabItem {
 |--------|------|------|--------|
 | collapsed | - | boolean | false |
 | title | 标题 | string | Admin |
+| size | 尺寸 | string | default（继承全局 size） |
+| tabs | - | array | [] |
+| activeTab | - | string |  |
+| breadcrumb | - | array | [] |
+| userInfo | - | object | {} |
+| userMenu | - | array | {} |
+| showUserDropdown | - | boolean | true |
+| showScreenfull | - | boolean | true |
+| showMenuSearch | - | boolean | true |
+| favorites | - | array | [] |
+| drawerBreakpoint | - | number | 768 |
+
+### Events
+
+| 事件名 | 说明 | 回调参数 |
+|--------|------|----------|
+| update:collapsed | - | - |
+| tab-change | - | - |
+| tab-close | - | - |
+| screenfull | - | - |
+| menu-search | - | - |
+| user-command | - | - |
+| logout | - | - |
 
 ### Slots
 
 | 插槽名 | 说明 |
 |--------|------|
 | default | 默认内容 |
-| header | 头部内容 |
+| header-actions | 自定义内容 |
 | logo | 自定义内容 |
 | menu | 菜单插槽 |
+| toggle | 自定义内容 |
 
 ## 主题定制
 

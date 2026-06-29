@@ -32,6 +32,7 @@ const data = Array.from({ length: 1000 }, (_, i) => ({
 | columns | 列配置 | array | [] |
 | rowHeight | - | number | 32 |
 | visibleCount | - | number | 10 |
+| height | 高度 | - | - |
 
 ### Slots
 

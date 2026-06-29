@@ -32,6 +32,12 @@ import { WAvatar, WSpace } from '@windows-ui/core'
 | bgColor | 背景颜色 | string | - |
 | color | 文字颜色 | string | - |
 
+### Events
+
+| 事件名 | 说明 | 回调参数 |
+|--------|------|----------|
+| error | 错误时触发 | event |
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：
