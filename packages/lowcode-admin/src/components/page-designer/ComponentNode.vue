@@ -74,7 +74,12 @@
         <div v-if="node.type === 'tabs'" class="tabs-header">
           <span v-for="tab in node.props.tabs" :key="tab.name" class="tab-item">{{ tab.title }}</span>
         </div>
-        <div class="children-area" :class="`layout-${node.type}`">
+        <div
+          class="children-area"
+          :class="`layout-${node.type}`"
+          data-droppable="container"
+          :data-node-id="node.id"
+        >
           <component-node
             v-for="(child, index) in node.children"
             :key="child.id"
@@ -253,6 +258,7 @@ function createDefaultComponent(type: string): any {
 .node-type { font-size: 12px; color: #666; }
 .node-content { min-height: 24px; }
 .children-area { min-height: 40px; padding: 8px; border: 1px dashed #e0e0e0; }
+.children-area.drop-target-active { background: rgba(0, 120, 215, 0.1); border-color: var(--w-color-primary); }
 .layout-grid { display: grid; grid-template-columns: repeat(var(--columns, 2), 1fr); gap: var(--gap, 12px); }
 .card-title { font-weight: bold; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
 .tabs-header { display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #ddd; }

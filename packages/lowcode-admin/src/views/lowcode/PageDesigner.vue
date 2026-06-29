@@ -29,9 +29,9 @@
             v-for="type in layoutTypes"
             :key="type.value"
             class="component-item"
-            draggable="true"
+            :draggable="!isMobile"
             @dragstart="handleDragStart($event, type.value)"
-            @click="isMobile && addComponent(type.value)"
+            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
           >
             {{ type.label }}
           </div>
@@ -42,9 +42,9 @@
             v-for="type in displayTypes"
             :key="type.value"
             class="component-item"
-            draggable="true"
+            :draggable="!isMobile"
             @dragstart="handleDragStart($event, type.value)"
-            @click="isMobile && addComponent(type.value)"
+            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
           >
             {{ type.label }}
           </div>
@@ -55,9 +55,9 @@
             v-for="type in dataTypes"
             :key="type.value"
             class="component-item"
-            draggable="true"
+            :draggable="!isMobile"
             @dragstart="handleDragStart($event, type.value)"
-            @click="isMobile && addComponent(type.value)"
+            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
           >
             {{ type.label }}
           </div>
@@ -68,9 +68,9 @@
             v-for="type in actionTypes"
             :key="type.value"
             class="component-item"
-            draggable="true"
+            :draggable="!isMobile"
             @dragstart="handleDragStart($event, type.value)"
-            @click="isMobile && addComponent(type.value)"
+            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
           >
             {{ type.label }}
           </div>
@@ -85,7 +85,12 @@
         @drop="handleDropToRoot($event)"
       >
         <div class="panel-title">画布</div>
-        <div class="canvas-body" :class="{ 'is-empty': !config.components?.length }">
+        <div
+          class="canvas-body"
+          :class="{ 'is-empty': !config.components?.length }"
+          data-droppable="root"
+          @click.self="selectedId = ''"
+        >
           <component-node
             v-for="(node, index) in config.components"
             :key="node.id"
@@ -98,7 +103,7 @@
             @move="moveNode"
           />
           <div v-if="!config.components?.length" class="empty-tip">
-            从左侧拖拽组件到此处
+            拖拽或点击组件到此处
           </div>
         </div>
       </div>
@@ -148,6 +153,15 @@ const config = reactive<any>({
 const selectedId = ref<string>('')
 const previewVisible = ref(false)
 const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
+
+const touchState = reactive({
+  type: '',
+  label: '',
+  startX: 0,
+  startY: 0,
+  dragging: false,
+  ghost: null as HTMLElement | null
+})
 
 const layoutTypes = [
   { label: '容器', value: 'container' },
@@ -283,10 +297,129 @@ function selectNode(id: string) {
   }
 }
 
+function isContainerNode(node: any): boolean {
+  if (!node) return false
+  if (['container', 'card', 'grid', 'tabs'].includes(node.type)) return true
+  const pluginDef = listComponents().find((c) => c.type === node.type)
+  return !!pluginDef?.isContainer
+}
+
 function addComponent(type: string) {
-  if (!config.components) config.components = []
-  const node = createDefaultComponent(type)
-  config.components.push(node)
+  const targetContainer = selectedNode.value && isContainerNode(selectedNode.value) ? selectedNode.value : null
+  if (targetContainer) {
+    if (!targetContainer.children) targetContainer.children = []
+    const node = createDefaultComponent(type)
+    targetContainer.children.push(node)
+    selectNode(node.id)
+  } else {
+    if (!config.components) config.components = []
+    const node = createDefaultComponent(type)
+    config.components.push(node)
+    selectNode(node.id)
+  }
+}
+
+function handleTouchStart(event: TouchEvent, label: string, type: string) {
+  const touch = event.touches[0]
+  touchState.type = type
+  touchState.label = label
+  touchState.startX = touch.clientX
+  touchState.startY = touch.clientY
+  touchState.dragging = false
+  document.addEventListener('touchmove', handleTouchMove, { passive: false })
+  document.addEventListener('touchend', handleTouchEnd)
+}
+
+function handleTouchMove(event: TouchEvent) {
+  if (!touchState.type) return
+  const touch = event.touches[0]
+  const dx = touch.clientX - touchState.startX
+  const dy = touch.clientY - touchState.startY
+  if (!touchState.dragging && Math.sqrt(dx * dx + dy * dy) > 10) {
+    touchState.dragging = true
+    touchState.ghost = createGhost(touchState.label)
+  }
+  if (touchState.dragging) {
+    event.preventDefault()
+    if (touchState.ghost) {
+      touchState.ghost.style.left = `${touch.clientX}px`
+      touchState.ghost.style.top = `${touch.clientY}px`
+    }
+    highlightDropTarget(touch.clientX, touch.clientY)
+  }
+}
+
+function handleTouchEnd(event: TouchEvent) {
+  document.removeEventListener('touchmove', handleTouchMove)
+  document.removeEventListener('touchend', handleTouchEnd)
+  if (touchState.dragging && touchState.ghost) {
+    const touch = event.changedTouches[0]
+    doDrop(touch.clientX, touch.clientY)
+    touchState.ghost.remove()
+  } else {
+    addComponent(touchState.type)
+  }
+  clearDropHighlight()
+  touchState.type = ''
+  touchState.label = ''
+  touchState.dragging = false
+  touchState.ghost = null
+}
+
+function createGhost(text: string) {
+  const el = document.createElement('div')
+  el.className = 'drag-ghost'
+  el.textContent = text
+  document.body.appendChild(el)
+  return el
+}
+
+function findDropTarget(x: number, y: number) {
+  let element = document.elementFromPoint(x, y)
+  while (element && element !== document.body) {
+    const droppable = element.getAttribute('data-droppable')
+    if (droppable === 'root') return { type: 'root' as const }
+    if (droppable === 'container') {
+      const nodeId = element.getAttribute('data-node-id')
+      if (nodeId) return { type: 'container' as const, nodeId }
+    }
+    element = element.parentElement
+  }
+  return null
+}
+
+function highlightDropTarget(x: number, y: number) {
+  clearDropHighlight()
+  const target = findDropTarget(x, y)
+  if (!target) return
+  if (target.type === 'root') {
+    document.querySelector('.canvas-body')?.classList.add('drop-target-active')
+  } else {
+    document.querySelector(`[data-node-id="${target.nodeId}"][data-droppable="container"]`)?.classList.add('drop-target-active')
+  }
+}
+
+function clearDropHighlight() {
+  document.querySelectorAll('.drop-target-active').forEach((el) => el.classList.remove('drop-target-active'))
+}
+
+function doDrop(x: number, y: number) {
+  const target = findDropTarget(x, y)
+  if (!target) return
+  const node = createDefaultComponent(touchState.type)
+  if (target.type === 'root') {
+    if (!config.components) config.components = []
+    config.components.push(node)
+  } else {
+    const container = findNode(config.components, target.nodeId)
+    if (container && isContainerNode(container)) {
+      if (!container.children) container.children = []
+      container.children.push(node)
+    } else {
+      if (!config.components) config.components = []
+      config.components.push(node)
+    }
+  }
   selectNode(node.id)
 }
 
@@ -374,7 +507,20 @@ function goBack() {
 .component-item:hover { background: #f0f0f0; }
 .canvas-body { flex: 1; border: 1px dashed #ccc; padding: 12px; position: relative; }
 .canvas-body.is-empty { display: flex; align-items: center; justify-content: center; }
+.canvas-body.drop-target-active { background: rgba(0, 120, 215, 0.1); border-color: var(--w-color-primary); }
 .empty-tip { color: #999; }
+.drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  padding: 8px 12px;
+  background: var(--w-color-primary);
+  color: #fff;
+  border-radius: 4px;
+  opacity: 0.9;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+}
 
 .mobile-panel-tabs { display: none; }
 
