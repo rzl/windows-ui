@@ -10,6 +10,10 @@
 - [x] Events 定义
 - [x] 基础交互逻辑
 - [x] 示例代码
+- [x] 自定义滚动条渲染（非 native 模式）
+- [x] 滑块拖拽滚动
+- [x] native / always / barSize props
+- [x] ResizeObserver 自动更新尺寸
 
 ## 待优化项
 - [ ] 单元测试覆盖
@@ -19,4 +23,4 @@
 
 ## 变更记录
 - 2024-06-01: 初始版本实现
-- 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
+- 2026-06-29: 新增自定义滚动条实现：支持 native/always/barSize props、滑块拖拽与 ResizeObserver 自动更新

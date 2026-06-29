@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import WSelect from '../select/select.vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WTimeSelect' })
@@ -12,6 +12,7 @@ const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const innerValue = ref(props.modelValue)
+watch(() => props.modelValue, (v) => { innerValue.value = v })
 const timeOptions = computed(() => {
   const opts: { label: string; value: string }[] = []
   const [sh, sm] = props.start.split(':').map(Number)

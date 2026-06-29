@@ -1,13 +1,16 @@
 <template>
   <div :class="['w-timeline', `w-timeline--${size}`]">
-    <div v-for="(item, i) in items" :key="i" :class="['w-timeline__item', { 'is-last': i === items.length - 1 }]">
+    <template v-if="items.length">
+      <div v-for="(item, i) in items" :key="i" :class="['w-timeline__item', { 'is-last': i === items.length - 1 }]">
       <div class="w-timeline__node" :style="{ background: item.color || '#c0c0c0' }" />
       <div class="w-timeline__content">
         <div class="w-timeline__time">{{ item.time }}</div>
         <div class="w-timeline__title">{{ item.title }}</div>
         <div v-if="item.content" class="w-timeline__text">{{ item.content }}</div>
       </div>
-    </div>
+      </div>
+    </template>
+    <slot v-else />
   </div>
 </template>
 

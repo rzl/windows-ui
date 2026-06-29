@@ -8,12 +8,14 @@
 - [x] 自定义权限检查函数
 - [x] 条件渲染 slot 内容
 - [x] 使用文档
-
+- [x] v-permission 指令
 ## 待优化项
-- [ ] 指令版本（v-permission）
-- [ ] 单元测试
+- [x] 指令版本（v-permission）
+- [x] 单元测试
 - [ ] 异步权限加载支持
 
 ## 变更记录
 - 2026-06-08: 初始版本实现
 - 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
+- 2026-06-29: 新增 v-permission 指令支持，支持全局权限校验函数配置
+- 2026-06-29: 补齐文档中已声明但缺失的 Props/API（如 size、border、contentPosition、preview-src-list、row/col 等）

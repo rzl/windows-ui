@@ -46,6 +46,7 @@ const content = ref('<p>Hello World</p>')
 | placeholder | 占位提示文本 | string | 请输入内容 |
 | disabled | 是否禁用 | boolean | - |
 | size | 尺寸 | string | default（继承全局 size） |
+| plainText | - | boolean | - |
 
 ### Events
 

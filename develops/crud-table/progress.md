@@ -23,3 +23,4 @@
 
 - 2026-06-13：初始实现
 - 2026-06-24：新增移动端响应式适配（≤768px），包含工具栏自动换行、分页居中，以及内部 dialog/table/form/search-form/query-builder/dynamic-form/pagination 的移动端行为适配。
+- 2026-06-29: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）

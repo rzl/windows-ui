@@ -3,14 +3,14 @@
     <div class="w-transfer__panel">
       <div class="w-transfer__header"><w-checkbox v-model="leftAll" :indeterminate="leftIndeterminate" @change="toggleLeftAll">{{ leftTitle }}</w-checkbox><span>{{ leftChecked.length }}/{{ leftData.length }}</span></div>
       <div class="w-transfer__body">
-        <w-checkbox v-for="item in leftData" :key="item.key" v-model="leftChecked" :label="item.key">{{ item.label }}</w-checkbox>
+        <w-checkbox v-for="item in leftData" :key="item.key" v-model="leftChecked" :label="item.key" :disabled="item.disabled">{{ item.label }}</w-checkbox>
       </div>
     </div>
     <div class="w-transfer__buttons"><w-button size="small" :disabled="!leftChecked.length" @click="toRight">&gt;</w-button><w-button size="small" :disabled="!rightChecked.length" @click="toLeft">&lt;</w-button></div>
     <div class="w-transfer__panel">
       <div class="w-transfer__header"><w-checkbox v-model="rightAll" :indeterminate="rightIndeterminate" @change="toggleRightAll">{{ rightTitle }}</w-checkbox><span>{{ rightChecked.length }}/{{ rightData.length }}</span></div>
       <div class="w-transfer__body">
-        <w-checkbox v-for="item in rightData" :key="item.key" v-model="rightChecked" :label="item.key">{{ item.label }}</w-checkbox>
+        <w-checkbox v-for="item in rightData" :key="item.key" v-model="rightChecked" :label="item.key" :disabled="item.disabled">{{ item.label }}</w-checkbox>
       </div>
     </div>
   </div>

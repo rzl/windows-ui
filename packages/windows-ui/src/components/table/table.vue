@@ -195,9 +195,14 @@
           :key="item.key"
         >
           <tr
-            :class="rowClass(item.row, virtualStartIndex + ri)"
+            :class="[rowClass(item.row, virtualStartIndex + ri), { 'is-drag-over': dragOverRowKey === item.key }]"
+            :draggable="props.rowDraggable"
             @click="handleRowClick(item.row, virtualStartIndex + ri)"
             @dblclick="handleRowDblclick(item.row, virtualStartIndex + ri)"
+            @dragstart.stop="handleRowDragStart($event, item)"
+            @dragover.stop="handleRowDragOver($event, item)"
+            @drop.stop="handleRowDrop($event, item)"
+            @dragend.stop="handleRowDragEnd"
           >
             <td
               v-for="(col, ci) in renderColumns"
@@ -272,7 +277,7 @@
         <tr v-if="!computedFlatRows.length">
           <td :colspan="totalColSpan" class="w-table__empty">
             <slot name="empty">
-              <w-empty :description="emptyText || '暂无数据'" />
+              <w-empty :description="emptyText || t('暂无数据')" />
             </slot>
           </td>
         </tr>
@@ -288,6 +293,7 @@ import WCheckbox from '../checkbox/checkbox.vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { useLocale } from '../../locale'
 
 defineOptions({ name: 'WTable' })
 
@@ -347,9 +353,11 @@ const props = defineProps({
   height: { type: [String, Number] as PropType<string | number>, default: '' },
   virtualX: Boolean,
   storageKey: { type: String, default: '' },
-  columnDraggable: Boolean
+  columnDraggable: Boolean,
+  rowDraggable: Boolean
 })
 const globalSize = useGlobalSize()
+const { t } = useLocale()
 const size = computed(() => props.size || globalSize.value)
 
 const emit = defineEmits([
@@ -363,7 +371,8 @@ const emit = defineEmits([
   'filter-change',
   'current-change',
   'expand-change',
-  'column-order-change'
+  'column-order-change',
+  'row-order-change'
 ])
 
 // ----- 多级表头辅助函数 -----
@@ -784,6 +793,49 @@ const stopResize = () => {
 // ----- 列排序拖拽 -----
 const dragColKey = ref<string | null>(null)
 const dragOverColKey = ref<string | null>(null)
+
+// ----- 行拖拽排序 -----
+const dragRowKey = ref<string | number | null>(null)
+const dragOverRowKey = ref<string | number | null>(null)
+
+const handleRowDragStart = (e: DragEvent, item: any) => {
+  if (!props.rowDraggable) {
+    e.preventDefault()
+    return
+  }
+  dragRowKey.value = item.key
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(item.key))
+  }
+}
+
+const handleRowDragOver = (e: DragEvent, item: any) => {
+  if (!props.rowDraggable || !dragRowKey.value) return
+  if (item.key === dragRowKey.value) return
+  e.preventDefault()
+  dragOverRowKey.value = item.key
+}
+
+const handleRowDrop = (e: DragEvent, targetItem: any) => {
+  if (!props.rowDraggable || !dragRowKey.value) return
+  if (targetItem.key === dragRowKey.value) return
+  e.preventDefault()
+  const rows = [...flatRows.value]
+  const fromIndex = rows.findIndex(r => r.key === dragRowKey.value)
+  const toIndex = rows.findIndex(r => r.key === targetItem.key)
+  if (fromIndex === -1 || toIndex === -1) return
+  const [moved] = rows.splice(fromIndex, 1)
+  rows.splice(toIndex, 0, moved)
+  dragRowKey.value = null
+  dragOverRowKey.value = null
+  emit('row-order-change', rows.map(r => r.row))
+}
+
+const handleRowDragEnd = () => {
+  dragRowKey.value = null
+  dragOverRowKey.value = null
+}
 
 function isDraggableColumn(col: any) {
   return props.columnDraggable && col && !col.__isPadding && !col.fixed && col.type !== 'selection' && col.type !== 'expand'
@@ -1477,6 +1529,8 @@ defineExpose({ resetColumnWidths })
 .w-table__resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 10; }
 .w-table__resize-handle:hover { background: var(--w-color-primary); opacity: 0.4; }
 .w-table th.is-drag-over { background: var(--w-color-primary); color: #fff; }
+.w-table tr.is-drag-over td { border-bottom: 2px solid var(--w-color-primary); }
+.w-table tr[draggable="true"] { cursor: move; }
 
 /* table layout */
 .w-table table { width: 100%; }

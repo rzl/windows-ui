@@ -34,6 +34,7 @@ import { WCarousel, WCarouselItem } from '@windows-ui/core'
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | items | 菜单项列表 | array | [] |
+| height | 高度 | - | 200px |
 | autoplay | - | boolean | true |
 | interval | - | number | 3000 |
 | showIndicators | - | boolean | true |

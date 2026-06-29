@@ -101,6 +101,7 @@ const visible = ref(false)
 | closeOnClickModal | 点击遮罩是否关闭 | boolean | true |
 | draggable | 是否可拖拽 | boolean | true |
 | fullscreen | 是否全屏 | boolean | false |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Events
 

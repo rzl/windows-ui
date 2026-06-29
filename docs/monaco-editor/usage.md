@@ -48,9 +48,13 @@ const code = ref('function hello() {\n  console.log("Hello Monaco")\n}')
 |--------|------|------|--------|
 | modelValue | 绑定值（支持 v-model） | string |  |
 | language | - | string | javascript |
-| height | 高度 | number | 300 |
+| height | 高度 | - | 300 |
+| width | 宽度 | - | 100% |
 | readOnly | - | boolean | false |
 | cdn | - | string |  |
+| theme | - | string | vs |
+| options | 选项数据 | object | {} |
+| loading | 是否加载中 | boolean | false |
 
 ### Events
 

@@ -1,5 +1,5 @@
 <template>
-  <a :class="['w-link', `w-link--${type}`, `w-link--${size}`, { 'is-underline': underline, 'is-disabled': disabled }]" :href="disabled ? undefined : href" @click="handleClick">
+  <a :class="['w-link', `w-link--${type}`, `w-link--${size}`, { 'is-underline': underline, 'is-disabled': disabled }]" :href="disabled ? undefined : href" :target="disabled ? undefined : target" @click="handleClick">
     <w-icon v-if="icon" :name="icon" :size="size" />
     <slot />
   </a>
@@ -10,7 +10,7 @@ import { computed } from 'vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WLink' })
-const props = defineProps({ type: { type: String, default: 'default' }, underline: { type: Boolean, default: true }, disabled: Boolean, href: String, icon: String, size: { type: String, default: undefined } })
+const props = defineProps({ type: { type: String, default: 'default' }, underline: { type: Boolean, default: true }, disabled: Boolean, href: String, target: String, icon: String, size: { type: String, default: undefined } })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['click'])

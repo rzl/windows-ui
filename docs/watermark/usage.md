@@ -23,7 +23,10 @@ import { WWatermark } from '@windows-ui/core'
 | content | 内容 | string | Watermark |
 | fontSize | - | number | 14 |
 | color | 文字颜色 | string | rgba(0,0,0,0.1) |
+| font | - | object | {} |
 | rotate | - | number | -30 |
+| gap | - | array | {} |
+| zIndex | 层级 | number | 1000 |
 
 ### Slots
 

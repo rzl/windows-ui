@@ -29,6 +29,15 @@ const breadcrumb = [
 |--------|------|------|--------|
 | title | 标题 | string |  |
 | breadcrumb | - | array | [] |
+| tabs | - | array | [] |
+| modelValue | 绑定值（支持 v-model） | string |  |
+
+### Events
+
+| 事件名 | 说明 | 回调参数 |
+|--------|------|----------|
+| update:modelValue | 绑定值更新 | value |
+| tab-change | - | - |
 
 ### Slots
 

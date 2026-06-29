@@ -328,12 +328,14 @@ async function loadRefOptions(modelCode, displayField, keyword, relationCode) {
 | model | - | object | {} |
 | fields | - | array | [] |
 | columns | 列配置 | number | 1 |
-| mobileColumns | 移动端列数 | number | 1 |
 | layout | 布局 | object | - |
+| mobileColumns | - | number | 1 |
 | validateRules | - | function | - |
 | loadOptions | - | function | - |
 | loadRefOptions | - | function | - |
 | userInfo | - | object | - |
+| parentModel | - | object | - |
+| urlParams | - | object | - |
 | generateCode | - | function | - |
 | uploadRequest | - | function | - |
 

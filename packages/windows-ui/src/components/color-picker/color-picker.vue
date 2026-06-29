@@ -5,7 +5,7 @@
       <span>{{ modelValue || '选择颜色' }}</span>
     </div>
     <div v-show="open" class="w-color-picker__popper">
-      <w-color-picker-panel @change="handleChange" />
+      <w-color-picker-panel :model-value="modelValue" @update:model-value="handleChange" @change="handleChange" />
     </div>
   </div>
 </template>

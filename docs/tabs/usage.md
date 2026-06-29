@@ -25,7 +25,7 @@ const activeName = ref('first')
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | tabs | - | array | [] |
-| modelValue | 绑定值（支持 v-model） | number | 0 |
+| modelValue | 绑定值（支持 v-model） | - | 0 |
 | size | 尺寸 | string | default（继承全局 size） |
 
 ### Events

@@ -27,6 +27,7 @@ import { WImage } from '@windows-ui/core'
 | width | 宽度 | string/number | - |
 | height | 高度 | string/number | - |
 | previewable | - | boolean | - |
+| previewSrcList | 预览图片列表 | array | [] |
 
 ## 主题定制
 

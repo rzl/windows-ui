@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import WInput from '../input/input.vue'
 import WButton from '../button/button.vue'
 import { useGlobalSize } from '../../utils/prefix'
@@ -28,6 +28,13 @@ const hour = ref(parts[0] || 0)
 const minute = ref(parts[1] || 0)
 const second = ref(parts[2] || 0)
 const displayValue = computed(() => props.modelValue || '')
+const syncFromModel = (v?: string) => {
+  const parts = v?.split(':').map(Number) || [0, 0, 0]
+  hour.value = parts[0] || 0
+  minute.value = parts[1] || 0
+  second.value = parts[2] || 0
+}
+watch(() => props.modelValue, syncFromModel)
 const confirm = () => { const val = `${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')}:${String(second.value).padStart(2, '0')}`; emit('update:modelValue', val); emit('change', val); open.value = false }
 const handleClear = () => { emit('update:modelValue', ''); emit('change', ''); emit('clear') }
 const close = () => { open.value = false }

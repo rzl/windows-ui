@@ -30,6 +30,12 @@ const handleClick = () => {
 | visible | 是否可见 | boolean | - |
 | text | 文本内容 | string | - |
 
+### 指令绑定值
+
+| 绑定值 | 说明 | 类型 |
+|--------|------|------|
+| v-loading | 是否显示加载遮罩，可传布尔值、提示文本字符串或 `{ visible, text }` 对象 | boolean / string / object |
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

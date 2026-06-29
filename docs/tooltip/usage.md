@@ -21,6 +21,8 @@ import { WTooltip, WButton } from '@windows-ui/core'
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
 | content | 内容 | string | - |
+| placement | 弹出位置 | string | top |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Slots
 

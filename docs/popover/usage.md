@@ -25,6 +25,7 @@ import { WPopover, WButton } from '@windows-ui/core'
 | placement | 弹出位置 | string | bottom |
 | trigger | 触发方式 | string | click |
 | width | 宽度 | - |  |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Slots
 

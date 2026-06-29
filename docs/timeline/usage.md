@@ -28,6 +28,12 @@ import { WTimeline, WTimelineItem, WCard } from '@windows-ui/core'
 | items | 菜单项列表 | array | [] |
 | size | 尺寸 | string | default（继承全局 size） |
 
+### Slots
+
+| 插槽名 | 说明 |
+|--------|------|
+| default | 默认内容 |
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

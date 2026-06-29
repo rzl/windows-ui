@@ -1,23 +1,27 @@
 <template>
   <div :class="['w-steps', `w-steps--${size}`]">
-    <div v-for="(step, i) in items" :key="i" :class="['w-steps__item', { 'is-finish': i < active, 'is-active': i === active, 'is-wait': i > active }]">
+    <template v-if="items.length">
+      <div v-for="(step, i) in items" :key="i" :class="['w-steps__item', { 'is-finish': i < active, 'is-active': i === active, 'is-wait': i > active }]">
       <div class="w-steps__icon">{{ i < active ? '✓' : i + 1 }}</div>
       <div class="w-steps__content">
         <div class="w-steps__title">{{ step.title }}</div>
         <div v-if="step.description" class="w-steps__desc">{{ step.description }}</div>
       </div>
       <div v-if="i < items.length - 1" class="w-steps__line" />
-    </div>
+      </div>
+    </template>
+    <slot v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, provide } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WSteps' })
 const props = defineProps({ items: { type: Array as () => { title: string; description?: string }[], default: () => [] }, active: { type: Number, default: 0 }, size: { type: String, default: undefined } })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
+provide('steps', { active: computed(() => props.active), size })
 </script>
 
 <style scoped>

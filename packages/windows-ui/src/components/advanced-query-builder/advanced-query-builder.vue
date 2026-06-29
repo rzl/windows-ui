@@ -26,6 +26,8 @@ export interface AdvancedQueryField {
   prop: string
   label: string
   type?: string
+  options?: { label: string; value: any }[]
+  async?: boolean
 }
 
 export interface AdvancedCondition {
@@ -70,7 +72,9 @@ defineOptions({ name: 'WAdvancedQueryBuilder' })
 
 const props = defineProps({
   modelValue: { type: Object as PropType<AdvancedConditionGroup | null>, default: null },
-  fields: { type: Array as PropType<AdvancedQueryField[]>, default: () => [] }
+  fields: { type: Array as PropType<AdvancedQueryField[]>, default: () => [] },
+  maxLevel: { type: Number, default: 5 },
+  operators: { type: Array as PropType<{ label: string; value: string }[]>, default: () => [] }
 })
 
 const emit = defineEmits(['update:modelValue', 'search', 'reset'])
@@ -112,6 +116,7 @@ watch(
 )
 
 function getOperatorsByFieldType(type?: string): { label: string; value: string }[] {
+  if (props.operators.length) return props.operators
   const ops = getAvailableOperators(type)
   return ALL_OPERATORS.filter((o) => ops.includes(o.value))
 }

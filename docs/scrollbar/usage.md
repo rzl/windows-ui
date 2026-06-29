@@ -14,14 +14,41 @@ import { WScrollbar } from '@windows-ui/core'
 </script>
 ```
 
+## 始终显示滚动条
+
+设置 `always` 后，当内容溢出时会始终显示滚动条轨道。
+
+```vue
+<template>
+  <w-scrollbar height="200px" always>
+    <p v-for="item in 20" :key="item">{{ item }}</p>
+  </w-scrollbar>
+</template>
+```
+
+## 使用原生滚动条
+
+设置 `native` 后，组件退化为原生滚动条容器。
+
+```vue
+<template>
+  <w-scrollbar height="200px" native>
+    <p v-for="item in 20" :key="item">{{ item }}</p>
+  </w-scrollbar>
+</template>
+```
+
 ## API
 
 ### Props
 
 | 属性名 | 说明 | 类型 | 默认值 |
 |--------|------|------|--------|
-| height | 高度 | - |  |
-| maxHeight | 最大高度 | - |  |
+| height | 高度 | string/number | - |
+| maxHeight | 最大高度 | string/number | - |
+| native | 是否使用原生滚动条 | boolean | false |
+| always | 是否始终显示滚动条 | boolean | false |
+| barSize | 滚动条轨道宽度（px） | number | 12 |
 
 ### Slots
 

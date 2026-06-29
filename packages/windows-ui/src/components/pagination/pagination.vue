@@ -9,12 +9,21 @@
     >{{ p }}</span>
     <w-button :size="size" :disabled="currentPage >= totalPages" @click="next">{{ t('下一页') }}</w-button>
     <span class="w-pagination__total">{{ totalText }}</span>
+    <w-select
+      v-if="props.pageSizes.length"
+      :model-value="props.pageSize"
+      :options="pageSizeOptions"
+      :size="size"
+      class="w-pagination__sizes"
+      @change="handleSizeChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import WButton from '../button/button.vue'
+import WSelect from '../select/select.vue'
 import { useGlobalSize } from '../../utils/prefix'
 import { useLocale } from '../../locale'
 
@@ -23,12 +32,14 @@ const props = defineProps({
   currentPage: { type: Number, default: 1 },
   pageSize: { type: Number, default: 10 },
   total: { type: Number, default: 0 },
-  size: { type: String, default: undefined }
+  size: { type: String, default: undefined },
+  pageSizes: { type: Array as () => number[], default: () => [10, 20, 50, 100] }
 })
 const globalSize = useGlobalSize()
 const { t } = useLocale()
 const size = computed(() => props.size || globalSize.value)
 const totalText = computed(() => t('共多少条', { total: props.total }))
+const pageSizeOptions = computed(() => props.pageSizes.map(s => ({ label: `${s}${t('条/页')}`, value: s })))
 
 const emit = defineEmits(['update:current-page', 'change', 'update:page-size'])
 
@@ -45,6 +56,7 @@ const pages = computed(() => {
 const prev = () => { if (props.currentPage > 1) goTo(props.currentPage - 1) }
 const next = () => { if (props.currentPage < totalPages.value) goTo(props.currentPage + 1) }
 const goTo = (p: number) => { emit('update:current-page', p); emit('change', p) }
+const handleSizeChange = (size: number) => { emit('update:page-size', size); emit('change', props.currentPage) }
 </script>
 
 <style scoped>
@@ -53,6 +65,7 @@ const goTo = (p: number) => { emit('update:current-page', p); emit('change', p) 
 .w-pagination__page:hover { background: var(--w-xp-blue-light); color: #fff; border-color: var(--w-xp-blue); }
 .w-pagination__page.is-active { background: var(--w-color-primary); color: #fff; border-color: var(--w-color-primary); }
 .w-pagination__total { font-size: var(--w-font-size-small); color: var(--w-text-color-secondary); margin-left: 8px; }
+.w-pagination__sizes { width: 90px; margin-left: 8px; }
 .w-pagination--small .w-pagination__page { padding: 1px 6px; height: var(--w-component-size-small); min-width: var(--w-component-size-small); font-size: var(--w-font-size-small); }
 .w-pagination--small .w-pagination__total { font-size: var(--w-font-size-extra-small); }
 .w-pagination--large .w-pagination__page { padding: 4px 10px; height: var(--w-component-size-large); min-width: var(--w-component-size-large); font-size: var(--w-font-size-medium); }

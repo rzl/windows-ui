@@ -123,6 +123,31 @@ interface AdvancedConditionGroup {
 | isNull | 为空 |
 | isNotNull | 不为空 |
 
+## 最大层级
+
+通过 `maxLevel` 限制条件分组的最大嵌套层级，超出后不再允许添加子分组。
+
+```vue
+<w-advanced-query-builder v-model="query" :fields="fields" :max-level="3" />
+```
+
+## 自定义运算符
+
+可通过 `operators` 传入自定义运算符列表，覆盖默认运算符。每个运算符对象包含 `value` 与 `label`：
+
+```vue
+<template>
+  <w-advanced-query-builder v-model="query" :fields="fields" :operators="operators" />
+</template>
+
+<script setup>
+const operators = [
+  { value: 'eq', label: '等于' },
+  { value: 'contains', label: '包含' }
+]
+</script>
+```
+
 ## Slots
 
 | 插槽名 | 说明 |
@@ -136,6 +161,31 @@ interface AdvancedConditionGroup {
 ## 移动端适配
 
 当视口宽度 ≤768px 时，条件行会切换为垂直堆叠，每个选择器与输入框占满可用宽度，便于触控操作。
+
+## API
+
+### Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| modelValue | 绑定值（支持 v-model） | object | null |
+| fields | - | array | [] |
+| maxLevel | - | number | 5 |
+| operators | - | array | [] |
+
+### Events
+
+| 事件名 | 说明 | 回调参数 |
+|--------|------|----------|
+| update:modelValue | 绑定值更新 | value |
+| search | - | - |
+| reset | - | - |
+
+### Slots
+
+| 插槽名 | 说明 |
+|--------|------|
+| toolbar | 工具栏插槽 |
 
 ## 主题定制
 

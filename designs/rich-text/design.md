@@ -18,6 +18,7 @@
 - 小尺寸：24px（`--w-component-size-small`）
 - 大尺寸：40px（`--w-component-size-large`）
 - 组件内部图标（如有）随组件 size 联动
+
 ## 交互设计
 
 - 点击工具栏按钮对选区应用格式（加粗/斜体/下划线）

@@ -788,6 +788,33 @@ const tableData = [
 </script>
 ```
 
+### 行拖拽排序
+
+设置 `row-draggable` 后，表格行支持拖拽排序，排序完成后触发 `row-order-change` 事件。
+
+```vue
+<template>
+  <w-table :data="tableData" :columns="columns" row-draggable @row-order-change="onRowOrderChange" />
+</template>
+
+<script setup>
+import { WTable } from '@windows-ui/core'
+
+const columns = [
+  { prop: 'name', label: '姓名' },
+  { prop: 'age', label: '年龄' }
+]
+const tableData = [
+  { id: 1, name: '张三', age: 28 },
+  { id: 2, name: '李四', age: 32 }
+]
+
+const onRowOrderChange = (newData) => {
+  console.log('排序后数据：', newData)
+}
+</script>
+```
+
 ## 移动端适配
 
 当视口宽度 ≤ 768px（典型移动端屏幕）时，表格会自动切换为移动端展示模式：
@@ -825,8 +852,9 @@ const tableData = [
 | rowHeight | - | number | 40 |
 | height | 高度 | - |  |
 | virtualX | - | boolean | - |
-| storageKey | 列宽/列顺序持久化存储键 | string | '' |
-| columnDraggable | 是否启用列拖拽排序 | boolean | false |
+| storageKey | - | string |  |
+| columnDraggable | - | boolean | - |
+| rowDraggable | - | boolean | - |
 
 ### Events
 
@@ -842,13 +870,8 @@ const tableData = [
 | filter-change | 筛选改变时触发 | filters |
 | current-change | 当前页改变时触发 | currentPage |
 | expand-change | 展开行改变时触发 | (row, expandedRows) |
-| column-order-change | 列顺序改变时触发 | string[] |
-
-### Methods
-
-| 方法名 | 说明 | 参数 |
-|--------|------|------|
-| resetColumnWidths | 清除当前 storageKey 下的列宽与顺序缓存，恢复默认 | - |
+| column-order-change | - | - |
+| row-order-change | - | - |
 
 ### Slots
 
@@ -857,6 +880,12 @@ const tableData = [
 | default | 默认内容 |
 | empty | 空状态插槽 |
 | expand | 展开行内容 |
+
+### Methods
+
+| 方法名 | 说明 |
+|--------|------|
+| resetColumnWidths | 组件暴露的方法 |
 
 ## 主题定制
 

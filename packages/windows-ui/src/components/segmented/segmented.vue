@@ -1,6 +1,6 @@
 <template>
   <div :class="['w-segmented', `w-segmented--${size}`]">
-    <div v-for="opt in options" :key="opt.value" :class="['w-segmented__item', { 'is-active': modelValue === opt.value, 'is-disabled': opt.disabled }]" @click="select(opt)">
+    <div v-for="opt in normalizedOptions" :key="opt.value" :class="['w-segmented__item', { 'is-active': modelValue === opt.value, 'is-disabled': opt.disabled }]" @click="select(opt)">
       <w-icon v-if="opt.icon" :name="opt.icon" :size="size" />
       <span>{{ opt.label }}</span>
     </div>
@@ -15,12 +15,17 @@ import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WSegmented' })
 const props = defineProps({
   modelValue: [String, Number] as any,
-  options: { type: Array as () => { label: string; value: any; icon?: string; disabled?: boolean }[], default: () => [] },
+  options: { type: Array as () => (string | { label: string; value: any; icon?: string; disabled?: boolean })[], default: () => [] },
   size: { type: String, default: undefined }
 })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
+
+const normalizedOptions = computed(() => props.options.map(opt => {
+  if (typeof opt === 'string' || typeof opt === 'number') return { label: String(opt), value: opt, icon: undefined, disabled: false }
+  return opt as { label: string; value: any; icon?: string; disabled?: boolean }
+}))
 
 const select = (opt: any) => { if (opt.disabled) return; emit('update:modelValue', opt.value); emit('change', opt.value) }
 </script>

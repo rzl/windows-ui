@@ -1,7 +1,7 @@
 <template>
   <label :class="['w-radio', `w-radio--${size}`, { 'is-checked': isChecked, 'is-disabled': disabled }]">
     <span class="w-radio__input">
-      <input type="radio" :checked="isChecked" :disabled="disabled" :value="label" :name="name" @change="handleChange" />
+      <input type="radio" :checked="isChecked" :disabled="isDisabled" :value="label" :name="inputName" @change="handleChange" />
       <span class="w-radio__inner" />
     </span>
     <span class="w-radio__label"><slot>{{ label }}</slot></span>
@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WRadio' })
@@ -21,12 +21,19 @@ const props = defineProps({
   size: { type: String, default: undefined }
 })
 const globalSize = useGlobalSize()
-const size = computed(() => props.size || globalSize.value)
+const group = inject<any>('radioGroup', null)
+const size = computed(() => props.size || group?.size?.value || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 
-const isChecked = computed(() => props.modelValue === props.label)
+const isChecked = computed(() => (group ? group.modelValue.value === props.label : props.modelValue === props.label))
+const isDisabled = computed(() => props.disabled || group?.disabled?.value)
+const inputName = computed(() => props.name || group?.name?.value)
 
 const handleChange = () => {
+  if (group) {
+    group.change(props.label)
+    return
+  }
   emit('update:modelValue', props.label)
   emit('change', props.label)
 }

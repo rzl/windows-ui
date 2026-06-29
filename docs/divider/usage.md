@@ -26,6 +26,8 @@ import { WDivider } from '@windows-ui/core'
 |--------|------|------|--------|
 | direction | 方向 | string | horizontal |
 | content | 内容 | string | - |
+| contentPosition | 内容位置 | string | center |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Slots
 

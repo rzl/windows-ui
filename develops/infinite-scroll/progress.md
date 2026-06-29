@@ -10,7 +10,7 @@
 - [x] Events 定义
 - [x] 基础交互逻辑
 - [x] 示例代码
-
+- [x] v-infinite-scroll 指令
 ## 待优化项
 - [ ] 单元测试覆盖
 - [ ] 性能优化
@@ -19,4 +19,4 @@
 
 ## 变更记录
 - 2024-06-01: 初始版本实现
-- 2026-06-12: 统一尺寸规范：新增 size 支持，组件高度与内部图标随尺寸联动（small/default/large）
+- 2026-06-29: 新增 v-infinite-scroll 指令支持，支持 disabled/distance/immediate 属性

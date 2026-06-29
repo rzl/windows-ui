@@ -16,6 +16,8 @@
     let editor = null
     let language = 'javascript'
     let readOnly = false
+    let theme = 'vs'
+    let options = {}
 
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } })
 
@@ -27,10 +29,11 @@
         editor = monaco.editor.create(document.getElementById('container'), {
           value: value || '',
           language: language,
-          theme: 'vs',
+          theme: theme,
           automaticLayout: true,
           minimap: { enabled: false },
-          readOnly: readOnly
+          readOnly: readOnly,
+          ...(options || {})
         })
         editor.onDidChangeModelContent(function () {
           window.parent.postMessage({ type: 'change', value: editor.getValue() }, '*')
@@ -44,11 +47,19 @@
       if (data.type === 'init') {
         language = data.language || 'javascript'
         readOnly = !!data.readOnly
+        theme = data.theme || 'vs'
+        options = data.options || {}
         initEditor(data.value || '')
       } else if (data.type === 'setValue' && editor) {
         editor.setValue(data.value || '')
       } else if (data.type === 'setLanguage' && editor) {
         monaco.editor.setModelLanguage(editor.getModel(), data.language || 'javascript')
+      } else if (data.type === 'setTheme' && editor) {
+        theme = data.theme || 'vs'
+        monaco.editor.setTheme(theme)
+      } else if (data.type === 'setOptions' && editor) {
+        options = data.options || {}
+        editor.updateOptions(options)
       }
     })
 

@@ -32,6 +32,7 @@ import { WCard, WButton } from '@windows-ui/core'
 | header | 头部内容 | string | - |
 | hover | - | boolean | - |
 | shadow | - | string | always |
+| size | 尺寸 | string | default（继承全局 size） |
 
 ### Slots
 

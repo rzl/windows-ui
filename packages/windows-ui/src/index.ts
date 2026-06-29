@@ -3,6 +3,9 @@ import './styles/variables.css'
 import './styles/base.css'
 import './styles/dark.css'
 import { setGlobalLocale, registerLocale } from './locale'
+import vLoading from './directives/loading'
+import vInfiniteScroll from './directives/infinite-scroll'
+import vPermission, { setPermissionChecker } from './directives/permission'
 
 // Components
 import WButton from './components/button/button.vue'
@@ -11,6 +14,8 @@ import WColor from './components/color/color.vue'
 import WContainer from './components/container/container.vue'
 import WIcon from './components/icon/icon.vue'
 import WLayout from './components/layout/layout.vue'
+import WRow from './components/layout/row.vue'
+import WCol from './components/layout/col.vue'
 import WLink from './components/link/link.vue'
 import WText from './components/text/text.vue'
 import WScrollbar from './components/scrollbar/scrollbar.vue'
@@ -21,6 +26,7 @@ import WConfigProvider from './components/config-provider/config-provider.vue'
 import WAutocomplete from './components/autocomplete/autocomplete.vue'
 import WCascader from './components/cascader/cascader.vue'
 import WCheckbox from './components/checkbox/checkbox.vue'
+import WCheckboxGroup from './components/checkbox/checkbox-group.vue'
 import WColorPickerPanel from './components/color-picker-panel/color-picker-panel.vue'
 import WColorPicker from './components/color-picker/color-picker.vue'
 import WDatePickerPanel from './components/date-picker-panel/date-picker-panel.vue'
@@ -34,6 +40,7 @@ import WInputTag from './components/input-tag/input-tag.vue'
 import WInputOTP from './components/input-otp/input-otp.vue'
 import WMention from './components/mention/mention.vue'
 import WRadio from './components/radio/radio.vue'
+import WRadioGroup from './components/radio/radio-group.vue'
 import WRate from './components/rate/rate.vue'
 import WSelect from './components/select/select.vue'
 import WVirtualizedSelect from './components/virtualized-select/virtualized-select.vue'
@@ -50,7 +57,9 @@ import WBadge from './components/badge/badge.vue'
 import WCalendar from './components/calendar/calendar.vue'
 import WCard from './components/card/card.vue'
 import WCarousel from './components/carousel/carousel.vue'
+import WCarouselItem from './components/carousel/carousel-item.vue'
 import WCollapse from './components/collapse/collapse.vue'
+import WCollapseItem from './components/collapse/collapse-item.vue'
 import WDescriptions from './components/descriptions/descriptions.vue'
 import WDescriptionsItem from './components/descriptions/descriptions-item.vue'
 import WEmpty from './components/empty/empty.vue'
@@ -65,6 +74,7 @@ import type { ColumnItem } from './components/table/table.vue'
 import WVirtualizedTable from './components/virtualized-table/virtualized-table.vue'
 import WTag from './components/tag/tag.vue'
 import WTimeline from './components/timeline/timeline.vue'
+import WTimelineItem from './components/timeline/timeline-item.vue'
 import WTour from './components/tour/tour.vue'
 import WTree from './components/tree/tree.vue'
 import WVirtualizedTree from './components/virtualized-tree/virtualized-tree.vue'
@@ -74,11 +84,16 @@ import WAffix from './components/affix/affix.vue'
 import WAnchor from './components/anchor/anchor.vue'
 import WBacktop from './components/backtop/backtop.vue'
 import WBreadcrumb from './components/breadcrumb/breadcrumb.vue'
+import WBreadcrumbItem from './components/breadcrumb/breadcrumb-item.vue'
 import WDropdown from './components/dropdown/dropdown.vue'
+import WDropdownMenu from './components/dropdown/dropdown-menu.vue'
+import WDropdownItem from './components/dropdown/dropdown-item.vue'
 import WMenu from './components/menu/menu.vue'
 import WPageHeader from './components/page-header/page-header.vue'
 import WSteps from './components/steps/steps.vue'
+import WStep from './components/steps/step.vue'
 import WTabs from './components/tabs/tabs.vue'
+import WTabPane from './components/tabs/tab-pane.vue'
 import WAlert from './components/alert/alert.vue'
 import WDialog from './components/dialog/dialog.vue'
 import WDrawer from './components/drawer/drawer.vue'
@@ -108,6 +123,8 @@ const components = [
   WContainer,
   WIcon,
   WLayout,
+  WRow,
+  WCol,
   WLink,
   WText,
   WScrollbar,
@@ -118,6 +135,7 @@ const components = [
   WAutocomplete,
   WCascader,
   WCheckbox,
+  WCheckboxGroup,
   WColorPickerPanel,
   WColorPicker,
   WDatePickerPanel,
@@ -131,6 +149,7 @@ const components = [
   WInputOTP,
   WMention,
   WRadio,
+  WRadioGroup,
   WRate,
   WSelect,
   WVirtualizedSelect,
@@ -147,7 +166,9 @@ const components = [
   WCalendar,
   WCard,
   WCarousel,
+  WCarouselItem,
   WCollapse,
+  WCollapseItem,
   WDescriptions,
   WDescriptionsItem,
   WEmpty,
@@ -161,6 +182,7 @@ const components = [
   WVirtualizedTable,
   WTag,
   WTimeline,
+  WTimelineItem,
   WTour,
   WTree,
   WVirtualizedTree,
@@ -170,11 +192,16 @@ const components = [
   WAnchor,
   WBacktop,
   WBreadcrumb,
+  WBreadcrumbItem,
   WDropdown,
+  WDropdownMenu,
+  WDropdownItem,
   WMenu,
   WPageHeader,
   WSteps,
+  WStep,
   WTabs,
+  WTabPane,
   WAlert,
   WDialog,
   WDrawer,
@@ -201,17 +228,24 @@ const components = [
 export interface WindowsUIOptions {
   locale?: string
   messages?: Record<string, string>
+  permission?: { has: (code: string) => boolean }
 }
 
 function install(app: App, options?: WindowsUIOptions) {
   components.forEach((component) => {
     app.component(component.name as string, component)
   })
+  app.directive('loading', vLoading)
+  app.directive('infinite-scroll', vInfiniteScroll)
+  app.directive('permission', vPermission)
   if (options?.locale) {
     if (options.messages) {
       registerLocale(options.locale, options.messages)
     }
     setGlobalLocale(options.locale)
+  }
+  if (options?.permission?.has) {
+    setPermissionChecker(options.permission.has)
   }
 }
 
@@ -222,6 +256,8 @@ export {
   WContainer,
   WIcon,
   WLayout,
+  WRow,
+  WCol,
   WLink,
   WText,
   WScrollbar,
@@ -232,6 +268,7 @@ export {
   WAutocomplete,
   WCascader,
   WCheckbox,
+  WCheckboxGroup,
   WColorPickerPanel,
   WColorPicker,
   WDatePickerPanel,
@@ -245,6 +282,7 @@ export {
   WInputOTP,
   WMention,
   WRadio,
+  WRadioGroup,
   WRate,
   WSelect,
   WVirtualizedSelect,
@@ -261,7 +299,9 @@ export {
   WCalendar,
   WCard,
   WCarousel,
+  WCarouselItem,
   WCollapse,
+  WCollapseItem,
   WDescriptions,
   WDescriptionsItem,
   WEmpty,
@@ -276,6 +316,7 @@ export {
   WVirtualizedTable,
   WTag,
   WTimeline,
+  WTimelineItem,
   WTour,
   WTree,
   WVirtualizedTree,
@@ -285,11 +326,16 @@ export {
   WAnchor,
   WBacktop,
   WBreadcrumb,
+  WBreadcrumbItem,
   WDropdown,
+  WDropdownMenu,
+  WDropdownItem,
   WMenu,
   WPageHeader,
   WSteps,
+  WStep,
   WTabs,
+  WTabPane,
   WAlert,
   WDialog,
   WDrawer,
@@ -318,6 +364,9 @@ export type { DynamicField } from './components/dynamic-form/dynamic-form.vue'
 export type { QueryField, QueryCondition } from './components/query-builder/query-builder.vue'
 export type { AdvancedQueryField, AdvancedCondition, AdvancedConditionGroup, AdvancedQueryCondition } from './components/advanced-query-builder/advanced-query-builder.vue'
 export type { LinkageRule, LinkageCondition, LinkageAction } from './components/dynamic-form/dynamic-form.vue'
+export { vLoading, vInfiniteScroll, vPermission }
+export { setPermissionChecker, clearPermissionChecker } from './directives/permission'
+export type { LoadingBindingValue } from './directives/loading'
 export {
   useLocale,
   setGlobalLocale,

@@ -18,6 +18,7 @@ Others / 管理后台通用组件
 - 小尺寸：24px（`--w-component-size-small`）
 - 大尺寸：40px（`--w-component-size-large`）
 - 组件内部图标（如有）随组件 size 联动
+
 ## 交互设计
 
 - 点击"查询"触发 search 事件

@@ -1,12 +1,12 @@
 <template>
-  <component :is="tag" :class="['w-text', `w-text--${size}`, `w-text--${type}`]"><slot /></component>
+  <component :is="tag" :class="['w-text', `w-text--${size}`, `w-text--${type}`, { 'is-truncated': truncated }]"><slot /></component>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WText' })
-const props = defineProps({ tag: { type: String, default: 'span' }, size: { type: String, default: undefined }, type: { type: String, default: 'default' } })
+const props = defineProps({ tag: { type: String, default: 'span' }, size: { type: String, default: undefined }, type: { type: String, default: 'default' }, truncated: Boolean })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 </script>
@@ -21,4 +21,5 @@ const size = computed(() => props.size || globalSize.value)
 .w-text--warning { color: var(--w-color-warning); }
 .w-text--danger { color: var(--w-color-danger); }
 .w-text--info { color: var(--w-color-info); }
+.w-text.is-truncated { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 </style>

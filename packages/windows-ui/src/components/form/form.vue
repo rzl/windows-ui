@@ -14,14 +14,16 @@ export interface FormRule {
   pattern?: RegExp
   min?: number
   max?: number
-  validator?: (value: any) => boolean | string
+  validator?: (value: any) => boolean | string | Promise<boolean | string>
+  asyncValidator?: (value: any) => Promise<boolean | string>
 }
 
 defineOptions({ name: 'WForm' })
 const props = defineProps({
   model: Object as () => Record<string, any>,
   rules: Object as () => Record<string, FormRule[]>,
-  size: { type: String, default: undefined }
+  size: { type: String, default: undefined },
+  labelWidth: { type: [String, Number], default: '100px' }
 })
 const emit = defineEmits(['submit', 'validate'])
 
@@ -32,6 +34,7 @@ const errors = ref<Record<string, string>>({})
 const fieldRefs = ref<any[]>([])
 
 provide('formSize', size)
+provide('formLabelWidth', computed(() => props.labelWidth))
 provide('formErrors', errors)
 provide('formModel', props.model)
 provide('formRules', props.rules)
@@ -68,7 +71,15 @@ const validate = async (): Promise<boolean> => {
         break
       }
       if (rule.validator) {
-        const result = rule.validator(value)
+        const result = await rule.validator(value)
+        if (result !== true) {
+          errors.value[prop] = typeof result === 'string' ? result : (rule.message || `${prop} 验证失败`)
+          valid = false
+          break
+        }
+      }
+      if (rule.asyncValidator) {
+        const result = await rule.asyncValidator(value)
         if (result !== true) {
           errors.value[prop] = typeof result === 'string' ? result : (rule.message || `${prop} 验证失败`)
           valid = false

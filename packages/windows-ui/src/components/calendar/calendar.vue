@@ -17,7 +17,7 @@
       >
         <span>{{ day.date }}</span>
         <div v-if="day.events?.length" class="w-calendar__events">
-          <span v-for="(_, i) in day.events.slice(0, 3)" :key="i" class="w-calendar__event" />
+          <span v-for="(evt, i) in day.events.slice(0, 2)" :key="i" class="w-calendar__event-title" :title="evt.title">{{ evt.title }}</span>
         </div>
       </div>
     </div>
@@ -92,6 +92,7 @@ const nextMonth = () => { if (currentMonth.value === 11) { currentMonth.value = 
 .w-calendar__day.is-today { font-weight: bold; color: var(--w-color-primary); border-color: var(--w-color-primary); }
 .w-calendar__day.is-selected { background: var(--w-color-primary); color: #fff; }
 .w-calendar__day:not(.is-current) { color: #a0a0a0; background: #f0f0f0; }
-.w-calendar__events { display: flex; gap: 2px; margin-top: 2px; }
-.w-calendar__event { width: 4px; height: 4px; background: var(--w-color-danger); border-radius: 50%; }
+.w-calendar__events { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; width: 100%; }
+.w-calendar__event-title { font-size: 10px; color: var(--w-color-danger); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; padding: 0 2px; }
+.w-calendar__day.is-selected .w-calendar__event-title { color: #fff; }
 </style>

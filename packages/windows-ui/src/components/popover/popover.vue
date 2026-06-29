@@ -1,5 +1,5 @@
 <template>
-  <div class="w-popover" v-click-outside="close">
+  <div :class="['w-popover', `w-popover--${size}`]" v-click-outside="close">
     <div @mouseenter="trigger === 'hover' && (open = true)" @mouseleave="trigger === 'hover' && (open = false)" @click="trigger === 'click' && (open = !open)"><slot /></div>
     <div v-show="open" class="w-popover__popper" :style="popperStyle">
       <div class="w-popover__header" v-if="title || $slots.header || $slots.action">
@@ -19,10 +19,23 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WPopover' })
-const props = defineProps({ title: String, content: String, placement: { type: String, default: 'bottom' }, trigger: { type: String, default: 'click' }, width: { type: [String, Number], default: '' } })
+const props = defineProps({ title: String, content: String, placement: { type: String, default: 'bottom' }, trigger: { type: String, default: 'click' }, width: { type: [String, Number], default: '' }, size: { type: String, default: undefined } })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 const open = ref(false)
-const popperStyle = computed(() => { const style: Record<string, string> = {}; if (props.width) style.width = typeof props.width === 'number' ? `${props.width}px` : props.width; style.top = '100%'; style.left = '50%'; style.transform = 'translateX(-50%)'; style.marginTop = '8px'; style.position = 'absolute'; return style })
+const popperStyle = computed(() => {
+  const style: Record<string, string> = { position: 'absolute' }
+  if (props.width) style.width = typeof props.width === 'number' ? `${props.width}px` : props.width
+  switch (props.placement) {
+    case 'top': style.bottom = '100%'; style.left = '50%'; style.transform = 'translateX(-50%)'; style.marginBottom = '8px'; break
+    case 'left': style.right = '100%'; style.top = '50%'; style.transform = 'translateY(-50%)'; style.marginRight = '8px'; break
+    case 'right': style.left = '100%'; style.top = '50%'; style.transform = 'translateY(-50%)'; style.marginLeft = '8px'; break
+    default: style.top = '100%'; style.left = '50%'; style.transform = 'translateX(-50%)'; style.marginTop = '8px'
+  }
+  return style
+})
 const close = () => { open.value = false }
 const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>
@@ -35,4 +48,8 @@ const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: 
 .w-popover__actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; }
 .w-popover__title { font-weight: bold; }
 .w-popover__content { font-size: var(--w-font-size-base); }
+.w-popover--small .w-popover__popper { padding: 6px; font-size: var(--w-font-size-small); }
+.w-popover--small .w-popover__title { font-size: var(--w-font-size-small); }
+.w-popover--large .w-popover__popper { padding: 14px; font-size: var(--w-font-size-medium); }
+.w-popover--large .w-popover__title { font-size: var(--w-font-size-large); }
 </style>
