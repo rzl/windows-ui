@@ -58,6 +58,14 @@
         <h3>Table 表格</h3>
         <p>{{ t('数据表格') }}</p>
       </router-link>
+      <router-link to="/data/virtualized-table" class="component-card">
+        <h3>VirtualizedTable 虚拟化表格</h3>
+        <p>{{ t('大数据量表格') }}</p>
+      </router-link>
+      <router-link to="/data/virtualized-tree" class="component-card">
+        <h3>VirtualizedTree 虚拟化树</h3>
+        <p>{{ t('大数据量树形') }}</p>
+      </router-link>
       <router-link to="/data/tag" class="component-card">
         <h3>Tag 标签</h3>
         <p>{{ t('标记与分类') }}</p>

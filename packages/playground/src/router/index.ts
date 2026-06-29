@@ -29,7 +29,9 @@ import AutocompletePage from '../pages/components/AutocompleteComponentPage.vue'
 import CascaderPage from '../pages/components/CascaderComponentPage.vue'
 import CheckboxPage from '../pages/components/CheckboxComponentPage.vue'
 import ColorPickerPage from '../pages/components/ColorPickerComponentPage.vue'
+import ColorPickerPanelPage from '../pages/components/ColorPickerPanelComponentPage.vue'
 import DatePickerPage from '../pages/components/DatePickerComponentPage.vue'
+import DatePickerPanelPage from '../pages/components/DatePickerPanelComponentPage.vue'
 import DatetimePickerPage from '../pages/components/DatetimePickerComponentPage.vue'
 import RadioPage from '../pages/components/RadioComponentPage.vue'
 import RatePage from '../pages/components/RateComponentPage.vue'
@@ -41,8 +43,12 @@ import TimeSelectPage from '../pages/components/TimeSelectComponentPage.vue'
 import TransferPage from '../pages/components/TransferComponentPage.vue'
 import TreeSelectPage from '../pages/components/TreeSelectComponentPage.vue'
 import UploadPage from '../pages/components/UploadComponentPage.vue'
+import VirtualizedSelectPage from '../pages/components/VirtualizedSelectComponentPage.vue'
+import VirtualizedTablePage from '../pages/components/VirtualizedTableComponentPage.vue'
+import VirtualizedTreePage from '../pages/components/VirtualizedTreeComponentPage.vue'
 import RichTextPage from '../pages/components/RichTextComponentPage.vue'
 import MonacoEditorPage from '../pages/components/MonacoEditorComponentPage.vue'
+import AdvancedQueryBuilderPage from '../pages/components/AdvancedQueryBuilderComponentPage.vue'
 import MentionPage from '../pages/components/MentionComponentPage.vue'
 import FormComponentPage from '../pages/components/FormComponentPage.vue'
 import AvatarPage from '../pages/components/AvatarComponentPage.vue'
@@ -130,11 +136,14 @@ const routes = [
       { path: 'form/cascader', component: CascaderPage },
       { path: 'form/checkbox', component: CheckboxPage },
       { path: 'form/color-picker', component: ColorPickerPage },
+      { path: 'form/color-picker-panel', component: ColorPickerPanelPage },
       { path: 'form/date-picker', component: DatePickerPage },
+      { path: 'form/date-picker-panel', component: DatePickerPanelPage },
       { path: 'form/datetime-picker', component: DatetimePickerPage },
       { path: 'form/radio', component: RadioPage },
       { path: 'form/rate', component: RatePage },
       { path: 'form/select', component: SelectPage },
+      { path: 'form/virtualized-select', component: VirtualizedSelectPage },
       { path: 'form/slider', component: SliderPage },
       { path: 'form/switch', component: SwitchPage },
       { path: 'form/time-picker', component: TimePickerPage },
@@ -160,6 +169,8 @@ const routes = [
       { path: 'data/result', component: ResultPage },
       { path: 'data/skeleton', component: SkeletonPage },
       { path: 'data/table', component: TablePage },
+      { path: 'data/virtualized-table', component: VirtualizedTablePage },
+      { path: 'data/virtualized-tree', component: VirtualizedTreePage },
       { path: 'data/tag', component: TagPage },
       { path: 'data/timeline', component: TimelinePage },
       { path: 'data/tree', component: TreePage },
@@ -195,6 +206,7 @@ const routes = [
       { path: 'others/crud-table', component: CrudTablePage },
       { path: 'others/dynamic-form', component: DynamicFormPage },
       { path: 'others/query-builder', component: QueryBuilderPage },
+      { path: 'others/advanced-query-builder', component: AdvancedQueryBuilderPage },
     ]
   }
 ]

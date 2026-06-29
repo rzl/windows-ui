@@ -34,9 +34,17 @@
         <h3>Color Picker 颜色选择器</h3>
         <p>{{ t('颜色拾取') }}</p>
       </router-link>
+      <router-link to="/form/color-picker-panel" class="component-card">
+        <h3>ColorPickerPanel 颜色面板</h3>
+        <p>{{ t('独立颜色选择面板') }}</p>
+      </router-link>
       <router-link to="/form/date-picker" class="component-card">
         <h3>Date Picker 日期选择器</h3>
         <p>{{ t('日期选择') }}</p>
+      </router-link>
+      <router-link to="/form/date-picker-panel" class="component-card">
+        <h3>DatePickerPanel 日期面板</h3>
+        <p>{{ t('独立日期选择面板') }}</p>
       </router-link>
       <router-link to="/form/datetime-picker" class="component-card">
         <h3>DateTime Picker 日期时间选择器</h3>
@@ -53,6 +61,10 @@
       <router-link to="/form/select" class="component-card">
         <h3>Select 选择器</h3>
         <p>{{ t('下拉选择') }}</p>
+      </router-link>
+      <router-link to="/form/virtualized-select" class="component-card">
+        <h3>VirtualizedSelect 虚拟化选择器</h3>
+        <p>{{ t('海量选项下拉选择') }}</p>
       </router-link>
       <router-link to="/form/slider" class="component-card">
         <h3>Slider 滑块</h3>

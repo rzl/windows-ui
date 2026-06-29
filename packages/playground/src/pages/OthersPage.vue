@@ -18,6 +18,22 @@
         <h3>Permission 权限控制</h3>
         <p>{{ t('基于权限码控制内容显示') }}</p>
       </router-link>
+      <router-link to="/others/crud-table" class="component-card">
+        <h3>CrudTable 高级表格</h3>
+        <p>{{ t('查询表格一体化') }}</p>
+      </router-link>
+      <router-link to="/others/dynamic-form" class="component-card">
+        <h3>DynamicForm 动态表单</h3>
+        <p>{{ t('根据配置渲染表单') }}</p>
+      </router-link>
+      <router-link to="/others/query-builder" class="component-card">
+        <h3>QueryBuilder 高级查询</h3>
+        <p>{{ t('多条件组合查询') }}</p>
+      </router-link>
+      <router-link to="/others/advanced-query-builder" class="component-card">
+        <h3>AdvancedQueryBuilder 高级查询</h3>
+        <p>{{ t('复杂条件分组查询') }}</p>
+      </router-link>
     </div>
   </div>
 </template>

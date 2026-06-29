@@ -182,11 +182,14 @@ const navItems = [
     { path: '/form/cascader', label: 'Cascader 级联选择器', indent: true },
     { path: '/form/checkbox', label: 'Checkbox 多选框', indent: true },
     { path: '/form/color-picker', label: 'Color Picker 颜色选择器', indent: true },
+    { path: '/form/color-picker-panel', label: 'ColorPickerPanel 颜色面板', indent: true },
     { path: '/form/date-picker', label: 'Date Picker 日期选择器', indent: true },
+    { path: '/form/date-picker-panel', label: 'DatePickerPanel 日期面板', indent: true },
     { path: '/form/datetime-picker', label: 'DateTime Picker 日期时间选择器', indent: true },
     { path: '/form/radio', label: 'Radio 单选框', indent: true },
     { path: '/form/rate', label: 'Rate 评分', indent: true },
     { path: '/form/select', label: 'Select 选择器', indent: true },
+    { path: '/form/virtualized-select', label: 'VirtualizedSelect 虚拟化选择器', indent: true },
     { path: '/form/slider', label: 'Slider 滑块', indent: true },
     { path: '/form/switch', label: 'Switch 开关', indent: true },
     { path: '/form/time-picker', label: 'Time Picker 时间选择器', indent: true },
@@ -214,6 +217,8 @@ const navItems = [
     { path: '/data/result', label: 'Result 结果', indent: true },
     { path: '/data/skeleton', label: 'Skeleton 骨架屏', indent: true },
     { path: '/data/table', label: 'Table 表格', indent: true },
+    { path: '/data/virtualized-table', label: 'VirtualizedTable 虚拟化表格', indent: true },
+    { path: '/data/virtualized-tree', label: 'VirtualizedTree 虚拟化树', indent: true },
     { path: '/data/tag', label: 'Tag 标签', indent: true },
     { path: '/data/timeline', label: 'Timeline 时间线', indent: true },
     { path: '/data/tree', label: 'Tree 树形控件', indent: true },
@@ -249,7 +254,8 @@ const navItems = [
     { path: '/others/permission', label: 'Permission 权限控制', indent: true },
     { path: '/others/crud-table', label: 'CrudTable 高级表格', indent: true },
     { path: '/others/dynamic-form', label: 'DynamicForm 动态表单', indent: true },
-    { path: '/others/query-builder', label: 'QueryBuilder 高级查询', indent: true }
+    { path: '/others/query-builder', label: 'QueryBuilder 高级查询', indent: true },
+    { path: '/others/advanced-query-builder', label: 'AdvancedQueryBuilder 高级查询', indent: true }
 ]
 </script>
 
