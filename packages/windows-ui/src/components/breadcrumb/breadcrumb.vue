@@ -1,19 +1,22 @@
 <template>
   <nav :class="['w-breadcrumb', `w-breadcrumb--${size}`]">
-    <span
-      v-for="(item, i) in items"
-      :key="i"
-      :class="['w-breadcrumb__item', { 'is-last': i === items.length - 1 }]"
-    >
-      <a v-if="resolveHref(item) && i < items.length - 1" :href="resolveHref(item)">{{ item.label }}</a>
-      <span v-else>{{ item.label }}</span>
-      <span v-if="i < items.length - 1" class="w-breadcrumb__separator">{{ separator }}</span>
-    </span>
+    <template v-if="items.length">
+      <span
+        v-for="(item, i) in items"
+        :key="i"
+        :class="['w-breadcrumb__item', { 'is-last': i === items.length - 1 }]"
+      >
+        <a v-if="resolveHref(item) && i < items.length - 1" :href="resolveHref(item)">{{ item.label }}</a>
+        <span v-else>{{ item.label }}</span>
+        <span v-if="i < items.length - 1" class="w-breadcrumb__separator">{{ separator }}</span>
+      </span>
+    </template>
+    <slot v-else />
   </nav>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, provide } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WBreadcrumb' })
@@ -32,6 +35,7 @@ const resolveHref = (item: { href?: string; to?: string | object }) => {
 }
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
+provide('breadcrumb', { separator: computed(() => props.separator) })
 </script>
 
 <style scoped>

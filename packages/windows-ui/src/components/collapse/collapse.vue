@@ -1,6 +1,7 @@
 <template>
   <div :class="['w-collapse', `w-collapse--${size}`]">
-    <div v-for="(item, i) in items" :key="i" :class="['w-collapse__item', { 'is-active': isActive(i) }]">
+    <template v-if="items.length">
+      <div v-for="(item, i) in items" :key="i" :class="['w-collapse__item', { 'is-active': isActive(i) }]">
       <div class="w-collapse__header" @click="toggle(i)">
         <div class="w-collapse__header-content">
           <slot name="header" :item="item" :index="i">
@@ -15,12 +16,13 @@
       <div v-show="isActive(i)" class="w-collapse__content">
         <slot :item="item" :index="i">{{ item.content }}</slot>
       </div>
-    </div>
+    </template>
+    <slot v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, provide } from 'vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WCollapse' })
@@ -29,14 +31,21 @@ const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 const activeSet = ref(new Set(props.modelValue))
-const isActive = (i: number) => activeSet.value.has(i)
-const toggle = (i: number) => {
-  if (props.accordion) { if (activeSet.value.has(i)) activeSet.value.clear(); else { activeSet.value.clear(); activeSet.value.add(i) } }
-  else { if (activeSet.value.has(i)) activeSet.value.delete(i); else activeSet.value.add(i) }
+const isActive = (name: number | string) => activeSet.value.has(name)
+const toggle = (name: number | string) => {
+  if (props.accordion) { if (activeSet.value.has(name)) activeSet.value.clear(); else { activeSet.value.clear(); activeSet.value.add(name) } }
+  else { if (activeSet.value.has(name)) activeSet.value.delete(name); else activeSet.value.add(name) }
   const arr = Array.from(activeSet.value)
   emit('update:modelValue', arr)
   emit('change', arr)
 }
+
+provide('collapse', {
+  isActive,
+  toggle,
+  size,
+  accordion: computed(() => props.accordion)
+})
 </script>
 
 <style scoped>

@@ -6,21 +6,24 @@
       </slot>
     </div>
     <div v-show="open" class="w-dropdown__menu">
-      <div
-        v-for="(item, i) in items"
-        :key="i"
-        :class="['w-dropdown__item', { 'is-disabled': item.disabled }]"
-        @click="handleClick(item)"
-      >
-        <w-icon v-if="item.icon" :name="item.icon" :size="size" />
-        {{ item.label }}
-      </div>
+      <template v-if="items.length">
+        <div
+          v-for="(item, i) in items"
+          :key="i"
+          :class="['w-dropdown__item', { 'is-disabled': item.disabled }]"
+          @click="handleClick(item)"
+        >
+          <w-icon v-if="item.icon" :name="item.icon" :size="size" />
+          {{ item.label }}
+        </div>
+      </template>
+      <slot v-else name="dropdown" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, provide } from 'vue'
 import WButton from '../button/button.vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
@@ -36,8 +39,14 @@ const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['command'])
 
 const open = ref(false)
-const handleClick = (item: any) => { if (item.disabled) return; emit('command', item.value || item.label); open.value = false }
+const handleCommand = (command: any) => { emit('command', command); open.value = false }
+const handleClick = (item: any) => { if (item.disabled) return; handleCommand(item.value || item.label) }
 const close = () => { open.value = false }
+
+provide('dropdown', {
+  size,
+  handleCommand
+})
 
 const vClickOutside = {
   mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) },

@@ -1,10 +1,10 @@
 <template>
-  <label :class="['w-checkbox', `w-checkbox--${size}`, { 'is-checked': isChecked, 'is-disabled': disabled, 'is-indeterminate': indeterminate }]">
+  <label :class="['w-checkbox', `w-checkbox--${size}`, { 'is-checked': isChecked, 'is-disabled': isDisabled, 'is-indeterminate': indeterminate }]">
     <span class="w-checkbox__input">
       <input
         type="checkbox"
         :checked="isChecked"
-        :disabled="disabled"
+        :disabled="isDisabled"
         :value="label"
         @change="handleChange"
       />
@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WCheckbox' })
@@ -27,16 +27,24 @@ const props = defineProps({
   size: { type: String, default: undefined }
 })
 const globalSize = useGlobalSize()
-const size = computed(() => props.size || globalSize.value)
+const group = inject<any>('checkboxGroup', null)
+const size = computed(() => props.size || group?.size?.value || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const isChecked = computed(() => {
+  if (group) return props.label !== undefined && group.modelValue.value.includes(props.label)
   if (Array.isArray(props.modelValue)) return props.label !== undefined && props.modelValue.includes(props.label)
   return props.modelValue
 })
 
+const isDisabled = computed(() => props.disabled || group?.disabled?.value)
+
 const handleChange = (e: Event) => {
   const checked = (e.target as HTMLInputElement).checked
+  if (group) {
+    group.change(props.label, checked)
+    return
+  }
   if (Array.isArray(props.modelValue)) {
     const arr = [...props.modelValue]
     if (checked) arr.push(props.label)
