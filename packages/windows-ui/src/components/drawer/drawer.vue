@@ -2,7 +2,7 @@
   <teleport to="body">
     <transition name="w-drawer-fade">
       <div v-if="modelValue" class="w-drawer__wrapper" @click.self="closeOnClickModal && close()">
-        <div :class="['w-drawer', `w-drawer--${direction}`]" :style="drawerStyle">
+        <div :class="['w-drawer', `w-drawer--${direction}`, `w-drawer--${size}`]" :style="drawerStyle">
           <div class="w-drawer__header">
             <slot name="header">
               <span class="w-drawer__title">{{ title }}</span>
@@ -24,6 +24,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import WIcon from '../icon/icon.vue'
+import { useGlobalSize } from '../../utils/prefix'
+
+const SIZE_VALUES = ['small', 'default', 'large']
 
 defineOptions({ name: 'WDrawer' })
 const props = defineProps({
@@ -33,10 +36,14 @@ const props = defineProps({
   size: { type: [String, Number], default: '300px' },
   closeOnClickModal: { type: Boolean, default: true }
 })
+const globalSize = useGlobalSize()
+const isGlobalSize = computed(() => typeof props.size === 'string' && SIZE_VALUES.includes(props.size))
+const drawerSize = computed(() => isGlobalSize.value ? '300px' : (typeof props.size === 'number' ? `${props.size}px` : props.size))
+const size = computed(() => isGlobalSize.value ? props.size as string : globalSize.value)
 const emit = defineEmits(['update:modelValue', 'close'])
 
 const drawerStyle = computed(() => {
-  const s = typeof props.size === 'number' ? `${props.size}px` : props.size
+  const s = drawerSize.value
   if (props.direction === 'left' || props.direction === 'right') return { width: s, height: '100%' }
   return { height: s, width: '100%' }
 })
@@ -55,6 +62,10 @@ const close = () => { emit('update:modelValue', false); emit('close') }
 .w-drawer__actions { display: flex; align-items: center; gap: 8px; }
 .w-drawer__close { cursor: pointer; }
 .w-drawer__body { flex: 1; padding: 16px; overflow: auto; }
+.w-drawer--small .w-drawer__header { padding: 6px 12px; font-size: var(--w-font-size-small); }
+.w-drawer--small .w-drawer__body { padding: 12px; font-size: var(--w-font-size-small); }
+.w-drawer--large .w-drawer__header { padding: 14px 20px; font-size: var(--w-font-size-large); }
+.w-drawer--large .w-drawer__body { padding: 20px; font-size: var(--w-font-size-medium); }
 .w-drawer-fade-enter-active, .w-drawer-fade-leave-active { transition: opacity 0.3s; }
 .w-drawer-fade-enter-from, .w-drawer-fade-leave-to { opacity: 0; }
 </style>

@@ -17,14 +17,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 defineOptions({ name: 'WColorPickerPanel' })
-const emit = defineEmits(['change'])
+const props = defineProps({ modelValue: String })
+const emit = defineEmits(['update:modelValue', 'change'])
 
 const hue = ref(0)
 const saturation = ref(100)
 const value = ref(100)
+
+const rgbToHsv = (r: number, g: number, b: number) => {
+  r /= 255; g /= 255; b /= 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  let h = 0, s = 0, v = max
+  const d = max - min
+  s = max === 0 ? 0 : d / max
+  if (max !== min) {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break
+      case g: h = (b - r) / d + 2; break
+      case b: h = (r - g) / d + 4; break
+    }
+    h /= 6
+  }
+  return { h: h * 360, s: s * 100, v: v * 100 }
+}
+
+const parseHex = (hex?: string) => {
+  if (!hex) return null
+  const clean = hex.replace('#', '')
+  if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null
+  return {
+    r: parseInt(clean.slice(0, 2), 16),
+    g: parseInt(clean.slice(2, 4), 16),
+    b: parseInt(clean.slice(4, 6), 16)
+  }
+}
+
+const syncFromModel = (hex?: string) => {
+  const rgb = parseHex(hex)
+  if (!rgb) return
+  const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b)
+  hue.value = hsv.h
+  saturation.value = hsv.s
+  value.value = hsv.v
+}
+
+syncFromModel(props.modelValue)
+watch(() => props.modelValue, syncFromModel)
 
 const hueGradient = 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)'
 
@@ -52,13 +93,15 @@ const hsvToRgb = (h: number, s: number, v: number) => {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
 
+const emitValue = () => { emit('update:modelValue', color.value); emit('change', color.value) }
+
 const startPick = (e: MouseEvent) => {
   const el = e.currentTarget as HTMLElement
   const rect = el.getBoundingClientRect()
   const update = (ev: MouseEvent) => {
     saturation.value = Math.max(0, Math.min(100, ((ev.clientX - rect.left) / rect.width) * 100))
     value.value = Math.max(0, Math.min(100, (1 - (ev.clientY - rect.top) / rect.height) * 100))
-    emit('change', color.value)
+    emitValue()
   }
   update(e)
   const up = () => { window.removeEventListener('mousemove', update); window.removeEventListener('mouseup', up) }
@@ -71,7 +114,7 @@ const startHue = (e: MouseEvent) => {
   const rect = el.getBoundingClientRect()
   const update = (ev: MouseEvent) => {
     hue.value = Math.max(0, Math.min(360, ((ev.clientX - rect.left) / rect.width) * 360))
-    emit('change', color.value)
+    emitValue()
   }
   update(e)
   const up = () => { window.removeEventListener('mousemove', update); window.removeEventListener('mouseup', up) }

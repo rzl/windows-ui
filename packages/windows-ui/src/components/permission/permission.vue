@@ -9,7 +9,8 @@ import type { PropType } from 'vue'
 defineOptions({ name: 'WPermission' })
 const props = defineProps({
   code: { type: String, default: '' },
-  has: { type: Function as PropType<(code: string) => boolean>, default: null }
+  has: { type: Function as PropType<(code: string) => boolean>, default: null },
+  size: { type: String, default: undefined }
 })
 
 const visible = computed(() => {

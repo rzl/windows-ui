@@ -1,5 +1,5 @@
 <template>
-  <div :class="['w-card', { 'w-card--hover': props.hover }]" :style="cardStyle">
+  <div :class="['w-card', `w-card--${size}`, { 'w-card--hover': props.hover }]" :style="cardStyle">
     <div v-if="$slots.header || props.header" class="w-card__header">
       <div class="w-card__header-content">
         <slot name="header">{{ props.header }}</slot>
@@ -19,13 +19,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WCard' })
 const props = defineProps({
   header: String,
   hover: Boolean,
-  shadow: { type: String, default: 'always' }
+  shadow: { type: String, default: 'always' },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 
 const cardStyle = computed(() => {
   const style: Record<string, string> = {}
@@ -45,4 +49,8 @@ const bodyStyle = computed(() => ({ padding: '12px' }))
 .w-card__body { font-size: var(--w-font-size-base); color: var(--w-text-color-primary); }
 .w-card__footer { padding: 8px 12px; border-top: 1px solid #d4d0c8; }
 .w-card--hover:hover { box-shadow: 4px 4px 10px rgba(0,0,0,0.5); }
+.w-card--small .w-card__header { padding: 6px 10px; font-size: var(--w-font-size-small); }
+.w-card--small .w-card__body { padding: 8px; font-size: var(--w-font-size-small); }
+.w-card--large .w-card__header { padding: 10px 14px; font-size: var(--w-font-size-large); }
+.w-card--large .w-card__body { padding: 16px; font-size: var(--w-font-size-medium); }
 </style>

@@ -4,8 +4,7 @@
       <div v-if="modelValue" class="w-dialog__wrapper" @click.self="handleWrapperClick">
         <div
           ref="dialogRef"
-          class="w-dialog"
-          :class="{ 'is-dragging': isDragging, 'is-fullscreen': isFullscreen }"
+          :class="['w-dialog', `w-dialog--${size}`, { 'is-dragging': isDragging, 'is-fullscreen': isFullscreen }]"
           :style="dialogStyle"
         >
           <div
@@ -46,6 +45,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WDialog' })
 
@@ -55,8 +55,11 @@ const props = defineProps({
   width: { type: Number, default: 420 },
   closeOnClickModal: { type: Boolean, default: true },
   draggable: { type: Boolean, default: true },
-  fullscreen: { type: Boolean, default: false }
+  fullscreen: { type: Boolean, default: false },
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 
 const emit = defineEmits(['update:modelValue', 'close', 'confirm'])
 
@@ -311,6 +314,12 @@ watch(isMobile, (val, oldVal) => {
 .w-dialog-fade-leave-to {
   opacity: 0;
 }
+.w-dialog--small .w-dialog__header { padding: 4px 8px; font-size: var(--w-font-size-small); }
+.w-dialog--small .w-dialog__body { padding: 10px; font-size: var(--w-font-size-small); }
+.w-dialog--small .w-dialog__footer { padding: 8px 10px; }
+.w-dialog--large .w-dialog__header { padding: 8px 12px; font-size: var(--w-font-size-large); }
+.w-dialog--large .w-dialog__body { padding: 20px; font-size: var(--w-font-size-medium); }
+.w-dialog--large .w-dialog__footer { padding: 12px 20px; }
 
 @media (max-width: 768px) {
   .w-dialog__wrapper {

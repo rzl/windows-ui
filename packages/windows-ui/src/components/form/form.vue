@@ -21,7 +21,8 @@ defineOptions({ name: 'WForm' })
 const props = defineProps({
   model: Object as () => Record<string, any>,
   rules: Object as () => Record<string, FormRule[]>,
-  size: { type: String, default: undefined }
+  size: { type: String, default: undefined },
+  labelWidth: { type: [String, Number], default: '100px' }
 })
 const emit = defineEmits(['submit', 'validate'])
 
@@ -32,6 +33,7 @@ const errors = ref<Record<string, string>>({})
 const fieldRefs = ref<any[]>([])
 
 provide('formSize', size)
+provide('formLabelWidth', computed(() => props.labelWidth))
 provide('formErrors', errors)
 provide('formModel', props.model)
 provide('formRules', props.rules)

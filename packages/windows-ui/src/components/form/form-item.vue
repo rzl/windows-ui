@@ -1,6 +1,6 @@
 <template>
   <div :class="['w-form-item', `w-form-item--${size}`]">
-    <label v-if="label" class="w-form-item__label">{{ label }}</label>
+    <label v-if="label" class="w-form-item__label" :style="{ width: labelWidth }">{{ label }}</label>
     <div class="w-form-item__content">
       <slot />
       <div v-if="error" class="w-form-item__error">{{ error }}</div>
@@ -16,8 +16,14 @@ defineOptions({ name: 'WFormItem' })
 const props = defineProps({ label: String, prop: String, size: { type: String, default: undefined } })
 
 const formSize = inject<Ref<string>>('formSize')
+const formLabelWidth = inject<Ref<string | number>>('formLabelWidth')
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || formSize?.value || globalSize.value)
+const labelWidth = computed(() => {
+  const w = formLabelWidth?.value
+  if (w === undefined) return '100px'
+  return typeof w === 'number' ? `${w}px` : w
+})
 
 const errors = inject<Ref<Record<string, string>>>('formErrors', ref({}))
 const formModel = inject<Record<string, any>>('formModel', {})

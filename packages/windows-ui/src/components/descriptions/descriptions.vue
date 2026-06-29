@@ -1,7 +1,7 @@
 <template>
-  <div class="w-descriptions">
+  <div :class="['w-descriptions', `w-descriptions--${size}`, { 'w-descriptions--border': border }]">
     <div v-if="title" class="w-descriptions__title">{{ title }}</div>
-    <table class="w-descriptions__table">
+    <table class="w-descriptions__table" :class="{ 'w-descriptions__table--border': border }">
       <tbody>
         <tr v-for="(row, ri) in rows" :key="ri">
           <td v-for="(cell, ci) in row" :key="ci" class="w-descriptions__cell">
@@ -19,6 +19,7 @@
 
 <script setup lang="ts">
 import { computed, useSlots } from 'vue'
+import { useGlobalSize } from '../../utils/prefix'
 
 interface DescriptionItem {
   label?: string
@@ -32,8 +33,12 @@ defineOptions({ name: 'WDescriptions' })
 const props = defineProps({
   title: String,
   items: { type: Array as () => { label: string; value?: any; prop?: string }[], default: () => [] },
-  column: { type: Number, default: 3 }
+  column: { type: Number, default: 3 },
+  border: Boolean,
+  size: { type: String, default: undefined }
 })
+const globalSize = useGlobalSize()
+const size = computed(() => props.size || globalSize.value)
 
 const slots = useSlots()
 
@@ -74,4 +79,12 @@ const rows = computed(() => {
 .w-descriptions__cell { padding: 6px 8px; border: 1px solid #d4d0c8; }
 .w-descriptions__label { color: var(--w-text-color-secondary); font-size: var(--w-font-size-small); display: block; margin-bottom: 2px; }
 .w-descriptions__value { color: var(--w-text-color-primary); font-size: var(--w-font-size-base); }
+.w-descriptions--border .w-descriptions__table--border { border: 1px solid #d4d0c8; }
+.w-descriptions--border .w-descriptions__cell { border: 1px solid #d4d0c8; }
+.w-descriptions--small .w-descriptions__title { font-size: var(--w-font-size-small); }
+.w-descriptions--small .w-descriptions__label { font-size: var(--w-font-size-extra-small); }
+.w-descriptions--small .w-descriptions__value { font-size: var(--w-font-size-small); }
+.w-descriptions--large .w-descriptions__title { font-size: var(--w-font-size-large); }
+.w-descriptions--large .w-descriptions__label { font-size: var(--w-font-size-base); }
+.w-descriptions--large .w-descriptions__value { font-size: var(--w-font-size-medium); }
 </style>

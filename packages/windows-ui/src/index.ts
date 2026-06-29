@@ -11,6 +11,8 @@ import WColor from './components/color/color.vue'
 import WContainer from './components/container/container.vue'
 import WIcon from './components/icon/icon.vue'
 import WLayout from './components/layout/layout.vue'
+import WRow from './components/layout/row.vue'
+import WCol from './components/layout/col.vue'
 import WLink from './components/link/link.vue'
 import WText from './components/text/text.vue'
 import WScrollbar from './components/scrollbar/scrollbar.vue'
@@ -118,6 +120,8 @@ const components = [
   WContainer,
   WIcon,
   WLayout,
+  WRow,
+  WCol,
   WLink,
   WText,
   WScrollbar,
@@ -242,6 +246,8 @@ export {
   WContainer,
   WIcon,
   WLayout,
+  WRow,
+  WCol,
   WLink,
   WText,
   WScrollbar,
