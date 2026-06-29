@@ -8,6 +8,7 @@
         <div class="w-timeline__title">{{ item.title }}</div>
         <div v-if="item.content" class="w-timeline__text">{{ item.content }}</div>
       </div>
+      </div>
     </template>
     <slot v-else />
   </div>

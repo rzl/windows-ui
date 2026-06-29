@@ -16,6 +16,7 @@
       <div v-show="isActive(i)" class="w-collapse__content">
         <slot :item="item" :index="i">{{ item.content }}</slot>
       </div>
+      </div>
     </template>
     <slot v-else />
   </div>
@@ -26,11 +27,11 @@ import { ref, computed, provide } from 'vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WCollapse' })
-const props = defineProps({ items: { type: Array as () => { title: string; content?: string }[], default: () => [] }, modelValue: { type: Array as () => number[], default: () => [] }, accordion: Boolean, size: { type: String, default: undefined } })
+const props = defineProps({ items: { type: Array as () => { title: string; content?: string }[], default: () => [] }, modelValue: { type: Array as () => (number | string)[], default: () => [] }, accordion: Boolean, size: { type: String, default: undefined } })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change'])
-const activeSet = ref(new Set(props.modelValue))
+const activeSet = ref(new Set<number | string>(props.modelValue))
 const isActive = (name: number | string) => activeSet.value.has(name)
 const toggle = (name: number | string) => {
   if (props.accordion) { if (activeSet.value.has(name)) activeSet.value.clear(); else { activeSet.value.clear(); activeSet.value.add(name) } }

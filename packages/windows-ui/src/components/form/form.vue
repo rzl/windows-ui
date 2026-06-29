@@ -14,7 +14,8 @@ export interface FormRule {
   pattern?: RegExp
   min?: number
   max?: number
-  validator?: (value: any) => boolean | string
+  validator?: (value: any) => boolean | string | Promise<boolean | string>
+  asyncValidator?: (value: any) => Promise<boolean | string>
 }
 
 defineOptions({ name: 'WForm' })
@@ -70,7 +71,15 @@ const validate = async (): Promise<boolean> => {
         break
       }
       if (rule.validator) {
-        const result = rule.validator(value)
+        const result = await rule.validator(value)
+        if (result !== true) {
+          errors.value[prop] = typeof result === 'string' ? result : (rule.message || `${prop} 验证失败`)
+          valid = false
+          break
+        }
+      }
+      if (rule.asyncValidator) {
+        const result = await rule.asyncValidator(value)
         if (result !== true) {
           errors.value[prop] = typeof result === 'string' ? result : (rule.message || `${prop} 验证失败`)
           valid = false

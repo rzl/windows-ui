@@ -3,6 +3,9 @@ import './styles/variables.css'
 import './styles/base.css'
 import './styles/dark.css'
 import { setGlobalLocale, registerLocale } from './locale'
+import vLoading from './directives/loading'
+import vInfiniteScroll from './directives/infinite-scroll'
+import vPermission, { setPermissionChecker } from './directives/permission'
 
 // Components
 import WButton from './components/button/button.vue'
@@ -225,17 +228,24 @@ const components = [
 export interface WindowsUIOptions {
   locale?: string
   messages?: Record<string, string>
+  permission?: { has: (code: string) => boolean }
 }
 
 function install(app: App, options?: WindowsUIOptions) {
   components.forEach((component) => {
     app.component(component.name as string, component)
   })
+  app.directive('loading', vLoading)
+  app.directive('infinite-scroll', vInfiniteScroll)
+  app.directive('permission', vPermission)
   if (options?.locale) {
     if (options.messages) {
       registerLocale(options.locale, options.messages)
     }
     setGlobalLocale(options.locale)
+  }
+  if (options?.permission?.has) {
+    setPermissionChecker(options.permission.has)
   }
 }
 
@@ -354,6 +364,9 @@ export type { DynamicField } from './components/dynamic-form/dynamic-form.vue'
 export type { QueryField, QueryCondition } from './components/query-builder/query-builder.vue'
 export type { AdvancedQueryField, AdvancedCondition, AdvancedConditionGroup, AdvancedQueryCondition } from './components/advanced-query-builder/advanced-query-builder.vue'
 export type { LinkageRule, LinkageCondition, LinkageAction } from './components/dynamic-form/dynamic-form.vue'
+export { vLoading, vInfiniteScroll, vPermission }
+export { setPermissionChecker, clearPermissionChecker } from './directives/permission'
+export type { LoadingBindingValue } from './directives/loading'
 export {
   useLocale,
   setGlobalLocale,

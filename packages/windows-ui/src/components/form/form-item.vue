@@ -36,7 +36,7 @@ onMounted(() => {
   if (props.prop) {
     registerField({
       prop: props.prop,
-      validate: () => {
+      validate: async () => {
         const rules = formRules[props.prop!]
         if (!rules) return true
         const value = formModel[props.prop!]
@@ -48,7 +48,11 @@ onMounted(() => {
             return false
           }
           if (rule.validator) {
-            const result = rule.validator(value)
+            const result = await rule.validator(value)
+            if (result !== true) return false
+          }
+          if (rule.asyncValidator) {
+            const result = await rule.asyncValidator(value)
             if (result !== true) return false
           }
         }

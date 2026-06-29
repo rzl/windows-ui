@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, getCurrentInstance, onMounted, onUpdated } from 'vue'
+import { computed, inject, ref, onMounted, onUpdated } from 'vue'
 
 defineOptions({ name: 'WBreadcrumbItem' })
 const props = defineProps({

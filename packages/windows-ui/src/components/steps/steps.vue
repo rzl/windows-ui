@@ -8,6 +8,7 @@
         <div v-if="step.description" class="w-steps__desc">{{ step.description }}</div>
       </div>
       <div v-if="i < items.length - 1" class="w-steps__line" />
+      </div>
     </template>
     <slot v-else />
   </div>

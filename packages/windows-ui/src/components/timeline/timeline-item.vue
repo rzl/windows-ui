@@ -12,10 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance, onMounted, onUpdated } from 'vue'
+import { ref, onMounted, onUpdated } from 'vue'
 
 defineOptions({ name: 'WTimelineItem' })
-const props = defineProps({
+defineProps({
   timestamp: String,
   title: String,
   placement: { type: String, default: 'top' },

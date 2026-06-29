@@ -15,7 +15,7 @@
 import { computed, inject, ref, getCurrentInstance, onMounted, onUpdated } from 'vue'
 
 defineOptions({ name: 'WStep' })
-const props = defineProps({
+defineProps({
   title: String,
   description: String
 })

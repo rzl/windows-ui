@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, type PropType } from 'vue'
 
 defineOptions({ name: 'WWatermark' })
 const props = defineProps({
@@ -12,7 +12,7 @@ const props = defineProps({
   color: { type: String, default: 'rgba(0,0,0,0.1)' },
   font: { type: Object as () => { size?: number; color?: string; family?: string }, default: () => ({}) },
   rotate: { type: Number, default: -30 },
-  gap: { type: Array as () => [number, number], default: () => [100, 100] },
+  gap: { type: Array as unknown as PropType<[number, number]>, default: () => [100, 100] },
   zIndex: { type: Number, default: 1000 }
 })
 

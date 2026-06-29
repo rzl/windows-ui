@@ -30,7 +30,7 @@ const resolveHref = (item: { href?: string; to?: string | object }) => {
   if (!item.href && !item.to) return undefined
   if (item.href) return item.href
   if (typeof item.to === 'string') return item.to
-  if (item.to && typeof item.to === 'object') return item.to.path || '#'
+  if (item.to && typeof item.to === 'object') return (item.to as any).path || '#'
   return undefined
 }
 const globalSize = useGlobalSize()

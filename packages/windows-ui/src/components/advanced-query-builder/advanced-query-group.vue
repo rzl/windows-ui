@@ -20,6 +20,7 @@
             v-model="(modelValue.conditions[index] as AdvancedConditionGroup)"
             :fields="fields"
             :level="level + 1"
+            :max-level="maxLevel"
             @remove="removeGroup(item)"
           />
         </template>
@@ -41,25 +42,32 @@
             />
             <template v-if="needValue(item.op)">
               <template v-if="item.op === 'between'">
-                <w-input
+                <component
+                  :is="inputComponent(item.field)"
                   :model-value="Array.isArray(item.value) ? item.value[0] : ''"
                   :placeholder="getPlaceholder(item)"
+                  :options="fieldOptionsOf(item.field)"
                   style="flex: 1"
                   @update:modelValue="(val: any) => setBetweenValue(item, 0, val)"
                 />
                 <span class="w-advanced-query-group__sep">~</span>
-                <w-input
+                <component
+                  :is="inputComponent(item.field)"
                   :model-value="Array.isArray(item.value) ? item.value[1] : ''"
                   :placeholder="getPlaceholder(item)"
+                  :options="fieldOptionsOf(item.field)"
                   style="flex: 1"
                   @update:modelValue="(val: any) => setBetweenValue(item, 1, val)"
                 />
               </template>
-              <w-input
+              <component
+                :is="inputComponent(item.field)"
                 v-else
-                v-model="item.value"
+                :model-value="item.value"
                 :placeholder="getPlaceholder(item)"
+                :options="fieldOptionsOf(item.field)"
                 style="flex: 1"
+                @update:modelValue="(val: any) => item.value = val"
               />
             </template>
             <w-button type="danger" size="small" @click="removeCondition(item)">删除</w-button>
@@ -70,7 +78,7 @@
     </div>
     <div class="w-advanced-query-group__actions">
       <w-button size="small" @click="addCondition(modelValue)">+ 添加条件</w-button>
-      <w-button size="small" @click="addGroup(modelValue)">+ 添加分组</w-button>
+      <w-button v-if="level < maxLevel - 1" size="small" @click="addGroup(modelValue)">+ 添加分组</w-button>
     </div>
   </div>
 </template>
@@ -79,6 +87,9 @@
 import { computed, inject, type PropType } from 'vue'
 import WSelect from '../select/select.vue'
 import WInput from '../input/input.vue'
+import WInputNumber from '../input-number/input-number.vue'
+import WDatePicker from '../date-picker/date-picker.vue'
+import WDateTimePicker from '../date-time-picker/date-time-picker.vue'
 import WButton from '../button/button.vue'
 import type { AdvancedQueryField, AdvancedCondition, AdvancedConditionGroup, AdvancedQueryCondition } from './advanced-query-builder.vue'
 
@@ -94,7 +105,8 @@ defineOptions({ name: 'AdvancedQueryGroup' })
 const props = defineProps({
   modelValue: { type: Object as PropType<AdvancedConditionGroup>, required: true },
   fields: { type: Array as PropType<AdvancedQueryField[]>, default: () => [] },
-  level: { type: Number, default: 0 }
+  level: { type: Number, default: 0 },
+  maxLevel: { type: Number, default: 5 }
 })
 
 const emit = defineEmits(['update:modelValue', 'remove'])
@@ -103,12 +115,34 @@ const builder = inject<any>('advancedQueryBuilder', null)
 
 const fieldOptions = computed(() => props.fields.map((f) => ({ label: f.label, value: f.prop })))
 
+function getField(field: string) {
+  return props.fields.find((item) => item.prop === field)
+}
+
 function getOperators(field: string) {
-  const f = props.fields.find((item) => item.prop === field)
+  const f = getField(field)
   if (builder && builder.getOperatorsByFieldType) {
     return builder.getOperatorsByFieldType(f?.type)
   }
   return []
+}
+
+function inputComponent(field: string) {
+  const f = getField(field)
+  switch (f?.type) {
+    case 'number': return WInputNumber
+    case 'date': return WDatePicker
+    case 'datetime': return WDateTimePicker
+    case 'select':
+    case 'radio':
+    case 'checkbox':
+    case 'ref': return WSelect
+    default: return WInput
+  }
+}
+
+function fieldOptionsOf(field: string) {
+  return getField(field)?.options || []
 }
 
 function addCondition(group: AdvancedConditionGroup) {
