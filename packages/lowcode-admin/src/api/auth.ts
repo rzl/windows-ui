@@ -32,12 +32,21 @@ export interface PasswordForm {
   newPassword: string
 }
 
+export interface RefreshResult {
+  accessToken: string
+  refreshToken: string
+}
+
 export function login(data: LoginForm) {
   return request.post<LoginResult>('/auth/login', data)
 }
 
 export function logout() {
   return request.post('/auth/logout')
+}
+
+export function refreshToken(refreshToken: string) {
+  return request.post<RefreshResult>('/auth/refresh', { refreshToken })
 }
 
 export function getProfile() {

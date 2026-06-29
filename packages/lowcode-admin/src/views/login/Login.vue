@@ -18,9 +18,10 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const loading = ref(false)
@@ -29,6 +30,16 @@ const form = reactive({
   username: 'admin',
   password: 'admin'
 })
+
+function getRedirectPath(): string {
+  const raw = route.query.redirect
+  const path = Array.isArray(raw) ? raw[0] : raw
+  // 仅允许站内相对路径，避免开放重定向
+  if (typeof path === 'string' && path.startsWith('/')) {
+    return path
+  }
+  return '/'
+}
 
 async function handleLogin() {
   if (!form.username || !form.password) {
@@ -39,7 +50,7 @@ async function handleLogin() {
   try {
     await auth.login(form)
     await auth.fetchProfile()
-    router.push('/')
+    router.push(getRedirectPath())
   } catch (e: any) {
     alert(e.message || '登录失败')
   } finally {

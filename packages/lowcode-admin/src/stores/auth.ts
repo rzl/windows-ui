@@ -7,11 +7,13 @@ import { useAppStore } from './app'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('lowcode_token') || '')
+  const refreshTokenValue = ref(localStorage.getItem('lowcode_refresh_token') || '')
   const userInfo = ref<any>(null)
   const permissions = ref<string[]>([])
   const errorMessage = ref('')
 
   const isLoggedIn = computed(() => !!token.value)
+  const isAuthenticated = computed(() => !!token.value && !!userInfo.value)
 
   function showError(message: string) {
     errorMessage.value = message
@@ -30,12 +32,27 @@ export const useAuthStore = defineStore('auth', () => {
     watchVisibilityForReconnect(userInfo.value.id, userInfo.value.nickname || userInfo.value.username)
   }
 
+  function setTokens(accessToken: string, refreshToken: string) {
+    token.value = accessToken
+    refreshTokenValue.value = refreshToken
+    localStorage.setItem('lowcode_token', accessToken)
+    localStorage.setItem('lowcode_refresh_token', refreshToken)
+  }
+
+  function clearTokens() {
+    token.value = ''
+    refreshTokenValue.value = ''
+    userInfo.value = null
+    permissions.value = []
+    localStorage.removeItem('lowcode_token')
+    localStorage.removeItem('lowcode_refresh_token')
+    disconnectWebSocket()
+  }
+
   async function login(form: LoginForm) {
     const result = await authApi.login(form)
-    token.value = result.accessToken
+    setTokens(result.accessToken, result.refreshToken)
     userInfo.value = result.userInfo
-    localStorage.setItem('lowcode_token', result.accessToken)
-    localStorage.setItem('lowcode_refresh_token', result.refreshToken)
     initWebSocket()
     return result
   }
@@ -48,13 +65,27 @@ export const useAuthStore = defineStore('auth', () => {
     return result
   }
 
-  function logout() {
-    token.value = ''
-    userInfo.value = null
-    permissions.value = []
-    localStorage.removeItem('lowcode_token')
-    localStorage.removeItem('lowcode_refresh_token')
-    disconnectWebSocket()
+  async function refresh() {
+    const rt = refreshTokenValue.value || localStorage.getItem('lowcode_refresh_token')
+    if (!rt) {
+      throw new Error('刷新令牌不存在')
+    }
+    const result = await authApi.refreshToken(rt)
+    setTokens(result.accessToken, result.refreshToken)
+    return result
+  }
+
+  async function logout() {
+    const currentToken = token.value
+    if (currentToken) {
+      try {
+        // 先调用后端退出，此时 localStorage 中的令牌仍未清除，请求头可正常携带
+        await authApi.logout()
+      } catch {
+        // 忽略退出接口失败
+      }
+    }
+    clearTokens()
   }
 
   function hasPermission(code: string) {
@@ -65,11 +96,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     token,
+    refreshTokenValue,
     userInfo,
     permissions,
     isLoggedIn,
+    isAuthenticated,
     login,
     fetchProfile,
+    refresh,
     logout,
     hasPermission,
     showError,

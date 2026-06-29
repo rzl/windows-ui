@@ -274,9 +274,13 @@ function handleMenuSelect(value: string) {
   router.push(value)
 }
 
-function handleLogout() {
-  auth.logout()
-  router.push('/login')
+async function handleLogout() {
+  const redirect = route.fullPath
+  await auth.logout()
+  router.push({
+    path: '/login',
+    query: redirect !== '/login' ? { redirect } : undefined
+  })
 }
 
 watch(
