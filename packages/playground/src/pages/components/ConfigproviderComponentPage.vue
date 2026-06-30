@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" :description="t('统一配置组件前缀等')" id="configprovider" doc="configprovider">
+    <demo-section :title="title" :description="t('统一配置组件前缀等')" id="configprovider" doc="config-provider">
 
             <demo-block :title="t('自定义前缀')" :code="ConfigproviderCode1">
               <w-config-provider prefix="xp">

@@ -61,7 +61,7 @@ const navCards = [
   { path: '/data', title: t('数据展示'), icon: '📊', count: 22, desc: 'Table, Card, Tag, Tree' },
   { path: '/nav', title: t('导航组件'), icon: '🧭', count: 9, desc: 'Menu, Tabs, Breadcrumb' },
   { path: '/feedback', title: t('反馈组件'), icon: '💬', count: 10, desc: 'Dialog, Alert, Message' },
-  { path: '/others', title: t('其他组件'), icon: '📎', count: 2, desc: 'Divider, Watermark' },
+  { path: '/others', title: t('其他组件'), icon: '📎', count: 8, desc: 'Divider, Watermark, PageContainer, Permission, CrudTable, DynamicForm, QueryBuilder, AdvancedQueryBuilder' },
 ]
 
 const groups = [
@@ -70,7 +70,7 @@ const groups = [
   { name: t('数据展示') + ' (22)', components: ['Avatar','Badge','Calendar','Card','Carousel','Collapse','Descriptions','Empty','Image','InfiniteScroll','Pagination','Progress','Result','Skeleton','Table','VirtualizedTable','Tag','Timeline','Tour','Tree','VirtualizedTree','Statistic','Segmented'] },
   { name: t('导航组件') + ' (9)', components: ['Affix','Anchor','Backtop','Breadcrumb','Dropdown','Menu','PageHeader','Steps','Tabs'] },
   { name: t('反馈组件') + ' (10)', components: ['Alert','Dialog','Drawer','Loading','Message','MessageBox','Notification','Popconfirm','Popover','Tooltip'] },
-  { name: t('其他组件') + ' (2)', components: ['Divider','Watermark'] },
+  { name: t('其他组件') + ' (8)', components: ['Divider','Watermark','PageContainer','Permission','CrudTable','DynamicForm','QueryBuilder','AdvancedQueryBuilder'] },
 ]
 </script>
 

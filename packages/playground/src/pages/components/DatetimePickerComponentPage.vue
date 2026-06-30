@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" :description="t('日期和时间联动选择')" id="datetime-picker" doc="datetime-picker">
+    <demo-section :title="title" :description="t('日期和时间联动选择')" id="datetime-picker" doc="date-time-picker">
 
       <demo-block :title="t('基础用法')" :code="DatetimePickerCode1"><w-date-time-picker v-model="form.datetime" /></demo-block>
 

@@ -1,6 +1,8 @@
 <template>
   <div :class="['w-form-item', `w-form-item--${size}`]">
-    <label v-if="label" class="w-form-item__label" :style="{ width: labelWidth }">{{ label }}</label>
+    <label v-if="label || $slots.label" class="w-form-item__label" :style="{ width: labelWidth }">
+      <slot name="label">{{ label }}</slot>
+    </label>
     <div class="w-form-item__content">
       <slot />
       <div v-if="error" class="w-form-item__error">{{ error }}</div>
