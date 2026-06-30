@@ -66,7 +66,13 @@ renderer.code = (token: any) => {
 marked.use({ renderer })
 
 const renderedDoc = computed(() => {
-  return marked.parse(docContent.value || '暂无文档内容', { async: false })
+  const text = docContent.value || '暂无文档内容'
+  try {
+    const result = marked.parse(text, { async: false })
+    return typeof result === 'string' ? result : '文档渲染中…'
+  } catch (e) {
+    return '文档渲染失败'
+  }
 })
 
 watch(() => props.doc, async (name) => {
