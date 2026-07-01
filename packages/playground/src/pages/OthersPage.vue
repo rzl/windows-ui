@@ -26,10 +26,6 @@
         <h3>DynamicForm 动态表单</h3>
         <p>{{ t('根据配置渲染表单') }}</p>
       </router-link>
-      <router-link to="/others/query-builder" class="component-card">
-        <h3>QueryBuilder 高级查询</h3>
-        <p>{{ t('多条件组合查询') }}</p>
-      </router-link>
       <router-link to="/others/advanced-query-builder" class="component-card">
         <h3>AdvancedQueryBuilder 高级查询</h3>
         <p>{{ t('复杂条件分组查询') }}</p>

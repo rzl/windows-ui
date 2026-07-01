@@ -112,7 +112,6 @@ import WPageContainer from './components/page-container/page-container.vue'
 import WPermission from './components/permission/permission.vue'
 import WCrudTable from './components/crud-table/crud-table.vue'
 import WDynamicForm from './components/dynamic-form/dynamic-form.vue'
-import WQueryBuilder from './components/query-builder/query-builder.vue'
 import WAdvancedQueryBuilder from './components/advanced-query-builder/advanced-query-builder.vue'
 import WMonacoEditor from './components/monaco-editor/monaco-editor.vue'
 
@@ -220,7 +219,6 @@ const components = [
   WPermission,
   WCrudTable,
   WDynamicForm,
-  WQueryBuilder,
   WAdvancedQueryBuilder,
   WMonacoEditor
 ]
@@ -354,14 +352,12 @@ export {
   WPermission,
   WCrudTable,
   WDynamicForm,
-  WQueryBuilder,
   WAdvancedQueryBuilder,
   WMonacoEditor
 }
 
 export type { FormRule } from './components/form/form.vue'
 export type { DynamicField } from './components/dynamic-form/dynamic-form.vue'
-export type { QueryField, QueryCondition } from './components/query-builder/query-builder.vue'
 export type { AdvancedQueryField, AdvancedCondition, AdvancedConditionGroup, AdvancedQueryCondition } from './components/advanced-query-builder/advanced-query-builder.vue'
 export type { LinkageRule, LinkageCondition, LinkageAction } from './components/dynamic-form/dynamic-form.vue'
 export { vLoading, vInfiniteScroll, vPermission }
