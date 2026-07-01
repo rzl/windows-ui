@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref, nextTick, defineComponent } from 'vue'
 import AdvancedQueryBuilder from './advanced-query-builder.vue'
 
 function findButton(wrapper: any, text: string) {
@@ -77,5 +78,39 @@ describe('AdvancedQueryBuilder', () => {
     expect(wrapper.emitted('reset')).toBeTruthy()
     const groups = wrapper.findAll('.w-advanced-query-group__condition')
     expect(groups.length).toBe(0)
+  })
+
+  it('v-model 绑定不应触发递归更新警告', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const Wrapper = defineComponent({
+      setup() {
+        const query = ref({ logic: 'and', conditions: [] })
+        return { query, fields }
+      },
+      template: '<AdvancedQueryBuilder v-model="query" :fields="fields" />',
+      components: { AdvancedQueryBuilder }
+    })
+
+    const wrapper = mount(Wrapper, {
+      global: {
+        stubs: ['WIcon']
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const addBtn = findButton(wrapper, '添加条件')
+    await addBtn!.trigger('click')
+    await nextTick()
+    await nextTick()
+
+    const recursiveWarning = warnSpy.mock.calls.find((call) =>
+      typeof call[0] === 'string' && call[0].includes('Maximum recursive updates exceeded')
+    )
+    expect(recursiveWarning).toBeUndefined()
+
+    warnSpy.mockRestore()
   })
 })

@@ -99,6 +99,7 @@ watch(
   () => props.modelValue,
   (val) => {
     if (val && val !== root) {
+      if (deepEqual(toPlain(root), val)) return
       root.logic = val.logic || 'and'
       root.conditions = val.conditions ? JSON.parse(JSON.stringify(val.conditions)) : []
       root.id = val.id || createId()
@@ -110,7 +111,9 @@ watch(
 watch(
   root,
   () => {
-    emit('update:modelValue', toPlain(root))
+    const plain = toPlain(root)
+    if (deepEqual(plain, props.modelValue)) return
+    emit('update:modelValue', plain)
   },
   { deep: true }
 )
@@ -182,6 +185,21 @@ function toPlain(group: AdvancedConditionGroup): AdvancedConditionGroup {
 
 function isGroup(item: AdvancedQueryCondition): item is AdvancedConditionGroup {
   return 'logic' in item && 'conditions' in item
+}
+
+function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true
+  if (a == null || b == null) return a === b
+  if (typeof a !== 'object' || typeof b !== 'object') return false
+  if (Array.isArray(a) !== Array.isArray(b)) return false
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false
+    return a.every((item, i) => deepEqual(item, b[i]))
+  }
+  const keysA = Object.keys(a).filter((k) => k !== 'id')
+  const keysB = Object.keys(b).filter((k) => k !== 'id')
+  if (keysA.length !== keysB.length) return false
+  return keysA.every((k) => keysB.includes(k) && deepEqual(a[k], b[k]))
 }
 
 provide('advancedQueryBuilder', {
