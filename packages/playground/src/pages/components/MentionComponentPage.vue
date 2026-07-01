@@ -1,7 +1,7 @@
 <template>
   <div class="demo-page">
     <h1 class="page-title">{{ title }}</h1>
-    <demo-section :title="title" :description="t('@提及功能')" id="mention" doc="mention">
+    <demo-section :title="title" :description="t('@ 提及功能')" id="mention" doc="mention">
 
       <demo-block :title="t('基础用法')" :code="MentionCode1"><w-mention v-model="form.mention" :options="mentionOptions" :placeholder="t('输入 @ 触发')" /></demo-block>
 

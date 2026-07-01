@@ -104,7 +104,7 @@
       </router-link>
       <router-link to="/form/mention" class="component-card">
         <h3>Mention 提及</h3>
-        <p>{{ t('@提及功能') }}</p>
+        <p>{{ t('@ 提及功能') }}</p>
       </router-link>
       <router-link to="/form/form" class="component-card">
         <h3>Form 表单</h3>
