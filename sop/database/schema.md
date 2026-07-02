@@ -259,12 +259,15 @@
 | id | integer PK | 自增主键 |
 | flow_code | string | 流程编码 |
 | business_key | integer | 业务主键 |
-| status | string | running / completed / rejected |
+| status | string | running / completed / rejected / terminated |
 | current_node_id | string | 当前节点 ID |
 | starter_id | integer | 发起人 ID |
 | starter_name | string | 发起人姓名 |
 | business_data | text | 业务数据 JSON |
 | definition_version | integer | 启动时流程定义版本 |
+| terminated_by | integer | 强制终止人 ID |
+| terminated_reason | text | 强制终止原因 |
+| terminated_time | datetime | 强制终止时间 |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
 
@@ -278,15 +281,18 @@
 | node_name | string | 节点名称 |
 | assignee_type | string | role / user / dept |
 | assignee_value | string | 审批对象 ID |
-| status | string | pending / approved / rejected / cc |
+| status | string | pending / approved / rejected / cc / terminated |
 | comment | text | 审批意见 |
 | operator_id | integer | 实际处理人 ID |
 | operator_name | string | 实际处理人姓名 |
 | timeout_hours | integer | 超时小时数 |
 | due_time | datetime | 截止时间 |
 | timeout_notified | integer | 是否已提醒 |
+| timeout_action | string | none / autoApprove / autoReject，超时后自动动作 |
 | transferred_from | integer | 转办来源用户 ID |
 | delegated_from | integer | 委托来源用户 ID |
+| urge_count | integer | 催办次数 |
+| last_urge_time | datetime | 上次催办时间 |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
 

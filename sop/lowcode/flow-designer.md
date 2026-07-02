@@ -7,7 +7,7 @@
 | 类型 | 说明 | 可配置属性 |
 |------|------|-----------|
 | `start` | 开始节点 | 名称 |
-| `approve` | 审批节点 | 名称、审批方式（角色/用户/部门）、审批对象 |
+| `approve` | 审批节点 | 名称、审批方式（角色/用户/部门）、审批对象、超时小时数、超时动作 |
 | `cc` | 抄送节点 | 名称、抄送方式、抄送对象 |
 | `condition` | 条件节点 | 名称、条件表达式 |
 | `sign` | 会签节点 | 名称、会签规则（全部通过/一人通过）、审批人列表 |
@@ -48,7 +48,7 @@ form.days >= 3 && form.dept === 'sales'
 {
   "nodes": [
     { "id": "start", "type": "start", "name": "开始" },
-    { "id": "approve", "type": "approve", "name": "经理审批", "assigneeType": "role", "assigneeValue": "manager" },
+    { "id": "approve", "type": "approve", "name": "经理审批", "assigneeType": "role", "assigneeValue": "manager", "timeoutHours": 24, "timeoutAction": "autoApprove" },
     { "id": "end", "type": "end", "name": "结束" }
   ],
   "transitions": [
@@ -58,9 +58,22 @@ form.days >= 3 && form.dept === 'sales'
 }
 ```
 
+## 超时动作
+
+审批节点可配置「超时小时数」与「超时动作」：
+
+| 超时动作 | 说明 |
+|----------|------|
+| `none` | 仅发送超时提醒（默认） |
+| `autoApprove` | 到达截止时间后自动按「通过」流转 |
+| `autoReject` | 到达截止时间后自动按「驳回」流转 |
+
+> **注意**：`autoApprove` / `autoReject` 会自动完成审批并影响业务数据，请谨慎配置。
+
 ## 运行时行为
 
 - **审批节点**：生成待办任务，指定审批人/角色/部门处理
 - **会签节点**：根据规则生成多个任务，全部通过或一人通过后继续流转
 - **抄送节点**：自动记录抄送并立即流转，不阻塞流程
 - **条件节点**：根据表单数据自动匹配表达式并流转
+- **超时处理**：系统每 10 分钟扫描一次待办任务，对超时任务按节点配置的 `timeoutAction` 执行提醒或自动流转

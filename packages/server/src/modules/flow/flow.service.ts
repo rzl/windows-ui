@@ -17,6 +17,7 @@ export interface FlowNode {
   assignees?: FlowAssignee[]
   condition?: string
   timeoutHours?: number
+  timeoutAction?: 'none' | 'autoApprove' | 'autoReject'
 }
 
 export interface FlowTransition {
@@ -198,6 +199,9 @@ export async function getFlowTrace(businessKey: number) {
     starterName: instance.starter_name,
     businessData: parseBusinessData(instance),
     createTime: instance.create_time,
+    terminatedBy: instance.terminated_by,
+    terminatedReason: instance.terminated_reason,
+    terminatedTime: instance.terminated_time,
     tasks: tasks.map((t) => ({
       id: t.id,
       nodeId: t.node_id,
@@ -208,6 +212,8 @@ export async function getFlowTrace(businessKey: number) {
       operatorId: t.operator_id,
       operatorName: t.operator_name,
       comment: t.comment,
+      urgeCount: t.urge_count,
+      lastUrgeTime: t.last_urge_time,
       createTime: t.create_time,
       updateTime: t.update_time
     }))
@@ -433,6 +439,7 @@ async function enterNode(instanceId: number, node: FlowNode) {
   const flowName = flow?.name || instance?.flow_code || ''
   const timeoutHours = node.timeoutHours || 0
   const dueTime = timeoutHours > 0 ? new Date(Date.now() + timeoutHours * 60 * 60 * 1000).toISOString() : null
+  const timeoutAction = node.timeoutAction || 'none'
 
   if (node.type === 'approve') {
     const [taskId] = await db('flow_tasks').insert({
@@ -443,7 +450,8 @@ async function enterNode(instanceId: number, node: FlowNode) {
       assignee_value: node.assigneeValue,
       status: 'pending',
       timeout_hours: timeoutHours,
-      due_time: dueTime
+      due_time: dueTime,
+      timeout_action: timeoutAction
     })
     const receiverIds = await getReceiverUserIds(node.assigneeType, node.assigneeValue)
     await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(instanceId, taskId, node.name, rid, flowName)))
@@ -463,7 +471,8 @@ async function enterNode(instanceId: number, node: FlowNode) {
         assignee_value: a.value,
         status: 'pending',
         timeout_hours: timeoutHours,
-        due_time: dueTime
+        due_time: dueTime,
+        timeout_action: timeoutAction
       }))
     )
     const tasks = await db('flow_tasks')
@@ -620,6 +629,16 @@ export async function checkTimeoutTasks() {
 
   for (const task of tasks) {
     await db('flow_tasks').where({ id: task.id }).update({ timeout_notified: 1 })
+    const action = task.timeout_action || 'none'
+
+    if (action === 'autoApprove' || action === 'autoReject') {
+      await handleTask(task.id, action === 'autoApprove' ? 'approve' : 'reject', '系统自动：任务超时自动流转', {
+        id: 0,
+        nickname: '系统自动'
+      })
+      continue
+    }
+
     const receiverIds = await getReceiverUserIds(task.assignee_type, task.assignee_value)
     const flow = await db('flow_definitions').where({ code: task.flow_code, is_latest: 1 }).first()
     for (const rid of receiverIds) {
@@ -727,4 +746,89 @@ export async function getFlowPerformanceByNode(query: any = {}) {
   }
 
   return result
+}
+
+// ---------- 催办 ----------
+
+export async function urgeTask(taskId: number, operator?: any) {
+  const task = await db('flow_tasks').where({ id: taskId }).first()
+  if (!task) throw new AppError('任务不存在', 404)
+  if (task.status !== 'pending') throw new AppError('任务已处理，无需催办', 400)
+
+  const instance = await db('flow_instances').where({ id: task.instance_id }).first()
+  if (!instance || instance.status !== 'running') throw new AppError('流程实例不存在或已结束', 400)
+
+  await db('flow_tasks').where({ id: taskId }).update({
+    urge_count: (task.urge_count || 0) + 1,
+    last_urge_time: new Date().toISOString(),
+    update_time: db.fn.now()
+  })
+
+  const receiverIds = await getReceiverUserIds(task.assignee_type, task.assignee_value)
+  const flow = await db('flow_definitions').where({ code: instance.flow_code, is_latest: 1 }).first()
+  for (const rid of receiverIds) {
+    await monitorService.createMessage({
+      receiverId: rid,
+      type: 'notice',
+      businessType: 'flow',
+      businessKey: String(taskId),
+      title: `审批催办：${flow?.name || instance.flow_code}`,
+      content: `节点「${task.node_name}」需要您尽快处理${operator?.nickname || operator?.username ? `（催办人：${operator.nickname || operator.username}）` : ''}`,
+      link: '/flow/pending'
+    })
+  }
+
+  return true
+}
+
+export async function urgeInstance(instanceId: number, operator?: any) {
+  const instance = await db('flow_instances').where({ id: instanceId }).first()
+  if (!instance) throw new AppError('流程实例不存在', 404)
+  if (instance.status !== 'running') throw new AppError('流程实例非运行中', 400)
+
+  const tasks = await db('flow_tasks')
+    .where({ instance_id: instanceId, status: 'pending' })
+
+  for (const task of tasks) {
+    await urgeTask(task.id, operator)
+  }
+
+  return tasks.length
+}
+
+// ---------- 强制终止 ----------
+
+export async function terminateInstance(instanceId: number, reason: string, operator?: any) {
+  const instance = await db('flow_instances').where({ id: instanceId }).first()
+  if (!instance) throw new AppError('流程实例不存在', 404)
+  if (instance.status !== 'running') throw new AppError('只能终止运行中的流程实例', 400)
+  if (!reason?.trim()) throw new AppError('终止原因不能为空', 400)
+
+  await db('flow_instances').where({ id: instanceId }).update({
+    status: 'terminated',
+    current_node_id: null,
+    terminated_by: operator?.id || null,
+    terminated_reason: reason,
+    terminated_time: new Date().toISOString(),
+    update_time: db.fn.now()
+  })
+
+  await db('flow_tasks')
+    .where({ instance_id: instanceId, status: 'pending' })
+    .update({ status: 'terminated', update_time: db.fn.now() })
+
+  if (instance.starter_id) {
+    const flow = await db('flow_definitions').where({ code: instance.flow_code, is_latest: 1 }).first()
+    await monitorService.createMessage({
+      receiverId: instance.starter_id,
+      type: 'notice',
+      businessType: 'flow',
+      businessKey: String(instanceId),
+      title: `流程已被强制终止：${flow?.name || instance.flow_code}`,
+      content: `原因：${reason}`,
+      link: '/flow/pending'
+    })
+  }
+
+  return true
 }

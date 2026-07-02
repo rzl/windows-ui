@@ -83,3 +83,15 @@ export function getFlowPerformanceByDefinition(params?: any) {
 export function getFlowPerformanceByNode(params?: any) {
   return request.get('/flow/performance/nodes', { params })
 }
+
+export function urgeTask(id: number) {
+  return request.post(`/flow/tasks/${id}/urge`)
+}
+
+export function urgeInstance(id: number) {
+  return request.post(`/flow/instances/${id}/urge`)
+}
+
+export function terminateInstance(id: number, reason: string) {
+  return request.post(`/flow/instances/${id}/terminate`, { reason })
+}

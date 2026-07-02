@@ -44,6 +44,12 @@
           <w-form-item v-if="selectedNode.data.type === 'approve' && selectedNode.data.assigneeType" label="审批对象">
             <w-input v-model="selectedNode.data.assigneeValue" placeholder="角色编码/用户名" />
           </w-form-item>
+          <w-form-item v-if="selectedNode.data.type === 'approve'" label="超时(小时)">
+            <w-input-number v-model="selectedNode.data.timeoutHours" :min="0" placeholder="0 表示不超时" />
+          </w-form-item>
+          <w-form-item v-if="selectedNode.data.type === 'approve' && selectedNode.data.timeoutHours" label="超时动作">
+            <w-select v-model="selectedNode.data.timeoutAction" :options="timeoutActionOptions" />
+          </w-form-item>
           <w-form-item v-if="selectedNode.data.type === 'sign'" label="会签规则">
             <w-radio-group v-model="selectedNode.data.signType" :options="signTypeOptions" />
           </w-form-item>
@@ -113,6 +119,12 @@ const conditionOptions = [
   { label: '通过', value: 'approve' },
   { label: '驳回', value: 'reject' },
   { label: '提交', value: 'submit' }
+]
+
+const timeoutActionOptions = [
+  { label: '无', value: 'none' },
+  { label: '自动通过', value: 'autoApprove' },
+  { label: '自动驳回', value: 'autoReject' }
 ]
 
 const nodeTypesMap: Record<string, any> = {

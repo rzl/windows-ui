@@ -32,4 +32,8 @@ router.post('/check-timeout', flowController.checkTimeoutTasks)
 router.get('/performance/definitions', flowController.getFlowPerformanceByDefinition)
 router.get('/performance/nodes', flowController.getFlowPerformanceByNode)
 
+router.post('/tasks/:id/urge', flowController.urgeTask)
+router.post('/instances/:id/urge', flowController.urgeInstance)
+router.post('/instances/:id/terminate', flowController.terminateInstance)
+
 export default router

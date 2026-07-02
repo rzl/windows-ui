@@ -8,6 +8,8 @@ export interface FlowNodeData {
   assignees?: { type: 'role' | 'user' | 'dept'; value: string }[]
   condition?: string
   fieldPermissions?: Record<string, 'editable' | 'readonly' | 'hidden'>
+  timeoutHours?: number
+  timeoutAction?: 'none' | 'autoApprove' | 'autoReject'
 }
 
 export interface FlowTransition {

@@ -7,6 +7,7 @@
           <w-button size="small" type="primary" @click="handleApprove(row)">通过</w-button>
           <w-button size="small" type="danger" @click="handleReject(row)">驳回</w-button>
           <w-button size="small" @click="handleTransfer(row)">转办</w-button>
+          <w-button size="small" @click="handleUrge(row)">催办</w-button>
         </w-space>
       </template>
     </w-table>
@@ -27,6 +28,8 @@
         <w-button type="primary" @click="handleApprove(currentTask)">通过</w-button>
         <w-button type="danger" @click="handleReject(currentTask)">驳回</w-button>
         <w-button @click="handleTransfer(currentTask)">转办</w-button>
+        <w-button @click="handleUrge(currentTask)">催办</w-button>
+        <w-button type="danger" @click="handleTerminate(currentTask)">强制终止</w-button>
       </template>
     </w-dialog>
 
@@ -53,6 +56,18 @@
         <w-button type="primary" @click="confirmTransfer">确定</w-button>
       </template>
     </w-dialog>
+
+    <w-dialog v-model="terminateDialogVisible" title="强制终止流程" width="420">
+      <w-form :model="terminateForm">
+        <w-form-item label="终止原因" required>
+          <w-input v-model="terminateForm.reason" type="textarea" placeholder="请填写强制终止原因" />
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="closeTerminateDialog">取消</w-button>
+        <w-button type="danger" @click="confirmTerminate">确定终止</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -67,10 +82,12 @@ const tasks = ref<any[]>([])
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
 const transferDialogVisible = ref(false)
+const terminateDialogVisible = ref(false)
 const commentForm = reactive({ comment: '' })
 const currentTask = ref<any>(null)
 const currentAction = ref<'approve' | 'reject'>('approve')
 const transferForm = reactive({ targetUserId: undefined as number | undefined })
+const terminateForm = reactive({ reason: '' })
 const userOptions = ref<any[]>([])
 const activeTab = ref('data')
 const businessData = ref<any>(null)
@@ -113,9 +130,12 @@ function formatTraceDesc(task: any) {
     parts.push(`已驳回${task.operatorName ? ` - ${task.operatorName}` : ''}`)
   } else if (task.status === 'cc') {
     parts.push('抄送')
+  } else if (task.status === 'terminated') {
+    parts.push('已终止')
   }
   if (task.transferredFrom) parts.push(`由用户 #${task.transferredFrom} 转办`)
   if (task.delegatedFrom) parts.push(`受用户 #${task.delegatedFrom} 委托代处理`)
+  if (task.urgeCount) parts.push(`催办 ${task.urgeCount} 次`)
   if (task.comment) parts.push(`意见：${task.comment}`)
   return parts.join(' · ')
 }
@@ -194,6 +214,34 @@ async function confirmTransfer() {
   closeTransferDialog()
   closeDetail()
   await loadData()
+}
+
+async function handleUrge(row: any) {
+  if (!confirm('确定催办该任务吗？')) return
+  await flowApi.urgeTask(row.id)
+  alert('催办成功')
+}
+
+function handleTerminate(row: any) {
+  currentTask.value = row
+  terminateForm.reason = ''
+  terminateDialogVisible.value = true
+}
+
+function closeTerminateDialog() {
+  terminateDialogVisible.value = false
+}
+
+async function confirmTerminate() {
+  if (!currentTask.value || !terminateForm.reason.trim()) {
+    alert('请填写终止原因')
+    return
+  }
+  await flowApi.terminateInstance(currentTask.value.instance_id, terminateForm.reason)
+  closeTerminateDialog()
+  closeDetail()
+  await loadData()
+  alert('流程已强制终止')
 }
 
 async function confirmAction() {

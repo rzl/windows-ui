@@ -112,3 +112,19 @@ export async function getFlowPerformanceByNode(req: Request, res: Response) {
   const result = await flowService.getFlowPerformanceByNode(req.query)
   res.json(success(result))
 }
+
+export async function urgeTask(req: Request, res: Response) {
+  await flowService.urgeTask(Number(req.params.id), (req as AuthRequest).user)
+  res.json(success(null, '催办成功'))
+}
+
+export async function urgeInstance(req: Request, res: Response) {
+  const count = await flowService.urgeInstance(Number(req.params.id), (req as AuthRequest).user)
+  res.json(success({ count }, '催办成功'))
+}
+
+export async function terminateInstance(req: Request, res: Response) {
+  const { reason } = req.body
+  await flowService.terminateInstance(Number(req.params.id), reason || '', (req as AuthRequest).user)
+  res.json(success(null, '流程已强制终止'))
+}

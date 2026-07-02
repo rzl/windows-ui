@@ -51,6 +51,7 @@
 | [phase-29](by-phase/phase-29.md) | 自定义接口安全加固 |
 | [phase-30](by-phase/phase-30.md) | 监控告警与日志治理 |
 | [phase-31](by-phase/phase-31.md) | 工作流增强 |
+| [phase-32](by-phase/phase-32.md) | 工作流高级特性 |
 
 ## 功能模块主子线
 
