@@ -128,6 +128,18 @@ const routes = [
         meta: { title: '我的待办', permission: 'flow:task' }
       },
       {
+        path: 'flow/delegation',
+        name: 'FlowDelegation',
+        component: () => import('@/views/flow/FlowDelegation.vue'),
+        meta: { title: '流程委托', permission: 'flow:delegation' }
+      },
+      {
+        path: 'flow/performance',
+        name: 'FlowPerformance',
+        component: () => import('@/views/flow/FlowPerformance.vue'),
+        meta: { title: '流程绩效', permission: 'flow:performance' }
+      },
+      {
         path: 'message/list',
         name: 'MessageList',
         component: () => import('@/views/monitor/MessageList.vue'),

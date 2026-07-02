@@ -60,3 +60,55 @@ export async function rejectTask(req: Request, res: Response) {
   await flowService.rejectTask(Number(req.params.id), comment || '', (req as AuthRequest).user)
   res.json(success(null, '审批已驳回'))
 }
+
+export async function transferTask(req: Request, res: Response) {
+  const { targetUserId } = req.body
+  await flowService.transferTask(Number(req.params.id), Number(targetUserId), (req as AuthRequest).user)
+  res.json(success(null, '转办成功'))
+}
+
+export async function getFlowVersions(req: Request, res: Response) {
+  const result = await flowService.getFlowVersions(req.params.code)
+  res.json(success(result))
+}
+
+export async function rollbackFlowDefinition(req: Request, res: Response) {
+  const { version } = req.body
+  const result = await flowService.rollbackFlowDefinition(req.params.code, Number(version))
+  res.json(success(result, '回滚成功'))
+}
+
+export async function getFlowDelegations(req: Request, res: Response) {
+  const result = await flowService.getFlowDelegations(req.query)
+  res.json(success(result))
+}
+
+export async function createFlowDelegation(req: Request, res: Response) {
+  const result = await flowService.createFlowDelegation(req.body)
+  res.json(success(result, '创建成功'))
+}
+
+export async function updateFlowDelegation(req: Request, res: Response) {
+  const result = await flowService.updateFlowDelegation(Number(req.params.id), req.body)
+  res.json(success(result, '更新成功'))
+}
+
+export async function deleteFlowDelegation(req: Request, res: Response) {
+  await flowService.deleteFlowDelegation(Number(req.params.id))
+  res.json(success(null, '删除成功'))
+}
+
+export async function checkTimeoutTasks(_req: Request, res: Response) {
+  const count = await flowService.checkTimeoutTasks()
+  res.json(success({ count }, '检查完成'))
+}
+
+export async function getFlowPerformanceByDefinition(req: Request, res: Response) {
+  const result = await flowService.getFlowPerformanceByDefinition(req.query)
+  res.json(success(result))
+}
+
+export async function getFlowPerformanceByNode(req: Request, res: Response) {
+  const result = await flowService.getFlowPerformanceByNode(req.query)
+  res.json(success(result))
+}

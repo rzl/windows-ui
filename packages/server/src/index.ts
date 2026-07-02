@@ -6,6 +6,7 @@ import { wsManager } from './utils/websocket'
 import { startScheduler } from './modules/schedule/scheduler'
 import { checkAlerts } from './modules/monitor/alert.service'
 import { runCleanup, cleanupCustomApiLogs } from './modules/monitor/data-governance.service'
+import { checkTimeoutTasks } from './modules/flow/flow.service'
 
 const PORT = config.port
 const server = http.createServer(app)
@@ -28,4 +29,9 @@ server.listen(PORT, '127.0.0.1', () => {
     runCleanup().catch((err) => logger.error('数据治理清理失败', err))
     cleanupCustomApiLogs().catch((err) => logger.error('自定义接口日志清理失败', err))
   }, 6 * 60 * 60 * 1000)
+
+  // 每 10 分钟扫描一次超时任务
+  setInterval(() => {
+    checkTimeoutTasks().catch((err) => logger.error('流程超时扫描失败', err))
+  }, 10 * 60 * 1000)
 })

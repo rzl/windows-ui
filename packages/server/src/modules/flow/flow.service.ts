@@ -16,6 +16,7 @@ export interface FlowNode {
   signType?: 'all' | 'any'
   assignees?: FlowAssignee[]
   condition?: string
+  timeoutHours?: number
 }
 
 export interface FlowTransition {
@@ -64,11 +65,11 @@ function evaluateCondition(condition: string, form: any): boolean {
 // ---------- 流程定义 ----------
 
 export async function getFlowDefinitions() {
-  return db('flow_definitions').orderBy('id', 'desc')
+  return db('flow_definitions').where('is_latest', 1).orderBy('id', 'desc')
 }
 
 export async function getFlowDefinitionByCode(code: string) {
-  const def = await db('flow_definitions').where({ code }).first()
+  const def = await db('flow_definitions').where({ code, is_latest: 1 }).first()
   if (!def) throw new AppError('流程定义不存在', 404)
   return {
     ...def,
@@ -77,7 +78,7 @@ export async function getFlowDefinitionByCode(code: string) {
 }
 
 export async function getFlowDefinitionByModelCode(modelCode: string) {
-  const def = await db('flow_definitions').where({ model_code: modelCode, status: 1 }).first()
+  const def = await db('flow_definitions').where({ model_code: modelCode, status: 1, is_latest: 1 }).first()
   if (!def) return null
   return {
     ...def,
@@ -88,25 +89,35 @@ export async function getFlowDefinitionByModelCode(modelCode: string) {
 export async function saveFlowDefinition(data: any) {
   const code = safeCode(data.code || data.name)
   const config = typeof data.config === 'string' ? data.config : JSON.stringify(data.config || {})
-  const exists = await db('flow_definitions').where({ code }).first()
 
-  if (exists) {
-    await db('flow_definitions').where({ code }).update({
+  if (data.id) {
+    const existing = await db('flow_definitions').where({ id: data.id }).first()
+    if (!existing) throw new AppError('流程定义不存在', 404)
+    await db('flow_definitions').where({ id: data.id }).update({
       name: data.name,
       model_code: data.modelCode,
       config,
-      status: data.status ?? 1,
+      status: data.status ?? existing.status,
+      remark: data.remark ?? existing.remark,
       update_time: db.fn.now()
     })
-    return db('flow_definitions').where({ code }).first()
+    return db('flow_definitions').where({ id: data.id }).first()
   }
+
+  const latest = await db('flow_definitions').where({ code }).orderBy('version', 'desc').first()
+  const version = latest ? latest.version + 1 : 1
+
+  await db('flow_definitions').where({ code }).update({ is_latest: 0 })
 
   const [id] = await db('flow_definitions').insert({
     code,
     name: data.name,
     model_code: data.modelCode,
     config,
-    status: data.status ?? 1
+    status: data.status ?? 1,
+    version,
+    is_latest: 1,
+    remark: data.remark || ''
   })
   return db('flow_definitions').where({ id }).first()
 }
@@ -114,6 +125,18 @@ export async function saveFlowDefinition(data: any) {
 export async function deleteFlowDefinition(id: number) {
   await db('flow_definitions').where({ id }).del()
   return true
+}
+
+export async function getFlowVersions(code: string) {
+  return db('flow_definitions').where({ code }).orderBy('version', 'desc')
+}
+
+export async function rollbackFlowDefinition(code: string, version: number) {
+  const target = await db('flow_definitions').where({ code, version }).first()
+  if (!target) throw new AppError('版本不存在', 404)
+  await db('flow_definitions').where({ code }).update({ is_latest: 0 })
+  await db('flow_definitions').where({ id: target.id }).update({ is_latest: 1, update_time: db.fn.now() })
+  return db('flow_definitions').where({ code, is_latest: 1 }).first()
 }
 
 // ---------- 流程实例 ----------
@@ -138,7 +161,8 @@ export async function startFlowInstance(flowCode: string, businessKey: number, b
     status: 'running',
     current_node_id: nextNode.id,
     starter_id: starter?.id || null,
-    starter_name: starter?.nickname || starter?.username || null
+    starter_name: starter?.nickname || starter?.username || null,
+    definition_version: def.version || 1
   })
 
   await enterNode(instanceId, nextNode)
@@ -193,15 +217,35 @@ export async function getFlowTrace(businessKey: number) {
 // ---------- 任务处理 ----------
 
 export async function getPendingTasks(user: any) {
+  const ownTasks = await queryPendingTasksByUser(user)
+  const delegations = await getActiveDelegations(user?.id)
+  const delegatedTasks: any[] = []
+
+  for (const d of delegations) {
+    const tasks = await queryPendingTasksByUser({ id: d.delegator_id })
+    for (const t of tasks) {
+      if (d.flow_code && d.flow_code !== t.flow_code) continue
+      t.delegated_from = d.delegator_id
+      t.delegated_from_name = d.delegator_name
+      delegatedTasks.push(t)
+    }
+  }
+
+  return [...ownTasks, ...delegatedTasks].sort((a, b) => b.id - a.id)
+}
+
+async function queryPendingTasksByUser(user: any) {
   const query = db('flow_tasks')
     .join('flow_instances', 'flow_tasks.instance_id', 'flow_instances.id')
     .join('flow_definitions', 'flow_instances.flow_code', 'flow_definitions.code')
     .where('flow_tasks.status', 'pending')
     .where('flow_instances.status', 'running')
+    .where('flow_definitions.is_latest', 1)
     .select(
       'flow_tasks.*',
       'flow_instances.flow_code as flow_code',
       'flow_instances.business_key as business_key',
+      'flow_instances.definition_version as definition_version',
       'flow_definitions.model_code as model_code',
       'flow_definitions.name as flow_name'
     )
@@ -220,9 +264,24 @@ export async function getPendingTasks(user: any) {
         })
       }
     })
+  } else if (user?.id) {
+    query.where('flow_tasks.assignee_type', 'user').andWhere('flow_tasks.assignee_value', String(user.id))
   }
 
   return query.orderBy('flow_tasks.id', 'desc')
+}
+
+async function getActiveDelegations(delegateeId?: number) {
+  if (!delegateeId) return []
+  const now = new Date().toISOString()
+  const list = await db('flow_delegations')
+    .join('users as delegator', 'flow_delegations.delegator_id', 'delegator.id')
+    .where('flow_delegations.delegatee_id', delegateeId)
+    .where('flow_delegations.status', 1)
+    .where('flow_delegations.start_time', '<=', now)
+    .where('flow_delegations.end_time', '>=', now)
+    .select('flow_delegations.*', 'delegator.username as delegator_name')
+  return list
 }
 
 export async function approveTask(taskId: number, comment: string, _operator?: any) {
@@ -231,6 +290,27 @@ export async function approveTask(taskId: number, comment: string, _operator?: a
 
 export async function rejectTask(taskId: number, comment: string, _operator?: any) {
   return handleTask(taskId, 'reject', comment, _operator)
+}
+
+export async function transferTask(taskId: number, targetUserId: number, operator?: any) {
+  const task = await db('flow_tasks').where({ id: taskId }).first()
+  if (!task) throw new AppError('任务不存在', 404)
+  if (task.status !== 'pending') throw new AppError('任务已处理', 400)
+
+  const target = await db('users').where({ id: targetUserId, status: 1 }).first()
+  if (!target) throw new AppError('目标用户不存在或已禁用', 400)
+
+  await db('flow_tasks').where({ id: taskId }).update({
+    assignee_type: 'user',
+    assignee_value: String(targetUserId),
+    transferred_from: operator?.id || null,
+    update_time: db.fn.now()
+  })
+
+  const instance = await db('flow_instances').where({ id: task.instance_id }).first()
+  const flow = instance ? await db('flow_definitions').where({ code: instance.flow_code, is_latest: 1 }).first() : null
+  await sendFlowTaskMessage(task.instance_id, taskId, task.node_name, targetUserId, flow?.name || instance?.flow_code || '')
+  return true
 }
 
 async function handleTask(taskId: number, action: 'approve' | 'reject', comment: string, operator?: any) {
@@ -349,8 +429,10 @@ async function sendFlowResultMessage(instance: any, status: 'completed' | 'rejec
 
 async function enterNode(instanceId: number, node: FlowNode) {
   const instance = await db('flow_instances').where({ id: instanceId }).first()
-  const flow = instance ? await db('flow_definitions').where({ code: instance.flow_code }).first() : null
+  const flow = instance ? await db('flow_definitions').where({ code: instance.flow_code, is_latest: 1 }).first() : null
   const flowName = flow?.name || instance?.flow_code || ''
+  const timeoutHours = node.timeoutHours || 0
+  const dueTime = timeoutHours > 0 ? new Date(Date.now() + timeoutHours * 60 * 60 * 1000).toISOString() : null
 
   if (node.type === 'approve') {
     const [taskId] = await db('flow_tasks').insert({
@@ -359,7 +441,9 @@ async function enterNode(instanceId: number, node: FlowNode) {
       node_name: node.name,
       assignee_type: node.assigneeType,
       assignee_value: node.assigneeValue,
-      status: 'pending'
+      status: 'pending',
+      timeout_hours: timeoutHours,
+      due_time: dueTime
     })
     const receiverIds = await getReceiverUserIds(node.assigneeType, node.assigneeValue)
     await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(instanceId, taskId, node.name, rid, flowName)))
@@ -377,7 +461,9 @@ async function enterNode(instanceId: number, node: FlowNode) {
         node_name: node.name,
         assignee_type: a.type,
         assignee_value: a.value,
-        status: 'pending'
+        status: 'pending',
+        timeout_hours: timeoutHours,
+        due_time: dueTime
       }))
     )
     const tasks = await db('flow_tasks')
@@ -397,7 +483,9 @@ async function enterNode(instanceId: number, node: FlowNode) {
       node_name: node.name,
       assignee_type: node.assigneeType,
       assignee_value: node.assigneeValue,
-      status: 'cc'
+      status: 'cc',
+      timeout_hours: 0,
+      due_time: null
     })
     const receiverIds = await getReceiverUserIds(node.assigneeType, node.assigneeValue)
     await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(instanceId, taskId, node.name, rid, flowName)))
@@ -453,4 +541,190 @@ async function checkSignComplete(instanceId: number, node: FlowNode): Promise<bo
   }
   // 默认 all
   return pendingCount === 0
+}
+
+// ---------- 流程委托 ----------
+
+export async function getFlowDelegations(query: any = {}) {
+  const { delegatorId, delegateeId, page = 1, pageSize = 50 } = query
+  const builder = db('flow_delegations')
+    .leftJoin('users as delegator', 'flow_delegations.delegator_id', 'delegator.id')
+    .leftJoin('users as delegatee', 'flow_delegations.delegatee_id', 'delegatee.id')
+    .orderBy('flow_delegations.id', 'desc')
+    .select(
+      'flow_delegations.*',
+      'delegator.username as delegator_name',
+      'delegatee.username as delegatee_name'
+    )
+
+  if (delegatorId) builder.where('flow_delegations.delegator_id', Number(delegatorId))
+  if (delegateeId) builder.where('flow_delegations.delegatee_id', Number(delegateeId))
+
+  const total = await builder.clone().count({ count: '*' }).first()
+  const list = await builder
+    .offset((Number(page) - 1) * Number(pageSize))
+    .limit(Number(pageSize))
+
+  return {
+    list,
+    total: Number(total?.count || 0),
+    page: Number(page),
+    pageSize: Number(pageSize)
+  }
+}
+
+export async function createFlowDelegation(data: any) {
+  const [id] = await db('flow_delegations').insert({
+    delegator_id: data.delegatorId,
+    delegatee_id: data.delegateeId,
+    flow_code: data.flowCode || null,
+    start_time: data.startTime,
+    end_time: data.endTime,
+    status: data.status ?? 1,
+    create_time: new Date().toISOString(),
+    update_time: new Date().toISOString()
+  })
+  return db('flow_delegations').where({ id }).first()
+}
+
+export async function updateFlowDelegation(id: number, data: any) {
+  await db('flow_delegations').where({ id }).update({
+    delegator_id: data.delegatorId,
+    delegatee_id: data.delegateeId,
+    flow_code: data.flowCode || null,
+    start_time: data.startTime,
+    end_time: data.endTime,
+    status: data.status,
+    update_time: new Date().toISOString()
+  })
+  return db('flow_delegations').where({ id }).first()
+}
+
+export async function deleteFlowDelegation(id: number) {
+  await db('flow_delegations').where({ id }).del()
+  return true
+}
+
+// ---------- 超时提醒 ----------
+
+export async function checkTimeoutTasks() {
+  const now = new Date().toISOString()
+  const tasks = await db('flow_tasks')
+    .join('flow_instances', 'flow_tasks.instance_id', 'flow_instances.id')
+    .where('flow_tasks.status', 'pending')
+    .where('flow_instances.status', 'running')
+    .where('flow_tasks.timeout_hours', '>', 0)
+    .where('flow_tasks.due_time', '<=', now)
+    .where('flow_tasks.timeout_notified', 0)
+    .select('flow_tasks.*', 'flow_instances.flow_code')
+
+  for (const task of tasks) {
+    await db('flow_tasks').where({ id: task.id }).update({ timeout_notified: 1 })
+    const receiverIds = await getReceiverUserIds(task.assignee_type, task.assignee_value)
+    const flow = await db('flow_definitions').where({ code: task.flow_code, is_latest: 1 }).first()
+    for (const rid of receiverIds) {
+      await monitorService.createMessage({
+        receiverId: rid,
+        type: 'notice',
+        businessType: 'flow',
+        businessKey: String(task.id),
+        title: `审批任务即将超时：${flow?.name || task.flow_code}`,
+        content: `节点「${task.node_name}」已到达截止时间，请及时处理。`,
+        link: '/flow/pending'
+      })
+    }
+  }
+
+  return tasks.length
+}
+
+// ---------- 绩效统计 ----------
+
+export async function getFlowPerformanceByDefinition(query: any = {}) {
+  const { startTime, endTime } = query
+  const builder = db('flow_instances').where('status', '!=', 'running')
+  if (startTime) builder.where('create_time', '>=', startTime)
+  if (endTime) builder.where('create_time', '<=', endTime)
+
+  const rows = await builder
+    .select('flow_code')
+    .count('* as totalCount')
+    .groupBy('flow_code')
+    .orderBy('totalCount', 'desc')
+
+  const result = []
+  for (const row of rows) {
+    const flowCode = row.flow_code
+    const base = db('flow_instances').where({ flow_code: flowCode }).where('status', '!=', 'running')
+    if (startTime) base.where('create_time', '>=', startTime)
+    if (endTime) base.where('create_time', '<=', endTime)
+
+    const completed = await base.clone().where('status', 'completed').count({ count: '*' }).first()
+    const rejected = await base.clone().where('status', 'rejected').count({ count: '*' }).first()
+    const avgDuration = await base.clone().select(db.raw('AVG(julianday(update_time) - julianday(create_time)) * 24 * 60 * 60 as avgDuration')).first()
+    const maxDuration = await base.clone().select(db.raw('MAX(julianday(update_time) - julianday(create_time)) * 24 * 60 * 60 as maxDuration')).first()
+    const timeoutCount = await db('flow_tasks')
+      .join('flow_instances', 'flow_tasks.instance_id', 'flow_instances.id')
+      .where('flow_instances.flow_code', flowCode)
+      .where('flow_tasks.timeout_notified', 1)
+      .count({ count: '*' })
+      .first()
+
+    const flow = await db('flow_definitions').where({ code: flowCode, is_latest: 1 }).first()
+    result.push({
+      flowCode,
+      flowName: flow?.name || flowCode,
+      totalCount: Number(row.totalCount),
+      completedCount: Number(completed?.count || 0),
+      rejectedCount: Number(rejected?.count || 0),
+      timeoutCount: Number(timeoutCount?.count || 0),
+      avgDuration: Math.round(Number(avgDuration?.avgDuration || 0)),
+      maxDuration: Math.round(Number(maxDuration?.maxDuration || 0))
+    })
+  }
+
+  return result
+}
+
+export async function getFlowPerformanceByNode(query: any = {}) {
+  const { startTime, endTime, flowCode } = query
+  const builder = db('flow_tasks')
+    .join('flow_instances', 'flow_tasks.instance_id', 'flow_instances.id')
+    .where('flow_tasks.status', '!=', 'pending')
+
+  if (flowCode) builder.where('flow_instances.flow_code', flowCode)
+  if (startTime) builder.where('flow_tasks.create_time', '>=', startTime)
+  if (endTime) builder.where('flow_tasks.create_time', '<=', endTime)
+
+  const rows = await builder
+    .select('flow_tasks.node_name')
+    .count('* as totalCount')
+    .groupBy('flow_tasks.node_name')
+    .orderBy('totalCount', 'desc')
+
+  const result = []
+  for (const row of rows) {
+    const nodeName = row.node_name
+    const base = db('flow_tasks')
+      .join('flow_instances', 'flow_tasks.instance_id', 'flow_instances.id')
+      .where('flow_tasks.node_name', nodeName)
+      .where('flow_tasks.status', '!=', 'pending')
+    if (flowCode) base.where('flow_instances.flow_code', flowCode)
+    if (startTime) base.where('flow_tasks.create_time', '>=', startTime)
+    if (endTime) base.where('flow_tasks.create_time', '<=', endTime)
+
+    const avgDuration = await base.clone().select(db.raw('AVG(julianday(flow_tasks.update_time) - julianday(flow_tasks.create_time)) * 24 * 60 * 60 as avgDuration')).first()
+    const maxDuration = await base.clone().select(db.raw('MAX(julianday(flow_tasks.update_time) - julianday(flow_tasks.create_time)) * 24 * 60 * 60 as maxDuration')).first()
+    const timeoutCount = await base.clone().where('flow_tasks.timeout_notified', 1).count({ count: '*' }).first()
+
+    result.push({
+      nodeName,
+      totalCount: Number(row.totalCount),
+      timeoutCount: Number(timeoutCount?.count || 0),
+      avgDuration: Math.round(Number(avgDuration?.avgDuration || 0)),
+      maxDuration: Math.round(Number(maxDuration?.maxDuration || 0))
+    })
+  }
+
+  return result
 }

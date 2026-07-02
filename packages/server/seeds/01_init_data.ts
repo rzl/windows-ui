@@ -437,6 +437,28 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'flow:task'
+    },
+    {
+      parent_id: flowId,
+      name: 'FlowDelegation',
+      path: '/flow/delegation',
+      component: 'views/flow/FlowDelegation.vue',
+      title: '流程委托',
+      icon: 'user',
+      sort: 3,
+      status: 1,
+      permission: 'flow:delegation'
+    },
+    {
+      parent_id: flowId,
+      name: 'FlowPerformance',
+      path: '/flow/performance',
+      component: 'views/flow/FlowPerformance.vue',
+      title: '流程绩效',
+      icon: 'chart',
+      sort: 4,
+      status: 1,
+      permission: 'flow:performance'
     }
   ])
 

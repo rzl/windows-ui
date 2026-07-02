@@ -6,6 +6,7 @@
           <w-button size="small" @click="openDetail(row)">详情</w-button>
           <w-button size="small" type="primary" @click="handleApprove(row)">通过</w-button>
           <w-button size="small" type="danger" @click="handleReject(row)">驳回</w-button>
+          <w-button size="small" @click="handleTransfer(row)">转办</w-button>
         </w-space>
       </template>
     </w-table>
@@ -25,6 +26,7 @@
         <w-button @click="closeDetail">关闭</w-button>
         <w-button type="primary" @click="handleApprove(currentTask)">通过</w-button>
         <w-button type="danger" @click="handleReject(currentTask)">驳回</w-button>
+        <w-button @click="handleTransfer(currentTask)">转办</w-button>
       </template>
     </w-dialog>
 
@@ -39,6 +41,18 @@
         <w-button type="primary" @click="confirmAction">确定</w-button>
       </template>
     </w-dialog>
+
+    <w-dialog v-model="transferDialogVisible" title="转办任务" width="420">
+      <w-form :model="transferForm">
+        <w-form-item label="转交给">
+          <w-select v-model="transferForm.targetUserId" :options="userOptions" placeholder="选择用户" />
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="closeTransferDialog">取消</w-button>
+        <w-button type="primary" @click="confirmTransfer">确定</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -47,13 +61,17 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import * as flowApi from '@/api/flow'
 import * as lowcodeApi from '@/api/lowcode'
 import * as monitorApi from '@/api/monitor'
+import * as userApi from '@/api/user'
 
 const tasks = ref<any[]>([])
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
+const transferDialogVisible = ref(false)
 const commentForm = reactive({ comment: '' })
 const currentTask = ref<any>(null)
 const currentAction = ref<'approve' | 'reject'>('approve')
+const transferForm = reactive({ targetUserId: undefined as number | undefined })
+const userOptions = ref<any[]>([])
 const activeTab = ref('data')
 const businessData = ref<any>(null)
 const traceData = ref<any>(null)
@@ -63,8 +81,9 @@ const columns = [
   { prop: 'model_code', label: '业务模型' },
   { prop: 'business_key', label: '业务主键' },
   { prop: 'node_name', label: '当前节点' },
+  { prop: 'delegated_from_name', label: '委托来源' },
   { prop: 'create_time', label: '创建时间' },
-  { prop: 'action', label: '操作', width: 220, fixed: 'right' }
+  { prop: 'action', label: '操作', width: 260, fixed: 'right' }
 ]
 
 const businessDataItems = computed(() => {
@@ -95,14 +114,24 @@ function formatTraceDesc(task: any) {
   } else if (task.status === 'cc') {
     parts.push('抄送')
   }
+  if (task.transferredFrom) parts.push(`由用户 #${task.transferredFrom} 转办`)
+  if (task.delegatedFrom) parts.push(`受用户 #${task.delegatedFrom} 委托代处理`)
   if (task.comment) parts.push(`意见：${task.comment}`)
   return parts.join(' · ')
 }
 
-onMounted(() => loadData())
+onMounted(async () => {
+  await loadData()
+  await loadUsers()
+})
 
 async function loadData() {
   tasks.value = await flowApi.getPendingTasks()
+}
+
+async function loadUsers() {
+  const result = await userApi.getUsers({ page: 1, pageSize: 1000, status: 1 })
+  userOptions.value = result.list.map((u: any) => ({ label: u.username, value: u.id }))
 }
 
 async function openDetail(row: any) {
@@ -144,6 +173,27 @@ function handleReject(row: any) {
 
 function closeDialog() {
   dialogVisible.value = false
+}
+
+function handleTransfer(row: any) {
+  currentTask.value = row
+  transferForm.targetUserId = undefined
+  transferDialogVisible.value = true
+}
+
+function closeTransferDialog() {
+  transferDialogVisible.value = false
+}
+
+async function confirmTransfer() {
+  if (!currentTask.value || !transferForm.targetUserId) {
+    alert('请选择转办目标用户')
+    return
+  }
+  await flowApi.transferTask(currentTask.value.id, transferForm.targetUserId)
+  closeTransferDialog()
+  closeDetail()
+  await loadData()
 }
 
 async function confirmAction() {

@@ -103,6 +103,7 @@
 - `alert_rules` / `alert_records`：告警规则与告警记录
 - `data_retention_policies`：数据保留策略
 - `custom_api_logs`：自定义接口执行日志
+- `flow_definitions` / `flow_instances` / `flow_tasks` / `flow_delegations`：工作流引擎
 - `lowcode_models` / `lowcode_fields` / `lowcode_forms` / `lowcode_tables`：低代码元数据
 - `lowcode_custom_apis`：自定义接口
 - `lowcode_pages`：自定义页面配置
@@ -230,6 +231,76 @@
 | ip_blacklist | text | IP 黑名单 JSON 数组 |
 | timeout | integer | 脚本超时 ms |
 | log_retention_days | integer | 执行日志保留天数 |
+| create_time | datetime | 创建时间 |
+| update_time | datetime | 更新时间 |
+
+## 工作流表
+
+### flow_definitions（流程定义表）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer PK | 自增主键 |
+| code | string | 流程编码 |
+| name | string | 流程名称 |
+| model_code | string | 关联模型编码 |
+| config | text | 流程 JSON 配置 |
+| status | integer | 0 禁用 / 1 启用 |
+| version | integer | 版本号 |
+| is_latest | integer | 是否为最新版本 |
+| remark | string | 版本说明 |
+| create_time | datetime | 创建时间 |
+| update_time | datetime | 更新时间 |
+
+### flow_instances（流程实例表）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer PK | 自增主键 |
+| flow_code | string | 流程编码 |
+| business_key | integer | 业务主键 |
+| status | string | running / completed / rejected |
+| current_node_id | string | 当前节点 ID |
+| starter_id | integer | 发起人 ID |
+| starter_name | string | 发起人姓名 |
+| business_data | text | 业务数据 JSON |
+| definition_version | integer | 启动时流程定义版本 |
+| create_time | datetime | 创建时间 |
+| update_time | datetime | 更新时间 |
+
+### flow_tasks（流程任务表）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer PK | 自增主键 |
+| instance_id | integer | 流程实例 ID |
+| node_id | string | 节点 ID |
+| node_name | string | 节点名称 |
+| assignee_type | string | role / user / dept |
+| assignee_value | string | 审批对象 ID |
+| status | string | pending / approved / rejected / cc |
+| comment | text | 审批意见 |
+| operator_id | integer | 实际处理人 ID |
+| operator_name | string | 实际处理人姓名 |
+| timeout_hours | integer | 超时小时数 |
+| due_time | datetime | 截止时间 |
+| timeout_notified | integer | 是否已提醒 |
+| transferred_from | integer | 转办来源用户 ID |
+| delegated_from | integer | 委托来源用户 ID |
+| create_time | datetime | 创建时间 |
+| update_time | datetime | 更新时间 |
+
+### flow_delegations（流程委托表）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer PK | 自增主键 |
+| delegator_id | integer | 委托人 ID |
+| delegatee_id | integer | 受托人 ID |
+| flow_code | string | 限定流程编码，空表示全部 |
+| start_time | datetime | 委托开始时间 |
+| end_time | datetime | 委托结束时间 |
+| status | integer | 1 启用 / 0 禁用 |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
 

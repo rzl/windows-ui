@@ -43,3 +43,43 @@ export function approveTask(id: number, comment?: string) {
 export function rejectTask(id: number, comment?: string) {
   return request.post(`/flow/tasks/${id}/reject`, { comment })
 }
+
+export function transferTask(id: number, targetUserId: number) {
+  return request.post(`/flow/tasks/${id}/transfer`, { targetUserId })
+}
+
+export function getFlowVersions(code: string) {
+  return request.get(`/flow/definitions/${code}/versions`)
+}
+
+export function rollbackFlowDefinition(code: string, version: number) {
+  return request.post(`/flow/definitions/${code}/rollback`, { version })
+}
+
+export function getFlowDelegations(params?: any) {
+  return request.get('/flow/delegations', { params })
+}
+
+export function createFlowDelegation(data: any) {
+  return request.post('/flow/delegations', data)
+}
+
+export function updateFlowDelegation(id: number, data: any) {
+  return request.put(`/flow/delegations/${id}`, data)
+}
+
+export function deleteFlowDelegation(id: number) {
+  return request.delete(`/flow/delegations/${id}`)
+}
+
+export function checkFlowTimeout() {
+  return request.post('/flow/check-timeout')
+}
+
+export function getFlowPerformanceByDefinition(params?: any) {
+  return request.get('/flow/performance/definitions', { params })
+}
+
+export function getFlowPerformanceByNode(params?: any) {
+  return request.get('/flow/performance/nodes', { params })
+}
