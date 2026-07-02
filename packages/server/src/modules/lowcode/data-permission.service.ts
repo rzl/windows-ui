@@ -1,6 +1,6 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
-import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, getTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 
 export interface DataPermissionRule {
@@ -135,22 +135,30 @@ export async function deleteDataPermissionRule(req: AuthRequest, id: number) {
 
 // 根据角色 ID 获取绑定的数据规则
 export async function getRoleDataPermissionIds(req: AuthRequest, roleId: number) {
-  const rows = await db('role_data_permissions')
-    .where(tenantWhere(req))
+  const tenantId = getTenantId(req)
+  const builder = db('role_data_permissions')
     .where({ role_id: roleId })
     .join('lowcode_data_permission_rules', 'role_data_permissions.data_permission_id', 'lowcode_data_permission_rules.id')
     .where({ 'lowcode_data_permission_rules.status': 1 })
     .select('lowcode_data_permission_rules.id')
+  if (tenantId !== null) {
+    builder.where('role_data_permissions.tenant_id', tenantId)
+  }
+  const rows = await builder
   return rows.map((row) => row.id)
 }
 
 export async function getRoleDataPermissionRules(req: AuthRequest, roleId: number) {
-  const rows = await db('role_data_permissions')
-    .where(tenantWhere(req))
+  const tenantId = getTenantId(req)
+  const builder = db('role_data_permissions')
     .where({ role_id: roleId })
     .join('lowcode_data_permission_rules', 'role_data_permissions.data_permission_id', 'lowcode_data_permission_rules.id')
     .where({ 'lowcode_data_permission_rules.status': 1 })
     .select('lowcode_data_permission_rules.*')
+  if (tenantId !== null) {
+    builder.where('role_data_permissions.tenant_id', tenantId)
+  }
+  const rows = await builder
 
   return rows.map((item) => ({
     ...item,
