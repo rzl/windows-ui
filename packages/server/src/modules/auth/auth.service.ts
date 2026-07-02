@@ -68,13 +68,18 @@ export async function login(dto: LoginDto) {
 
 export async function refresh(dto: RefreshDto) {
   try {
-    const payload = jwt.verify(dto.refreshToken, config.jwt.secret as jwt.Secret) as {
+    const decoded = jwt.verify(dto.refreshToken, config.jwt.secret as jwt.Secret) as {
       id: number
       username: string
       roleId: number
       tenantId: number
     }
-    return generateTokens(payload)
+    return generateTokens({
+      id: decoded.id,
+      username: decoded.username,
+      roleId: decoded.roleId,
+      tenantId: decoded.tenantId
+    })
   } catch {
     throw new AppError('刷新令牌无效或已过期', 401)
   }
