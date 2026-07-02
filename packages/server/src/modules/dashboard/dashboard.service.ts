@@ -3,11 +3,16 @@ import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { config as appConfig } from '../../config'
 import { runScript, checkSafeSql } from '../../utils/script-runner'
+import type { AuthRequest } from '../../middleware/auth'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
 
 // ---------- 首页配置 ----------
 
-export async function getHomepageConfig(code = 'default') {
-  const config = await db('homepage_configs').where({ code }).first()
+export async function getHomepageConfig(req: AuthRequest, code = 'default') {
+  const config = await db('homepage_configs')
+    .where(tenantWhere(req))
+    .where({ code })
+    .first()
   if (!config) {
     return getDefaultHomepageConfig()
   }
@@ -17,34 +22,45 @@ export async function getHomepageConfig(code = 'default') {
   }
 }
 
-export async function saveHomepageConfig(data: any) {
+export async function saveHomepageConfig(req: AuthRequest, data: any) {
   const code = data.code || 'default'
-  const exists = await db('homepage_configs').where({ code }).first()
+  const exists = await db('homepage_configs')
+    .where(tenantWhere(req))
+    .where({ code })
+    .first()
 
   if (exists) {
-    await db('homepage_configs').where({ code }).update({
-      name: data.name,
-      widgets: JSON.stringify(data.widgets || []),
-      status: data.status ?? 1,
-      update_time: db.fn.now()
-    })
+    await db('homepage_configs')
+      .where(tenantWhere(req))
+      .where({ code })
+      .update({
+        name: data.name,
+        widgets: JSON.stringify(data.widgets || []),
+        status: data.status ?? 1,
+        update_time: db.fn.now()
+      })
   } else {
-    await db('homepage_configs').insert({
-      code,
-      name: data.name || '默认首页',
-      widgets: JSON.stringify(data.widgets || []),
-      status: data.status ?? 1
-    })
+    await db('homepage_configs').insert(
+      setTenantId(
+        {
+          code,
+          name: data.name || '默认首页',
+          widgets: JSON.stringify(data.widgets || []),
+          status: data.status ?? 1
+        },
+        req
+      )
+    )
   }
 
-  return getHomepageConfig(code)
+  return getHomepageConfig(req, code)
 }
 
-export async function getStats(widgets: any[] = []) {
+export async function getStats(req: AuthRequest, widgets: any[] = []) {
   const [userCount, modelCount, messageCount] = await Promise.all([
-    db('users').where('status', 1).count({ count: '*' }).first(),
-    db('lowcode_models').where('status', 1).count({ count: '*' }).first(),
-    db('messages').where('status', 1).count({ count: '*' }).first()
+    db('users').where(tenantWhere(req)).where('status', 1).count({ count: '*' }).first(),
+    db('lowcode_models').where(tenantWhere(req)).where('status', 1).count({ count: '*' }).first(),
+    db('messages').where(tenantWhere(req)).where('status', 1).count({ count: '*' }).first()
   ])
   const stats: Record<string, any> = {
     userCount: Number(userCount?.count || 0),
@@ -110,12 +126,12 @@ function getDefaultHomepageConfig() {
 
 // ---------- 仪表盘 ----------
 
-export async function getDashboards() {
-  return db('dashboards').orderBy('id', 'desc')
+export async function getDashboards(req: AuthRequest) {
+  return db('dashboards').where(tenantWhere(req)).orderBy('id', 'desc')
 }
 
-export async function getDashboardByCode(code: string) {
-  const dashboard = await db('dashboards').where({ code }).first()
+export async function getDashboardByCode(req: AuthRequest, code: string) {
+  const dashboard = await db('dashboards').where(tenantWhere(req)).where({ code }).first()
   if (!dashboard) throw new AppError('仪表盘不存在', 404)
   return {
     ...dashboard,
@@ -123,28 +139,36 @@ export async function getDashboardByCode(code: string) {
   }
 }
 
-export async function createDashboard(data: any) {
-  const [id] = await db('dashboards').insert({
-    code: data.code,
-    name: data.name,
-    config: JSON.stringify(data.config || {}),
-    status: data.status ?? 1
-  })
-  return db('dashboards').where({ id }).first()
+export async function createDashboard(req: AuthRequest, data: any) {
+  const [id] = await db('dashboards').insert(
+    setTenantId(
+      {
+        code: data.code,
+        name: data.name,
+        config: JSON.stringify(data.config || {}),
+        status: data.status ?? 1
+      },
+      req
+    )
+  )
+  return db('dashboards').where(tenantWhere(req)).where({ id }).first()
 }
 
-export async function updateDashboard(id: number, data: any) {
-  await db('dashboards').where({ id }).update({
-    name: data.name,
-    config: JSON.stringify(data.config || {}),
-    status: data.status,
-    update_time: db.fn.now()
-  })
-  return db('dashboards').where({ id }).first()
+export async function updateDashboard(req: AuthRequest, id: number, data: any) {
+  await db('dashboards')
+    .where(tenantWhere(req))
+    .where({ id })
+    .update({
+      name: data.name,
+      config: JSON.stringify(data.config || {}),
+      status: data.status,
+      update_time: db.fn.now()
+    })
+  return db('dashboards').where(tenantWhere(req)).where({ id }).first()
 }
 
-export async function deleteDashboard(id: number) {
-  await db('dashboards').where({ id }).del()
+export async function deleteDashboard(req: AuthRequest, id: number) {
+  await db('dashboards').where(tenantWhere(req)).where({ id }).del()
   return true
 }
 

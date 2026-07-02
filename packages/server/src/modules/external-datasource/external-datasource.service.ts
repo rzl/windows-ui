@@ -1,5 +1,7 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 import axios from 'axios'
 
 export interface ExternalDataSourceConfig {
@@ -35,71 +37,84 @@ function parseConfig(data: any): ExternalDataSourceConfig {
   }
 }
 
-export async function getExternalDataSources() {
-  return db('external_data_sources').orderBy('id', 'desc')
+export async function getExternalDataSources(req: AuthRequest) {
+  return db('external_data_sources').where(tenantWhere(req)).orderBy('id', 'desc')
 }
 
-export async function getExternalDataSource(id: number) {
-  const ds = await db('external_data_sources').where({ id }).first()
+export async function getExternalDataSource(req: AuthRequest, id: number) {
+  const ds = await db('external_data_sources').where({ id }).where(tenantWhere(req)).first()
   if (!ds) throw new AppError('外部数据源不存在', 404)
   return { ...ds, config: parseConfig(ds) }
 }
 
-export async function getExternalDataSourceByCode(code: string) {
-  const ds = await db('external_data_sources').where({ code }).first()
+export async function getExternalDataSourceByCode(req: AuthRequest, code: string) {
+  const ds = await db('external_data_sources').where({ code }).where(tenantWhere(req)).first()
   if (!ds) throw new AppError('外部数据源不存在', 404)
   return { ...ds, config: parseConfig(ds) }
 }
 
-export async function createExternalDataSource(data: any) {
+export async function createExternalDataSource(req: AuthRequest, data: any) {
   const code = safeCode(data.code || data.name)
-  const exists = await db('external_data_sources').where({ code }).first()
+  const exists = await db('external_data_sources').where({ code }).where(tenantWhere(req)).first()
   if (exists) throw new AppError('数据源编码已存在', 400)
 
   const config = typeof data.config === 'string' ? data.config : JSON.stringify(data.config || {})
-  const [id] = await db('external_data_sources').insert({
-    code,
-    name: data.name,
-    type: data.type,
-    config,
-    description: data.description || '',
-    status: data.status ?? 1
-  })
-  return db('external_data_sources').where({ id }).first()
+  const [id] = await db('external_data_sources').insert(
+    setTenantId(
+      {
+        code,
+        name: data.name,
+        type: data.type,
+        config,
+        description: data.description || '',
+        status: data.status ?? 1
+      },
+      req
+    )
+  )
+  return db('external_data_sources').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function updateExternalDataSource(id: number, data: any) {
-  const ds = await db('external_data_sources').where({ id }).first()
+export async function updateExternalDataSource(req: AuthRequest, id: number, data: any) {
+  const ds = await db('external_data_sources').where({ id }).where(tenantWhere(req)).first()
   if (!ds) throw new AppError('外部数据源不存在', 404)
 
   const config = typeof data.config === 'string' ? data.config : JSON.stringify(data.config || {})
-  await db('external_data_sources').where({ id }).update({
-    name: data.name,
-    type: data.type,
-    config,
-    description: data.description || '',
-    status: data.status ?? 1,
-    update_time: db.fn.now()
-  })
-  return db('external_data_sources').where({ id }).first()
+  await db('external_data_sources')
+    .where({ id })
+    .where(tenantWhere(req))
+    .update(
+      setTenantId(
+        {
+          name: data.name,
+          type: data.type,
+          config,
+          description: data.description || '',
+          status: data.status ?? 1,
+          update_time: db.fn.now()
+        },
+        req
+      )
+    )
+  return db('external_data_sources').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function deleteExternalDataSource(id: number) {
-  await db('external_data_sources').where({ id }).del()
+export async function deleteExternalDataSource(req: AuthRequest, id: number) {
+  await db('external_data_sources').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
-export async function testExternalDataSource(id: number) {
+export async function testExternalDataSource(req: AuthRequest, id: number) {
   try {
-    const result = await executeExternalDataSource(id, {})
+    const result = await executeExternalDataSource(req, id, {})
     return { success: true, sample: Array.isArray(result) ? result.slice(0, 3) : result }
   } catch (error: any) {
     return { success: false, message: error.message || '测试失败' }
   }
 }
 
-export async function executeExternalDataSource(id: number, ctx: Record<string, any> = {}) {
-  const ds = await getExternalDataSource(id)
+export async function executeExternalDataSource(req: AuthRequest, id: number, ctx: Record<string, any> = {}) {
+  const ds = await getExternalDataSource(req, id)
   const config = ds.config as ExternalDataSourceConfig
 
   if (ds.type === 'rest') {

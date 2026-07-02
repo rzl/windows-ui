@@ -1,5 +1,7 @@
 import { db } from '../../db'
 import { wsManager } from '../../utils/websocket'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 import { createMessage } from './monitor.service'
 
 export interface AlertRule {
@@ -13,9 +15,9 @@ export interface AlertRule {
   receiverIds?: number[]
 }
 
-export async function getAlertRules(query: any = {}) {
+export async function getAlertRules(req: AuthRequest, query: any = {}) {
   const { type, enabled, page = 1, pageSize = 50 } = query
-  const builder = db('alert_rules').orderBy('id', 'desc')
+  const builder = db('alert_rules').where(tenantWhere(req)).orderBy('id', 'desc')
 
   if (type) builder.where('type', type)
   if (enabled !== undefined && enabled !== '') builder.where('enabled', Number(enabled))
@@ -33,29 +35,29 @@ export async function getAlertRules(query: any = {}) {
   }
 }
 
-export async function getAlertRule(id: number) {
-  const item = await db('alert_rules').where({ id }).first()
+export async function getAlertRule(req: AuthRequest, id: number) {
+  const item = await db('alert_rules').where({ id }).where(tenantWhere(req)).first()
   return item ? parseRule(item) : null
 }
 
-export async function createAlertRule(data: AlertRule) {
-  const [id] = await db('alert_rules').insert(formatRule(data))
-  return getAlertRule(id)
+export async function createAlertRule(req: AuthRequest, data: AlertRule) {
+  const [id] = await db('alert_rules').insert(setTenantId(formatRule(data), req))
+  return getAlertRule(req, id)
 }
 
-export async function updateAlertRule(id: number, data: AlertRule) {
-  await db('alert_rules').where({ id }).update(formatRule(data))
-  return getAlertRule(id)
+export async function updateAlertRule(req: AuthRequest, id: number, data: AlertRule) {
+  await db('alert_rules').where({ id }).where(tenantWhere(req)).update(formatRule(data))
+  return getAlertRule(req, id)
 }
 
-export async function deleteAlertRule(id: number) {
-  await db('alert_rules').where({ id }).del()
+export async function deleteAlertRule(req: AuthRequest, id: number) {
+  await db('alert_rules').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
-export async function getAlertRecords(query: any = {}) {
+export async function getAlertRecords(req: AuthRequest, query: any = {}) {
   const { type, isRead, status, page = 1, pageSize = 10 } = query
-  const builder = db('alert_records').orderBy('id', 'desc')
+  const builder = db('alert_records').where(tenantWhere(req)).orderBy('id', 'desc')
 
   if (type) builder.where('type', type)
   if (isRead !== undefined && isRead !== '') builder.where('is_read', Number(isRead))
@@ -74,44 +76,62 @@ export async function getAlertRecords(query: any = {}) {
   }
 }
 
-export async function createAlertRecord(data: {
-  ruleId?: number
-  ruleName: string
-  type: string
-  message: string
-  snapshot?: any
-}) {
-  const [id] = await db('alert_records').insert({
-    rule_id: data.ruleId || null,
-    rule_name: data.ruleName,
-    type: data.type,
-    message: data.message,
-    snapshot: data.snapshot ? JSON.stringify(data.snapshot) : null,
-    is_read: 0,
-    status: 'pending',
-    create_time: new Date().toISOString(),
-    update_time: new Date().toISOString()
-  })
-  return db('alert_records').where({ id }).first()
+export async function createAlertRecord(
+  req: AuthRequest,
+  data: {
+    ruleId?: number
+    ruleName: string
+    type: string
+    message: string
+    snapshot?: any
+  }
+) {
+  const [id] = await db('alert_records').insert(
+    setTenantId(
+      {
+        rule_id: data.ruleId || null,
+        rule_name: data.ruleName,
+        type: data.type,
+        message: data.message,
+        snapshot: data.snapshot ? JSON.stringify(data.snapshot) : null,
+        is_read: 0,
+        status: 'pending',
+        create_time: new Date().toISOString(),
+        update_time: new Date().toISOString()
+      },
+      req
+    )
+  )
+  return db('alert_records').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function markAlertRecordRead(id: number) {
-  await db('alert_records').where({ id }).update({ is_read: 1, update_time: new Date().toISOString() })
-  return db('alert_records').where({ id }).first()
+export async function markAlertRecordRead(req: AuthRequest, id: number) {
+  await db('alert_records')
+    .where({ id })
+    .where(tenantWhere(req))
+    .update({ is_read: 1, update_time: new Date().toISOString() })
+  return db('alert_records').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function resolveAlertRecord(id: number) {
-  await db('alert_records').where({ id }).update({ status: 'resolved', update_time: new Date().toISOString() })
-  return db('alert_records').where({ id }).first()
+export async function resolveAlertRecord(req: AuthRequest, id: number) {
+  await db('alert_records')
+    .where({ id })
+    .where(tenantWhere(req))
+    .update({ status: 'resolved', update_time: new Date().toISOString() })
+  return db('alert_records').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function getUnreadAlertCount() {
-  const result = await db('alert_records').where({ is_read: 0 }).count({ count: '*' }).first()
+export async function getUnreadAlertCount(req: AuthRequest) {
+  const result = await db('alert_records')
+    .where(tenantWhere(req))
+    .where({ is_read: 0 })
+    .count({ count: '*' })
+    .first()
   return Number(result?.count || 0)
 }
 
-export async function checkAlerts() {
-  const rules = await db('alert_rules').where('enabled', 1)
+export async function checkAlerts(req: AuthRequest) {
+  const rules = await db('alert_rules').where(tenantWhere(req)).where('enabled', 1)
   const now = new Date()
   const records: any[] = []
 
@@ -120,12 +140,13 @@ export async function checkAlerts() {
 
     if (rule.type === 'api_slow') {
       const slow = await db('api_metrics')
+        .where(tenantWhere(req))
         .where('created_at', '>=', windowStart)
         .where('duration', '>', rule.threshold)
         .orderBy('duration', 'desc')
         .first()
       if (slow) {
-        const record = await createAlertRecord({
+        const record = await createAlertRecord(req, {
           ruleId: rule.id,
           ruleName: rule.name,
           type: rule.type,
@@ -138,12 +159,13 @@ export async function checkAlerts() {
 
     if (rule.type === 'sql_slow') {
       const slow = await db('sql_metrics')
+        .where(tenantWhere(req))
         .where('created_at', '>=', windowStart)
         .where('duration', '>', rule.threshold)
         .orderBy('duration', 'desc')
         .first()
       if (slow) {
-        const record = await createAlertRecord({
+        const record = await createAlertRecord(req, {
           ruleId: rule.id,
           ruleName: rule.name,
           type: rule.type,
@@ -155,8 +177,13 @@ export async function checkAlerts() {
     }
 
     if (rule.type === 'error_rate') {
-      const total = await db('api_metrics').where('created_at', '>=', windowStart).count({ count: '*' }).first()
+      const total = await db('api_metrics')
+        .where(tenantWhere(req))
+        .where('created_at', '>=', windowStart)
+        .count({ count: '*' })
+        .first()
       const errors = await db('api_metrics')
+        .where(tenantWhere(req))
         .where('created_at', '>=', windowStart)
         .where('status_code', '>=', 500)
         .count({ count: '*' })
@@ -165,7 +192,7 @@ export async function checkAlerts() {
       const errorCount = Number(errors?.count || 0)
       const rate = totalCount > 0 ? (errorCount / totalCount) * 100 : 0
       if (rate > rule.threshold) {
-        const record = await createAlertRecord({
+        const record = await createAlertRecord(req, {
           ruleId: rule.id,
           ruleName: rule.name,
           type: rule.type,
@@ -180,9 +207,9 @@ export async function checkAlerts() {
       const os = await import('os')
       const loadavg = os.loadavg()
       const cpus = os.cpus().length || 1
-      const load = loadavg[0] / cpus * 100
+      const load = (loadavg[0] / cpus) * 100
       if (load > rule.threshold) {
-        const record = await createAlertRecord({
+        const record = await createAlertRecord(req, {
           ruleId: rule.id,
           ruleName: rule.name,
           type: rule.type,
@@ -196,18 +223,18 @@ export async function checkAlerts() {
 
   // 推送告警通知
   for (const record of records) {
-    await pushAlertNotification(record)
+    await pushAlertNotification(req, record)
   }
 
   return records
 }
 
-async function pushAlertNotification(record: any) {
+async function pushAlertNotification(req: AuthRequest, record: any) {
   const ruleId = record.rule_id
   let receiverIds: number[] = []
 
   if (ruleId) {
-    const rule = await db('alert_rules').where({ id: ruleId }).first()
+    const rule = await db('alert_rules').where({ id: ruleId }).where(tenantWhere(req)).first()
     if (rule?.receiver_ids) {
       try {
         receiverIds = JSON.parse(rule.receiver_ids)
@@ -225,7 +252,7 @@ async function pushAlertNotification(record: any) {
   if (receiverIds.length > 0) {
     for (const userId of receiverIds) {
       wsManager.sendToUser(userId, payload)
-      await createMessage({
+      await createMessage(req, {
         receiverId: userId,
         title: '系统告警',
         content: record.message,

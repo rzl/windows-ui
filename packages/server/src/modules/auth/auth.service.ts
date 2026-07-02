@@ -4,8 +4,9 @@ import { db } from '../../db'
 import { config } from '../../config'
 import { AppError } from '../../utils/response'
 import { tokenBlacklist } from '../../middleware/auth'
-import { getRoleDataPermissionIds } from '../lowcode/data-permission.service'
+import type { AuthRequest } from '../../middleware/auth'
 import type { LoginDto, RefreshDto, UpdateProfileDto, ChangePasswordDto } from './auth.dto'
+import { getRoleDataPermissionIds } from '../lowcode/data-permission.service'
 
 function generateTokens(payload: { id: number; username: string; roleId: number; tenantId: number }) {
   const accessToken = jwt.sign(payload, config.jwt.secret as jwt.Secret, {
@@ -115,7 +116,8 @@ export async function getProfile(userId: number) {
     .pluck('permission')
 
   // 获取角色绑定的数据权限规则 ID 列表
-  const dataPermissionIds = await getRoleDataPermissionIds(user.roleId)
+  const userReq = { user: { id: user.id, username: user.username, roleId: user.roleId, tenantId: user.tenantId } } as AuthRequest
+  const dataPermissionIds = await getRoleDataPermissionIds(userReq, user.roleId)
 
   // 超级管理员直接返回，不额外聚合应用权限
   if (permissions.includes('*') || user.roleId === 1) {

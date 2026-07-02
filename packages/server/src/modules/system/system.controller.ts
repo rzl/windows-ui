@@ -51,64 +51,64 @@ export async function deleteDictItem(req: AuthRequest, res: Response) {
 }
 
 // 字典分类
-export async function getDictCategories(_req: AuthRequest, res: Response) {
-  const result = await systemService.getDictCategories()
+export async function getDictCategories(req: AuthRequest, res: Response) {
+  const result = await systemService.getDictCategories(req)
   res.json(success(result))
 }
 
 export async function createDictCategory(req: AuthRequest, res: Response) {
-  const result = await systemService.createDictCategory(req.body)
+  const result = await systemService.createDictCategory(req, req.body)
   res.json(success(result, '创建成功'))
 }
 
 export async function updateDictCategory(req: AuthRequest, res: Response) {
-  const result = await systemService.updateDictCategory(Number(req.params.id), req.body)
+  const result = await systemService.updateDictCategory(req, Number(req.params.id), req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteDictCategory(req: AuthRequest, res: Response) {
-  await systemService.deleteDictCategory(Number(req.params.id))
+  await systemService.deleteDictCategory(req, Number(req.params.id))
   res.json(success(null, '删除成功'))
 }
 
 // 公告
-export async function getNotices(_req: AuthRequest, res: Response) {
-  const result = await systemService.getNotices()
+export async function getNotices(req: AuthRequest, res: Response) {
+  const result = await systemService.getNotices(req)
   res.json(success(result))
 }
 
 export async function createNotice(req: AuthRequest, res: Response) {
-  const result = await systemService.createNotice(req.body)
+  const result = await systemService.createNotice(req, req.body)
   res.json(success(result, '创建成功'))
 }
 
 export async function updateNotice(req: AuthRequest, res: Response) {
-  const result = await systemService.updateNotice(Number(req.params.id), req.body)
+  const result = await systemService.updateNotice(req, Number(req.params.id), req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteNotice(req: AuthRequest, res: Response) {
-  await systemService.deleteNotice(Number(req.params.id))
+  await systemService.deleteNotice(req, Number(req.params.id))
   res.json(success(null, '删除成功'))
 }
 
 // 职务
-export async function getPositions(_req: AuthRequest, res: Response) {
-  const result = await systemService.getPositions()
+export async function getPositions(req: AuthRequest, res: Response) {
+  const result = await systemService.getPositions(req)
   res.json(success(result))
 }
 
 export async function createPosition(req: AuthRequest, res: Response) {
-  const result = await systemService.createPosition(req.body)
+  const result = await systemService.createPosition(req, req.body)
   res.json(success(result, '创建成功'))
 }
 
 export async function updatePosition(req: AuthRequest, res: Response) {
-  const result = await systemService.updatePosition(Number(req.params.id), req.body)
+  const result = await systemService.updatePosition(req, Number(req.params.id), req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deletePosition(req: AuthRequest, res: Response) {
-  await systemService.deletePosition(Number(req.params.id))
+  await systemService.deletePosition(req, Number(req.params.id))
   res.json(success(null, '删除成功'))
 }

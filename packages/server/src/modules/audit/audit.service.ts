@@ -1,4 +1,6 @@
 import { db } from '../../db'
+import type { AuthRequest } from '../../middleware/auth'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
 
 export interface AuditLog {
   id?: number
@@ -55,7 +57,7 @@ export async function isAuditEnabled(modelCode: string): Promise<boolean> {
   return model ? model.enable_audit === 1 : false
 }
 
-export async function logAudit(ctx: AuditContext) {
+export async function logAudit(req: AuthRequest, ctx: AuditContext) {
   try {
     const enabled = await isAuditEnabled(ctx.modelCode)
     if (!enabled) return
@@ -64,37 +66,45 @@ export async function logAudit(ctx: AuditContext) {
     const after = ctx.after ?? null
     const diff = computeDiff(before, after)
 
-    await db('data_audit_logs').insert({
-      model_code: ctx.modelCode,
-      record_id: ctx.recordId,
-      action: ctx.action,
-      operator_id: ctx.user?.id || null,
-      operator_name: ctx.user?.username || ctx.user?.nickname || null,
-      before: before ? JSON.stringify(before) : null,
-      after: after ? JSON.stringify(after) : null,
-      diff: diff ? JSON.stringify(diff) : null,
-      ip: getClientIp(ctx.req),
-      create_time: db.fn.now()
-    })
+    await db('data_audit_logs').insert(
+      setTenantId(
+        {
+          model_code: ctx.modelCode,
+          record_id: ctx.recordId,
+          action: ctx.action,
+          operator_id: ctx.user?.id || null,
+          operator_name: ctx.user?.username || ctx.user?.nickname || null,
+          before: before ? JSON.stringify(before) : null,
+          after: after ? JSON.stringify(after) : null,
+          diff: diff ? JSON.stringify(diff) : null,
+          ip: getClientIp(ctx.req),
+          create_time: db.fn.now()
+        },
+        req
+      )
+    )
   } catch (error) {
     // 审计失败不应影响主业务
     console.error('审计日志写入失败', error)
   }
 }
 
-export async function getAuditLogs(query: {
-  modelCode?: string
-  action?: string
-  recordId?: number
-  operatorName?: string
-  startTime?: string
-  endTime?: string
-  page?: number
-  pageSize?: number
-}) {
+export async function getAuditLogs(
+  req: AuthRequest,
+  query: {
+    modelCode?: string
+    action?: string
+    recordId?: number
+    operatorName?: string
+    startTime?: string
+    endTime?: string
+    page?: number
+    pageSize?: number
+  }
+) {
   const page = Number(query.page) || 1
   const pageSize = Number(query.pageSize) || 20
-  const builder = db('data_audit_logs').orderBy('id', 'desc')
+  const builder = db('data_audit_logs').where(tenantWhere(req)).orderBy('id', 'desc')
 
   if (query.modelCode) {
     builder.where('model_code', query.modelCode)
@@ -128,8 +138,8 @@ export async function getAuditLogs(query: {
   }
 }
 
-export async function getAuditLogDetail(id: number) {
-  return db('data_audit_logs').where({ id }).first()
+export async function getAuditLogDetail(req: AuthRequest, id: number) {
+  return db('data_audit_logs').where({ id }).andWhere(tenantWhere(req)).first()
 }
 
 export async function getAuditActions() {

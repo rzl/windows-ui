@@ -26,11 +26,11 @@ export function requestLogMiddleware(req: AuthRequest, res: Response, next: Next
       status: res.statusCode < 400 ? 1 : 0
     }
 
-    monitorService.createOperationLog(logData).catch(() => {
+    monitorService.createOperationLog(req, logData).catch(() => {
       // ignore log error
     })
 
-    monitorService.createApiMetric({
+    monitorService.createApiMetric(req, {
       method: logData.method,
       path: logData.path,
       statusCode: res.statusCode,

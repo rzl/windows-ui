@@ -1,5 +1,7 @@
 import { db } from '../../db'
 import { logger } from '../../utils/logger'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 
 export interface RetentionPolicy {
   id?: number
@@ -18,26 +20,29 @@ const TIME_COLUMNS: Record<string, string> = {
   data_logs: 'created_at'
 }
 
-export async function getRetentionPolicies() {
-  const list = await db('data_retention_policies').orderBy('id', 'desc')
+export async function getRetentionPolicies(req: AuthRequest) {
+  const list = await db('data_retention_policies').where(tenantWhere(req)).orderBy('id', 'desc')
   return list.map((item) => parsePolicy(item))
 }
 
-export async function getRetentionPolicy(id: number) {
-  const item = await db('data_retention_policies').where({ id }).first()
+export async function getRetentionPolicy(req: AuthRequest, id: number) {
+  const item = await db('data_retention_policies').where({ id }).where(tenantWhere(req)).first()
   return item ? parsePolicy(item) : null
 }
 
-export async function updateRetentionPolicy(id: number, data: Partial<RetentionPolicy>) {
-  await db('data_retention_policies').where({ id }).update({
-    retention_days: data.retentionDays,
-    enabled: data.enabled,
-    update_time: new Date().toISOString()
-  })
-  return getRetentionPolicy(id)
+export async function updateRetentionPolicy(req: AuthRequest, id: number, data: Partial<RetentionPolicy>) {
+  await db('data_retention_policies')
+    .where({ id })
+    .where(tenantWhere(req))
+    .update({
+      retention_days: data.retentionDays,
+      enabled: data.enabled,
+      update_time: new Date().toISOString()
+    })
+  return getRetentionPolicy(req, id)
 }
 
-export async function cleanupByPolicy(policy: RetentionPolicy) {
+export async function cleanupByPolicy(req: AuthRequest, policy: RetentionPolicy) {
   if (!policy.enabled || policy.retentionDays <= 0) return 0
 
   const timeColumn = TIME_COLUMNS[policy.tableName]
@@ -47,27 +52,32 @@ export async function cleanupByPolicy(policy: RetentionPolicy) {
   }
 
   const deadline = new Date(Date.now() - policy.retentionDays * 24 * 60 * 60 * 1000).toISOString()
-  const deleted = await db(policy.tableName).where(timeColumn, '<', deadline).del()
+  const deleted = await db(policy.tableName)
+    .where(tenantWhere(req))
+    .where(timeColumn, '<', deadline)
+    .del()
 
   await db('data_retention_policies')
     .where({ id: policy.id })
+    .where(tenantWhere(req))
     .update({ last_cleanup_time: new Date().toISOString() })
 
   logger.info(`数据治理清理完成：${policy.tableName}，保留 ${policy.retentionDays} 天，删除 ${deleted} 条记录`)
   return deleted
 }
 
-export async function runCleanup() {
-  const policies = await getRetentionPolicies()
+export async function runCleanup(req: AuthRequest) {
+  const policies = await getRetentionPolicies(req)
   let total = 0
   for (const policy of policies) {
-    total += await cleanupByPolicy(policy)
+    total += await cleanupByPolicy(req, policy)
   }
   return total
 }
 
-export async function cleanupCustomApiLogs() {
+export async function cleanupCustomApiLogs(req: AuthRequest) {
   const apis = await db('lowcode_custom_apis')
+    .where(tenantWhere(req))
     .where('log_retention_days', '>', 0)
     .select('id', 'code', 'log_retention_days')
 
@@ -75,6 +85,7 @@ export async function cleanupCustomApiLogs() {
   for (const api of apis) {
     const deadline = new Date(Date.now() - api.log_retention_days * 24 * 60 * 60 * 1000).toISOString()
     const deleted = await db('custom_api_logs')
+      .where(tenantWhere(req))
       .where('api_id', api.id)
       .where('create_time', '<', deadline)
       .del()

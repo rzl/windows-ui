@@ -1,6 +1,8 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { runScript } from '../../utils/script-runner'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 import * as securityService from './custom-api-security.service'
 
 export interface CustomApiForm {
@@ -25,93 +27,102 @@ function safeCode(name: string) {
   return name.replace(/[^a-z0-9_]/gi, '_').toLowerCase()
 }
 
-export async function getCustomApis() {
-  return db('lowcode_custom_apis').orderBy('id', 'desc')
+export async function getCustomApis(req: AuthRequest) {
+  return db('lowcode_custom_apis').where(tenantWhere(req)).orderBy('id', 'desc')
 }
 
-export async function getCustomApiById(id: number) {
-  const api = await db('lowcode_custom_apis').where({ id }).first()
+export async function getCustomApiById(req: AuthRequest, id: number) {
+  const api = await db('lowcode_custom_apis').where({ id }).where(tenantWhere(req)).first()
   if (!api) throw new AppError('接口不存在', 404)
   return api
 }
 
-export async function getCustomApiByCode(code: string) {
-  return db('lowcode_custom_apis').where({ code }).first()
+export async function getCustomApiByCode(req: AuthRequest, code: string) {
+  return db('lowcode_custom_apis').where({ code }).where(tenantWhere(req)).first()
 }
 
-export async function createCustomApi(data: CustomApiForm) {
+export async function createCustomApi(req: AuthRequest, data: CustomApiForm) {
   const code = safeCode(data.code || '')
   if (!code) throw new AppError('接口编码不能为空', 400)
 
-  const exists = await db('lowcode_custom_apis').where({ code }).first()
+  const exists = await db('lowcode_custom_apis').where({ code }).where(tenantWhere(req)).first()
   if (exists) throw new AppError('接口编码已存在', 400)
 
   const path = data.path ? data.path.trim() : code
 
-  const [id] = await db('lowcode_custom_apis').insert({
-    code,
-    name: data.name || code,
-    method: (data.method || 'ALL').toUpperCase(),
-    path,
-    description: data.description || '',
-    script: data.script || '',
-    status: data.status ?? 1,
-    is_public: data.isPublic ?? 0,
-    rate_limit: data.rateLimit ?? 0,
-    rate_limit_window: data.rateLimitWindow || 'minute',
-    ip_whitelist: data.ipWhitelist ? JSON.stringify(securityService.parseIpList(data.ipWhitelist)) : null,
-    ip_blacklist: data.ipBlacklist ? JSON.stringify(securityService.parseIpList(data.ipBlacklist)) : null,
-    timeout: data.timeout ?? 5000,
-    log_retention_days: data.logRetentionDays ?? 30
-  })
-  return getCustomApiById(id)
+  const [id] = await db('lowcode_custom_apis').insert(
+    setTenantId(
+      {
+        code,
+        name: data.name || code,
+        method: (data.method || 'ALL').toUpperCase(),
+        path,
+        description: data.description || '',
+        script: data.script || '',
+        status: data.status ?? 1,
+        is_public: data.isPublic ?? 0,
+        rate_limit: data.rateLimit ?? 0,
+        rate_limit_window: data.rateLimitWindow || 'minute',
+        ip_whitelist: data.ipWhitelist ? JSON.stringify(securityService.parseIpList(data.ipWhitelist)) : null,
+        ip_blacklist: data.ipBlacklist ? JSON.stringify(securityService.parseIpList(data.ipBlacklist)) : null,
+        timeout: data.timeout ?? 5000,
+        log_retention_days: data.logRetentionDays ?? 30
+      },
+      req
+    )
+  )
+  return getCustomApiById(req, id)
 }
 
-export async function updateCustomApi(id: number, data: CustomApiForm) {
-  const api = await getCustomApiById(id)
+export async function updateCustomApi(req: AuthRequest, id: number, data: CustomApiForm) {
+  const api = await getCustomApiById(req, id)
   const path = data.path ? data.path.trim() : api.path
 
-  await db('lowcode_custom_apis').where({ id }).update({
-    name: data.name ?? api.name,
-    method: (data.method || api.method).toUpperCase(),
-    path,
-    description: data.description ?? api.description,
-    script: data.script ?? api.script,
-    status: data.status ?? api.status,
-    is_public: data.isPublic ?? api.is_public,
-    rate_limit: data.rateLimit ?? api.rate_limit ?? 0,
-    rate_limit_window: data.rateLimitWindow || api.rate_limit_window || 'minute',
-    ip_whitelist: data.ipWhitelist !== undefined
-      ? (data.ipWhitelist ? JSON.stringify(securityService.parseIpList(data.ipWhitelist)) : null)
-      : api.ip_whitelist,
-    ip_blacklist: data.ipBlacklist !== undefined
-      ? (data.ipBlacklist ? JSON.stringify(securityService.parseIpList(data.ipBlacklist)) : null)
-      : api.ip_blacklist,
-    timeout: data.timeout ?? api.timeout ?? 5000,
-    log_retention_days: data.logRetentionDays ?? api.log_retention_days ?? 30,
-    update_time: db.fn.now()
-  })
-  return getCustomApiById(id)
+  await db('lowcode_custom_apis')
+    .where({ id })
+    .where(tenantWhere(req))
+    .update({
+      name: data.name ?? api.name,
+      method: (data.method || api.method).toUpperCase(),
+      path,
+      description: data.description ?? api.description,
+      script: data.script ?? api.script,
+      status: data.status ?? api.status,
+      is_public: data.isPublic ?? api.is_public,
+      rate_limit: data.rateLimit ?? api.rate_limit ?? 0,
+      rate_limit_window: data.rateLimitWindow || api.rate_limit_window || 'minute',
+      ip_whitelist: data.ipWhitelist !== undefined
+        ? (data.ipWhitelist ? JSON.stringify(securityService.parseIpList(data.ipWhitelist)) : null)
+        : api.ip_whitelist,
+      ip_blacklist: data.ipBlacklist !== undefined
+        ? (data.ipBlacklist ? JSON.stringify(securityService.parseIpList(data.ipBlacklist)) : null)
+        : api.ip_blacklist,
+      timeout: data.timeout ?? api.timeout ?? 5000,
+      log_retention_days: data.logRetentionDays ?? api.log_retention_days ?? 30,
+      update_time: db.fn.now()
+    })
+  return getCustomApiById(req, id)
 }
 
-export async function deleteCustomApi(id: number) {
-  const api = await getCustomApiById(id)
-  await db('lowcode_custom_apis').where({ id }).del()
+export async function deleteCustomApi(req: AuthRequest, id: number) {
+  const api = await getCustomApiById(req, id)
+  await db('lowcode_custom_apis').where({ id }).where(tenantWhere(req)).del()
   return api
 }
 
-export async function executeApiById(id: number, ctx: any = {}) {
-  const api = await getCustomApiById(id)
+export async function executeApiById(req: AuthRequest, id: number, ctx: any = {}) {
+  const api = await getCustomApiById(req, id)
   if (api.status !== 1) throw new AppError('接口已禁用', 403)
   const timeout = api.timeout ?? 5000
   return runScript(api.script, { ctx }, timeout)
 }
 
-export async function executeApiByPath(path: string, ctx: any = {}) {
+export async function executeApiByPath(req: AuthRequest, path: string, ctx: any = {}) {
   const api = await db('lowcode_custom_apis')
     .where(function () {
       this.where({ path }).orWhere({ code: path })
     })
+    .where(tenantWhere(req))
     .andWhere('status', 1)
     .first()
 
@@ -147,7 +158,7 @@ export async function executeApiByPath(path: string, ctx: any = {}) {
 
   try {
     const result = await runScript(api.script, { ctx }, timeout)
-    await securityService.logExecution({
+    await securityService.logExecution(req, {
       apiId: api.id,
       apiCode: api.code,
       apiPath: api.path,
@@ -162,7 +173,7 @@ export async function executeApiByPath(path: string, ctx: any = {}) {
     })
     return result
   } catch (err: any) {
-    await securityService.logExecution({
+    await securityService.logExecution(req, {
       apiId: api.id,
       apiCode: api.code,
       apiPath: api.path,
@@ -179,10 +190,11 @@ export async function executeApiByPath(path: string, ctx: any = {}) {
   }
 }
 
-export async function getCustomApiByPath(path: string) {
+export async function getCustomApiByPath(req: AuthRequest, path: string) {
   return db('lowcode_custom_apis')
     .where(function () {
       this.where({ path }).orWhere({ code: path })
     })
+    .where(tenantWhere(req))
     .first()
 }

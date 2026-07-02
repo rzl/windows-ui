@@ -1,16 +1,19 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 import { getCustomApiById, updateCustomApi } from './custom-api.service'
 
-export async function getCustomApiVersions(apiId: number) {
-  await getCustomApiById(apiId)
+export async function getCustomApiVersions(req: AuthRequest, apiId: number) {
+  await getCustomApiById(req, apiId)
   return db('lowcode_custom_api_versions')
     .where({ api_id: apiId })
+    .where(tenantWhere(req))
     .orderBy('id', 'desc')
 }
 
-export async function createCustomApiVersion(apiId: number, data: any) {
-  const api = await getCustomApiById(apiId)
+export async function createCustomApiVersion(req: AuthRequest, apiId: number, data: any) {
+  const api = await getCustomApiById(req, apiId)
 
   const snapshot = {
     name: api.name,
@@ -22,34 +25,48 @@ export async function createCustomApiVersion(apiId: number, data: any) {
     is_public: api.is_public
   }
 
-  await db('lowcode_custom_api_versions').where({ api_id: apiId }).update({ is_published: 0 })
+  await db('lowcode_custom_api_versions')
+    .where({ api_id: apiId })
+    .where(tenantWhere(req))
+    .update({ is_published: 0 })
 
-  const [id] = await db('lowcode_custom_api_versions').insert({
-    api_id: apiId,
-    version: data.version || generateVersion(),
-    description: data.description || '',
-    snapshot: JSON.stringify(snapshot),
-    is_published: 1
-  })
+  const [id] = await db('lowcode_custom_api_versions').insert(
+    setTenantId(
+      {
+        api_id: apiId,
+        version: data.version || generateVersion(),
+        description: data.description || '',
+        snapshot: JSON.stringify(snapshot),
+        is_published: 1
+      },
+      req
+    )
+  )
 
-  return db('lowcode_custom_api_versions').where({ id }).first()
+  return db('lowcode_custom_api_versions').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function deleteCustomApiVersion(apiId: number, versionId: number) {
-  const version = await db('lowcode_custom_api_versions').where({ id: versionId, api_id: apiId }).first()
+export async function deleteCustomApiVersion(req: AuthRequest, apiId: number, versionId: number) {
+  const version = await db('lowcode_custom_api_versions')
+    .where({ id: versionId, api_id: apiId })
+    .where(tenantWhere(req))
+    .first()
   if (!version) throw new AppError('版本不存在', 404)
-  await db('lowcode_custom_api_versions').where({ id: versionId }).del()
+  await db('lowcode_custom_api_versions').where({ id: versionId }).where(tenantWhere(req)).del()
   return true
 }
 
-export async function rollbackCustomApiVersion(apiId: number, versionId: number) {
-  const version = await db('lowcode_custom_api_versions').where({ id: versionId, api_id: apiId }).first()
+export async function rollbackCustomApiVersion(req: AuthRequest, apiId: number, versionId: number) {
+  const version = await db('lowcode_custom_api_versions')
+    .where({ id: versionId, api_id: apiId })
+    .where(tenantWhere(req))
+    .first()
   if (!version) throw new AppError('版本不存在', 404)
 
   const snapshot = parseJson(version.snapshot)
   if (!snapshot) throw new AppError('快照数据无效', 400)
 
-  await updateCustomApi(apiId, {
+  await updateCustomApi(req, apiId, {
     name: snapshot.name,
     method: snapshot.method,
     path: snapshot.path,
@@ -59,10 +76,16 @@ export async function rollbackCustomApiVersion(apiId: number, versionId: number)
     isPublic: snapshot.is_public
   })
 
-  await db('lowcode_custom_api_versions').where({ api_id: apiId }).update({ is_published: 0 })
-  await db('lowcode_custom_api_versions').where({ id: versionId }).update({ is_published: 1 })
+  await db('lowcode_custom_api_versions')
+    .where({ api_id: apiId })
+    .where(tenantWhere(req))
+    .update({ is_published: 0 })
+  await db('lowcode_custom_api_versions')
+    .where({ id: versionId })
+    .where(tenantWhere(req))
+    .update({ is_published: 1 })
 
-  return getCustomApiById(apiId)
+  return getCustomApiById(req, apiId)
 }
 
 function parseJson(value: any) {

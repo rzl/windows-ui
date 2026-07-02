@@ -110,7 +110,9 @@
 
 ### 租户隔离范围
 
-当前已实现隔离的核心系统表（均含 `tenant_id`）：
+当前已实现隔离的系统表（均含 `tenant_id`）：
+
+#### 核心系统表（phase-34）
 
 - `users`（username 唯一索引改为 `(tenant_id, username)`）
 - `roles`、`depts`、`menus`
@@ -118,6 +120,22 @@
 - `role_permissions`、`role_apps`
 - `lowcode_apps`、`lowcode_app_items`、`lowcode_app_versions`
 - `lowcode_pages`
+
+#### 剩余业务表（phase-35）
+
+- 低代码元数据：`lowcode_models`、`lowcode_fields`、`lowcode_forms`、`lowcode_tables`、`lowcode_model_relations`、`lowcode_model_versions`、`lowcode_coding_rules`、`lowcode_validation_rules`、`lowcode_saved_queries`
+- 自定义接口：`lowcode_custom_apis`、`lowcode_custom_api_versions`、`custom_api_logs`
+- 工作流：`flow_definitions`、`flow_instances`、`flow_tasks`、`flow_delegations`
+- 监控与治理：`operation_logs`、`data_logs`、`data_audit_logs`、`api_metrics`、`sql_metrics`、`alert_rules`、`alert_records`、`data_retention_policies`
+- 消息中心：`message_templates`、`messages`
+- 首页与仪表盘：`homepage_configs`、`dashboards`
+- 插件与扩展：`lowcode_plugins`
+- 报表打印：`print_templates`、`lowcode_reports`
+- 定时任务：`scheduled_tasks`、`scheduled_task_logs`
+- 外部数据源：`external_data_sources`
+- 数据/字段权限：`lowcode_data_permission_rules`、`role_data_permissions`、`lowcode_field_permission_rules`
+- 异步导出：`export_tasks`
+- 动态物理表：所有由 `lowcode_models` 生成的业务表
 
 超级管理员（当前以 `role_id === 1` 判定）可跨租户访问，普通用户仅可访问 `tenant_id` 与本用户 `tenant_id` 一致的数据。
 
@@ -252,7 +270,8 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
-| code | string UNIQUE | 接口编码 |
+| tenant_id | integer FK | 租户 ID |
+| code | string | 接口编码（联合唯一：tenant_id + code） |
 | name | string | 接口名称 |
 | method | string | 请求方法 |
 | path | string | 接口路径 |
@@ -276,7 +295,8 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
-| code | string | 流程编码 |
+| tenant_id | integer FK | 租户 ID |
+| code | string | 流程编码（联合唯一：tenant_id + code + version） |
 | name | string | 流程名称 |
 | model_code | string | 关联模型编码 |
 | config | text | 流程 JSON 配置 |

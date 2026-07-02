@@ -1,10 +1,14 @@
 import { db } from '../../db'
+import type { AuthRequest } from '../../middleware/auth'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
 import { AppError } from '../../utils/response'
 import { applyDataPermissionWhere } from './data-permission.service'
 import { getModelByCode } from './lowcode.service'
 
-export async function getRelations(query: any = {}) {
-  const builder = db('lowcode_model_relations').orderBy('id', 'desc')
+export async function getRelations(req: AuthRequest, query: any = {}) {
+  const builder = db('lowcode_model_relations')
+    .where(tenantWhere(req))
+    .orderBy('id', 'desc')
   if (query.sourceModel) {
     builder.where('source_model', query.sourceModel)
   }
@@ -17,24 +21,33 @@ export async function getRelations(query: any = {}) {
   return builder
 }
 
-export async function getRelationById(id: number) {
-  const relation = await db('lowcode_model_relations').where({ id }).first()
+export async function getRelationById(req: AuthRequest, id: number) {
+  const relation = await db('lowcode_model_relations')
+    .where(tenantWhere(req))
+    .where({ id })
+    .first()
   if (!relation) throw new AppError('关联关系不存在', 404)
   return relation
 }
 
-export async function getRelationByCode(code: string) {
-  return db('lowcode_model_relations').where({ code }).first()
+export async function getRelationByCode(req: AuthRequest, code: string) {
+  return db('lowcode_model_relations')
+    .where(tenantWhere(req))
+    .where({ code })
+    .first()
 }
 
-export async function createRelation(data: any) {
+export async function createRelation(req: AuthRequest, data: any) {
   const code = safeCode(data.code)
-  const exists = await db('lowcode_model_relations').where({ code }).first()
+  const exists = await db('lowcode_model_relations')
+    .where(tenantWhere(req))
+    .where({ code })
+    .first()
   if (exists) throw new AppError('关系编码已存在', 400)
 
   validateRelation(data)
 
-  const [id] = await db('lowcode_model_relations').insert({
+  const insertData = setTenantId({
     code,
     name: data.name,
     source_model: data.sourceModel,
@@ -44,36 +57,47 @@ export async function createRelation(data: any) {
     target_field: data.targetField || 'id',
     junction_table: data.junctionTable || null,
     status: data.status ?? 1
-  })
+  }, req)
 
-  return getRelationById(id)
+  const [id] = await db('lowcode_model_relations').insert(insertData)
+
+  return getRelationById(req, id)
 }
 
-export async function updateRelation(id: number, data: any) {
-  const relation = await getRelationById(id)
+export async function updateRelation(req: AuthRequest, id: number, data: any) {
+  const relation = await getRelationById(req, id)
   validateRelation({ ...relation, ...data })
 
-  await db('lowcode_model_relations').where({ id }).update({
-    name: data.name ?? relation.name,
-    source_model: data.sourceModel ?? relation.source_model,
-    target_model: data.targetModel ?? relation.target_model,
-    relation_type: data.relationType ?? relation.relation_type,
-    source_field: data.sourceField ?? relation.source_field,
-    target_field: data.targetField ?? relation.target_field,
-    junction_table: data.junctionTable ?? relation.junction_table,
-    status: data.status ?? relation.status,
-    update_time: db.fn.now()
-  })
+  await db('lowcode_model_relations')
+    .where(tenantWhere(req))
+    .where({ id })
+    .update(setTenantId({
+      name: data.name ?? relation.name,
+      source_model: data.sourceModel ?? relation.source_model,
+      target_model: data.targetModel ?? relation.target_model,
+      relation_type: data.relationType ?? relation.relation_type,
+      source_field: data.sourceField ?? relation.source_field,
+      target_field: data.targetField ?? relation.target_field,
+      junction_table: data.junctionTable ?? relation.junction_table,
+      status: data.status ?? relation.status,
+      update_time: db.fn.now()
+    }, req))
 
-  return getRelationById(id)
+  return getRelationById(req, id)
 }
 
-export async function deleteRelation(id: number) {
-  const relation = await getRelationById(id)
+export async function deleteRelation(req: AuthRequest, id: number) {
+  const relation = await getRelationById(req, id)
   // 检查是否有字段引用该关系
-  const used = await db('lowcode_fields').where({ ref_relation: relation.code }).first()
+  const used = await db('lowcode_fields')
+    .where(tenantWhere(req))
+    .where({ ref_relation: relation.code })
+    .first()
   if (used) throw new AppError('该关系已被字段引用，无法删除', 400)
-  await db('lowcode_model_relations').where({ id }).del()
+  await db('lowcode_model_relations')
+    .where(tenantWhere(req))
+    .where({ id })
+    .del()
   return true
 }
 
@@ -101,9 +125,9 @@ function safeCode(code: string) {
  * expand 格式: fieldName1,fieldName2
  * 只有字段配置了 ref_relation 或 ref_model 的字段才会被展开
  */
-export async function resolveExpands(modelCode: string, expand?: string) {
+export async function resolveExpands(req: AuthRequest, modelCode: string, expand?: string) {
   if (!expand) return []
-  const model = await getModelByCode(modelCode)
+  const model = await getModelByCode(req, modelCode)
   const expandNames = String(expand)
     .split(',')
     .map((s) => s.trim())
@@ -116,7 +140,7 @@ export async function resolveExpands(modelCode: string, expand?: string) {
     const field = fields.find((f: any) => f.field_name === name)
     if (!field) continue
     if (field.ref_relation) {
-      const relation = await getRelationByCode(field.ref_relation)
+      const relation = await getRelationByCode(req, field.ref_relation)
       if (relation && relation.status === 1) {
         result.push({ field, relation })
       }
@@ -142,12 +166,12 @@ export async function resolveExpands(modelCode: string, expand?: string) {
 /**
  * 统一填充所有 expand 关联数据（belongsTo / hasMany / manyToMany）
  */
-export async function fillAllExpands(rows: any[], expands: any[], user?: any) {
+export async function fillAllExpands(req: AuthRequest, rows: any[], expands: any[], user?: any) {
   if (!rows.length || !expands.length) return rows
   const currentUser = normalizeUser(user)
 
   for (const { field, relation } of expands) {
-    const targetModel = await getModelByCode(relation.target_model)
+    const targetModel = await getModelByCode(req, relation.target_model)
     const sourceValues = [...new Set(rows.map((r) => r[relation.source_field]).filter((v) => v !== undefined && v !== null))]
     if (!sourceValues.length) continue
 
@@ -156,19 +180,27 @@ export async function fillAllExpands(rows: any[], expands: any[], user?: any) {
 
     if (relation.relation_type === 'belongsTo') {
       isSingle = true
-      const builder = db(targetModel.table_name).whereIn(relation.target_field, sourceValues)
-      await applyDataPermissionWhere(builder, relation.target_model, currentUser)
+      const builder = db(targetModel.table_name)
+        .where(tenantWhere(req))
+        .whereIn(relation.target_field, sourceValues)
+      await applyDataPermissionWhere(req, builder, relation.target_model, currentUser)
       targetRows = await builder
     } else if (relation.relation_type === 'hasMany') {
-      const builder = db(targetModel.table_name).whereIn(relation.target_field, sourceValues)
-      await applyDataPermissionWhere(builder, relation.target_model, currentUser)
+      const builder = db(targetModel.table_name)
+        .where(tenantWhere(req))
+        .whereIn(relation.target_field, sourceValues)
+      await applyDataPermissionWhere(req, builder, relation.target_model, currentUser)
       targetRows = await builder
     } else if (relation.relation_type === 'manyToMany') {
-      const junctionRows = await db(relation.junction_table).whereIn(relation.source_field, sourceValues)
+      const junctionRows = await db(relation.junction_table)
+        .where(tenantWhere(req))
+        .whereIn(relation.source_field, sourceValues)
       const targetIds = junctionRows.map((r) => r[relation.target_field]).filter(Boolean)
       if (!targetIds.length) continue
-      const builder = db(targetModel.table_name).whereIn('id', targetIds)
-      await applyDataPermissionWhere(builder, relation.target_model, currentUser)
+      const builder = db(targetModel.table_name)
+        .where(tenantWhere(req))
+        .whereIn('id', targetIds)
+      await applyDataPermissionWhere(req, builder, relation.target_model, currentUser)
       targetRows = await builder
       for (const row of targetRows) {
         row.__junction = junctionRows.find((j) => j[relation.target_field] === row.id)
@@ -202,8 +234,8 @@ export async function fillAllExpands(rows: any[], expands: any[], user?: any) {
 /**
  * 校验关联字段值是否存在于目标模型
  */
-export async function assertRelationValuesValid(modelCode: string, data: any) {
-  const model = await getModelByCode(modelCode)
+export async function assertRelationValuesValid(req: AuthRequest, modelCode: string, data: any) {
+  const model = await getModelByCode(req, modelCode)
   const fields = model.fields.filter((f: any) => f.status === 1)
 
   for (const field of fields) {
@@ -214,7 +246,7 @@ export async function assertRelationValuesValid(modelCode: string, data: any) {
     let targetField = 'id'
 
     if (field.ref_relation) {
-      const relation = await getRelationByCode(field.ref_relation)
+      const relation = await getRelationByCode(req, field.ref_relation)
       if (relation && relation.relation_type === 'belongsTo') {
         targetModelCode = relation.target_model
         targetField = relation.target_field
@@ -226,8 +258,9 @@ export async function assertRelationValuesValid(modelCode: string, data: any) {
 
     if (!targetModelCode) continue
 
-    const targetModel = await getModelByCode(targetModelCode)
+    const targetModel = await getModelByCode(req, targetModelCode)
     const exists = await db(targetModel.table_name)
+      .where(tenantWhere(req))
       .where({ [targetField]: value })
       .first()
     if (!exists) {
@@ -239,15 +272,17 @@ export async function assertRelationValuesValid(modelCode: string, data: any) {
 /**
  * 获取关联字段的下拉选项数据
  */
-export async function getRelationOptions(relationCode: string, query: any = {}) {
-  const relation = await getRelationByCode(relationCode)
+export async function getRelationOptions(req: AuthRequest, relationCode: string, query: any = {}) {
+  const relation = await getRelationByCode(req, relationCode)
   if (!relation) throw new AppError('关联关系不存在', 404)
   if (relation.relation_type !== 'belongsTo') {
     throw new AppError('只有 belongsTo 关系支持下拉选项', 400)
   }
 
-  const targetModel = await getModelByCode(relation.target_model)
-  const builder = db(targetModel.table_name).select('*')
+  const targetModel = await getModelByCode(req, relation.target_model)
+  const builder = db(targetModel.table_name)
+    .where(tenantWhere(req))
+    .select('*')
 
   // 关键词搜索：对所有字符串字段模糊匹配
   if (query.keyword) {

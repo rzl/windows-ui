@@ -1,5 +1,7 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import type { AuthRequest } from '../../middleware/auth'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
 import { getModelByCode } from '../lowcode/lowcode.service'
 
 export interface PrintElement {
@@ -56,14 +58,14 @@ function parsePageStyle(template: any): PrintPageStyle {
   }
 }
 
-export async function getPrintTemplates(modelCode?: string) {
-  const builder = db('print_templates').orderBy('id', 'desc')
-  if (modelCode) builder.where({ model_code: modelCode })
+export async function getPrintTemplates(req: AuthRequest, modelCode?: string) {
+  const builder = db('print_templates').where(tenantWhere(req)).orderBy('id', 'desc')
+  if (modelCode) builder.andWhere({ model_code: modelCode })
   return builder
 }
 
-export async function getPrintTemplateByCode(code: string) {
-  const template = await db('print_templates').where({ code }).first()
+export async function getPrintTemplateByCode(req: AuthRequest, code: string) {
+  const template = await db('print_templates').where(tenantWhere(req)).andWhere({ code }).first()
   if (!template) throw new AppError('打印模板不存在', 404)
   return {
     ...template,
@@ -72,27 +74,30 @@ export async function getPrintTemplateByCode(code: string) {
   }
 }
 
-export async function savePrintTemplate(data: any) {
+export async function savePrintTemplate(req: AuthRequest, data: any) {
   const code = safeCode(data.code || data.name)
   const config = typeof data.config === 'string' ? data.config : JSON.stringify(data.config || { elements: [] })
   const pageStyle = typeof data.pageStyle === 'string' ? data.pageStyle : JSON.stringify(data.pageStyle || {})
 
-  const exists = await db('print_templates').where({ code }).first()
+  const exists = await db('print_templates').where(tenantWhere(req)).andWhere({ code }).first()
   if (exists) {
-    await db('print_templates').where({ code }).update({
-      name: data.name,
-      model_code: data.modelCode,
-      paper_size: data.paperSize || exists.paper_size || 'A4',
-      orientation: data.orientation || exists.orientation || 'portrait',
-      config,
-      page_style: pageStyle,
-      status: data.status ?? 1,
-      update_time: db.fn.now()
-    })
-    return db('print_templates').where({ code }).first()
+    await db('print_templates')
+      .where(tenantWhere(req))
+      .andWhere({ code })
+      .update(setTenantId({
+        name: data.name,
+        model_code: data.modelCode,
+        paper_size: data.paperSize || exists.paper_size || 'A4',
+        orientation: data.orientation || exists.orientation || 'portrait',
+        config,
+        page_style: pageStyle,
+        status: data.status ?? 1,
+        update_time: db.fn.now()
+      }, req))
+    return db('print_templates').where(tenantWhere(req)).andWhere({ code }).first()
   }
 
-  const [id] = await db('print_templates').insert({
+  const [id] = await db('print_templates').insert(setTenantId({
     code,
     name: data.name,
     model_code: data.modelCode,
@@ -101,27 +106,34 @@ export async function savePrintTemplate(data: any) {
     config,
     page_style: pageStyle,
     status: data.status ?? 1
-  })
-  return db('print_templates').where({ id }).first()
+  }, req))
+  return db('print_templates').where(tenantWhere(req)).andWhere({ id }).first()
 }
 
-export async function deletePrintTemplate(id: number) {
-  await db('print_templates').where({ id }).del()
+export async function deletePrintTemplate(req: AuthRequest, id: number) {
+  await db('print_templates').where(tenantWhere(req)).andWhere({ id }).del()
   return true
 }
 
-export async function renderPrintTemplate(code: string, options: { recordId?: number; recordIds?: number[]; filters?: any }, user?: any) {
-  const template = await getPrintTemplateByCode(code)
+export async function renderPrintTemplate(req: AuthRequest, code: string, options: { recordId?: number; recordIds?: number[]; filters?: any }, user?: any) {
+  const template = await getPrintTemplateByCode(req, code)
   const config = template.config as PrintTemplateConfig
-  const model = await getModelByCode(template.model_code)
+  const model = await getModelByCode(req, template.model_code)
 
   let mainRows: any[] = []
   if (options.recordId) {
-    mainRows = [await db(model.table_name).where({ id: options.recordId }).first()]
+    mainRows = [await db(model.table_name)
+      .where(tenantWhere(req))
+      .where({ id: options.recordId })
+      .first()]
   } else if (options.recordIds?.length) {
-    mainRows = await db(model.table_name).whereIn('id', options.recordIds)
+    mainRows = await db(model.table_name)
+      .where(tenantWhere(req))
+      .whereIn('id', options.recordIds)
   } else {
-    mainRows = await db(model.table_name).select()
+    mainRows = await db(model.table_name)
+      .where(tenantWhere(req))
+      .select()
   }
 
   if (!mainRows.length) throw new AppError('未找到打印数据', 404)
@@ -129,7 +141,7 @@ export async function renderPrintTemplate(code: string, options: { recordId?: nu
   const fieldMap = new Map<string, any>(model.fields.map((f: any) => [f.field_name, f]))
   const pages: any[] = []
   for (const row of mainRows) {
-    pages.push(await renderPage(template, config, row, model, fieldMap))
+    pages.push(await renderPage(req, template, config, row, model, fieldMap))
   }
 
   return {
@@ -138,7 +150,7 @@ export async function renderPrintTemplate(code: string, options: { recordId?: nu
   }
 }
 
-async function renderPage(template: any, config: PrintTemplateConfig, row: any, model: any, fieldMap: Map<string, any>) {
+async function renderPage(req: AuthRequest, template: any, config: PrintTemplateConfig, row: any, model: any, fieldMap: Map<string, any>) {
   const pageStyle = template.pageStyle as PrintPageStyle
   const paperSize = template.paper_size || 'A4'
   const orientation = template.orientation || 'portrait'
@@ -146,7 +158,7 @@ async function renderPage(template: any, config: PrintTemplateConfig, row: any, 
 
   const htmlParts: string[] = []
   for (const el of config.elements) {
-    htmlParts.push(await renderElement(el, row, model, fieldMap))
+    htmlParts.push(await renderElement(req, el, row, model, fieldMap))
   }
 
   const paddingTop = pageStyle.paddingTop ?? 20
@@ -173,7 +185,7 @@ async function renderPage(template: any, config: PrintTemplateConfig, row: any, 
   }
 }
 
-async function renderElement(el: PrintElement, row: any, model: any, fieldMap: Map<string, any>): Promise<string> {
+async function renderElement(req: AuthRequest, el: PrintElement, row: any, model: any, fieldMap: Map<string, any>): Promise<string> {
   const style = {
     position: 'absolute',
     left: `${el.x}px`,
@@ -192,7 +204,7 @@ async function renderElement(el: PrintElement, row: any, model: any, fieldMap: M
     case 'qrcode':
       return `<div class="print-qrcode" style="${styleStr}">${escapeHtml(String(getFieldValue(row, el.field, el.content) ?? ''))}</div>`
     case 'table':
-      return renderTableElement(el, row, model, fieldMap, styleStr)
+      return renderTableElement(req, el, row, model, fieldMap, styleStr)
     case 'rect':
       return `<div style="${styleStr};border:1px solid #000"></div>`
     default:
@@ -205,7 +217,7 @@ function renderTextElement(el: PrintElement, row: any, styleStr: string): string
   return `<div style="${styleStr};display:flex;align-items:center">${escapeHtml(String(value ?? ''))}</div>`
 }
 
-async function renderTableElement(el: PrintElement, row: any, model: any, fieldMap: Map<string, any>, styleStr: string): Promise<string> {
+async function renderTableElement(req: AuthRequest, el: PrintElement, row: any, model: any, fieldMap: Map<string, any>, styleStr: string): Promise<string> {
   const columns = el.tableConfig?.columns || []
   if (!columns.length) return `<div style="${styleStr}"></div>`
 
@@ -215,10 +227,12 @@ async function renderTableElement(el: PrintElement, row: any, model: any, fieldM
   if (dataSource === 'main') {
     rows = [row]
   } else if (typeof dataSource === 'object' && dataSource.modelCode) {
-    const refModel = await getModelByCode(dataSource.modelCode)
+    const refModel = await getModelByCode(req, dataSource.modelCode)
     const foreignField = dataSource.foreignField || 'id'
     const localValue = row[dataSource.localField || 'id']
-    rows = await db(refModel.table_name).where(foreignField, localValue)
+    rows = await db(refModel.table_name)
+      .where(tenantWhere(req))
+      .where(foreignField, localValue)
   }
 
   const colStyle = (width?: number) => width ? `width:${width}px;min-width:${width}px` : ''

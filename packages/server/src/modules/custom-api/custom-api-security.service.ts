@@ -1,5 +1,7 @@
 import { db } from '../../db'
 import { createRateLimitStore, type RateLimitStore } from '../../utils/rate-limit-store'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 
 export interface SecurityConfig {
   rateLimit?: number
@@ -102,41 +104,49 @@ export function parseIpList(text?: string | string[] | null): string[] {
   return []
 }
 
-export async function logExecution(data: {
-  apiId: number
-  apiCode: string
-  apiPath?: string
-  userId?: number
-  username?: string
-  ip?: string
-  method?: string
-  params?: any
-  response?: any
-  duration?: number
-  status: 0 | 1
-  errorMessage?: string
-}) {
+export async function logExecution(
+  req: AuthRequest,
+  data: {
+    apiId: number
+    apiCode: string
+    apiPath?: string
+    userId?: number
+    username?: string
+    ip?: string
+    method?: string
+    params?: any
+    response?: any
+    duration?: number
+    status: 0 | 1
+    errorMessage?: string
+  }
+) {
   const snapshot = data.response ? JSON.stringify(data.response).slice(0, 2000) : null
-  return db('custom_api_logs').insert({
-    api_id: data.apiId,
-    api_code: data.apiCode,
-    api_path: data.apiPath || data.apiCode,
-    user_id: data.userId || null,
-    username: data.username || null,
-    ip: data.ip || 'unknown',
-    method: data.method || 'GET',
-    params: data.params ? JSON.stringify(data.params) : null,
-    response_snapshot: snapshot,
-    duration: data.duration ?? 0,
-    status: data.status,
-    error_message: data.errorMessage || null,
-    create_time: new Date().toISOString()
-  })
+  return db('custom_api_logs').insert(
+    setTenantId(
+      {
+        api_id: data.apiId,
+        api_code: data.apiCode,
+        api_path: data.apiPath || data.apiCode,
+        user_id: data.userId || null,
+        username: data.username || null,
+        ip: data.ip || 'unknown',
+        method: data.method || 'GET',
+        params: data.params ? JSON.stringify(data.params) : null,
+        response_snapshot: snapshot,
+        duration: data.duration ?? 0,
+        status: data.status,
+        error_message: data.errorMessage || null,
+        create_time: new Date().toISOString()
+      },
+      req
+    )
+  )
 }
 
-export async function getApiLogs(query: any) {
+export async function getApiLogs(req: AuthRequest, query: any) {
   const { apiId, status, page = 1, pageSize = 20 } = query
-  const builder = db('custom_api_logs').orderBy('id', 'desc')
+  const builder = db('custom_api_logs').where(tenantWhere(req)).orderBy('id', 'desc')
 
   if (apiId) builder.where('api_id', Number(apiId))
   if (status !== undefined && status !== '') builder.where('status', Number(status))

@@ -1,18 +1,20 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 import { getModelByCode, getModelById, createField, updateField, deleteField, updateModel } from './lowcode.service'
 import * as relationService from './relation.service'
 
-export async function getModelVersions(modelId: number) {
-  const model = await getModelById(modelId)
+export async function getModelVersions(req: AuthRequest, modelId: number) {
+  const model = await getModelById(req, modelId)
   return db('lowcode_model_versions')
-    .where({ model_id: modelId })
+    .where({ model_id: modelId, ...tenantWhere(req) })
     .orderBy('id', 'desc')
 }
 
-export async function createModelVersion(modelId: number, data: any) {
-  const model = await getModelById(modelId)
-  const relations = await relationService.getRelations({
+export async function createModelVersion(req: AuthRequest, modelId: number, data: any) {
+  const model = await getModelById(req, modelId)
+  const relations = await relationService.getRelations(req, {
     sourceModel: model.code,
     targetModel: model.code
   })
@@ -67,35 +69,47 @@ export async function createModelVersion(modelId: number, data: any) {
     }))
   }
 
-  await db('lowcode_model_versions').where({ model_id: modelId }).update({ is_published: 0 })
+  await db('lowcode_model_versions')
+    .where({ model_id: modelId, ...tenantWhere(req) })
+    .update({ is_published: 0 })
 
-  const [id] = await db('lowcode_model_versions').insert({
-    model_id: modelId,
-    version: data.version || generateVersion(),
-    description: data.description || '',
-    snapshot: JSON.stringify(snapshot),
-    is_published: 1
-  })
+  const [id] = await db('lowcode_model_versions').insert(
+    setTenantId({
+      model_id: modelId,
+      version: data.version || generateVersion(),
+      description: data.description || '',
+      snapshot: JSON.stringify(snapshot),
+      is_published: 1
+    }, req)
+  )
 
-  return db('lowcode_model_versions').where({ id }).first()
+  return db('lowcode_model_versions')
+    .where({ id, ...tenantWhere(req) })
+    .first()
 }
 
-export async function deleteModelVersion(modelId: number, versionId: number) {
-  const version = await db('lowcode_model_versions').where({ id: versionId, model_id: modelId }).first()
+export async function deleteModelVersion(req: AuthRequest, modelId: number, versionId: number) {
+  const version = await db('lowcode_model_versions')
+    .where({ id: versionId, model_id: modelId, ...tenantWhere(req) })
+    .first()
   if (!version) throw new AppError('版本不存在', 404)
-  await db('lowcode_model_versions').where({ id: versionId }).del()
+  await db('lowcode_model_versions')
+    .where({ id: versionId, model_id: modelId, ...tenantWhere(req) })
+    .del()
   return true
 }
 
-export async function rollbackModelVersion(modelId: number, versionId: number) {
-  const version = await db('lowcode_model_versions').where({ id: versionId, model_id: modelId }).first()
+export async function rollbackModelVersion(req: AuthRequest, modelId: number, versionId: number) {
+  const version = await db('lowcode_model_versions')
+    .where({ id: versionId, model_id: modelId, ...tenantWhere(req) })
+    .first()
   if (!version) throw new AppError('版本不存在', 404)
 
   const snapshot = parseJson(version.snapshot)
   if (!snapshot) throw new AppError('快照数据无效', 400)
 
   // 1. 回滚模型基础信息
-  await updateModel(modelId, {
+  await updateModel(req, modelId, {
     name: snapshot.model?.name,
     description: snapshot.model?.description,
     status: snapshot.model?.status,
@@ -104,31 +118,35 @@ export async function rollbackModelVersion(modelId: number, versionId: number) {
   })
 
   // 2. 回滚字段
-  await rollbackFields(modelId, snapshot.fields || [])
+  await rollbackFields(req, modelId, snapshot.fields || [])
 
   // 3. 回滚表单/列表配置
-  await rollbackForms(modelId, snapshot.forms || [])
-  await rollbackTables(modelId, snapshot.tables || [])
+  await rollbackForms(req, modelId, snapshot.forms || [])
+  await rollbackTables(req, modelId, snapshot.tables || [])
 
   // 4. 回滚关联关系（更新或创建，不删除）
-  await rollbackRelations(snapshot.relations || [])
+  await rollbackRelations(req, snapshot.relations || [])
 
   // 5. 标记当前版本
-  await db('lowcode_model_versions').where({ model_id: modelId }).update({ is_published: 0 })
-  await db('lowcode_model_versions').where({ id: versionId }).update({ is_published: 1 })
+  await db('lowcode_model_versions')
+    .where({ model_id: modelId, ...tenantWhere(req) })
+    .update({ is_published: 0 })
+  await db('lowcode_model_versions')
+    .where({ id: versionId, ...tenantWhere(req) })
+    .update({ is_published: 1 })
 
-  return getModelById(modelId)
+  return getModelById(req, modelId)
 }
 
-async function rollbackFields(modelId: number, snapshotFields: any[]) {
-  const currentFields = await db('lowcode_fields').where({ model_id: modelId })
+async function rollbackFields(req: AuthRequest, modelId: number, snapshotFields: any[]) {
+  const currentFields = await db('lowcode_fields').where({ model_id: modelId }).where(tenantWhere(req))
   const currentMap = new Map(currentFields.map((f) => [f.field_name, f]))
   const snapshotMap = new Map(snapshotFields.map((f) => [f.field_name, f]))
 
   // 删除快照中不存在的字段（仅元数据）
   for (const [name, field] of currentMap) {
     if (!snapshotMap.has(name)) {
-      await deleteField(field.id)
+      await deleteField(req, field.id)
     }
   }
 
@@ -137,17 +155,18 @@ async function rollbackFields(modelId: number, snapshotFields: any[]) {
     const current = currentMap.get(field.field_name)
     const input = fieldSnapshotToInput(modelId, field)
     if (!current) {
-      await createField(input)
+      await createField(req, input)
     } else {
-      await updateField(current.id, input)
+      await updateField(req, current.id, input)
     }
   }
 }
 
-async function rollbackForms(modelId: number, snapshotForms: any[]) {
-  await db('lowcode_forms').where({ model_id: modelId }).del()
+async function rollbackForms(req: AuthRequest, modelId: number, snapshotForms: any[]) {
+  await db('lowcode_forms').where({ model_id: modelId }).where(tenantWhere(req)).del()
   for (const form of snapshotForms) {
     await db('lowcode_forms').insert({
+      ...tenantWhere(req),
       model_id: modelId,
       name: form.name,
       config: form.config ? JSON.stringify(form.config) : '{}',
@@ -156,10 +175,11 @@ async function rollbackForms(modelId: number, snapshotForms: any[]) {
   }
 }
 
-async function rollbackTables(modelId: number, snapshotTables: any[]) {
-  await db('lowcode_tables').where({ model_id: modelId }).del()
+async function rollbackTables(req: AuthRequest, modelId: number, snapshotTables: any[]) {
+  await db('lowcode_tables').where({ model_id: modelId }).where(tenantWhere(req)).del()
   for (const table of snapshotTables) {
     await db('lowcode_tables').insert({
+      ...tenantWhere(req),
       model_id: modelId,
       name: table.name,
       config: table.config ? JSON.stringify(table.config) : '{}',
@@ -168,11 +188,11 @@ async function rollbackTables(modelId: number, snapshotTables: any[]) {
   }
 }
 
-async function rollbackRelations(snapshotRelations: any[]) {
+async function rollbackRelations(req: AuthRequest, snapshotRelations: any[]) {
   for (const relation of snapshotRelations) {
-    const existing = await relationService.getRelationByCode(relation.code)
+    const existing = await relationService.getRelationByCode(req, relation.code)
     if (existing) {
-      await relationService.updateRelation(existing.id, {
+      await relationService.updateRelation(req, existing.id, {
         name: relation.name,
         sourceModel: relation.source_model,
         targetModel: relation.target_model,
@@ -183,7 +203,7 @@ async function rollbackRelations(snapshotRelations: any[]) {
         status: relation.status
       })
     } else {
-      await relationService.createRelation({
+      await relationService.createRelation(req, {
         code: relation.code,
         name: relation.name,
         sourceModel: relation.source_model,

@@ -132,7 +132,7 @@ export async function createRole(req: AuthRequest, data: any) {
   }
 
   await saveRoleApps(req, id, data.appIds || [])
-  await saveRoleDataPermissions(id, data.dataPermissionIds || [])
+  await saveRoleDataPermissions(req, id, data.dataPermissionIds || [])
 
   return getRoleById(req, id)
 }
@@ -158,7 +158,7 @@ export async function updateRole(req: AuthRequest, id: number, data: any) {
   }
 
   await saveRoleApps(req, id, data.appIds || [])
-  await saveRoleDataPermissions(id, data.dataPermissionIds || [])
+  await saveRoleDataPermissions(req, id, data.dataPermissionIds || [])
 
   return getRoleById(req, id)
 }
@@ -176,7 +176,7 @@ export async function getRoleById(req: AuthRequest, id: number) {
     .where(tenantWhere(req))
     .pluck('permission')
   const appIds = await getRoleApps(req, id)
-  const dataPermissionIds = await getRoleDataPermissionIds(id)
+  const dataPermissionIds = await getRoleDataPermissionIds(req, id)
   return { ...role, permissions, appIds, dataPermissionIds }
 }
 
@@ -205,12 +205,12 @@ async function getTenantIdForRole(req: AuthRequest, roleId: number): Promise<num
   return role?.tenant_id ?? 0
 }
 
-async function saveRoleDataPermissions(roleId: number, dataPermissionIds: number[]) {
-  await saveRoleDataPermissionsToService(roleId, dataPermissionIds)
+async function saveRoleDataPermissions(req: AuthRequest, roleId: number, dataPermissionIds: number[]) {
+  await saveRoleDataPermissionsToService(req, roleId, dataPermissionIds)
 }
 
-async function getRoleDataPermissionIds(roleId: number) {
-  return getRoleDataPermissionIdsFromService(roleId)
+async function getRoleDataPermissionIds(req: AuthRequest, roleId: number) {
+  return getRoleDataPermissionIdsFromService(req, roleId)
 }
 
 // 菜单

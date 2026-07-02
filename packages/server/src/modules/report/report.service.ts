@@ -3,6 +3,8 @@ import { AppError } from '../../utils/response'
 import * as XLSX from 'xlsx'
 import { getModelByCode } from '../lowcode/lowcode.service'
 import * as externalDatasourceService from '../external-datasource/external-datasource.service'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 
 export interface ReportColumn {
   field: string
@@ -56,60 +58,73 @@ function parseConfig(report: any): ReportConfig {
   }
 }
 
-export async function getReports() {
-  return db('lowcode_reports').orderBy('id', 'desc')
+export async function getReports(req: AuthRequest) {
+  return db('lowcode_reports').where(tenantWhere(req)).orderBy('id', 'desc')
 }
 
-export async function getReportByCode(code: string) {
-  const report = await db('lowcode_reports').where({ code }).first()
+export async function getReportByCode(req: AuthRequest, code: string) {
+  const report = await db('lowcode_reports').where({ code }).andWhere(tenantWhere(req)).first()
   if (!report) throw new AppError('报表不存在', 404)
   return { ...report, config: parseConfig(report) }
 }
 
-export async function saveReport(data: any) {
+export async function saveReport(req: AuthRequest, data: any) {
   const code = safeCode(data.code || data.name)
   const config = typeof data.config === 'string' ? data.config : JSON.stringify(data.config || { columns: [] })
 
-  const exists = await db('lowcode_reports').where({ code }).first()
+  const exists = await db('lowcode_reports').where({ code }).andWhere(tenantWhere(req)).first()
   if (exists) {
-    await db('lowcode_reports').where({ code }).update({
-      name: data.name,
-      model_code: data.modelCode,
-      config,
-      status: data.status ?? 1,
-      update_time: db.fn.now()
-    })
-    return db('lowcode_reports').where({ code }).first()
+    await db('lowcode_reports')
+      .where({ code })
+      .andWhere(tenantWhere(req))
+      .update(
+        setTenantId(
+          {
+            name: data.name,
+            model_code: data.modelCode,
+            config,
+            status: data.status ?? 1,
+            update_time: db.fn.now()
+          },
+          req
+        )
+      )
+    return db('lowcode_reports').where({ code }).andWhere(tenantWhere(req)).first()
   }
 
-  const [id] = await db('lowcode_reports').insert({
-    code,
-    name: data.name,
-    model_code: data.modelCode,
-    config,
-    status: data.status ?? 1
-  })
-  return db('lowcode_reports').where({ id }).first()
+  const [id] = await db('lowcode_reports').insert(
+    setTenantId(
+      {
+        code,
+        name: data.name,
+        model_code: data.modelCode,
+        config,
+        status: data.status ?? 1
+      },
+      req
+    )
+  )
+  return db('lowcode_reports').where({ id }).andWhere(tenantWhere(req)).first()
 }
 
-export async function deleteReport(id: number) {
-  await db('lowcode_reports').where({ id }).del()
+export async function deleteReport(req: AuthRequest, id: number) {
+  await db('lowcode_reports').where({ id }).andWhere(tenantWhere(req)).del()
   return true
 }
 
-export async function executeReport(code: string, params: any = {}, user?: any) {
-  const report = await getReportByCode(code)
+export async function executeReport(req: AuthRequest, code: string, params: any = {}, user?: any) {
+  const report = await getReportByCode(req, code)
   const config = report.config as ReportConfig
 
   // 外部数据源报表
   if (config.externalDataSourceId) {
     const ctx = buildExternalCtx(params)
-    const rows = await externalDatasourceService.executeExternalDataSource(config.externalDataSourceId, ctx)
+    const rows = await externalDatasourceService.executeExternalDataSource(req, config.externalDataSourceId, ctx)
     const list = Array.isArray(rows) ? rows : []
     return { report, config, list, params: config.params || [] }
   }
 
-  const model = await getModelByCode(report.model_code)
+  const model = await getModelByCode(req, report.model_code)
   const fields = model.fields.filter((f: any) => f.status === 1)
   const fieldMap = new Map<string, any>(fields.map((f: any) => [f.field_name, f]))
 
@@ -147,7 +162,7 @@ export async function executeReport(code: string, params: any = {}, user?: any) 
   applyFilters(builder, dynamicFilters, model.table_name, fieldMap)
 
   // 数据权限
-  await applyDataPermission(builder, model, user)
+  await applyDataPermission(req, builder, model, user)
 
   // 分组
   if (aggregateColumns.length && groupByFields.length) {
@@ -224,7 +239,7 @@ function applyFilters(builder: any, filters: ReportFilter[], tableName: string, 
   }
 }
 
-async function applyDataPermission(builder: any, model: any, user?: any) {
+async function applyDataPermission(req: AuthRequest, builder: any, model: any, user?: any) {
   if (!user || !model.data_permission) return
   const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
   if (isAdmin) return
@@ -237,18 +252,21 @@ async function applyDataPermission(builder: any, model: any, user?: any) {
   } else if (type === 'dept') {
     builder.where('dept_id', user.deptId || null)
   } else if (type === 'dept_and_child') {
-    const deptIds = await getChildDeptIds(user.deptId)
+    const deptIds = await getChildDeptIds(req, user.deptId)
     builder.whereIn('dept_id', deptIds.length ? deptIds : [null])
   }
 }
 
-async function getChildDeptIds(parentId?: number): Promise<number[]> {
+async function getChildDeptIds(req: AuthRequest, parentId?: number): Promise<number[]> {
   if (!parentId) return []
   const result = new Set<number>([parentId])
   const queue = [parentId]
   while (queue.length) {
     const current = queue.shift()!
-    const children = await db('depts').where({ parent_id: current, status: 1 }).select('id')
+    const children = await db('depts')
+      .where({ parent_id: current, status: 1 })
+      .where(tenantWhere(req))
+      .select('id')
     for (const child of children) {
       if (!result.has(child.id)) {
         result.add(child.id)
@@ -259,9 +277,9 @@ async function getChildDeptIds(parentId?: number): Promise<number[]> {
   return Array.from(result)
 }
 
-export async function exportReportExcel(code: string, params: any = {}, user?: any) {
-  const { report, config, list } = await executeReport(code, params, user)
-  const model = await getModelByCode(report.model_code)
+export async function exportReportExcel(req: AuthRequest, code: string, params: any = {}, user?: any) {
+  const { report, config, list } = await executeReport(req, code, params, user)
+  const model = await getModelByCode(req, report.model_code)
   const fields = model.fields.filter((f: any) => f.status === 1)
   const fieldMap = new Map<string, any>(fields.map((f: any) => [f.field_name, f]))
 

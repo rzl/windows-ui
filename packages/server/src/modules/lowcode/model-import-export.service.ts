@@ -1,13 +1,15 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 import { getModelById, createModel, createField } from './lowcode.service'
 import * as relationService from './relation.service'
 
 const EXPORT_VERSION = '1.0'
 
-export async function exportModel(modelId: number) {
-  const model = await getModelById(modelId)
-  const relations = await relationService.getRelations({
+export async function exportModel(req: AuthRequest, modelId: number) {
+  const model = await getModelById(req, modelId)
+  const relations = await relationService.getRelations(req, {
     sourceModel: model.code,
     targetModel: model.code
   })
@@ -67,7 +69,7 @@ export async function exportModel(modelId: number) {
   }
 }
 
-export async function importModel(fileBuffer: Buffer, conflict: string = 'skip') {
+export async function importModel(req: AuthRequest, fileBuffer: Buffer, conflict: string = 'skip') {
   let data: any
   try {
     data = JSON.parse(fileBuffer.toString('utf-8'))
@@ -80,7 +82,7 @@ export async function importModel(fileBuffer: Buffer, conflict: string = 'skip')
   }
 
   const modelCode = data.model.code
-  const existing = await db('lowcode_models').where({ code: modelCode }).first()
+  const existing = await db('lowcode_models').where({ code: modelCode }).where(tenantWhere(req)).first()
 
   let action = 'created'
 
@@ -94,18 +96,21 @@ export async function importModel(fileBuffer: Buffer, conflict: string = 'skip')
     if (conflict === 'overwrite') {
       // 删除旧模型级联删除字段/表单/列表，物理表也删除
       await db.schema.dropTableIfExists(existing.table_name)
-      await db('lowcode_models').where({ id: existing.id }).del()
+      await db('lowcode_models').where({ id: existing.id }).where(tenantWhere(req)).del()
       action = 'overwritten'
     }
   }
 
   // 检查表名是否已被其他模型使用
-  const tableExists = await db('lowcode_models').where({ table_name: data.model.table_name }).first()
+  const tableExists = await db('lowcode_models')
+    .where({ table_name: data.model.table_name })
+    .where(tenantWhere(req))
+    .first()
   if (tableExists) {
     throw new AppError(`表名 "${data.model.table_name}" 已被其他模型使用`, 400)
   }
 
-  const model = await createModel({
+  const model = await createModel(req, {
     code: data.model.code,
     name: data.model.name,
     tableName: data.model.table_name,
@@ -119,7 +124,7 @@ export async function importModel(fileBuffer: Buffer, conflict: string = 'skip')
 
   // 创建字段
   for (const field of data.fields || []) {
-    const created = await createField({
+    const created = await createField(req, {
       modelId: model.id,
       fieldName: field.field_name,
       displayName: field.display_name,
@@ -144,29 +149,35 @@ export async function importModel(fileBuffer: Buffer, conflict: string = 'skip')
 
   // 创建表单配置
   for (const form of data.forms || []) {
-    await db('lowcode_forms').insert({
+    await db('lowcode_forms').insert(setTenantId({
       model_id: model.id,
       name: form.name || '默认表单',
       config: form.config ? JSON.stringify(form.config) : '{}',
       status: form.status ?? 1
-    })
+    }, req))
   }
 
   // 创建列表配置
   for (const table of data.tables || []) {
-    await db('lowcode_tables').insert({
+    await db('lowcode_tables').insert(setTenantId({
       model_id: model.id,
       name: table.name || '默认列表',
       config: table.config ? JSON.stringify(table.config) : '{}',
       status: table.status ?? 1
-    })
+    }, req))
   }
 
   // 创建关联关系（目标模型必须存在）
   const relationResults: { code: string; status: string; reason?: string }[] = []
   for (const relation of data.relations || []) {
-    const targetModel = await db('lowcode_models').where({ code: relation.target_model }).first()
-    const sourceModel = await db('lowcode_models').where({ code: relation.source_model }).first()
+    const targetModel = await db('lowcode_models')
+      .where({ code: relation.target_model })
+      .where(tenantWhere(req))
+      .first()
+    const sourceModel = await db('lowcode_models')
+      .where({ code: relation.source_model })
+      .where(tenantWhere(req))
+      .first()
     if (!targetModel || !sourceModel) {
       relationResults.push({
         code: relation.code,
@@ -176,7 +187,7 @@ export async function importModel(fileBuffer: Buffer, conflict: string = 'skip')
       continue
     }
 
-    const existingRelation = await relationService.getRelationByCode(relation.code)
+    const existingRelation = await relationService.getRelationByCode(req, relation.code)
     if (existingRelation) {
       relationResults.push({
         code: relation.code,
@@ -187,7 +198,7 @@ export async function importModel(fileBuffer: Buffer, conflict: string = 'skip')
     }
 
     try {
-      await relationService.createRelation({
+      await relationService.createRelation(req, {
         code: relation.code,
         name: relation.name,
         sourceModel: relation.source_model,

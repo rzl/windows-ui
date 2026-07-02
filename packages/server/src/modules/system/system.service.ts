@@ -111,26 +111,27 @@ export async function deleteDictItem(req: AuthRequest, id: number) {
 }
 
 // 字典分类 CRUD
-export async function getDictCategories() {
-  return db('dict_categories').where('status', 1).orderBy('sort', 'asc')
+export async function getDictCategories(req: AuthRequest) {
+  return db('dict_categories').where(tenantWhere(req)).where('status', 1).orderBy('sort', 'asc')
 }
 
-export async function createDictCategory(data: any) {
-  const exists = await db('dict_categories').where({ code: data.code }).first()
+export async function createDictCategory(req: AuthRequest, data: any) {
+  const exists = await db('dict_categories').where({ code: data.code }).where(tenantWhere(req)).first()
   if (exists) throw new AppError('分类编码已存在', 400)
-  const [id] = await db('dict_categories').insert({
+  const insertData = setTenantId({
     code: data.code,
     name: data.name,
     sort: data.sort ?? 0,
     status: data.status ?? 1
-  })
+  }, req)
+  const [id] = await db('dict_categories').insert(insertData)
   return db('dict_categories').where({ id }).first()
 }
 
-export async function updateDictCategory(id: number, data: any) {
-  const category = await db('dict_categories').where({ id }).first()
+export async function updateDictCategory(req: AuthRequest, id: number, data: any) {
+  const category = await db('dict_categories').where({ id }).where(tenantWhere(req)).first()
   if (!category) throw new AppError('字典分类不存在', 404)
-  await db('dict_categories').where({ id }).update({
+  await db('dict_categories').where({ id }).where(tenantWhere(req)).update({
     code: data.code,
     name: data.name,
     sort: data.sort,
@@ -139,32 +140,33 @@ export async function updateDictCategory(id: number, data: any) {
   return db('dict_categories').where({ id }).first()
 }
 
-export async function deleteDictCategory(id: number) {
-  await db('dict_categories').where({ id }).del()
+export async function deleteDictCategory(req: AuthRequest, id: number) {
+  await db('dict_categories').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
 // 公告 CRUD
-export async function getNotices() {
-  return db('notices').orderBy('sort', 'asc').orderBy('id', 'desc')
+export async function getNotices(req: AuthRequest) {
+  return db('notices').where(tenantWhere(req)).orderBy('sort', 'asc').orderBy('id', 'desc')
 }
 
-export async function createNotice(data: any) {
-  const [id] = await db('notices').insert({
+export async function createNotice(req: AuthRequest, data: any) {
+  const insertData = setTenantId({
     title: data.title,
     content: data.content,
     type: data.type || 'notice',
     status: data.status ?? 1,
     sort: data.sort ?? 0,
     publish_time: data.publishTime || null
-  })
+  }, req)
+  const [id] = await db('notices').insert(insertData)
   return db('notices').where({ id }).first()
 }
 
-export async function updateNotice(id: number, data: any) {
-  const notice = await db('notices').where({ id }).first()
+export async function updateNotice(req: AuthRequest, id: number, data: any) {
+  const notice = await db('notices').where({ id }).where(tenantWhere(req)).first()
   if (!notice) throw new AppError('公告不存在', 404)
-  await db('notices').where({ id }).update({
+  await db('notices').where({ id }).where(tenantWhere(req)).update({
     title: data.title,
     content: data.content,
     type: data.type || 'notice',
@@ -176,32 +178,33 @@ export async function updateNotice(id: number, data: any) {
   return db('notices').where({ id }).first()
 }
 
-export async function deleteNotice(id: number) {
-  await db('notices').where({ id }).del()
+export async function deleteNotice(req: AuthRequest, id: number) {
+  await db('notices').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
 // 职务 CRUD
-export async function getPositions() {
-  return db('positions').orderBy('sort', 'asc').orderBy('id', 'desc')
+export async function getPositions(req: AuthRequest) {
+  return db('positions').where(tenantWhere(req)).orderBy('sort', 'asc').orderBy('id', 'desc')
 }
 
-export async function createPosition(data: any) {
-  const exists = await db('positions').where({ code: data.code }).first()
+export async function createPosition(req: AuthRequest, data: any) {
+  const exists = await db('positions').where({ code: data.code }).where(tenantWhere(req)).first()
   if (exists) throw new AppError('职务编码已存在', 400)
-  const [id] = await db('positions').insert({
+  const insertData = setTenantId({
     code: data.code,
     name: data.name,
     sort: data.sort ?? 0,
     status: data.status ?? 1
-  })
+  }, req)
+  const [id] = await db('positions').insert(insertData)
   return db('positions').where({ id }).first()
 }
 
-export async function updatePosition(id: number, data: any) {
-  const position = await db('positions').where({ id }).first()
+export async function updatePosition(req: AuthRequest, id: number, data: any) {
+  const position = await db('positions').where({ id }).where(tenantWhere(req)).first()
   if (!position) throw new AppError('职务不存在', 404)
-  await db('positions').where({ id }).update({
+  await db('positions').where({ id }).where(tenantWhere(req)).update({
     code: data.code,
     name: data.name,
     sort: data.sort,
@@ -211,7 +214,7 @@ export async function updatePosition(id: number, data: any) {
   return db('positions').where({ id }).first()
 }
 
-export async function deletePosition(id: number) {
-  await db('positions').where({ id }).del()
+export async function deletePosition(req: AuthRequest, id: number) {
+  await db('positions').where({ id }).where(tenantWhere(req)).del()
   return true
 }

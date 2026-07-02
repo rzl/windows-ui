@@ -558,7 +558,7 @@ export async function seed(knex: Knex): Promise<void> {
   // 角色权限（超级管理员拥有所有权限）
   const permissions = ['*']
   await knex('role_permissions').insert(
-    permissions.map((permission) => ({ role_id: adminRoleId, permission }))
+    permissions.map((permission) => ({ role_id: adminRoleId, permission, tenant_id: 1 }))
   )
 
   // 字典
@@ -573,4 +573,55 @@ export async function seed(knex: Knex): Promise<void> {
     { dict_id: statusDictId, label: '启用', value: '1', sort: 1, status: 1 , tenant_id: 1},
     { dict_id: statusDictId, label: '禁用', value: '0', sort: 2, status: 1 , tenant_id: 1}
   ])
+
+  // 默认字典分类
+  await knex('dict_categories').insert({
+    name: '系统字典',
+    code: 'system',
+    sort: 1,
+    status: 1,
+    tenant_id: 1
+  })
+
+  // 默认职务
+  await knex('positions').insert({
+    name: '员工',
+    code: 'employee',
+    sort: 1,
+    status: 1,
+    tenant_id: 1
+  })
+
+  // 默认首页配置
+  await knex('homepage_configs').insert({
+    code: 'default',
+    name: '默认首页',
+    widgets: JSON.stringify([
+      { type: 'stat', title: '用户数量', field: 'userCount', icon: 'user', color: 'primary', dataSource: { type: '' } },
+      { type: 'stat', title: '数据模型', field: 'modelCount', icon: 'model', color: 'success', dataSource: { type: '' } },
+      { type: 'stat', title: '消息', field: 'messageCount', icon: 'message', color: 'warning', dataSource: { type: '' } }
+    ]),
+    status: 1,
+    tenant_id: 1
+  })
+
+  // 默认仪表盘
+  await knex('dashboards').insert({
+    code: 'default',
+    name: '默认仪表盘',
+    config: JSON.stringify({}),
+    status: 1,
+    tenant_id: 1
+  })
+
+  // 默认消息模板
+  await knex('message_templates').insert({
+    code: 'system_notice',
+    name: '系统通知',
+    title: '系统通知',
+    content: '您有一条系统通知',
+    channel: 'site',
+    status: 1,
+    tenant_id: 1
+  })
 }

@@ -3,128 +3,128 @@ import { success } from '../../utils/response'
 import type { AuthRequest } from '../../middleware/auth'
 import * as flowService from './flow.service'
 
-export async function getFlowDefinitions(_req: Request, res: Response) {
-  const result = await flowService.getFlowDefinitions()
+export async function getFlowDefinitions(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowDefinitions(req)
   res.json(success(result))
 }
 
-export async function getFlowDefinition(req: Request, res: Response) {
-  const result = await flowService.getFlowDefinitionByCode(req.params.code)
+export async function getFlowDefinition(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowDefinitionByCode(req, req.params.code)
   res.json(success(result))
 }
 
-export async function getFlowDefinitionByModel(req: Request, res: Response) {
-  const result = await flowService.getFlowDefinitionByModelCode(req.params.modelCode)
+export async function getFlowDefinitionByModel(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowDefinitionByModelCode(req, req.params.modelCode)
   res.json(success(result))
 }
 
-export async function saveFlowDefinition(req: Request, res: Response) {
-  const result = await flowService.saveFlowDefinition(req.body)
+export async function saveFlowDefinition(req: AuthRequest, res: Response) {
+  const result = await flowService.saveFlowDefinition(req, req.body)
   res.json(success(result, '保存成功'))
 }
 
-export async function deleteFlowDefinition(req: Request, res: Response) {
-  await flowService.deleteFlowDefinition(Number(req.params.id))
+export async function deleteFlowDefinition(req: AuthRequest, res: Response) {
+  await flowService.deleteFlowDefinition(req, Number(req.params.id))
   res.json(success(null, '删除成功'))
 }
 
-export async function startFlowInstance(req: Request, res: Response) {
-  const { flowCode, businessKey } = req.body
-  const result = await flowService.startFlowInstance(flowCode, Number(businessKey), (req as AuthRequest).user)
+export async function startFlowInstance(req: AuthRequest, res: Response) {
+  const { flowCode, businessKey, businessData } = req.body
+  const result = await flowService.startFlowInstance(req, flowCode, Number(businessKey), businessData || {}, req.user)
   res.json(success(result, '流程已启动'))
 }
 
-export async function getInstanceStatus(req: Request, res: Response) {
-  const result = await flowService.getInstanceStatus(Number(req.params.businessKey))
+export async function getInstanceStatus(req: AuthRequest, res: Response) {
+  const result = await flowService.getInstanceStatus(req, Number(req.params.businessKey))
   res.json(success(result))
 }
 
-export async function getFlowTrace(req: Request, res: Response) {
-  const result = await flowService.getFlowTrace(Number(req.params.businessKey))
+export async function getFlowTrace(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowTrace(req, Number(req.params.businessKey))
   res.json(success(result))
 }
 
-export async function getPendingTasks(req: Request, res: Response) {
-  const result = await flowService.getPendingTasks((req as AuthRequest).user)
+export async function getPendingTasks(req: AuthRequest, res: Response) {
+  const result = await flowService.getPendingTasks(req, req.user)
   res.json(success(result))
 }
 
-export async function approveTask(req: Request, res: Response) {
+export async function approveTask(req: AuthRequest, res: Response) {
   const { comment } = req.body
-  await flowService.approveTask(Number(req.params.id), comment || '', (req as AuthRequest).user)
+  await flowService.approveTask(req, Number(req.params.id), comment || '', req.user)
   res.json(success(null, '审批通过'))
 }
 
-export async function rejectTask(req: Request, res: Response) {
+export async function rejectTask(req: AuthRequest, res: Response) {
   const { comment } = req.body
-  await flowService.rejectTask(Number(req.params.id), comment || '', (req as AuthRequest).user)
+  await flowService.rejectTask(req, Number(req.params.id), comment || '', req.user)
   res.json(success(null, '审批已驳回'))
 }
 
-export async function transferTask(req: Request, res: Response) {
+export async function transferTask(req: AuthRequest, res: Response) {
   const { targetUserId } = req.body
-  await flowService.transferTask(Number(req.params.id), Number(targetUserId), (req as AuthRequest).user)
+  await flowService.transferTask(req, Number(req.params.id), Number(targetUserId), req.user)
   res.json(success(null, '转办成功'))
 }
 
-export async function getFlowVersions(req: Request, res: Response) {
-  const result = await flowService.getFlowVersions(req.params.code)
+export async function getFlowVersions(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowVersions(req, req.params.code)
   res.json(success(result))
 }
 
-export async function rollbackFlowDefinition(req: Request, res: Response) {
+export async function rollbackFlowDefinition(req: AuthRequest, res: Response) {
   const { version } = req.body
-  const result = await flowService.rollbackFlowDefinition(req.params.code, Number(version))
+  const result = await flowService.rollbackFlowDefinition(req, req.params.code, Number(version))
   res.json(success(result, '回滚成功'))
 }
 
-export async function getFlowDelegations(req: Request, res: Response) {
-  const result = await flowService.getFlowDelegations(req.query)
+export async function getFlowDelegations(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowDelegations(req, req.query)
   res.json(success(result))
 }
 
-export async function createFlowDelegation(req: Request, res: Response) {
-  const result = await flowService.createFlowDelegation(req.body)
+export async function createFlowDelegation(req: AuthRequest, res: Response) {
+  const result = await flowService.createFlowDelegation(req, req.body)
   res.json(success(result, '创建成功'))
 }
 
-export async function updateFlowDelegation(req: Request, res: Response) {
-  const result = await flowService.updateFlowDelegation(Number(req.params.id), req.body)
+export async function updateFlowDelegation(req: AuthRequest, res: Response) {
+  const result = await flowService.updateFlowDelegation(req, Number(req.params.id), req.body)
   res.json(success(result, '更新成功'))
 }
 
-export async function deleteFlowDelegation(req: Request, res: Response) {
-  await flowService.deleteFlowDelegation(Number(req.params.id))
+export async function deleteFlowDelegation(req: AuthRequest, res: Response) {
+  await flowService.deleteFlowDelegation(req, Number(req.params.id))
   res.json(success(null, '删除成功'))
 }
 
-export async function checkTimeoutTasks(_req: Request, res: Response) {
-  const count = await flowService.checkTimeoutTasks()
+export async function checkTimeoutTasks(req: AuthRequest, res: Response) {
+  const count = await flowService.checkTimeoutTasks(req)
   res.json(success({ count }, '检查完成'))
 }
 
-export async function getFlowPerformanceByDefinition(req: Request, res: Response) {
-  const result = await flowService.getFlowPerformanceByDefinition(req.query)
+export async function getFlowPerformanceByDefinition(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowPerformanceByDefinition(req, req.query)
   res.json(success(result))
 }
 
-export async function getFlowPerformanceByNode(req: Request, res: Response) {
-  const result = await flowService.getFlowPerformanceByNode(req.query)
+export async function getFlowPerformanceByNode(req: AuthRequest, res: Response) {
+  const result = await flowService.getFlowPerformanceByNode(req, req.query)
   res.json(success(result))
 }
 
-export async function urgeTask(req: Request, res: Response) {
-  await flowService.urgeTask(Number(req.params.id), (req as AuthRequest).user)
+export async function urgeTask(req: AuthRequest, res: Response) {
+  await flowService.urgeTask(req, Number(req.params.id), req.user)
   res.json(success(null, '催办成功'))
 }
 
-export async function urgeInstance(req: Request, res: Response) {
-  const count = await flowService.urgeInstance(Number(req.params.id), (req as AuthRequest).user)
+export async function urgeInstance(req: AuthRequest, res: Response) {
+  const count = await flowService.urgeInstance(req, Number(req.params.id), req.user)
   res.json(success({ count }, '催办成功'))
 }
 
-export async function terminateInstance(req: Request, res: Response) {
+export async function terminateInstance(req: AuthRequest, res: Response) {
   const { reason } = req.body
-  await flowService.terminateInstance(Number(req.params.id), reason || '', (req as AuthRequest).user)
+  await flowService.terminateInstance(req, Number(req.params.id), reason || '', req.user)
   res.json(success(null, '流程已强制终止'))
 }
