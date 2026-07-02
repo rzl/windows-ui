@@ -61,7 +61,7 @@ const iconGroups = [
   { title: t('状态提示'), names: ['info', 'warning', 'error', 'success', 'help', 'loading'] },
   { title: t('通用界面'), names: ['user', 'star', 'menu', 'home', 'fullscreen', 'fullscreen-exit', 'heart', 'bell', 'calendar', 'clock', 'mail', 'phone', 'link', 'tag', 'bookmark', 'filter', 'sort', 'grid', 'list'] },
   { title: t('后台管理'), names: ['computer', 'logout', 'password', 'cart', 'pie-chart', 'bar-chart', 'setting'] },
-  { title: t('低代码平台'), names: ['app', 'audit', 'category', 'code', 'dashboard', 'database', 'dept', 'dict', 'flow', 'flowChart', 'log', 'market', 'message', 'model', 'monitor', 'notice', 'page', 'position', 'report', 'reportList', 'role', 'rule', 'schedule', 'server', 'task', 'template', 'validate', 'chart'] }
+  { title: t('低代码平台'), names: ['app', 'audit', 'category', 'code', 'dashboard', 'database', 'data', 'dept', 'dict', 'flow', 'flowChart', 'log', 'market', 'message', 'model', 'monitor', 'notice', 'page', 'position', 'report', 'reportList', 'role', 'rule', 'schedule', 'server', 'task', 'template', 'validate', 'tenant', 'api', 'plugin', 'relation', 'printer', 'chart', 'arrow-right'] }
 ]
 
 function getGroupCode(group: { title: string; names: string[] }) {

@@ -126,9 +126,18 @@ const icons: Record<string, string> = {
   template: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 1h12v14H2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><rect x="5" y="5" width="6" height="4" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5 11h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
   validate: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
 
+  // 低代码平台扩展图标
+  tenant: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 4.5v10h12v-10L8 1z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 7h2M5 10h2M9 7h2M9 10h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+  api: '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="5" width="12" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5 5V3M8 5V3M11 5V3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="5" cy="8" r="0.8" fill="currentColor"/><circle cx="8" cy="8" r="0.8" fill="currentColor"/><circle cx="11" cy="8" r="0.8" fill="currentColor"/></svg>',
+  plugin: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h4v2h2V3h4v4h-2v2h2v4H9v-2H7v2H3V9h2V7H3V3z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+  relation: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="4" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 8h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+
   // 别名
   setting: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M4.3 4.3l1.4 1.4M10.3 10.3l1.4 1.4M4.3 11.7l1.4-1.4M10.3 5.7l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-  chart: '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="10" width="3" height="4" fill="currentColor"/><rect x="6.5" y="6" width="3" height="8" fill="currentColor"/><rect x="11" y="2" width="3" height="12" fill="currentColor"/></svg>'
+  chart: '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="10" width="3" height="4" fill="currentColor"/><rect x="6.5" y="6" width="3" height="8" fill="currentColor"/><rect x="11" y="2" width="3" height="12" fill="currentColor"/></svg>',
+  printer: '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="5" width="12" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="2" width="8" height="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 11h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  data: '<svg viewBox="0 0 16 16" fill="currentColor"><ellipse cx="8" cy="4" rx="6" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M2 4v8c0 1.5 3 2.5 6 2.5s6-1 6-2.5V4" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M2 8c0 1.5 3 2.5 6 2.5s6-1 6-2.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
+  'arrow-right': '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M14 8l-8-6v12z" fill="currentColor"/></svg>'
 }
 
 const svgContent = computed(() => {
