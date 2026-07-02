@@ -266,12 +266,25 @@ export async function getApiPerformanceStats(query: any) {
     .orderBy('maxDuration', 'desc')
     .limit(Number(topN))
 
+  const durations = await builder.clone().select('duration').orderBy('duration', 'asc')
+  const p95 = calculatePercentile(durations.map((d) => d.duration), 0.95)
+  const p99 = calculatePercentile(durations.map((d) => d.duration), 0.99)
+
   return {
     totalCount: Number(totalCount?.count || 0),
     slowCount: Number(slowCount?.count || 0),
     errorCount: Number(errorCount?.count || 0),
+    p95,
+    p99,
     topSlow
   }
+}
+
+function calculatePercentile(sortedOrUnsorted: number[], percentile: number): number {
+  if (!sortedOrUnsorted.length) return 0
+  const sorted = [...sortedOrUnsorted].sort((a, b) => a - b)
+  const index = Math.ceil(sorted.length * percentile) - 1
+  return sorted[Math.max(0, index)]
 }
 
 export async function getApiTrend(query: any) {

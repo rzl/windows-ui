@@ -18,6 +18,7 @@ export interface CustomApiForm {
   ipWhitelist?: string | string[]
   ipBlacklist?: string | string[]
   timeout?: number
+  logRetentionDays?: number
 }
 
 function safeCode(name: string) {
@@ -60,7 +61,8 @@ export async function createCustomApi(data: CustomApiForm) {
     rate_limit_window: data.rateLimitWindow || 'minute',
     ip_whitelist: data.ipWhitelist ? JSON.stringify(securityService.parseIpList(data.ipWhitelist)) : null,
     ip_blacklist: data.ipBlacklist ? JSON.stringify(securityService.parseIpList(data.ipBlacklist)) : null,
-    timeout: data.timeout ?? 5000
+    timeout: data.timeout ?? 5000,
+    log_retention_days: data.logRetentionDays ?? 30
   })
   return getCustomApiById(id)
 }
@@ -86,6 +88,7 @@ export async function updateCustomApi(id: number, data: CustomApiForm) {
       ? (data.ipBlacklist ? JSON.stringify(securityService.parseIpList(data.ipBlacklist)) : null)
       : api.ip_blacklist,
     timeout: data.timeout ?? api.timeout ?? 5000,
+    log_retention_days: data.logRetentionDays ?? api.log_retention_days ?? 30,
     update_time: db.fn.now()
   })
   return getCustomApiById(id)
@@ -134,7 +137,8 @@ export async function executeApiByPath(path: string, ctx: any = {}) {
   const rateLimit = api.rate_limit ?? 0
   const rateLimitWindow = api.rate_limit_window || 'minute'
   const rateLimitKey = ctx.user?.id ? `user:${ctx.user.id}` : `ip:${ip}`
-  if (!securityService.checkRateLimit(api.id, rateLimitKey, rateLimit, rateLimitWindow)) {
+  const allowed = await securityService.checkRateLimit(api.id, rateLimitKey, rateLimit, rateLimitWindow)
+  if (!allowed) {
     throw new AppError('请求过于频繁，请稍后重试', 429)
   }
 

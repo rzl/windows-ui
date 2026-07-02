@@ -43,6 +43,7 @@ sop/
 | [database/schema.md](./database/schema.md) | 数据库设计 |
 | [progress/phase-15.md](./progress/phase-15.md) | 阶段十五：顶部系统设置与国际化 |
 | [progress/phase-16.md](./progress/phase-16.md) | 阶段十六：数据权限与行级隔离 |
+| [progress/phase-30.md](./progress/phase-30.md) | 阶段三十：监控告警与日志治理 |
 | [manuals/README.md](./manuals/README.md) | 用户操作手册总览 |
 | [manuals/getting-started/homepage.md](./manuals/getting-started/homepage.md) | 首页、导航与系统设置 |
 | [manuals/lowcode/model.md](./manuals/lowcode/model.md) | 数据模型与低代码开发手册 |

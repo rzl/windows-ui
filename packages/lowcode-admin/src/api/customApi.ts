@@ -15,6 +15,7 @@ export interface CustomApiForm {
   ipWhitelist?: string
   ipBlacklist?: string
   timeout?: number
+  logRetentionDays?: number
 }
 
 export function getCustomApis() {

@@ -49,6 +49,7 @@
 | [phase-27](by-phase/phase-27.md) | 系统监控增强 |
 | [phase-28](by-phase/phase-28.md) | 表单设计器增强 |
 | [phase-29](by-phase/phase-29.md) | 自定义接口安全加固 |
+| [phase-30](by-phase/phase-30.md) | 监控告警与日志治理 |
 
 ## 功能模块主子线
 

@@ -83,6 +83,9 @@
             <w-form-item label="超时时间(ms)">
               <w-input-number v-model="form.timeout" :min="100" :max="60000" />
             </w-form-item>
+            <w-form-item label="日志保留(天)">
+              <w-input-number v-model="form.logRetentionDays" :min="0" placeholder="0 为不限制" />
+            </w-form-item>
           </w-form>
         </w-card>
       </div>
@@ -138,7 +141,8 @@ return await main()
   rateLimitWindow: 'minute',
   ipWhitelist: '',
   ipBlacklist: '',
-  timeout: 5000
+  timeout: 5000,
+  logRetentionDays: 30
 })
 
 const testParams = reactive({
@@ -202,6 +206,7 @@ async function reloadApi() {
   form.ipWhitelist = formatIpList(data.ip_whitelist)
   form.ipBlacklist = formatIpList(data.ip_blacklist)
   form.timeout = data.timeout ?? 5000
+  form.logRetentionDays = data.log_retention_days ?? 30
 }
 
 async function loadLogs() {
@@ -240,7 +245,8 @@ async function handleSave() {
       rateLimitWindow: form.rateLimitWindow,
       ipWhitelist: form.ipWhitelist,
       ipBlacklist: form.ipBlacklist,
-      timeout: Number(form.timeout) || 5000
+      timeout: Number(form.timeout) || 5000,
+      logRetentionDays: Number(form.logRetentionDays) ?? 30
     }
     if (isEdit.value) {
       await customApiApi.updateCustomApi(Number(route.params.id), data)

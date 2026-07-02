@@ -33,6 +33,14 @@
           <div class="stat-card__value">{{ sqlStats.totalCount }}</div>
         </div>
         <div class="stat-card">
+          <div class="stat-card__label">P95 耗时</div>
+          <div class="stat-card__value">{{ formatNumber(apiStats.p95) }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">P99 耗时</div>
+          <div class="stat-card__value">{{ formatNumber(apiStats.p99) }}</div>
+        </div>
+        <div class="stat-card">
           <div class="stat-card__label">未读告警</div>
           <div class="stat-card__value">{{ unreadAlertCount }}</div>
         </div>
@@ -111,6 +119,19 @@
       />
     </w-card>
 
+    <w-card header="数据治理" style="margin-top: 16px;">
+      <w-space style="margin-bottom: 12px;">
+        <w-button type="primary" @click="handleRunCleanup">立即清理过期数据</w-button>
+      </w-space>
+      <w-table :data="retentionPolicies" :columns="retentionPolicyColumns" stripe border>
+        <template #enabled="{ row }">{{ row.enabled ? '是' : '否' }}</template>
+        <template #lastCleanupTime="{ row }">{{ row.lastCleanupTime || '-' }}</template>
+        <template #action="{ row }">
+          <w-button size="small" @click="openRetentionPolicyDialog(row)">编辑</w-button>
+        </template>
+      </w-table>
+    </w-card>
+
     <w-dialog v-model="alertRuleDialogVisible" title="告警规则" width="520">
       <w-form :model="alertRuleForm">
         <w-form-item label="规则名称" required>
@@ -135,6 +156,24 @@
       <template #footer>
         <w-button @click="alertRuleDialogVisible = false">取消</w-button>
         <w-button type="primary" @click="handleSaveAlertRule">确定</w-button>
+      </template>
+    </w-dialog>
+
+    <w-dialog v-model="retentionPolicyDialogVisible" title="编辑保留策略" width="420">
+      <w-form :model="retentionPolicyForm">
+        <w-form-item label="数据表">
+          <w-input v-model="retentionPolicyForm.tableName" disabled />
+        </w-form-item>
+        <w-form-item label="保留天数">
+          <w-input-number v-model="retentionPolicyForm.retentionDays" :min="0" placeholder="0 表示不自动清理" />
+        </w-form-item>
+        <w-form-item label="启用自动清理">
+          <w-switch v-model="retentionPolicyForm.enabled" />
+        </w-form-item>
+      </w-form>
+      <template #footer>
+        <w-button @click="retentionPolicyDialogVisible = false">取消</w-button>
+        <w-button type="primary" @click="handleSaveRetentionPolicy">确定</w-button>
       </template>
     </w-dialog>
   </div>
@@ -167,6 +206,15 @@ const alertRuleForm = reactive<any>({
   windowMinutes: 5,
   enabled: true,
   notifyChannel: 'site'
+})
+
+const retentionPolicies = ref<any[]>([])
+const retentionPolicyDialogVisible = ref(false)
+const retentionPolicyForm = reactive<any>({
+  id: undefined,
+  tableName: '',
+  retentionDays: 30,
+  enabled: true
 })
 
 const alertTypeOptions = [
@@ -214,6 +262,14 @@ const alertRecordColumns = [
   { prop: 'action', label: '操作' }
 ]
 
+const retentionPolicyColumns = [
+  { prop: 'tableName', label: '数据表' },
+  { prop: 'retentionDays', label: '保留天数' },
+  { prop: 'enabled', label: '启用' },
+  { prop: 'lastCleanupTime', label: '上次清理' },
+  { prop: 'action', label: '操作' }
+]
+
 onMounted(() => {
   loadData()
 })
@@ -238,7 +294,37 @@ async function loadData() {
   apiTrend.value = trend
   unreadAlertCount.value = unread
 
-  await Promise.all([loadSlowSqls(), loadAlertRules(), loadAlertRecords()])
+  await Promise.all([loadSlowSqls(), loadAlertRules(), loadAlertRecords(), loadRetentionPolicies()])
+}
+
+async function loadRetentionPolicies() {
+  retentionPolicies.value = await monitorApi.getRetentionPolicies()
+}
+
+function openRetentionPolicyDialog(row: any) {
+  Object.assign(retentionPolicyForm, {
+    id: row.id,
+    tableName: row.tableName,
+    retentionDays: row.retentionDays,
+    enabled: row.enabled === 1
+  })
+  retentionPolicyDialogVisible.value = true
+}
+
+async function handleSaveRetentionPolicy() {
+  await monitorApi.updateRetentionPolicy(retentionPolicyForm.id, {
+    retentionDays: Number(retentionPolicyForm.retentionDays),
+    enabled: retentionPolicyForm.enabled ? 1 : 0
+  })
+  retentionPolicyDialogVisible.value = false
+  await loadRetentionPolicies()
+}
+
+async function handleRunCleanup() {
+  if (!confirm('确定立即清理所有过期数据吗？此操作不可恢复。')) return
+  const result = await monitorApi.runCleanup()
+  alert(`清理完成：公共监控数据 ${result.total} 条，自定义接口日志 ${result.customApiTotal} 条`)
+  await loadRetentionPolicies()
 }
 
 async function loadSlowSqls() {

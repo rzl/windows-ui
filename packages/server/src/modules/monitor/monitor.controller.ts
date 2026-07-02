@@ -3,6 +3,7 @@ import { success } from '../../utils/response'
 import type { AuthRequest } from '../../middleware/auth'
 import * as monitorService from './monitor.service'
 import * as alertService from './alert.service'
+import * as dataGovernanceService from './data-governance.service'
 
 // 消息模板
 export async function getMessageTemplates(_req: Request, res: Response) {
@@ -162,4 +163,22 @@ export async function getUnreadAlertCount(_req: Request, res: Response) {
 export async function checkAlerts(_req: Request, res: Response) {
   const result = await alertService.checkAlerts()
   res.json(success(result))
+}
+
+// ---------- 数据治理 ----------
+
+export async function getRetentionPolicies(_req: Request, res: Response) {
+  const result = await dataGovernanceService.getRetentionPolicies()
+  res.json(success(result))
+}
+
+export async function updateRetentionPolicy(req: Request, res: Response) {
+  const result = await dataGovernanceService.updateRetentionPolicy(Number(req.params.id), req.body)
+  res.json(success(result, '更新成功'))
+}
+
+export async function runCleanup(_req: Request, res: Response) {
+  const total = await dataGovernanceService.runCleanup()
+  const customApiTotal = await dataGovernanceService.cleanupCustomApiLogs()
+  res.json(success({ total, customApiTotal }, '清理完成'))
 }

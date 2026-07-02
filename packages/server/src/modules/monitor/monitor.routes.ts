@@ -55,4 +55,9 @@ router.put('/alert-records/:id/read', monitorController.markAlertRecordRead)
 router.put('/alert-records/:id/resolve', monitorController.resolveAlertRecord)
 router.post('/check-alerts', monitorController.checkAlerts)
 
+// 数据治理
+router.get('/retention-policies', monitorController.getRetentionPolicies)
+router.put('/retention-policies/:id', monitorController.updateRetentionPolicy)
+router.post('/run-cleanup', monitorController.runCleanup)
+
 export default router

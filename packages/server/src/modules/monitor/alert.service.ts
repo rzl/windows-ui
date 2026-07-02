@@ -1,4 +1,6 @@
 import { db } from '../../db'
+import { wsManager } from '../../utils/websocket'
+import { createMessage } from './monitor.service'
 
 export interface AlertRule {
   id?: number
@@ -192,7 +194,50 @@ export async function checkAlerts() {
     }
   }
 
+  // 推送告警通知
+  for (const record of records) {
+    await pushAlertNotification(record)
+  }
+
   return records
+}
+
+async function pushAlertNotification(record: any) {
+  const ruleId = record.rule_id
+  let receiverIds: number[] = []
+
+  if (ruleId) {
+    const rule = await db('alert_rules').where({ id: ruleId }).first()
+    if (rule?.receiver_ids) {
+      try {
+        receiverIds = JSON.parse(rule.receiver_ids)
+      } catch {
+        receiverIds = []
+      }
+    }
+  }
+
+  const payload = {
+    type: 'new_alert',
+    data: record
+  }
+
+  if (receiverIds.length > 0) {
+    for (const userId of receiverIds) {
+      wsManager.sendToUser(userId, payload)
+      await createMessage({
+        receiverId: userId,
+        title: '系统告警',
+        content: record.message,
+        type: 'alert',
+        businessType: 'alert_record',
+        businessKey: String(record.id)
+      })
+    }
+  } else {
+    // 未配置接收人时广播给所有在线用户
+    wsManager.broadcast(payload)
+  }
 }
 
 function parseRule(item: any): AlertRule {

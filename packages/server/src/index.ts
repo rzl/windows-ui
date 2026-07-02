@@ -5,6 +5,7 @@ import { logger } from './utils/logger'
 import { wsManager } from './utils/websocket'
 import { startScheduler } from './modules/schedule/scheduler'
 import { checkAlerts } from './modules/monitor/alert.service'
+import { runCleanup, cleanupCustomApiLogs } from './modules/monitor/data-governance.service'
 
 const PORT = config.port
 const server = http.createServer(app)
@@ -21,4 +22,10 @@ server.listen(PORT, '127.0.0.1', () => {
   setInterval(() => {
     checkAlerts().catch((err) => logger.error('告警检查失败', err))
   }, 60 * 1000)
+
+  // 每 6 小时执行一次数据治理清理
+  setInterval(() => {
+    runCleanup().catch((err) => logger.error('数据治理清理失败', err))
+    cleanupCustomApiLogs().catch((err) => logger.error('自定义接口日志清理失败', err))
+  }, 6 * 60 * 60 * 1000)
 })

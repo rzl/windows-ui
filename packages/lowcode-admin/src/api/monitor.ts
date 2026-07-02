@@ -119,3 +119,16 @@ export function resolveAlertRecord(id: number) {
 export function checkAlerts() {
   return request.post('/monitor/check-alerts')
 }
+
+// 数据治理
+export function getRetentionPolicies() {
+  return request.get('/monitor/retention-policies')
+}
+
+export function updateRetentionPolicy(id: number, data: any) {
+  return request.put(`/monitor/retention-policies/${id}`, data)
+}
+
+export function runCleanup() {
+  return request.post('/monitor/run-cleanup')
+}

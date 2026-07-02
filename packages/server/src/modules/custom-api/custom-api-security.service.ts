@@ -1,4 +1,5 @@
 import { db } from '../../db'
+import { createRateLimitStore, type RateLimitStore } from '../../utils/rate-limit-store'
 
 export interface SecurityConfig {
   rateLimit?: number
@@ -15,28 +16,32 @@ const WINDOW_SECONDS: Record<string, number> = {
   day: 24 * 60 * 60
 }
 
-interface RateLimitRecord {
-  count: number
-  resetTime: number
+let rateLimitStore: RateLimitStore | null = null
+
+async function getRateLimitStore(): Promise<RateLimitStore> {
+  if (!rateLimitStore) {
+    rateLimitStore = await createRateLimitStore()
+  }
+  return rateLimitStore
 }
 
-const rateLimitMap = new Map<string, RateLimitRecord>()
-
-export function checkRateLimit(apiId: number, identifier: string, limit: number, window: string): boolean {
+export async function checkRateLimit(apiId: number, identifier: string, limit: number, window: string): Promise<boolean> {
   if (!limit || limit <= 0) return true
 
+  const store = await getRateLimitStore()
   const windowSeconds = WINDOW_SECONDS[window] || WINDOW_SECONDS.minute
-  const key = `${apiId}:${identifier}`
+  const key = `rate_limit:${apiId}:${identifier}`
   const now = Date.now()
-  const record = rateLimitMap.get(key)
+  const record = await store.get(key)
 
   if (!record || now > record.resetTime) {
-    rateLimitMap.set(key, { count: 1, resetTime: now + windowSeconds * 1000 })
+    await store.set(key, { count: 1, resetTime: now + windowSeconds * 1000 })
     return true
   }
 
   if (record.count >= limit) return false
   record.count++
+  await store.set(key, record)
   return true
 }
 

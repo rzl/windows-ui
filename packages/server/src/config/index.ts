@@ -14,5 +14,8 @@ export const config = {
   db: {
     client: process.env.DB_CLIENT || 'sqlite3',
     filename: process.env.DB_FILENAME || './data/lowcode.sqlite'
+  },
+  redis: {
+    url: process.env.REDIS_URL || ''
   }
 }
