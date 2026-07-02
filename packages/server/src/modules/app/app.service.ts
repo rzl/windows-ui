@@ -292,21 +292,29 @@ export async function publishAppMenus(app: any) {
 
   // 根据应用项生成子菜单
   const items: any[] = app.items || []
+  const pageCodes = items.filter((item) => item.type === 'page').map((item) => item.ref_code)
+  const pagePermissionMap: Record<string, string> = {}
+  if (pageCodes.length) {
+    const pages = await db('lowcode_pages').whereIn('code', pageCodes).select('code', 'permission')
+    pages.forEach((p: any) => {
+      pagePermissionMap[p.code] = p.permission || `page:${p.code}`
+    })
+  }
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
-    const menuItem = buildMenuItem(item, appMenu.id, i)
+    const menuItem = await buildMenuItem(item, appMenu.id, i, pagePermissionMap)
     if (menuItem) await db('menus').insert(menuItem)
   }
 }
 
-function buildMenuItem(item: any, parentId: number, sort: number): any {
+async function buildMenuItem(item: any, parentId: number, sort: number, pagePermissionMap: Record<string, string> = {}): Promise<any> {
   const base = {
     parent_id: parentId,
     name: `${item.type}_${item.ref_code}`,
     title: item.ref_name || item.ref_code,
     sort,
     status: 1,
-    permission: `${item.type}:${item.ref_code}`
+    permission: item.type === 'page' ? (pagePermissionMap[item.ref_code] || `page:${item.ref_code}`) : `${item.type}:${item.ref_code}`
   }
 
   switch (item.type) {

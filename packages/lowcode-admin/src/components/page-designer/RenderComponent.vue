@@ -31,11 +31,57 @@
       :closable="false"
     />
 
+    <!-- 图片 -->
+    <img
+      v-else-if="node.type === 'image'"
+      class="render-image"
+      :src="node.props.src || ''"
+      :alt="node.props.alt || ''"
+      :style="imageStyle"
+      @click="handleEvent(node.events?.onClick)"
+    />
+
+    <!-- 分隔线 -->
+    <div
+      v-else-if="node.type === 'divider'"
+      class="render-divider"
+      :style="dividerStyle"
+    >
+      <span v-if="node.props.text" class="divider-text">{{ node.props.text }}</span>
+    </div>
+
+    <!-- 表格 -->
+    <div v-else-if="node.type === 'table'" class="render-table-wrapper">
+      <w-table
+        :data="tableData"
+        :columns="tableColumns"
+        :height="node.props.height"
+        stripe
+        border
+      />
+    </div>
+
+    <!-- 列表 -->
+    <div v-else-if="node.type === 'list'" class="render-list">
+      <div
+        v-for="(item, idx) in listData"
+        :key="idx"
+        class="render-list-item"
+        @click="handleItemClick(item)"
+      >
+        <w-icon v-if="item.icon || node.props.itemIcon" :name="item.icon || node.props.itemIcon" />
+        <div class="render-list-content">
+          <div class="render-list-title">{{ item[node.props.itemTitle || 'title'] }}</div>
+          <div class="render-list-desc">{{ item[node.props.itemDesc || 'description'] }}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- 按钮 -->
     <w-button
       v-else-if="node.type === 'button'"
       :type="node.props.type || 'default'"
-      @click="handleButtonClick"
+      @click="handleEvent(node.events?.onClick)"
     >
       {{ node.props.label }}
     </w-button>
@@ -145,7 +191,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as pageApi from '@/api/page'
 import { getChart, getComponent } from '@/utils/pluginManager'
@@ -156,6 +202,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const pageContext = inject<any>('pageContext', null)
 const activeTab = ref('')
 const dataValue = ref<any>(null)
 const chartUrl = ref('')
@@ -177,6 +224,42 @@ const gridStyle = computed(() => {
     gridTemplateColumns: `repeat(${props.node.props.columns || 2}, 1fr)`,
     gap: props.node.props.gap || '12px'
   }
+})
+
+const imageStyle = computed(() => {
+  return {
+    width: props.node.props.width || '100%',
+    height: props.node.props.height || 'auto',
+    objectFit: props.node.props.objectFit || 'cover',
+    cursor: props.node.events?.onClick ? 'pointer' : 'default'
+  }
+})
+
+const dividerStyle = computed(() => {
+  const isVertical = props.node.props.direction === 'vertical'
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: props.node.props.margin || '16px 0',
+    width: isVertical ? '1px' : '100%',
+    height: isVertical ? '100%' : '1px',
+    backgroundColor: '#ddd'
+  }
+})
+
+const tableColumns = computed(() => {
+  return props.node.props.columns || []
+})
+
+const tableData = computed(() => {
+  if (Array.isArray(dataValue.value)) return dataValue.value
+  return props.node.props.data || []
+})
+
+const listData = computed(() => {
+  if (Array.isArray(dataValue.value)) return dataValue.value
+  return props.node.props.items || []
 })
 
 const activeTabChildren = computed(() => {
@@ -201,6 +284,10 @@ watch(() => props.node.dataSource, () => {
   loadDataSource()
 }, { deep: true })
 
+watch(() => pageContext?.refreshKey?.value, () => {
+  loadDataSource()
+})
+
 async function loadDataSource() {
   const ds = props.node.dataSource
   if (!ds || !ds.type || ds.type === 'static') {
@@ -213,7 +300,8 @@ async function loadDataSource() {
 
   try {
     const code = props.pageCode || 'preview'
-    const result = await pageApi.executePageDataSource(code, ds, {})
+    const ctx = pageContext ? { state: pageContext.pageState } : {}
+    const result = await pageApi.executePageDataSource(code, ds, ctx)
     dataValue.value = result
     if (props.node.type === 'chart') {
       generateChartUrl(result || props.node.option || {})
@@ -251,19 +339,24 @@ function revokeUrls() {
   if (chartUrl.value) URL.revokeObjectURL(chartUrl.value)
 }
 
-function handleButtonClick() {
-  const event = props.node.events?.onClick
-  if (!event) return
-  if (event.action === 'navigate' && event.target) {
+function handleEvent(event: any) {
+  if (pageContext) {
+    pageContext.executeEvent(event)
+  } else if (event?.action === 'navigate' && event.target) {
     router.push(event.target)
-  } else if (event.action === 'refresh') {
-    loadDataSource()
   }
 }
 
 function handleLinkClick() {
   if (props.node.props.path) {
     router.push(props.node.props.path)
+  }
+}
+
+function handleItemClick(item: any) {
+  if (props.node.events?.onClick) {
+    const event = { ...props.node.events.onClick, item }
+    handleEvent(event)
   }
 }
 </script>
@@ -279,6 +372,17 @@ function handleLinkClick() {
 .stat-value { font-size: 28px; font-weight: bold; }
 .chart-wrapper { width: 100%; }
 .chart-frame { width: 100%; border: none; height: v-bind('node.props.height || "300px"'); }
+.render-image { max-width: 100%; display: block; }
+.render-divider { position: relative; }
+.divider-text { background: #fff; padding: 0 12px; color: #666; font-size: 12px; position: absolute; }
+.render-table-wrapper { overflow-x: auto; }
+.render-list { border: 1px solid #eee; border-radius: 4px; }
+.render-list-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+.render-list-item:last-child { border-bottom: none; }
+.render-list-item:hover { background: #f8f8f8; }
+.render-list-content { flex: 1; }
+.render-list-title { font-weight: bold; }
+.render-list-desc { color: #666; font-size: 12px; }
 .render-container { border: 1px solid #eee; }
 .render-grid { width: 100%; }
 .grid-item { min-width: 0; }

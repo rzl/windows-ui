@@ -79,6 +79,68 @@
       </w-form-item>
     </template>
 
+    <!-- 图片 -->
+    <template v-if="node.type === 'image'">
+      <w-form-item label="图片地址">
+        <w-input v-model="node.props.src" />
+      </w-form-item>
+      <w-form-item label="替代文本">
+        <w-input v-model="node.props.alt" />
+      </w-form-item>
+      <w-form-item label="宽度">
+        <w-input v-model="node.props.width" placeholder="100% 或 300px" />
+      </w-form-item>
+      <w-form-item label="高度">
+        <w-input v-model="node.props.height" placeholder="auto 或 200px" />
+      </w-form-item>
+      <w-form-item label="适应方式">
+        <w-select v-model="node.props.objectFit" :options="objectFitOptions" />
+      </w-form-item>
+      <event-editor v-model="node.events" />
+    </template>
+
+    <!-- 分隔线 -->
+    <template v-if="node.type === 'divider'">
+      <w-form-item label="文字">
+        <w-input v-model="node.props.text" />
+      </w-form-item>
+      <w-form-item label="方向">
+        <w-select v-model="node.props.direction" :options="directionOptions" />
+      </w-form-item>
+      <w-form-item label="边距">
+        <w-input v-model="node.props.margin" placeholder="如 16px 0" />
+      </w-form-item>
+    </template>
+
+    <!-- 表格 -->
+    <template v-if="node.type === 'table'">
+      <w-form-item label="标题">
+        <w-input v-model="node.props.title" />
+      </w-form-item>
+      <w-form-item label="高度">
+        <w-input v-model="node.props.height" placeholder="如 300px，留空自适应" />
+      </w-form-item>
+      <w-form-item label="列配置(JSON)">
+        <w-input v-model="columnsText" type="textarea" :rows="4" placeholder='[{"prop":"name","label":"名称","width":120}]' />
+      </w-form-item>
+      <data-source-editor v-model="node.dataSource" />
+    </template>
+
+    <!-- 列表 -->
+    <template v-if="node.type === 'list'">
+      <w-form-item label="标题字段">
+        <w-input v-model="node.props.itemTitle" placeholder="默认 title" />
+      </w-form-item>
+      <w-form-item label="描述字段">
+        <w-input v-model="node.props.itemDesc" placeholder="默认 description" />
+      </w-form-item>
+      <w-form-item label="图标字段">
+        <w-input v-model="node.props.itemIcon" placeholder="默认 icon" />
+      </w-form-item>
+      <data-source-editor v-model="node.dataSource" />
+      <event-editor v-model="node.events" />
+    </template>
+
     <!-- 容器 -->
     <template v-if="node.type === 'container'">
       <w-form-item label="内边距">
@@ -142,12 +204,7 @@
       <w-form-item label="按钮类型">
         <w-select v-model="node.props.type" :options="buttonTypeOptions" />
       </w-form-item>
-      <w-form-item label="点击动作">
-        <w-select v-model="node.events.onClick.action" :options="actionOptions" />
-      </w-form-item>
-      <w-form-item label="目标">
-        <w-input v-model="node.events.onClick.target" placeholder="路径或编码" />
-      </w-form-item>
+      <event-editor v-model="node.events" />
     </template>
 
     <!-- 链接 -->
@@ -175,6 +232,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import DataSourceEditor from './DataSourceEditor.vue'
+import EventEditor from './EventEditor.vue'
 import { listCharts, getChart, getComponent } from '@/utils/pluginManager'
 
 const props = defineProps<{
@@ -192,6 +250,10 @@ const typeLabelMap: Record<string, string> = {
   stat: '统计卡片',
   chart: '图表',
   notice: '公告',
+  image: '图片',
+  divider: '分隔线',
+  table: '表格',
+  list: '列表',
   model: '数据模型',
   dashboard: '仪表盘',
   report: '报表',
@@ -249,10 +311,16 @@ const buttonTypeOptions = [
   { label: '危险', value: 'danger' }
 ]
 
-const actionOptions = [
-  { label: '跳转', value: 'navigate' },
-  { label: '刷新', value: 'refresh' },
-  { label: '打开弹窗', value: 'openDialog' }
+const objectFitOptions = [
+  { label: '覆盖', value: 'cover' },
+  { label: '包含', value: 'contain' },
+  { label: '填充', value: 'fill' },
+  { label: '原始大小', value: 'none' }
+]
+
+const directionOptions = [
+  { label: '水平', value: 'horizontal' },
+  { label: '垂直', value: 'vertical' }
 ]
 
 const optionText = computed({
@@ -290,6 +358,20 @@ const propsText = computed({
   set(value: string) {
     try {
       props.node.props = JSON.parse(value)
+      emit('update', props.node)
+    } catch {
+      // ignore invalid json
+    }
+  }
+})
+
+const columnsText = computed({
+  get() {
+    return JSON.stringify(props.node.props.columns || [], null, 2)
+  },
+  set(value: string) {
+    try {
+      props.node.props.columns = JSON.parse(value)
       emit('update', props.node)
     } catch {
       // ignore invalid json

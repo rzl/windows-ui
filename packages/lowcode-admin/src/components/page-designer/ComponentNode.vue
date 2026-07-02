@@ -58,6 +58,31 @@
         <div class="embed-preview">[嵌入报表] {{ node.props.reportCode || '未配置' }}</div>
       </template>
 
+      <!-- 图片 -->
+      <template v-else-if="node.type === 'image'">
+        <img v-if="node.props.src" class="node-image" :src="node.props.src" :alt="node.props.alt" :style="{ width: node.props.width || '100%', height: node.props.height || 'auto', objectFit: node.props.objectFit || 'cover' }">
+        <div v-else class="embed-preview">[图片] 未配置地址</div>
+      </template>
+
+      <!-- 分隔线 -->
+      <template v-else-if="node.type === 'divider'">
+        <div class="divider-preview">{{ node.props.text || '—' }}</div>
+      </template>
+
+      <!-- 表格 -->
+      <template v-else-if="node.type === 'table'">
+        <div class="embed-preview">[表格] {{ node.props.title || '示例表格' }}</div>
+      </template>
+
+      <!-- 列表 -->
+      <template v-else-if="node.type === 'list'">
+        <div class="list-preview">
+          <div v-for="i in 3" :key="i" class="list-preview-item">
+            <span class="list-preview-title">列表项 {{ i }}</span>
+          </div>
+        </div>
+      </template>
+
       <!-- 按钮 -->
       <template v-else-if="node.type === 'button'">
         <w-button :type="node.props.type || 'default'">{{ node.props.label }}</w-button>
@@ -132,6 +157,10 @@ const typeLabelMap: Record<string, string> = {
   stat: '统计卡片',
   chart: '图表',
   notice: '公告',
+  image: '图片',
+  divider: '分隔线',
+  table: '表格',
+  list: '列表',
   model: '数据模型',
   dashboard: '仪表盘',
   report: '报表',
@@ -215,6 +244,14 @@ function createDefaultComponent(type: string): any {
       return { ...base, props: { height: '300px', chartType: 'echarts' }, dataSource: { type: 'static' }, option: { title: { text: '示例图表' }, xAxis: { data: ['一月', '二月', '三月'] }, yAxis: {}, series: [{ type: 'bar', data: [5, 20, 36] }] } }
     case 'notice':
       return { ...base, props: { content: '公告内容', type: 'info' } }
+    case 'image':
+      return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
+    case 'divider':
+      return { ...base, props: { text: '', direction: 'horizontal', margin: '16px 0' } }
+    case 'table':
+      return { ...base, props: { title: '表格', columns: [{ prop: 'name', label: '名称' }, { prop: 'value', label: '值' }], height: '' }, dataSource: { type: 'static', value: [] } }
+    case 'list':
+      return { ...base, props: { itemTitle: 'title', itemDesc: 'description', itemIcon: 'file' }, dataSource: { type: 'static', value: [] } }
     case 'model':
       return { ...base, props: { modelCode: '', height: '500px' } }
     case 'dashboard':
@@ -276,4 +313,10 @@ function createDefaultComponent(type: string): any {
   text-align: center;
   color: #666;
 }
+.node-image { max-width: 100%; display: block; }
+.divider-preview { text-align: center; color: #999; padding: 8px 0; }
+.list-preview { padding: 8px; }
+.list-preview-item { padding: 6px; border-bottom: 1px dashed #eee; }
+.list-preview-item:last-child { border-bottom: none; }
+.list-preview-title { font-size: 12px; color: #666; }
 </style>

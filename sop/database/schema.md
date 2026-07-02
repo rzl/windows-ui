@@ -119,10 +119,11 @@
 | description | text | 页面描述 |
 | config | text | 页面 JSON 配置 |
 | status | integer | 0 禁用 / 1 启用 |
+| permission | string | 页面权限码，为空表示不限制 |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
 
-页面配置中的 `components` 数组支持嵌套，容器类组件通过 `children` 字段组织子组件。
+页面配置中的 `components` 数组支持嵌套，容器类组件通过 `children` 字段组织子组件。每个组件可配置 `props`、`styles`、`dataSource` 与 `events`。
 
 ## 监控与治理表
 

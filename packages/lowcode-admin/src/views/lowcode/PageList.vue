@@ -27,6 +27,9 @@
         <w-form-item label="描述">
           <w-input v-model="formModel.description" type="textarea" :rows="2" />
         </w-form-item>
+        <w-form-item label="权限码">
+          <w-input v-model="formModel.permission" placeholder="为空表示不限制，如 page:sales_dashboard" />
+        </w-form-item>
         <w-form-item label="状态">
           <w-switch v-model="formModel.status" active-text="启用" inactive-text="禁用" />
         </w-form-item>
@@ -53,6 +56,7 @@ const columns = [
   { prop: 'id', label: 'ID', width: 60 },
   { prop: 'code', label: '编码' },
   { prop: 'name', label: '名称' },
+  { prop: 'permission', label: '权限码' },
   { prop: 'status', label: '状态' },
   { prop: 'action', label: '操作', width: 200, fixed: 'right' }
 ]

@@ -9,6 +9,7 @@ export interface PageForm {
   description?: string
   config?: any
   status?: number
+  permission?: string
 }
 
 function safeCode(name: string) {
@@ -52,7 +53,8 @@ export async function createPage(data: PageForm) {
     name: data.name,
     description: data.description,
     config: JSON.stringify(data.config || {}),
-    status: data.status ?? 1
+    status: data.status ?? 1,
+    permission: data.permission || null
   })
   return getPageById(id)
 }
@@ -64,6 +66,7 @@ export async function updatePage(id: number, data: PageForm) {
     description: data.description ?? page.description,
     config: JSON.stringify(data.config || page.config),
     status: data.status ?? page.status,
+    permission: data.permission !== undefined ? (data.permission || null) : page.permission,
     update_time: db.fn.now()
   })
   return getPageById(id)

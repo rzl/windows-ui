@@ -172,9 +172,13 @@ const layoutTypes = [
 
 const displayTypes = computed(() => [
   { label: '文本', value: 'text' },
+  { label: '图片', value: 'image' },
+  { label: '分隔线', value: 'divider' },
   { label: '统计卡片', value: 'stat' },
   { label: '图表', value: 'chart' },
   { label: '公告', value: 'notice' },
+  { label: '表格', value: 'table' },
+  { label: '列表', value: 'list' },
   ...listComponentsByCategory('display').map((c) => ({ label: c.label, value: c.type }))
 ])
 
@@ -259,6 +263,14 @@ function createDefaultComponent(type: string): any {
     }
     case 'notice':
       return { ...base, props: { content: '公告内容', type: 'info' } }
+    case 'image':
+      return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
+    case 'divider':
+      return { ...base, props: { text: '', direction: 'horizontal', margin: '16px 0' } }
+    case 'table':
+      return { ...base, props: { title: '表格', columns: [{ prop: 'name', label: '名称' }, { prop: 'value', label: '值' }], height: '' }, dataSource: { type: 'static', value: [] } }
+    case 'list':
+      return { ...base, props: { itemTitle: 'title', itemDesc: 'description', itemIcon: 'file' }, dataSource: { type: 'static', value: [] } }
     case 'model':
       return { ...base, props: { modelCode: '', height: '500px' } }
     case 'dashboard':
