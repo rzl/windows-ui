@@ -113,6 +113,10 @@ instance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    const auth = useAuthStore()
+    if (auth.userInfo?.tenantId !== undefined && auth.userInfo?.tenantId !== null) {
+      config.headers['X-Tenant-Id'] = String(auth.userInfo.tenantId)
+    }
     return config
   },
   (error) => {

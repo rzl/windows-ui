@@ -53,6 +53,7 @@
 | [phase-31](by-phase/phase-31.md) | 工作流增强 |
 | [phase-32](by-phase/phase-32.md) | 工作流高级特性 |
 | [phase-33](by-phase/phase-33.md) | 页面设计器增强 |
+| [phase-34](by-phase/phase-34.md) | 多租户基础框架与核心系统表隔离 |
 
 ## 功能模块主子线
 

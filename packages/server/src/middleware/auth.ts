@@ -12,6 +12,7 @@ export interface AuthRequest extends Request {
     id: number
     username: string
     roleId: number
+    tenantId: number
     deptId?: number
     permissions?: string[]
   }
@@ -46,6 +47,7 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
       id: profile.id,
       username: profile.username,
       roleId: profile.roleId,
+      tenantId: decoded.tenantId || profile.tenantId || 0,
       deptId: profile.deptId,
       permissions: profile.permissions || []
     }
@@ -71,6 +73,7 @@ export async function optionalAuthMiddleware(req: AuthRequest, res: Response, ne
           id: profile.id,
           username: profile.username,
           roleId: profile.roleId,
+          tenantId: decoded.tenantId || profile.tenantId || 0,
           deptId: profile.deptId,
           permissions: profile.permissions || []
         }

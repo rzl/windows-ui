@@ -8,6 +8,9 @@
         <w-form-item label="密码">
           <w-input v-model="form.password" type="password" placeholder="请输入密码" @keyup.enter="handleLogin" />
         </w-form-item>
+        <w-form-item label="租户编码">
+          <w-input v-model="form.tenantCode" placeholder="可选，超级管理员可留空" />
+        </w-form-item>
         <div class="login-actions">
           <w-button type="primary" :loading="loading" @click="handleLogin">登录</w-button>
         </div>
@@ -28,7 +31,8 @@ const loading = ref(false)
 
 const form = reactive({
   username: 'admin',
-  password: 'admin'
+  password: 'admin',
+  tenantCode: ''
 })
 
 function getRedirectPath(): string {

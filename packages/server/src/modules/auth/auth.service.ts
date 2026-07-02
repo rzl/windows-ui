@@ -7,7 +7,7 @@ import { tokenBlacklist } from '../../middleware/auth'
 import { getRoleDataPermissionIds } from '../lowcode/data-permission.service'
 import type { LoginDto, RefreshDto, UpdateProfileDto, ChangePasswordDto } from './auth.dto'
 
-function generateTokens(payload: { id: number; username: string; roleId: number }) {
+function generateTokens(payload: { id: number; username: string; roleId: number; tenantId: number }) {
   const accessToken = jwt.sign(payload, config.jwt.secret as jwt.Secret, {
     expiresIn: config.jwt.accessExpires as jwt.SignOptions['expiresIn']
   })
@@ -18,7 +18,16 @@ function generateTokens(payload: { id: number; username: string; roleId: number 
 }
 
 export async function login(dto: LoginDto) {
-  const user = await db('users').where({ username: dto.username }).first()
+  let query = db('users').where({ username: dto.username })
+  if (dto.tenantCode) {
+    const tenant = await db('tenants').where({ code: dto.tenantCode }).first()
+    if (!tenant) {
+      throw new AppError('租户不存在', 401)
+    }
+    query = query.where({ tenant_id: tenant.id })
+  }
+
+  const user = await query.first()
 
   if (!user) {
     throw new AppError('用户名或密码错误', 401)
@@ -36,7 +45,8 @@ export async function login(dto: LoginDto) {
   const tokens = generateTokens({
     id: user.id,
     username: user.username,
-    roleId: user.role_id
+    roleId: user.role_id,
+    tenantId: user.tenant_id ?? 0
   })
 
   return {
@@ -49,6 +59,7 @@ export async function login(dto: LoginDto) {
       phone: user.phone,
       avatar: user.avatar,
       roleId: user.role_id,
+      tenantId: user.tenant_id ?? 0,
       deptId: user.dept_id
     }
   }
@@ -60,6 +71,7 @@ export async function refresh(dto: RefreshDto) {
       id: number
       username: string
       roleId: number
+      tenantId: number
     }
     return generateTokens(payload)
   } catch {
@@ -87,6 +99,7 @@ export async function getProfile(userId: number) {
       'users.status',
       'users.dept_id as deptId',
       'users.role_id as roleId',
+      'users.tenant_id as tenantId',
       'roles.name as roleName',
       'depts.name as deptName'
     )

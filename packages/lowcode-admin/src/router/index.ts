@@ -20,6 +20,12 @@ const routes = [
         meta: { title: '仪表盘', permission: 'dashboard' }
       },
       {
+        path: 'system/tenant',
+        name: 'TenantList',
+        component: () => import('@/views/system/TenantList.vue'),
+        meta: { title: '租户管理', permission: 'tenant:list' }
+      },
+      {
         path: 'system/user',
         name: 'UserList',
         component: () => import('@/views/system/UserList.vue'),

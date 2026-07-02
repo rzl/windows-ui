@@ -1,59 +1,66 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import { tenantWhere, setTenantId } from '../../utils/tenant'
+import type { AuthRequest } from '../../middleware/auth'
 
 // 字典 CRUD
-export async function getDicts() {
+export async function getDicts(req: AuthRequest) {
   return db('dicts')
     .leftJoin('dict_categories', 'dicts.category_id', 'dict_categories.id')
+    .where(tenantWhere(req))
     .select('dicts.*', 'dict_categories.name as category_name')
     .orderBy('dicts.id', 'desc')
 }
 
-export async function getDictById(id: number) {
-  const dict = await db('dicts').where({ id }).first()
+export async function getDictById(req: AuthRequest, id: number) {
+  const dict = await db('dicts').where({ id }).where(tenantWhere(req)).first()
   if (!dict) throw new AppError('字典不存在', 404)
   const items = await db('dict_items')
     .where({ dict_id: id })
+    .where(tenantWhere(req))
     .where('status', 1)
     .orderBy('sort', 'asc')
   return { ...dict, items }
 }
 
-export async function getDictByCode(code: string) {
-  const dict = await db('dicts').where({ code }).first()
+export async function getDictByCode(req: AuthRequest, code: string) {
+  const dict = await db('dicts').where({ code }).where(tenantWhere(req)).first()
   if (!dict) throw new AppError('字典不存在', 404)
   const items = await db('dict_items')
     .where({ dict_id: dict.id })
+    .where(tenantWhere(req))
     .where('status', 1)
     .orderBy('sort', 'asc')
   return { ...dict, items }
 }
 
-export async function createDict(data: any) {
-  const exists = await db('dicts').where({ code: data.code }).first()
+export async function createDict(req: AuthRequest, data: any) {
+  const exists = await db('dicts').where({ code: data.code }).where(tenantWhere(req)).first()
   if (exists) throw new AppError('字典编码已存在', 400)
 
-  const [id] = await db('dicts').insert({
+  const insertData = setTenantId({
     name: data.name,
     code: data.code,
     description: data.description,
     category_id: data.categoryId || null,
     status: data.status ?? 1
-  })
+  }, req)
+  const [id] = await db('dicts').insert(insertData)
   return db('dicts').where({ id }).first()
 }
 
-export async function updateDict(id: number, data: any) {
-  const dict = await db('dicts').where({ id }).first()
+export async function updateDict(req: AuthRequest, id: number, data: any) {
+  const dict = await db('dicts').where({ id }).where(tenantWhere(req)).first()
   if (!dict) throw new AppError('字典不存在', 404)
 
   const exists = await db('dicts')
     .where({ code: data.code })
     .whereNot('id', id)
+    .where(tenantWhere(req))
     .first()
   if (exists) throw new AppError('字典编码已存在', 400)
 
-  await db('dicts').where({ id }).update({
+  await db('dicts').where({ id }).where(tenantWhere(req)).update({
     name: data.name,
     code: data.code,
     description: data.description,
@@ -63,32 +70,33 @@ export async function updateDict(id: number, data: any) {
   return db('dicts').where({ id }).first()
 }
 
-export async function deleteDict(id: number) {
-  await db('dict_items').where({ dict_id: id }).del()
-  await db('dicts').where({ id }).del()
+export async function deleteDict(req: AuthRequest, id: number) {
+  await db('dict_items').where({ dict_id: id }).where(tenantWhere(req)).del()
+  await db('dicts').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
 // 字典项 CRUD
-export async function createDictItem(data: any) {
-  const dict = await db('dicts').where({ id: data.dictId }).first()
+export async function createDictItem(req: AuthRequest, data: any) {
+  const dict = await db('dicts').where({ id: data.dictId }).where(tenantWhere(req)).first()
   if (!dict) throw new AppError('字典不存在', 404)
 
-  const [id] = await db('dict_items').insert({
+  const insertData = setTenantId({
     dict_id: data.dictId,
     label: data.label,
     value: data.value,
     sort: data.sort ?? 0,
     status: data.status ?? 1
-  })
+  }, req)
+  const [id] = await db('dict_items').insert(insertData)
   return db('dict_items').where({ id }).first()
 }
 
-export async function updateDictItem(id: number, data: any) {
-  const item = await db('dict_items').where({ id }).first()
+export async function updateDictItem(req: AuthRequest, id: number, data: any) {
+  const item = await db('dict_items').where({ id }).where(tenantWhere(req)).first()
   if (!item) throw new AppError('字典项不存在', 404)
 
-  await db('dict_items').where({ id }).update({
+  await db('dict_items').where({ id }).where(tenantWhere(req)).update({
     label: data.label,
     value: data.value,
     sort: data.sort,
@@ -97,8 +105,8 @@ export async function updateDictItem(id: number, data: any) {
   return db('dict_items').where({ id }).first()
 }
 
-export async function deleteDictItem(id: number) {
-  await db('dict_items').where({ id }).del()
+export async function deleteDictItem(req: AuthRequest, id: number) {
+  await db('dict_items').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 

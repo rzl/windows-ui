@@ -10,6 +10,15 @@ export async function seed(knex: Knex): Promise<void> {
   await knex('roles').del()
   await knex('dict_items').del()
   await knex('dicts').del()
+  await knex('tenants').del()
+
+  // 默认租户
+  const [defaultTenantId] = await knex('tenants').insert({
+    name: '默认租户',
+    code: 'default',
+    description: '系统默认租户',
+    status: 1
+  })
 
   // 角色
   const [adminRoleId] = await knex('roles').insert({
@@ -17,11 +26,11 @@ export async function seed(knex: Knex): Promise<void> {
     code: 'admin',
     description: '全部权限',
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('roles').insert([
-    { name: '编辑', code: 'editor', description: '内容管理', status: 1 },
-    { name: '访客', code: 'viewer', description: '只读权限', status: 1 }
+    { name: '编辑', code: 'editor', description: '内容管理', status: 1 , tenant_id: 1},
+    { name: '访客', code: 'viewer', description: '只读权限', status: 1 , tenant_id: 1}
   ])
 
   // 部门
@@ -31,11 +40,11 @@ export async function seed(knex: Knex): Promise<void> {
     code: 'RD',
     sort: 1,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('depts').insert([
-    { parent_id: devDeptId, name: '前端组', code: 'RD-FE', sort: 1, status: 1 },
-    { parent_id: devDeptId, name: '后端组', code: 'RD-BE', sort: 2, status: 1 }
+    { parent_id: devDeptId, name: '前端组', code: 'RD-FE', sort: 1, status: 1 , tenant_id: 1},
+    { parent_id: devDeptId, name: '后端组', code: 'RD-BE', sort: 2, status: 1 , tenant_id: 1}
   ])
 
   // 用户
@@ -48,7 +57,7 @@ export async function seed(knex: Knex): Promise<void> {
     status: 1,
     dept_id: devDeptId,
     role_id: adminRoleId
-  })
+  , tenant_id: 1})
 
   // 菜单
   const [dashboardId] = await knex('menus').insert({
@@ -61,7 +70,7 @@ export async function seed(knex: Knex): Promise<void> {
     sort: 1,
     status: 1,
     permission: 'dashboard'
-  })
+  , tenant_id: 1})
 
   const [systemId] = await knex('menus').insert({
     parent_id: 0,
@@ -71,9 +80,21 @@ export async function seed(knex: Knex): Promise<void> {
     icon: 'setting',
     sort: 2,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('menus').insert([
+    {
+      parent_id: systemId,
+      name: 'TenantList',
+      path: '/system/tenant',
+      component: 'views/system/TenantList.vue',
+      title: '租户管理',
+      icon: 'tenant',
+      sort: 0,
+      status: 1,
+      tenant_id: 1,
+      permission: 'tenant:list'
+    },
     {
       parent_id: systemId,
       name: 'UserList',
@@ -84,7 +105,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 1,
       status: 1,
       permission: 'user:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'RoleList',
@@ -95,7 +116,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'role:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'MenuList',
@@ -106,7 +127,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 3,
       status: 1,
       permission: 'menu:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'DeptList',
@@ -117,7 +138,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 4,
       status: 1,
       permission: 'dept:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'DictList',
@@ -128,7 +149,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 5,
       status: 1,
       permission: 'dict:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'NoticeList',
@@ -139,7 +160,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 6,
       status: 1,
       permission: 'notice:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'PositionList',
@@ -150,7 +171,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 7,
       status: 1,
       permission: 'position:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'DictCategoryList',
@@ -161,7 +182,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 8,
       status: 1,
       permission: 'dict:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'DataPermissionList',
@@ -172,7 +193,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 9,
       status: 1,
       permission: 'data-permission:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: systemId,
       name: 'FieldPermissionList',
@@ -183,7 +204,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 10,
       status: 1,
       permission: 'field-permission:list'
-    }
+    , tenant_id: 1}
   ])
 
   // 在线开发（低代码）
@@ -195,7 +216,7 @@ export async function seed(knex: Knex): Promise<void> {
     icon: 'code',
     sort: 3,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('menus').insert([
     {
@@ -208,7 +229,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 0,
       status: 1,
       permission: 'lowcode:appMarket'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'ModelList',
@@ -219,7 +240,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 1,
       status: 1,
       permission: 'lowcode:model'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'CodingRuleList',
@@ -230,7 +251,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'lowcode:coding'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'ValidationRuleList',
@@ -241,7 +262,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 3,
       status: 1,
       permission: 'lowcode:validate'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'AppList',
@@ -252,7 +273,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 4,
       status: 1,
       permission: 'lowcode:app'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'PrintTemplateList',
@@ -263,7 +284,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 6,
       status: 1,
       permission: 'lowcode:printTemplate'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'ExternalDataSourceList',
@@ -274,7 +295,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 7,
       status: 1,
       permission: 'lowcode:externalDatasource'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'AuditLogList',
@@ -285,7 +306,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 8,
       status: 1,
       permission: 'lowcode:auditLog'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'CustomApiList',
@@ -296,7 +317,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 9,
       status: 1,
       permission: 'lowcode:customApi'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'PageList',
@@ -307,7 +328,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 5,
       status: 1,
       permission: 'lowcode:page'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'PluginList',
@@ -318,7 +339,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 10,
       status: 1,
       permission: 'lowcode:plugin'
-    },
+    , tenant_id: 1},
     {
       parent_id: lowcodeId,
       name: 'RelationList',
@@ -329,7 +350,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 11,
       status: 1,
       permission: 'lowcode:relation'
-    }
+    , tenant_id: 1}
   ])
 
   // 仪表盘与首页配置
@@ -341,7 +362,7 @@ export async function seed(knex: Knex): Promise<void> {
     icon: 'dashboard',
     sort: 8,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('menus').insert([
     {
@@ -354,7 +375,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 1,
       status: 1,
       permission: 'homepage:config'
-    },
+    , tenant_id: 1},
     {
       parent_id: dashboardManagerId,
       name: 'DashboardList',
@@ -365,7 +386,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'dashboard:list'
-    }
+    , tenant_id: 1}
   ])
 
   // 消息中心
@@ -377,7 +398,7 @@ export async function seed(knex: Knex): Promise<void> {
     icon: 'message',
     sort: 4,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('menus').insert([
     {
@@ -390,7 +411,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 1,
       status: 1,
       permission: 'message:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: messageId,
       name: 'MessageTemplateList',
@@ -401,7 +422,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'message:template'
-    }
+    , tenant_id: 1}
   ])
 
   // 流程中心
@@ -413,7 +434,7 @@ export async function seed(knex: Knex): Promise<void> {
     icon: 'flow',
     sort: 6,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('menus').insert([
     {
@@ -426,7 +447,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 1,
       status: 1,
       permission: 'flow:list'
-    },
+    , tenant_id: 1},
     {
       parent_id: flowId,
       name: 'PendingTaskList',
@@ -437,7 +458,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'flow:task'
-    },
+    , tenant_id: 1},
     {
       parent_id: flowId,
       name: 'FlowDelegation',
@@ -448,7 +469,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 3,
       status: 1,
       permission: 'flow:delegation'
-    },
+    , tenant_id: 1},
     {
       parent_id: flowId,
       name: 'FlowPerformance',
@@ -459,7 +480,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 4,
       status: 1,
       permission: 'flow:performance'
-    }
+    , tenant_id: 1}
   ])
 
   // 报表中心
@@ -471,7 +492,7 @@ export async function seed(knex: Knex): Promise<void> {
     icon: 'report',
     sort: 7,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('menus').insert([
     {
@@ -484,7 +505,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 1,
       status: 1,
       permission: 'report:list'
-    }
+    , tenant_id: 1}
   ])
 
   // 系统监控
@@ -496,7 +517,7 @@ export async function seed(knex: Knex): Promise<void> {
     icon: 'monitor',
     sort: 5,
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('menus').insert([
     {
@@ -509,7 +530,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 1,
       status: 1,
       permission: 'monitor:server'
-    },
+    , tenant_id: 1},
     {
       parent_id: monitorId,
       name: 'OperationLogList',
@@ -520,7 +541,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 2,
       status: 1,
       permission: 'monitor:log'
-    },
+    , tenant_id: 1},
     {
       parent_id: monitorId,
       name: 'ScheduleList',
@@ -531,7 +552,7 @@ export async function seed(knex: Knex): Promise<void> {
       sort: 3,
       status: 1,
       permission: 'monitor:schedule'
-    }
+    , tenant_id: 1}
   ])
 
   // 角色权限（超级管理员拥有所有权限）
@@ -546,10 +567,10 @@ export async function seed(knex: Knex): Promise<void> {
     code: 'user_status',
     description: '用户账号状态',
     status: 1
-  })
+  , tenant_id: 1})
 
   await knex('dict_items').insert([
-    { dict_id: statusDictId, label: '启用', value: '1', sort: 1, status: 1 },
-    { dict_id: statusDictId, label: '禁用', value: '0', sort: 2, status: 1 }
+    { dict_id: statusDictId, label: '启用', value: '1', sort: 1, status: 1 , tenant_id: 1},
+    { dict_id: statusDictId, label: '禁用', value: '0', sort: 2, status: 1 , tenant_id: 1}
   ])
 }

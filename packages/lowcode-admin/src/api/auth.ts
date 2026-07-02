@@ -3,6 +3,7 @@ import request from './request'
 export interface LoginForm {
   username: string
   password: string
+  tenantCode?: string
 }
 
 export interface LoginResult {

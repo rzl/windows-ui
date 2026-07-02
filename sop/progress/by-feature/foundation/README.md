@@ -14,6 +14,7 @@
 | 认证与会话管理 | - | 双令牌刷新、启动校验、未登录/过期自动跳转登录、登录后回源 | ✅ |
 | 通用组件扩展 | [phase-1](../../by-phase/phase-1.md) | WCrudTable、WDynamicForm、WQueryBuilder | ✅ |
 | 页面模板 | [phase-4](../../by-phase/phase-4.md) | 结果页、异常页（403/404/500）、个人页 | ✅ |
+| 多租户基础框架 | [phase-34](../../by-phase/phase-34.md) | tenants 表、JWT 传递 tenantId、核心系统表租户隔离 | ✅ |
 
 ## 待增强
 

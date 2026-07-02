@@ -275,9 +275,10 @@ export interface InstallTemplateOptions {
   autoPublish?: boolean
 }
 
-export async function installTemplate(templateCode: string, options: InstallTemplateOptions = {}, operator?: any) {
+export async function installTemplate(req: any, templateCode: string, options: InstallTemplateOptions = {}, operator?: any) {
   const template = loadTemplate(templateCode)
   const appCode = options.code ? safeCode(options.code) : template.app?.code || template.template
+  const tenantId = operator?.tenantId || req?.user?.tenantId || 0
 
   return db.transaction(async (trx) => {
     // 1. 生成应用编码
@@ -303,7 +304,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
         code: newCode,
         description: dict.description || '',
         category_id: dict.categoryId || null,
-        status: dict.status ?? 1
+        status: dict.status ?? 1,
+        tenant_id: tenantId
       })
 
       dictCodeMap[dict.code] = dictId
@@ -315,7 +317,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
             label: item.label,
             value: item.value,
             sort: item.sort ?? index,
-            status: item.status ?? 1
+            status: item.status ?? 1,
+            tenant_id: tenantId
           }))
         )
       }
@@ -542,7 +545,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
         name: page.name,
         description: page.description || '',
         config: stringifyJson(rewrittenConfig),
-        status: page.status ?? 1
+        status: page.status ?? 1,
+        tenant_id: tenantId
       })
     }
 
@@ -558,7 +562,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
       description: template.app?.description || '',
       status: options.autoPublish !== false ? 1 : 0,
       is_market: 0,
-      portal_config: portalConfig
+      portal_config: portalConfig,
+      tenant_id: tenantId
     })
 
     // 15. 创建应用项
@@ -570,7 +575,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
           type: item.type,
           ref_code: item.refCode ? codeMap[item.refCode] || item.refCode : item.refCode,
           ref_name: item.refName || '',
-          sort: item.sort ?? index
+          sort: item.sort ?? index,
+          tenant_id: tenantId
         }))
       )
     }
@@ -600,7 +606,8 @@ export async function installTemplate(templateCode: string, options: InstallTemp
       version: template.version || '1.0.0',
       snapshot,
       description: '从模板安装',
-      is_published: options.autoPublish !== false ? 1 : 0
+      is_published: options.autoPublish !== false ? 1 : 0,
+      tenant_id: tenantId
     })
 
     if (options.autoPublish !== false) {

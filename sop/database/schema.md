@@ -9,7 +9,8 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
-| username | string UNIQUE | 用户名 |
+| tenant_id | integer FK | 租户 ID |
+| username | string | 用户名（联合唯一：tenant_id + username） |
 | password | string | bcrypt 加密密码 |
 | nickname | string | 昵称 |
 | email | string | 邮箱 |
@@ -26,8 +27,9 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
+| tenant_id | integer FK | 租户 ID |
 | name | string | 角色名称 |
-| code | string UNIQUE | 角色编码 |
+| code | string | 角色编码（联合唯一：tenant_id + code） |
 | description | string | 描述 |
 | status | integer | 0 禁用 / 1 启用 |
 | create_time | datetime | 创建时间 |
@@ -37,6 +39,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
+| tenant_id | integer FK | 租户 ID |
 | parent_id | integer FK | 父菜单 ID，0 为根 |
 | name | string | 路由名称 |
 | path | string | 路由路径 |
@@ -52,6 +55,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
+| tenant_id | integer FK | 租户 ID |
 | role_id | integer FK | 角色 ID |
 | permission | string | 权限码 |
 
@@ -60,6 +64,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
+| tenant_id | integer FK | 租户 ID |
 | parent_id | integer FK | 父部门 ID |
 | name | string | 部门名称 |
 | code | string | 部门编码 |
@@ -71,8 +76,9 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
+| tenant_id | integer FK | 租户 ID |
 | name | string | 字典名称 |
-| code | string UNIQUE | 字典编码 |
+| code | string | 字典编码（联合唯一：tenant_id + code） |
 | description | string | 描述 |
 | status | integer | 0 禁用 / 1 启用 |
 
@@ -81,15 +87,42 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
+| tenant_id | integer FK | 租户 ID |
 | dict_id | integer FK | 字典 ID |
 | label | string | 显示标签 |
 | value | string | 值 |
 | sort | integer | 排序 |
 | status | integer | 0 禁用 / 1 启用 |
 
+## 多租户
+
+### tenants（租户表）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | integer PK | 自增主键 |
+| name | string | 租户名称 |
+| code | string UNIQUE | 租户编码 |
+| description | text | 描述 |
+| status | integer | 0 禁用 / 1 启用 |
+| create_time | datetime | 创建时间 |
+| update_time | datetime | 更新时间 |
+
+### 租户隔离范围
+
+当前已实现隔离的核心系统表（均含 `tenant_id`）：
+
+- `users`（username 唯一索引改为 `(tenant_id, username)`）
+- `roles`、`depts`、`menus`
+- `dicts`、`dict_items`
+- `role_permissions`、`role_apps`
+- `lowcode_apps`、`lowcode_app_items`、`lowcode_app_versions`
+- `lowcode_pages`
+
+超级管理员（当前以 `role_id === 1` 判定）可跨租户访问，普通用户仅可访问 `tenant_id` 与本用户 `tenant_id` 一致的数据。
+
 ## 后续扩展表
 
-- `tenants`：租户表
 - `tenant_packages`：租户套餐
 - `data_sources`：多数据源配置
 - `white_lists`：白名单
@@ -114,7 +147,8 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | integer PK | 自增主键 |
-| code | string UNIQUE | 页面编码 |
+| tenant_id | integer FK | 租户 ID |
+| code | string | 页面编码（联合唯一：tenant_id + code） |
 | name | string | 页面名称 |
 | description | text | 页面描述 |
 | config | text | 页面 JSON 配置 |

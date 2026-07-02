@@ -8,6 +8,7 @@ import { useAppStore } from './app'
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('lowcode_token') || '')
   const refreshTokenValue = ref(localStorage.getItem('lowcode_refresh_token') || '')
+  const tenantCode = ref(localStorage.getItem('lowcode_tenant_code') || '')
   const userInfo = ref<any>(null)
   const permissions = ref<string[]>([])
   const errorMessage = ref('')
@@ -42,16 +43,22 @@ export const useAuthStore = defineStore('auth', () => {
   function clearTokens() {
     token.value = ''
     refreshTokenValue.value = ''
+    tenantCode.value = ''
     userInfo.value = null
     permissions.value = []
     localStorage.removeItem('lowcode_token')
     localStorage.removeItem('lowcode_refresh_token')
+    localStorage.removeItem('lowcode_tenant_code')
     disconnectWebSocket()
   }
 
   async function login(form: LoginForm) {
     const result = await authApi.login(form)
     setTokens(result.accessToken, result.refreshToken)
+    if (form.tenantCode !== undefined) {
+      tenantCode.value = form.tenantCode
+      localStorage.setItem('lowcode_tenant_code', form.tenantCode)
+    }
     userInfo.value = result.userInfo
     initWebSocket()
     return result
@@ -97,6 +104,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     token,
     refreshTokenValue,
+    tenantCode,
     userInfo,
     permissions,
     isLoggedIn,
