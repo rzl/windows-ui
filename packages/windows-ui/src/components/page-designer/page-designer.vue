@@ -4,6 +4,7 @@
       <w-button size="small" @click="goBack">返回</w-button>
       <w-space>
         <w-button size="small" @click="handlePreview">预览</w-button>
+        <w-button size="small" @click="handlePreviewConfig">预览配置</w-button>
         <w-button type="primary" size="small" @click="handleSave">保存</w-button>
       </w-space>
     </div>
@@ -126,6 +127,13 @@
         <w-button @click="previewVisible = false">关闭</w-button>
       </template>
     </w-dialog>
+
+    <w-dialog v-model="configVisible" title="页面配置（JSON）" width="700">
+      <w-input v-model="configJson" type="textarea" :rows="16" readonly />
+      <template #footer>
+        <w-button @click="configVisible = false">关闭</w-button>
+      </template>
+    </w-dialog>
   </div>
 </template>
 
@@ -158,7 +166,10 @@ const config = reactive<PageConfig>({
 })
 const selectedId = ref<string>('')
 const previewVisible = ref(false)
+const configVisible = ref(false)
 const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
+
+const configJson = computed(() => JSON.stringify(config, null, 2))
 
 const touchState = reactive({
   type: '',
@@ -499,6 +510,10 @@ function onPropertyUpdate(_node: PageNode) {
 function handlePreview() {
   previewVisible.value = true
   emit('preview')
+}
+
+function handlePreviewConfig() {
+  configVisible.value = true
 }
 
 async function handleSave() {
