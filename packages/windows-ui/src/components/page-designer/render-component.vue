@@ -151,32 +151,35 @@
     </div>
 
     <!-- 嵌入模型 -->
-    <iframe
-      v-else-if="node.type === 'model'"
-      v-if="modelUrl"
-      class="embed-frame"
-      :src="modelUrl"
-      sandbox="allow-scripts allow-same-origin"
-      :style="{ height: node.props.height || '500px' }"
-    />
+    <template v-else-if="node.type === 'model'">
+      <iframe
+        v-if="modelUrl"
+        class="embed-frame"
+        :src="modelUrl"
+        sandbox="allow-scripts allow-same-origin"
+        :style="{ height: node.props.height || '500px' }"
+      />
+    </template>
 
     <!-- 嵌入仪表盘 -->
-    <iframe
-      v-else-if="node.type === 'dashboard'"
-      v-if="dashboardUrl"
-      class="embed-frame"
-      :src="dashboardUrl"
-      sandbox="allow-scripts allow-same-origin"
-    />
+    <template v-else-if="node.type === 'dashboard'">
+      <iframe
+        v-if="dashboardUrl"
+        class="embed-frame"
+        :src="dashboardUrl"
+        sandbox="allow-scripts allow-same-origin"
+      />
+    </template>
 
     <!-- 嵌入报表 -->
-    <iframe
-      v-else-if="node.type === 'report'"
-      v-if="reportUrl"
-      class="embed-frame"
-      :src="reportUrl"
-      sandbox="allow-scripts allow-same-origin"
-    />
+    <template v-else-if="node.type === 'report'">
+      <iframe
+        v-if="reportUrl"
+        class="embed-frame"
+        :src="reportUrl"
+        sandbox="allow-scripts allow-same-origin"
+      />
+    </template>
 
     <component
       v-else-if="pluginComponent"
@@ -192,17 +195,17 @@
 
 <script setup lang="ts">
 import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import * as pageApi from '@/api/page'
-import { getChart, getComponent } from '@/utils/pluginManager'
+import { getChart, getComponent } from './plugin-manager'
+import type { PageContext, PageNode } from './types'
+
+defineOptions({ name: 'WPageRenderComponent' })
 
 const props = defineProps<{
-  node: any
+  node: PageNode
   pageCode?: string
 }>()
 
-const router = useRouter()
-const pageContext = inject<any>('pageContext', null)
+const pageContext = inject<PageContext | null>('pageContext', null)
 const activeTab = ref('')
 const dataValue = ref<any>(null)
 const chartUrl = ref('')
@@ -221,27 +224,27 @@ const displayValue = computed(() => {
 const gridStyle = computed(() => {
   return {
     display: 'grid',
-    gridTemplateColumns: `repeat(${props.node.props.columns || 2}, 1fr)`,
-    gap: props.node.props.gap || '12px'
+    gridTemplateColumns: `repeat(${props.node.props?.columns || 2}, 1fr)`,
+    gap: props.node.props?.gap || '12px'
   }
 })
 
 const imageStyle = computed(() => {
   return {
-    width: props.node.props.width || '100%',
-    height: props.node.props.height || 'auto',
-    objectFit: props.node.props.objectFit || 'cover',
+    width: props.node.props?.width || '100%',
+    height: props.node.props?.height || 'auto',
+    objectFit: props.node.props?.objectFit || 'cover',
     cursor: props.node.events?.onClick ? 'pointer' : 'default'
   }
 })
 
 const dividerStyle = computed(() => {
-  const isVertical = props.node.props.direction === 'vertical'
+  const isVertical = props.node.props?.direction === 'vertical'
   return {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    margin: props.node.props.margin || '16px 0',
+    margin: props.node.props?.margin || '16px 0',
     width: isVertical ? '1px' : '100%',
     height: isVertical ? '100%' : '1px',
     backgroundColor: '#ddd'
@@ -249,27 +252,27 @@ const dividerStyle = computed(() => {
 })
 
 const tableColumns = computed(() => {
-  return props.node.props.columns || []
+  return props.node.props?.columns || []
 })
 
 const tableData = computed(() => {
   if (Array.isArray(dataValue.value)) return dataValue.value
-  return props.node.props.data || []
+  return props.node.props?.data || []
 })
 
 const listData = computed(() => {
   if (Array.isArray(dataValue.value)) return dataValue.value
-  return props.node.props.items || []
+  return props.node.props?.items || []
 })
 
 const activeTabChildren = computed(() => {
   const tabName = activeTab.value
   if (!tabName || !props.node.children) return []
-  return props.node.children.filter((child: any) => !child.tab || child.tab === tabName)
+  return props.node.children.filter((child: PageNode) => !child.tab || child.tab === tabName)
 })
 
 onMounted(() => {
-  if (props.node.type === 'tabs' && props.node.props.tabs?.length) {
+  if (props.node.type === 'tabs' && props.node.props?.tabs?.length) {
     activeTab.value = props.node.props.tabs[0].name
   }
   loadDataSource()
@@ -284,7 +287,7 @@ watch(() => props.node.dataSource, () => {
   loadDataSource()
 }, { deep: true })
 
-watch(() => pageContext?.refreshKey?.value, () => {
+watch(() => pageContext?.refreshKey.value, () => {
   loadDataSource()
 })
 
@@ -301,7 +304,9 @@ async function loadDataSource() {
   try {
     const code = props.pageCode || 'preview'
     const ctx = pageContext ? { state: pageContext.pageState } : {}
-    const result = await pageApi.executePageDataSource(code, ds, ctx)
+    const result = pageContext
+      ? await pageContext.executeDataSource?.(code, ds, ctx)
+      : undefined
     dataValue.value = result
     if (props.node.type === 'chart') {
       generateChartUrl(result || props.node.option || {})
@@ -313,10 +318,10 @@ async function loadDataSource() {
 
 function generateChartUrl(option: any) {
   if (chartUrl.value) URL.revokeObjectURL(chartUrl.value)
-  const chartType = props.node.props.chartType || 'echarts'
+  const chartType = props.node.props?.chartType || 'echarts'
   const plugin = getChart(chartType)
   const html = plugin
-    ? plugin.render(option, props.node.props, dataValue.value)
+    ? plugin.render(option, props.node.props || {}, dataValue.value)
     : `<!DOCTYPE html><html><body>未知图表类型: ${chartType}</body></html>`
   const blob = new Blob([html], { type: 'text/html' })
   chartUrl.value = URL.createObjectURL(blob)
@@ -324,13 +329,13 @@ function generateChartUrl(option: any) {
 
 function loadEmbedUrls() {
   const base = window.location.origin + window.location.pathname
-  if (props.node.type === 'model' && props.node.props.modelCode) {
+  if (props.node.type === 'model' && props.node.props?.modelCode) {
     modelUrl.value = `${base}#/lowcode/run/${props.node.props.modelCode}`
   }
-  if (props.node.type === 'dashboard' && props.node.props.dashboardCode) {
+  if (props.node.type === 'dashboard' && props.node.props?.dashboardCode) {
     dashboardUrl.value = `${base}#/dashboard/run/${props.node.props.dashboardCode}`
   }
-  if (props.node.type === 'report' && props.node.props.reportCode) {
+  if (props.node.type === 'report' && props.node.props?.reportCode) {
     reportUrl.value = `${base}#/report/run/${props.node.props.reportCode}`
   }
 }
@@ -342,14 +347,12 @@ function revokeUrls() {
 function handleEvent(event: any) {
   if (pageContext) {
     pageContext.executeEvent(event)
-  } else if (event?.action === 'navigate' && event.target) {
-    router.push(event.target)
   }
 }
 
 function handleLinkClick() {
-  if (props.node.props.path) {
-    router.push(props.node.props.path)
+  if (props.node.props?.path) {
+    handleEvent({ action: 'navigate', target: props.node.props.path })
   }
 }
 

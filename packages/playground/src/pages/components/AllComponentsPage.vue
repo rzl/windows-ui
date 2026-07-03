@@ -458,6 +458,14 @@
               <w-button size="small">查看用户（有权限）</w-button>
             </w-permission>
           </w-form-item>
+
+          <w-form-item><template #label><router-link :to="'/others/page-renderer'" class="component-label-link">PageRenderer 页面渲染器</router-link></template>
+            <w-page-renderer :config="pageRendererConfig" preview />
+          </w-form-item>
+
+          <w-form-item><template #label><router-link :to="'/others/page-designer'" class="component-label-link">PageDesigner 页面设计器</router-link></template>
+            <router-link :to="'/others/page-designer'" class="component-label-link">进入页面设计器演示</router-link>
+          </w-form-item>
         </div>
       </w-card>
     </w-form>
@@ -556,6 +564,14 @@ const tableColumns = [
 const calendarEvents = [
   { date: new Date().toISOString().slice(0, 10), title: '今日事件' }
 ]
+
+const pageRendererConfig = {
+  title: '全部组件预览',
+  components: [
+    { id: 't1', type: 'text', props: { content: '页面渲染器示例', tag: 'p', align: 'left' }, styles: {} },
+    { id: 's1', type: 'stat', props: { title: '在线', icon: 'user', color: 'success' }, styles: { marginTop: '8px' }, dataSource: { type: 'static', value: 1280 } }
+  ]
+}
 
 const dialogs = reactive({ basic: false })
 const drawers = reactive({ right: false })

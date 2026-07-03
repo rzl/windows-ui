@@ -114,6 +114,8 @@ import WCrudTable from './components/crud-table/crud-table.vue'
 import WDynamicForm from './components/dynamic-form/dynamic-form.vue'
 import WAdvancedQueryBuilder from './components/advanced-query-builder/advanced-query-builder.vue'
 import WMonacoEditor from './components/monaco-editor/monaco-editor.vue'
+import WPageDesigner from './components/page-designer/page-designer.vue'
+import WPageRenderer from './components/page-designer/page-renderer.vue'
 
 const components = [
   WButton,
@@ -220,7 +222,9 @@ const components = [
   WCrudTable,
   WDynamicForm,
   WAdvancedQueryBuilder,
-  WMonacoEditor
+  WMonacoEditor,
+  WPageDesigner,
+  WPageRenderer
 ]
 
 export interface WindowsUIOptions {
@@ -353,8 +357,31 @@ export {
   WCrudTable,
   WDynamicForm,
   WAdvancedQueryBuilder,
-  WMonacoEditor
+  WMonacoEditor,
+  WPageDesigner,
+  WPageRenderer
 }
+
+export {
+  registerComponent,
+  registerChart,
+  getComponent,
+  getChart,
+  listComponents,
+  listCharts,
+  listComponentsByCategory,
+  clearPageComponentRegistries
+} from './components/page-designer/plugin-manager'
+
+export type {
+  PageNode,
+  PageConfig,
+  PageEventConfig,
+  PageDataSource,
+  PageContext,
+  PageComponentDefinition,
+  ChartPluginDefinition
+} from './components/page-designer/types'
 
 export type { FormRule } from './components/form/form.vue'
 export type { DynamicField } from './components/dynamic-form/dynamic-form.vue'

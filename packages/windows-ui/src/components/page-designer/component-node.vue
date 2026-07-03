@@ -111,7 +111,7 @@
             :node="child"
             :index="index"
             :selected-id="selectedId"
-            :parent-list="node.children"
+            :parent-list="node.children || []"
             @select="$emit('select', $event)"
             @delete="$emit('delete', $event)"
             @move="$emit('move', $event)"
@@ -133,13 +133,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { listComponents, getComponent } from '@/utils/pluginManager'
+import { listComponents, getComponent } from './plugin-manager'
+import type { PageNode } from './types'
+
+defineOptions({ name: 'WPageComponentNode' })
 
 const props = defineProps<{
-  node: any
+  node: PageNode
   index: number
   selectedId: string
-  parentList: any[]
+  parentList: PageNode[]
 }>()
 
 const emit = defineEmits(['select', 'delete', 'move'])
@@ -188,12 +191,7 @@ function moveDown() {
 
 function addChild() {
   if (!props.node.children) props.node.children = []
-  const child = {
-    id: `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    type: 'text',
-    props: { content: '子组件文本', tag: 'p', align: 'left' },
-    styles: {}
-  }
+  const child = createDefaultComponent('text')
   props.node.children.push(child)
   emit('select', child.id)
 }
@@ -214,14 +212,18 @@ function handleDrop(event: DragEvent) {
   emit('select', child.id)
 }
 
-function createDefaultComponent(type: string): any {
+function generateId() {
+  return `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+}
+
+function createDefaultComponent(type: string): PageNode {
   const pluginDef = listComponents().find((c) => c.type === type)
   if (pluginDef) {
-    return { id: `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, ...pluginDef.defaultNode() }
+    return { id: generateId(), ...pluginDef.defaultNode() }
   }
 
-  const base = {
-    id: `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+  const base: PageNode = {
+    id: generateId(),
     type,
     props: {},
     styles: {}

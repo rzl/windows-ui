@@ -1,4 +1,14 @@
 import { computed, defineComponent, h, onMounted, ref, watch, type VNode } from 'vue'
+import {
+  registerComponent as uiRegisterComponent,
+  registerChart as uiRegisterChart,
+  getComponent as uiGetComponent,
+  getChart as uiGetChart,
+  listComponents as uiListComponents,
+  listCharts as uiListCharts,
+  listComponentsByCategory as uiListComponentsByCategory,
+  clearPageComponentRegistries
+} from '@windows-ui/core'
 import * as pluginApi from '@/api/plugin'
 
 export interface FieldTypeDefinition {
@@ -69,71 +79,34 @@ export function mapFieldTypeToFormType(type: string) {
   return getFieldTypeMeta(type)?.formType || 'input'
 }
 
-// ---------- 图表注册表 ----------
+// ---------- 页面组件与图表注册表（委托给组件库） ----------
 
-const chartRegistry = new Map<string, ChartPluginDefinition>()
+export function registerComponent(def: PageComponentDefinition) {
+  uiRegisterComponent(def as any)
+}
 
 export function registerChart(def: ChartPluginDefinition) {
-  chartRegistry.set(def.type, def)
+  uiRegisterChart(def as any)
 }
 
 export function getChart(type: string): ChartPluginDefinition | undefined {
-  return chartRegistry.get(type)
-}
-
-export function listCharts(): ChartPluginDefinition[] {
-  return Array.from(chartRegistry.values())
-}
-
-// 默认 ECharts 图表
-registerChart({
-  type: 'echarts',
-  label: 'ECharts',
-  defaultOption: () => ({
-    title: { text: '示例图表' },
-    xAxis: { data: ['一月', '二月', '三月'] },
-    yAxis: {},
-    series: [{ type: 'bar', data: [5, 20, 36] }]
-  }),
-  render(option: any, props: Record<string, any>) {
-    const height = props.height || '300px'
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <style>body{margin:0;padding:8px;}</style>
-</head>
-<body>
-  <div id="chart" style="width:100%;height:${height};"></div>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>
-  <script>
-    var chart = echarts.init(document.getElementById('chart'));
-    chart.setOption(${JSON.stringify(option || {})});
-    window.addEventListener('resize', function() { chart.resize(); });
-  <\/script>
-</body>
-</html>`
-  }
-})
-
-// ---------- 页面组件注册表 ----------
-
-const componentRegistry = new Map<string, PageComponentDefinition>()
-
-export function registerComponent(def: PageComponentDefinition) {
-  componentRegistry.set(def.type, def)
+  return uiGetChart(type) as ChartPluginDefinition | undefined
 }
 
 export function getComponent(type: string): PageComponentDefinition | undefined {
-  return componentRegistry.get(type)
+  return uiGetComponent(type) as PageComponentDefinition | undefined
 }
 
 export function listComponents(): PageComponentDefinition[] {
-  return Array.from(componentRegistry.values())
+  return uiListComponents() as PageComponentDefinition[]
+}
+
+export function listCharts(): ChartPluginDefinition[] {
+  return uiListCharts() as ChartPluginDefinition[]
 }
 
 export function listComponentsByCategory(category: PageComponentDefinition['category']) {
-  return listComponents().filter((c) => c.category === category)
+  return uiListComponentsByCategory(category) as PageComponentDefinition[]
 }
 
 // ---------- 插件运行时 API ----------
@@ -216,10 +189,7 @@ async function loadPluginFieldTypes(plugin: any) {
 
 function clearPluginRegistries() {
   pluginFieldTypes.clear()
-  componentRegistry.clear()
-  for (const key of chartRegistry.keys()) {
-    if (key !== 'echarts') chartRegistry.delete(key)
-  }
+  clearPageComponentRegistries()
 }
 
 export async function initPlugins() {

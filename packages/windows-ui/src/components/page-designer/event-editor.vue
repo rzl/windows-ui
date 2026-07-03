@@ -34,6 +34,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+defineOptions({ name: 'WPageEventEditor' })
+
 const props = defineProps<{
   modelValue: any
 }>()

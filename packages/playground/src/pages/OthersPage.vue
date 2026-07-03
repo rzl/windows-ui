@@ -30,6 +30,14 @@
         <h3>AdvancedQueryBuilder 高级查询</h3>
         <p>{{ t('复杂条件分组查询') }}</p>
       </router-link>
+      <router-link to="/others/page-designer" class="component-card">
+        <h3>PageDesigner 页面设计器</h3>
+        <p>{{ t('可视化拖拽搭建低代码页面') }}</p>
+      </router-link>
+      <router-link to="/others/page-renderer" class="component-card">
+        <h3>PageRenderer 页面渲染器</h3>
+        <p>{{ t('通过 JSON 配置渲染页面') }}</p>
+      </router-link>
     </div>
   </div>
 </template>

@@ -16,7 +16,15 @@
     </template>
 
     <w-dialog v-model="dialogVisible" :title="dialogTitle" width="800">
-      <page-renderer v-if="dialogConfig" :config="dialogConfig" preview />
+      <page-renderer
+        v-if="dialogConfig"
+        :config="dialogConfig"
+        :preview="true"
+        :execute-data-source="executeDataSource"
+        @navigate="handleNavigate"
+        @open-dialog="handleOpenDialog"
+        @call-api="handleCallApi"
+      />
       <iframe
         v-else-if="dialogUrl"
         :src="dialogUrl"
@@ -31,34 +39,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 
-defineOptions({ name: 'PageRenderer' })
-import * as pageApi from '@/api/page'
-import request from '@/api/request'
-import { useAuthStore } from '@/stores/auth'
-import RenderComponent from './RenderComponent.vue'
+defineOptions({ name: 'WPageRenderer' })
+
+import RenderComponent from './render-component.vue'
+import type { PageConfig, PageDataSource, PageEventConfig } from './types'
 
 const props = defineProps<{
   code?: string
-  config?: any
+  config?: PageConfig
   preview?: boolean
+  loadPage?: (code: string) => Promise<any>
+  executeDataSource?: (code: string, ds: PageDataSource, ctx?: any) => Promise<any>
+  hasPermission?: (code: string) => boolean
 }>()
 
-const router = useRouter()
-const authStore = useAuthStore()
+const emit = defineEmits(['navigate', 'openExternal', 'openDialog', 'callApi', 'refresh', 'back'])
 
 const pageCode = computed(() => props.code || '')
 
-const pageInfo = reactive<any>({
+const pageInfo = reactive<{
+  id: number | null
+  code: string
+  name: string
+  permission: string
+}>({
   id: null,
   code: '',
   name: '',
   permission: ''
 })
 
-const pageConfig = reactive<any>({
+const pageConfig = reactive<PageConfig>({
   title: '',
   description: '',
   components: []
@@ -67,44 +80,51 @@ const pageConfig = reactive<any>({
 const pageState = reactive<Record<string, any>>({})
 const dialogVisible = ref(false)
 const dialogTitle = ref('弹窗')
-const dialogConfig = ref<any>(null)
+const dialogConfig = ref<PageConfig | null>(null)
 const dialogUrl = ref('')
+const refreshKey = ref(0)
 
 const hasPagePermission = computed(() => {
   if (props.preview) return true
-  return authStore.hasPermission(pageInfo.permission)
+  if (!pageInfo.permission) return true
+  return props.hasPermission ? props.hasPermission(pageInfo.permission) : true
 })
 
 onMounted(() => loadConfig())
 
+watch(() => props.code, () => loadConfig())
+watch(() => props.config, () => loadConfig())
+
 async function loadConfig() {
   if (props.config) {
-    Object.assign(pageConfig, props.config)
-  } else if (props.code) {
-    const data = await pageApi.getPage(props.code)
-    Object.assign(pageInfo, {
-      id: data.id,
-      code: data.code,
-      name: data.name,
-      permission: data.permission || ''
-    })
-    Object.assign(pageConfig, data.config || {})
+    pageConfig.title = props.config.title || ''
+    pageConfig.description = props.config.description || ''
+    pageConfig.components = props.config.components || []
+  } else if (props.code && props.loadPage) {
+    const data = await props.loadPage(props.code)
+    pageInfo.id = data.id
+    pageInfo.code = data.code
+    pageInfo.name = data.name
+    pageInfo.permission = data.permission || ''
+    pageConfig.title = data.config?.title || ''
+    pageConfig.description = data.config?.description || ''
+    pageConfig.components = data.config?.components || []
   }
 }
 
-async function executeEvent(event: any) {
+async function executeEvent(event: PageEventConfig | undefined) {
   if (!event) return
   const { action, target, method = 'GET', params = {}, body = {}, variable = '', value = '' } = event
 
   switch (action) {
     case 'navigate':
-      if (target) router.push(target)
+      if (target) emit('navigate', target)
       break
     case 'openExternal':
-      if (target) window.open(target, '_blank')
+      if (target) emit('openExternal', target)
       break
     case 'goBack':
-      router.back()
+      emit('back')
       break
     case 'setVariable':
       if (variable) {
@@ -112,8 +132,8 @@ async function executeEvent(event: any) {
       }
       break
     case 'refresh':
-      // 触发所有组件重新加载数据源，通过刷新 key 实现
       refreshKey.value++
+      emit('refresh')
       break
     case 'openDialog':
       if (target) {
@@ -130,8 +150,6 @@ async function executeEvent(event: any) {
   }
 }
 
-const refreshKey = ref(0)
-
 async function openDialog(target: string) {
   dialogTitle.value = '弹窗'
   dialogConfig.value = null
@@ -139,33 +157,42 @@ async function openDialog(target: string) {
 
   if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('//')) {
     dialogUrl.value = target
-  } else {
+  } else if (props.loadPage) {
     try {
-      const data = await pageApi.getPage(target)
+      const data = await props.loadPage(target)
       dialogTitle.value = data.name || '弹窗'
       dialogConfig.value = data.config || {}
     } catch {
       dialogUrl.value = target
     }
+  } else {
+    dialogUrl.value = target
   }
   dialogVisible.value = true
+  emit('openDialog', { target, title: dialogTitle.value })
 }
 
 async function callApi(target: string, method: string, params: any, body: any) {
-  const url = target.startsWith('http') ? target : `/api${target.startsWith('/') ? '' : '/'}${target}`
-  await request({
-    url,
-    method,
-    params,
-    data: body
-  })
-  alert('接口调用成功')
+  emit('callApi', { target, method, params, body })
+}
+
+function handleNavigate(target: string) {
+  emit('navigate', target)
+}
+
+function handleOpenDialog(payload: any) {
+  emit('openDialog', payload)
+}
+
+function handleCallApi(payload: any) {
+  emit('callApi', payload)
 }
 
 provide('pageContext', {
   pageCode,
   pageState,
   executeEvent,
+  executeDataSource: props.executeDataSource,
   refreshKey
 })
 

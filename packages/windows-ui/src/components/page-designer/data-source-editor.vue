@@ -49,6 +49,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+defineOptions({ name: 'WPageDataSourceEditor' })
+
 const props = defineProps<{
   modelValue: any
 }>()

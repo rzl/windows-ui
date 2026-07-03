@@ -254,7 +254,9 @@ const navItems = [
     { path: '/others/permission', label: 'Permission 权限控制', indent: true },
     { path: '/others/crud-table', label: 'CrudTable 高级表格', indent: true },
     { path: '/others/dynamic-form', label: 'DynamicForm 动态表单', indent: true },
-    { path: '/others/advanced-query-builder', label: 'AdvancedQueryBuilder 高级查询', indent: true }
+    { path: '/others/advanced-query-builder', label: 'AdvancedQueryBuilder 高级查询', indent: true },
+    { path: '/others/page-designer', label: 'PageDesigner 页面设计器', indent: true },
+    { path: '/others/page-renderer', label: 'PageRenderer 页面渲染器', indent: true }
 ]
 </script>
 

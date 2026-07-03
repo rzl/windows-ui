@@ -99,6 +99,8 @@ import PageContainerPage from '../pages/components/PageContainerComponentPage.vu
 import PermissionPage from '../pages/components/PermissionComponentPage.vue'
 import CrudTablePage from '../pages/components/CrudTableComponentPage.vue'
 import DynamicFormPage from '../pages/components/DynamicFormComponentPage.vue'
+import PageDesignerPage from '../pages/components/PageDesignerComponentPage.vue'
+import PageRendererPage from '../pages/components/PageRendererComponentPage.vue'
 
 const routes = [
   {
@@ -205,6 +207,8 @@ const routes = [
       { path: 'others/crud-table', component: CrudTablePage },
       { path: 'others/dynamic-form', component: DynamicFormPage },
       { path: 'others/advanced-query-builder', component: AdvancedQueryBuilderPage },
+      { path: 'others/page-designer', component: PageDesignerPage },
+      { path: 'others/page-renderer', component: PageRendererPage },
     ]
   }
 ]

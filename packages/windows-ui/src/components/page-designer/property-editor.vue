@@ -231,12 +231,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import DataSourceEditor from './DataSourceEditor.vue'
-import EventEditor from './EventEditor.vue'
-import { listCharts, getChart, getComponent } from '@/utils/pluginManager'
+import DataSourceEditor from './data-source-editor.vue'
+import EventEditor from './event-editor.vue'
+import { listCharts, getChart, getComponent } from './plugin-manager'
+import type { PageNode } from './types'
+
+defineOptions({ name: 'WPagePropertyEditor' })
 
 const props = defineProps<{
-  node: any
+  node: PageNode
 }>()
 
 const emit = defineEmits(['update'])
@@ -339,10 +342,11 @@ const optionText = computed({
 
 const tabsText = computed({
   get() {
-    return JSON.stringify(props.node.props.tabs || [], null, 2)
+    return JSON.stringify(props.node.props?.tabs || [], null, 2)
   },
   set(value: string) {
     try {
+      if (!props.node.props) props.node.props = {}
       props.node.props.tabs = JSON.parse(value)
       emit('update', props.node)
     } catch {
@@ -367,10 +371,11 @@ const propsText = computed({
 
 const columnsText = computed({
   get() {
-    return JSON.stringify(props.node.props.columns || [], null, 2)
+    return JSON.stringify(props.node.props?.columns || [], null, 2)
   },
   set(value: string) {
     try {
+      if (!props.node.props) props.node.props = {}
       props.node.props.columns = JSON.parse(value)
       emit('update', props.node)
     } catch {
