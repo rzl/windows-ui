@@ -13,7 +13,12 @@
             @preview="handlePreview"
           />
         </div>
-        <p class="demo-note">{{ t('提示：点击工具栏「保存」可在控制台看到页面配置') }}</p>
+        <p class="demo-note">{{ t('提示：点击工具栏「保存」可在控制台看到页面配置，并触发下方预览') }}</p>
+      </demo-block>
+
+      <demo-block :title="t('保存后预览')" :code="codePreview">
+        <w-page-renderer v-if="savedConfig" :config="savedConfig" preview />
+        <p v-else class="demo-note">{{ t('尚未保存，请先点击设计器工具栏的「保存」') }}</p>
       </demo-block>
 
     </demo-section>
@@ -22,12 +27,15 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { ref } from 'vue'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import type { PageConfig } from '@windows-ui/core'
 
 const { t } = useI18n()
 const title = 'PageDesigner 页面设计器'
+
+const savedConfig = ref<PageConfig | null>(null)
 
 const designerConfig: PageConfig = {
   title: '示例页面',
@@ -51,6 +59,7 @@ const designerConfig: PageConfig = {
 function handleSave(data: any) {
   // eslint-disable-next-line no-console
   console.log('page save', data)
+  savedConfig.value = data.config
   window.alert(t('已保存，配置见控制台'))
 }
 
@@ -79,6 +88,21 @@ function handleSave(data) {
 
 <template>
   <w-page-designer code="demo" :config="designerConfig" @save="handleSave" />
+<\/template>`
+
+const codePreview = `<script setup>
+import { ref } from 'vue'
+
+const savedConfig = ref(null)
+
+function handleSave(data) {
+  savedConfig.value = data.config
+}
+<\/script>
+
+<template>
+  <w-page-designer code="demo" :config="designerConfig" @save="handleSave" />
+  <w-page-renderer v-if="savedConfig" :config="savedConfig" preview />
 <\/template>`
 </script>
 
