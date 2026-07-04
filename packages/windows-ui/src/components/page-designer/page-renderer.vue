@@ -16,7 +16,7 @@
       />
     </template>
 
-    <component :is="dialogTag" v-model="dialogVisible" :title="dialogTitle" width="800">
+    <component :is="dialogTag" v-model="dialogVisible" :title="dialogTitle" :width="800">
       <page-renderer
         v-if="dialogConfig"
         :config="dialogConfig"

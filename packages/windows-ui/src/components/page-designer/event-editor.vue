@@ -16,7 +16,7 @@
           <div v-for="(action, index) in eventConfig.actions" :key="index" class="chain-item">
             <div class="chain-header">
               <span>动作 {{ index + 1 }}</span>
-              <component :is="buttonTag" size="mini" type="danger" @click="removeAction(index)">删除</component>
+              <component :is="buttonTag" :size="globalSize" type="danger" @click="removeAction(index)">删除</component>
             </div>
             <component :is="formItemTag" label="动作">
               <component :is="selectTag" v-model="action.action" :options="actionOptions" />
@@ -45,8 +45,8 @@
           </div>
         </div>
         <div class="chain-actions">
-          <component :is="buttonTag" size="small" @click="addAction">+ 添加动作</component>
-          <component :is="buttonTag" size="small" @click="convertToSingle">切换为单个动作</component>
+          <component :is="buttonTag" :size="globalSize" @click="addAction">+ 添加动作</component>
+          <component :is="buttonTag" :size="globalSize" @click="convertToSingle">切换为单个动作</component>
         </div>
       </template>
 
@@ -74,7 +74,7 @@
           <component :is="inputTag" v-model="valueText" type="textarea" :rows="2" placeholder="支持字符串、数字或 JSON" />
         </component>
         <div class="chain-actions">
-          <component :is="buttonTag" size="small" @click="convertToChain">+ 添加链式动作</component>
+          <component :is="buttonTag" :size="globalSize" @click="convertToChain">+ 添加链式动作</component>
         </div>
       </template>
     </template>
@@ -83,12 +83,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePrefix } from '../../utils/prefix'
+import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import type { PageEventConfig } from './types'
 
 defineOptions({ name: 'WPageEventEditor' })
 
 const { withPrefix } = usePrefix()
+const globalSize = useGlobalSize()
 const formItemTag = withPrefix('form-item')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')

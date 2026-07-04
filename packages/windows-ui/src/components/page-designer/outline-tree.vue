@@ -13,10 +13,10 @@
         class="outline-toggle"
         @click.stop="toggleNode(node.id)"
       >
-        {{ isExpanded(node.id) ? '▼' : '▶' }}
+        <component :is="iconTag" :name="isExpanded(node.id) ? 'chevron-down' : 'chevron-right'" />
       </span>
       <span v-else class="outline-spacer" />
-      <span class="outline-icon">{{ node.icon }}</span>
+      <component :is="iconTag" :name="node.icon" class="outline-icon" />
       <span class="outline-label" :title="node.label">{{ node.label }}</span>
     </div>
   </div>
@@ -24,9 +24,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { usePrefix } from '../../utils/prefix'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPageOutlineTree' })
+
+const { withPrefix } = usePrefix()
+const iconTag = withPrefix('icon')
 
 const props = defineProps<{
   components: PageNode[]
@@ -38,32 +42,32 @@ const emit = defineEmits(['select'])
 const expandedIds = ref<Set<string>>(new Set())
 
 const typeIconMap: Record<string, string> = {
-  container: '📦',
-  card: '🃏',
-  row: '⊞',
-  tabs: '🗂️',
-  text: 'T',
-  statistic: '🔢',
-  chart: '📊',
-  alert: '🔔',
-  tag: '🏷️',
-  progress: '▰',
-  avatar: '👤',
-  image: '🖼️',
-  divider: '—',
-  table: '▦',
-  list: '☰',
-  model: '🗃️',
-  dashboard: '📈',
-  report: '📄',
-  button: '🔘',
-  link: '🔗',
-  input: '📝',
-  select: '▼',
-  radio: '◉',
-  checkbox: '☑',
-  'date-picker': '📅',
-  switch: '⚪'
+  container: 'box',
+  card: 'card',
+  row: 'layout',
+  tabs: 'tabs',
+  text: 'font',
+  statistic: 'stats',
+  chart: 'chart',
+  alert: 'alert',
+  tag: 'tag',
+  progress: 'progress',
+  avatar: 'avatar',
+  image: 'image',
+  divider: 'divider',
+  table: 'table',
+  list: 'list',
+  model: 'model',
+  dashboard: 'dashboard',
+  report: 'report',
+  button: 'button',
+  link: 'link',
+  input: 'input',
+  select: 'select',
+  radio: 'radio',
+  checkbox: 'checkbox',
+  'date-picker': 'calendar',
+  switch: 'switch'
 }
 
 interface OutlineTreeNode {

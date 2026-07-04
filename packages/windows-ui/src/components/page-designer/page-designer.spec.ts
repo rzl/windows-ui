@@ -316,9 +316,9 @@ describe('WPageDesigner', () => {
     await wrapper.vm.$nextTick()
     expect((wrapper.vm as any).activePageCode).toBe('sub1')
 
-    const close = wrapper.findAll('.page-tab-close').find((el) => el.text().includes('×'))
-    expect(close).toBeTruthy()
-    await close!.trigger('click')
+    const close = wrapper.find('.page-tab-close')
+    expect(close.exists()).toBe(true)
+    await close.trigger('click')
     await wrapper.vm.$nextTick()
 
     expect((wrapper.vm as any).allPages.length).toBe(1)

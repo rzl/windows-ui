@@ -2,33 +2,32 @@
   <div class="page-info">
     <div class="panel-title">页面信息</div>
     <div class="page-info-form">
-      <w-form-item label="编码">
-        <w-input :model-value="code" readonly />
-      </w-form-item>
-      <w-form-item label="名称">
-        <w-input :model-value="name" @update:model-value="emit('update:name', $event)" />
-      </w-form-item>
-      <w-form-item label="配置（JSON）">
-        <textarea
-          :value="configText"
-          class="sub-page-config-textarea"
-          rows="8"
+      <component :is="formItemTag" label="编码">
+        <component :is="inputTag" :model-value="code" readonly />
+      </component>
+      <component :is="formItemTag" label="名称">
+        <component :is="inputTag" :model-value="name" @update:model-value="emit('update:name', $event)" />
+      </component>
+      <component :is="formItemTag" label="配置（JSON）">
+        <component
+          :is="inputTag"
+          :model-value="configText"
+          type="textarea"
+          :rows="8"
           placeholder='{"components":[]}'
-          @input="emit('update:config-text', ($event.target as HTMLTextAreaElement).value)"
+          @update:model-value="emit('update:config-text', $event)"
         />
-      </w-form-item>
+      </component>
       <div class="sub-page-actions">
-        <component :is="buttonTag" size="small" type="primary" @click="emit('apply')">应用</component>
-        <component :is="buttonTag" size="small" @click="emit('reset')">重置</component>
+        <component :is="buttonTag" :size="globalSize" type="primary" @click="emit('apply')">应用</component>
+        <component :is="buttonTag" :size="globalSize" @click="emit('reset')">重置</component>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { usePrefix } from '../../utils/prefix'
-import WFormItem from '../form/form-item.vue'
-import WInput from '../input/input.vue'
+import { usePrefix, useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'PageInfoPanel' })
 
@@ -46,7 +45,10 @@ const emit = defineEmits<{
 }>()
 
 const { withPrefix } = usePrefix()
+const globalSize = useGlobalSize()
 const buttonTag = withPrefix('button')
+const formItemTag = withPrefix('form-item')
+const inputTag = withPrefix('input')
 
 void props
 </script>
@@ -56,5 +58,5 @@ void props
 .panel-title { font-weight: bold; margin-bottom: 12px; color: var(--w-text-color-primary); }
 .page-info-form { padding: 12px; border: 1px dashed var(--w-border-color-darker); border-radius: 4px; background: var(--w-fill-color-lighter); }
 .sub-page-actions { display: flex; gap: 8px; margin-top: 8px; }
-.sub-page-config-textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--w-border-color); padding: 4px; font-family: var(--w-font-family); font-size: var(--w-font-size-base); color: var(--w-text-color-primary); background: var(--w-bg-color); resize: vertical; }
+
 </style>

@@ -106,14 +106,14 @@
       </div>
     </div>
 
-    <component :is="dialogTag" v-model="previewVisible" title="页面预览" width="900">
+    <component :is="dialogTag" v-model="previewVisible" title="页面预览" :width="900">
       <page-renderer :code="page.code" :config="config" :preview="true" />
       <template #footer>
         <component :is="buttonTag" @click="previewVisible = false">关闭</component>
       </template>
     </component>
 
-    <component :is="dialogTag" v-model="configVisible" title="页面配置（JSON）" width="700">
+    <component :is="dialogTag" v-model="configVisible" title="页面配置（JSON）" :width="700">
       <component :is="inputTag" v-model="configJson" type="textarea" :rows="16" readonly />
       <template #footer>
         <component :is="buttonTag" @click="configVisible = false">关闭</component>

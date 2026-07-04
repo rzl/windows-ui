@@ -10,10 +10,10 @@
     <div class="node-toolbar">
       <span class="node-type">{{ typeLabel }}</span>
       <component :is="spaceTag">
-        <component :is="buttonTag" v-if="isContainer" size="mini" @click.stop="addChild">+ 子组件</component>
-        <component :is="buttonTag" size="mini" @click.stop="moveUp">上移</component>
-        <component :is="buttonTag" size="mini" @click.stop="moveDown">下移</component>
-        <component :is="buttonTag" size="mini" type="danger" @click.stop="remove">删除</component>
+        <component :is="buttonTag" v-if="isContainer" :size="globalSize" @click.stop="addChild">+ 子组件</component>
+        <component :is="buttonTag" :size="globalSize" @click.stop="moveUp">上移</component>
+        <component :is="buttonTag" :size="globalSize" @click.stop="moveDown">下移</component>
+        <component :is="buttonTag" :size="globalSize" type="danger" @click.stop="remove">删除</component>
       </component>
     </div>
 
@@ -200,7 +200,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { listComponents, getComponent } from './plugin-manager'
-import { usePrefix } from '../../utils/prefix'
+import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPageComponentNode' })
@@ -215,6 +215,7 @@ const props = defineProps<{
 const emit = defineEmits(['select', 'delete', 'move', 'change'])
 
 const { withPrefix } = usePrefix()
+const globalSize = useGlobalSize()
 const alertTag = withPrefix('alert')
 const statisticTag = withPrefix('statistic')
 const buttonTag = withPrefix('button')

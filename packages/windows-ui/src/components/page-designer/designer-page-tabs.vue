@@ -9,15 +9,22 @@
       >
         <component :is="iconTag" v-if="p.isMain" name="document" class="page-tab-icon" />
         <span class="page-tab-name">{{ p.name }}</span>
-        <span v-if="!p.isMain" class="page-tab-close" title="删除子页面" @click.stop="emit('delete', p.code)">×</span>
+        <component
+          :is="iconTag"
+          v-if="!p.isMain"
+          name="close"
+          class="page-tab-close"
+          title="删除子页面"
+          @click.stop="emit('delete', p.code)"
+        />
       </div>
     </div>
-    <component :is="buttonTag" size="mini" @click="emit('add')">+ 子页面</component>
+    <component :is="buttonTag" :size="globalSize" @click="emit('add')">+ 子页面</component>
   </div>
 </template>
 
 <script setup lang="ts">
-import { usePrefix } from '../../utils/prefix'
+import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import type { PageItem } from './types'
 
 defineOptions({ name: 'DesignerPageTabs' })
@@ -34,6 +41,7 @@ const emit = defineEmits<{
 }>()
 
 const { withPrefix } = usePrefix()
+const globalSize = useGlobalSize()
 const buttonTag = withPrefix('button')
 const iconTag = withPrefix('icon')
 
@@ -47,6 +55,6 @@ void props
 .page-tab:hover { background: var(--w-fill-color-light); color: var(--w-text-color-regular); }
 .page-tab.active { background: var(--w-bg-color); color: var(--w-color-primary); border-color: var(--w-border-color); font-weight: bold; }
 .page-tab-icon { font-size: 14px; }
-.page-tab-close { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border-radius: 50%; font-size: 14px; line-height: 1; }
+.page-tab-close { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border-radius: 50%; cursor: pointer; }
 .page-tab-close:hover { background: var(--w-fill-color-dark); }
 </style>

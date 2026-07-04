@@ -36,7 +36,7 @@ export interface PageItem {
 export interface ComponentGroup {
   key: string
   title: string
-  items: { label: string; value: string }[]
+  items: { label: string; value: string; icon: string }[]
 }
 
 export interface PageEventConfig {
