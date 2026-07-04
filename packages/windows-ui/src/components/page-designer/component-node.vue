@@ -149,7 +149,6 @@ const props = defineProps<{
 const emit = defineEmits(['select', 'delete', 'move'])
 
 const { withPrefix } = usePrefix()
-const iconTag = withPrefix('icon')
 const alertTag = withPrefix('alert')
 const buttonTag = withPrefix('button')
 const spaceTag = withPrefix('space')

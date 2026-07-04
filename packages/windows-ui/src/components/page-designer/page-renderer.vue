@@ -1,6 +1,7 @@
 <template>
   <div class="page-renderer">
-    <w-result
+    <component
+      :is="resultTag"
       v-if="!hasPagePermission"
       icon="warning"
       title="无权访问"
@@ -15,7 +16,7 @@
       />
     </template>
 
-    <w-dialog v-model="dialogVisible" :title="dialogTitle" width="800">
+    <component :is="dialogTag" v-model="dialogVisible" :title="dialogTitle" width="800">
       <page-renderer
         v-if="dialogConfig"
         :config="dialogConfig"
@@ -32,9 +33,9 @@
         sandbox="allow-scripts allow-same-origin allow-popups"
       />
       <template #footer>
-        <w-button @click="dialogVisible = false">关闭</w-button>
+        <component :is="buttonTag" @click="dialogVisible = false">关闭</component>
       </template>
-    </w-dialog>
+    </component>
   </div>
 </template>
 
@@ -44,7 +45,13 @@ import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 defineOptions({ name: 'WPageRenderer' })
 
 import RenderComponent from './render-component.vue'
+import { usePrefix } from '../../utils/prefix'
 import type { PageConfig, PageDataSource, PageEventConfig } from './types'
+
+const { withPrefix } = usePrefix()
+const resultTag = withPrefix('result')
+const dialogTag = withPrefix('dialog')
+const buttonTag = withPrefix('button')
 
 const props = defineProps<{
   code?: string

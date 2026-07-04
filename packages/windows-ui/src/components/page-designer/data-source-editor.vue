@@ -1,55 +1,61 @@
 <template>
   <div class="data-source-editor">
     <div class="section-title">数据源</div>
-    <w-form-item label="数据源类型">
-      <w-select :model-value="modelValue?.type" :options="typeOptions" @update:model-value="updateType" />
-    </w-form-item>
+    <component :is="formItemTag" label="数据源类型">
+      <component :is="selectTag" :model-value="modelValue?.type" :options="typeOptions" @update:model-value="updateType" />
+    </component>
 
     <template v-if="modelValue?.type === 'static'">
-      <w-form-item label="静态值">
-        <w-input v-model="modelValue.value" type="textarea" :rows="3" />
-      </w-form-item>
+      <component :is="formItemTag" label="静态值">
+        <component :is="inputTag" v-model="modelValue.value" type="textarea" :rows="3" />
+      </component>
     </template>
 
     <template v-if="modelValue?.type === 'sql'">
-      <w-form-item label="SQL 查询">
-        <w-input v-model="modelValue.sql" type="textarea" :rows="4" placeholder="仅支持 SELECT 查询" />
-      </w-form-item>
-      <w-form-item label="转换脚本">
-        <w-input v-model="modelValue.transformScript" type="textarea" :rows="4" placeholder="接收 data 参数，返回处理后的数据" />
-      </w-form-item>
+      <component :is="formItemTag" label="SQL 查询">
+        <component :is="inputTag" v-model="modelValue.sql" type="textarea" :rows="4" placeholder="仅支持 SELECT 查询" />
+      </component>
+      <component :is="formItemTag" label="转换脚本">
+        <component :is="inputTag" v-model="modelValue.transformScript" type="textarea" :rows="4" placeholder="接收 data 参数，返回处理后的数据" />
+      </component>
     </template>
 
     <template v-if="modelValue?.type === 'api'">
-      <w-form-item label="请求方法">
-        <w-select v-model="modelValue.api.method" :options="methodOptions" />
-      </w-form-item>
-      <w-form-item label="请求地址">
-        <w-input v-model="modelValue.api.url" placeholder="/api/lowcode/xxx" />
-      </w-form-item>
-      <w-form-item label="查询参数（JSON）">
-        <w-input v-model="paramsText" type="textarea" :rows="2" />
-      </w-form-item>
-      <w-form-item label="请求体（JSON）">
-        <w-input v-model="bodyText" type="textarea" :rows="2" />
-      </w-form-item>
-      <w-form-item label="转换脚本">
-        <w-input v-model="modelValue.transformScript" type="textarea" :rows="4" />
-      </w-form-item>
+      <component :is="formItemTag" label="请求方法">
+        <component :is="selectTag" v-model="modelValue.api.method" :options="methodOptions" />
+      </component>
+      <component :is="formItemTag" label="请求地址">
+        <component :is="inputTag" v-model="modelValue.api.url" placeholder="/api/lowcode/xxx" />
+      </component>
+      <component :is="formItemTag" label="查询参数（JSON）">
+        <component :is="inputTag" v-model="paramsText" type="textarea" :rows="2" />
+      </component>
+      <component :is="formItemTag" label="请求体（JSON）">
+        <component :is="inputTag" v-model="bodyText" type="textarea" :rows="2" />
+      </component>
+      <component :is="formItemTag" label="转换脚本">
+        <component :is="inputTag" v-model="modelValue.transformScript" type="textarea" :rows="4" />
+      </component>
     </template>
 
     <template v-if="modelValue?.type === 'script'">
-      <w-form-item label="执行脚本">
-        <w-input v-model="modelValue.script" type="textarea" :rows="8" placeholder="可调用 db.raw() 和 http()，需返回数据" />
-      </w-form-item>
+      <component :is="formItemTag" label="执行脚本">
+        <component :is="inputTag" v-model="modelValue.script" type="textarea" :rows="8" placeholder="可调用 db.raw() 和 http()，需返回数据" />
+      </component>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { usePrefix } from '../../utils/prefix'
 
 defineOptions({ name: 'WPageDataSourceEditor' })
+
+const { withPrefix } = usePrefix()
+const formItemTag = withPrefix('form-item')
+const inputTag = withPrefix('input')
+const selectTag = withPrefix('select')
 
 const props = defineProps<{
   modelValue: any

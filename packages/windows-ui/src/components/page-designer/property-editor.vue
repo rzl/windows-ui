@@ -1,230 +1,230 @@
 <template>
   <div class="property-editor">
     <div class="section-title">基础</div>
-    <w-form-item label="组件类型">
-      <w-input :model-value="typeLabel" disabled />
-    </w-form-item>
+    <component :is="formItemTag" label="组件类型">
+      <component :is="inputTag" :model-value="typeLabel" disabled />
+    </component>
 
     <!-- 通用样式 -->
-    <w-form-item label="上边距">
-      <w-input v-model="node.styles.marginTop" />
-    </w-form-item>
-    <w-form-item label="下边距">
-      <w-input v-model="node.styles.marginBottom" />
-    </w-form-item>
-    <w-form-item label="左边距">
-      <w-input v-model="node.styles.marginLeft" />
-    </w-form-item>
-    <w-form-item label="右边距">
-      <w-input v-model="node.styles.marginRight" />
-    </w-form-item>
-    <w-form-item label="宽度">
-      <w-input v-model="node.styles.width" placeholder="如 100% 或 300px" />
-    </w-form-item>
+    <component :is="formItemTag" label="上边距">
+      <component :is="inputTag" v-model="node.styles.marginTop" />
+    </component>
+    <component :is="formItemTag" label="下边距">
+      <component :is="inputTag" v-model="node.styles.marginBottom" />
+    </component>
+    <component :is="formItemTag" label="左边距">
+      <component :is="inputTag" v-model="node.styles.marginLeft" />
+    </component>
+    <component :is="formItemTag" label="右边距">
+      <component :is="inputTag" v-model="node.styles.marginRight" />
+    </component>
+    <component :is="formItemTag" label="宽度">
+      <component :is="inputTag" v-model="node.styles.width" placeholder="如 100% 或 300px" />
+    </component>
 
     <!-- 文本 -->
     <template v-if="node.type === 'text'">
-      <w-form-item label="内容">
-        <w-input v-model="node.props.content" type="textarea" :rows="3" />
-      </w-form-item>
-      <w-form-item label="标签">
-        <w-select v-model="node.props.tag" :options="tagOptions" />
-      </w-form-item>
-      <w-form-item label="对齐">
-        <w-select v-model="node.props.align" :options="alignOptions" />
-      </w-form-item>
+      <component :is="formItemTag" label="内容">
+        <component :is="inputTag" v-model="node.props.content" type="textarea" :rows="3" />
+      </component>
+      <component :is="formItemTag" label="标签">
+        <component :is="selectTag" v-model="node.props.tag" :options="tagOptions" />
+      </component>
+      <component :is="formItemTag" label="对齐">
+        <component :is="selectTag" v-model="node.props.align" :options="alignOptions" />
+      </component>
     </template>
 
     <!-- 统计卡片 -->
     <template v-if="node.type === 'statistic'">
-      <w-form-item label="标题">
-        <w-input v-model="node.props.title" />
-      </w-form-item>
-      <w-form-item label="字段名">
-        <w-input v-model="node.props.field" />
-      </w-form-item>
-      <w-form-item label="图标">
-        <w-input v-model="node.props.icon" />
-      </w-form-item>
-      <w-form-item label="颜色">
-        <w-select v-model="node.props.color" :options="colorOptions" />
-      </w-form-item>
+      <component :is="formItemTag" label="标题">
+        <component :is="inputTag" v-model="node.props.title" />
+      </component>
+      <component :is="formItemTag" label="字段名">
+        <component :is="inputTag" v-model="node.props.field" />
+      </component>
+      <component :is="formItemTag" label="图标">
+        <component :is="inputTag" v-model="node.props.icon" />
+      </component>
+      <component :is="formItemTag" label="颜色">
+        <component :is="selectTag" v-model="node.props.color" :options="colorOptions" />
+      </component>
       <data-source-editor v-model="node.dataSource" />
     </template>
 
     <!-- 图表 -->
     <template v-if="node.type === 'chart'">
-      <w-form-item label="标题">
-        <w-input v-model="node.props.title" />
-      </w-form-item>
-      <w-form-item label="图表类型">
-        <w-select v-model="node.props.chartType" :options="chartTypeOptions" @change="handleChartTypeChange" />
-      </w-form-item>
-      <w-form-item label="高度">
-        <w-input v-model="node.props.height" />
-      </w-form-item>
-      <w-form-item label="图表配置（JSON）">
-        <w-input v-model="optionText" type="textarea" :rows="8" />
-      </w-form-item>
+      <component :is="formItemTag" label="标题">
+        <component :is="inputTag" v-model="node.props.title" />
+      </component>
+      <component :is="formItemTag" label="图表类型">
+        <component :is="selectTag" v-model="node.props.chartType" :options="chartTypeOptions" @change="handleChartTypeChange" />
+      </component>
+      <component :is="formItemTag" label="高度">
+        <component :is="inputTag" v-model="node.props.height" />
+      </component>
+      <component :is="formItemTag" label="图表配置（JSON）">
+        <component :is="inputTag" v-model="optionText" type="textarea" :rows="8" />
+      </component>
       <data-source-editor v-model="node.dataSource" />
     </template>
 
     <!-- 公告 -->
     <template v-if="node.type === 'alert'">
-      <w-form-item label="内容">
-        <w-input v-model="node.props.content" type="textarea" :rows="2" />
-      </w-form-item>
-      <w-form-item label="类型">
-        <w-select v-model="node.props.type" :options="noticeTypeOptions" />
-      </w-form-item>
+      <component :is="formItemTag" label="内容">
+        <component :is="inputTag" v-model="node.props.content" type="textarea" :rows="2" />
+      </component>
+      <component :is="formItemTag" label="类型">
+        <component :is="selectTag" v-model="node.props.type" :options="noticeTypeOptions" />
+      </component>
     </template>
 
     <!-- 图片 -->
     <template v-if="node.type === 'image'">
-      <w-form-item label="图片地址">
-        <w-input v-model="node.props.src" />
-      </w-form-item>
-      <w-form-item label="替代文本">
-        <w-input v-model="node.props.alt" />
-      </w-form-item>
-      <w-form-item label="宽度">
-        <w-input v-model="node.props.width" placeholder="100% 或 300px" />
-      </w-form-item>
-      <w-form-item label="高度">
-        <w-input v-model="node.props.height" placeholder="auto 或 200px" />
-      </w-form-item>
-      <w-form-item label="适应方式">
-        <w-select v-model="node.props.objectFit" :options="objectFitOptions" />
-      </w-form-item>
+      <component :is="formItemTag" label="图片地址">
+        <component :is="inputTag" v-model="node.props.src" />
+      </component>
+      <component :is="formItemTag" label="替代文本">
+        <component :is="inputTag" v-model="node.props.alt" />
+      </component>
+      <component :is="formItemTag" label="宽度">
+        <component :is="inputTag" v-model="node.props.width" placeholder="100% 或 300px" />
+      </component>
+      <component :is="formItemTag" label="高度">
+        <component :is="inputTag" v-model="node.props.height" placeholder="auto 或 200px" />
+      </component>
+      <component :is="formItemTag" label="适应方式">
+        <component :is="selectTag" v-model="node.props.objectFit" :options="objectFitOptions" />
+      </component>
       <event-editor v-model="node.events" />
     </template>
 
     <!-- 分隔线 -->
     <template v-if="node.type === 'divider'">
-      <w-form-item label="文字">
-        <w-input v-model="node.props.text" />
-      </w-form-item>
-      <w-form-item label="方向">
-        <w-select v-model="node.props.direction" :options="directionOptions" />
-      </w-form-item>
-      <w-form-item label="边距">
-        <w-input v-model="node.props.margin" placeholder="如 16px 0" />
-      </w-form-item>
+      <component :is="formItemTag" label="文字">
+        <component :is="inputTag" v-model="node.props.text" />
+      </component>
+      <component :is="formItemTag" label="方向">
+        <component :is="selectTag" v-model="node.props.direction" :options="directionOptions" />
+      </component>
+      <component :is="formItemTag" label="边距">
+        <component :is="inputTag" v-model="node.props.margin" placeholder="如 16px 0" />
+      </component>
     </template>
 
     <!-- 表格 -->
     <template v-if="node.type === 'table'">
-      <w-form-item label="标题">
-        <w-input v-model="node.props.title" />
-      </w-form-item>
-      <w-form-item label="高度">
-        <w-input v-model="node.props.height" placeholder="如 300px，留空自适应" />
-      </w-form-item>
-      <w-form-item label="列配置(JSON)">
-        <w-input v-model="columnsText" type="textarea" :rows="4" placeholder='[{"prop":"name","label":"名称","width":120}]' />
-      </w-form-item>
+      <component :is="formItemTag" label="标题">
+        <component :is="inputTag" v-model="node.props.title" />
+      </component>
+      <component :is="formItemTag" label="高度">
+        <component :is="inputTag" v-model="node.props.height" placeholder="如 300px，留空自适应" />
+      </component>
+      <component :is="formItemTag" label="列配置(JSON)">
+        <component :is="inputTag" v-model="columnsText" type="textarea" :rows="4" placeholder='[{"prop":"name","label":"名称","width":120}]' />
+      </component>
       <data-source-editor v-model="node.dataSource" />
     </template>
 
     <!-- 列表 -->
     <template v-if="node.type === 'list'">
-      <w-form-item label="标题字段">
-        <w-input v-model="node.props.itemTitle" placeholder="默认 title" />
-      </w-form-item>
-      <w-form-item label="描述字段">
-        <w-input v-model="node.props.itemDesc" placeholder="默认 description" />
-      </w-form-item>
-      <w-form-item label="图标字段">
-        <w-input v-model="node.props.itemIcon" placeholder="默认 icon" />
-      </w-form-item>
+      <component :is="formItemTag" label="标题字段">
+        <component :is="inputTag" v-model="node.props.itemTitle" placeholder="默认 title" />
+      </component>
+      <component :is="formItemTag" label="描述字段">
+        <component :is="inputTag" v-model="node.props.itemDesc" placeholder="默认 description" />
+      </component>
+      <component :is="formItemTag" label="图标字段">
+        <component :is="inputTag" v-model="node.props.itemIcon" placeholder="默认 icon" />
+      </component>
       <data-source-editor v-model="node.dataSource" />
       <event-editor v-model="node.events" />
     </template>
 
     <!-- 容器 -->
     <template v-if="node.type === 'container'">
-      <w-form-item label="内边距">
-        <w-input v-model="node.props.padding" />
-      </w-form-item>
+      <component :is="formItemTag" label="内边距">
+        <component :is="inputTag" v-model="node.props.padding" />
+      </component>
     </template>
 
     <!-- 卡片 -->
     <template v-if="node.type === 'card'">
-      <w-form-item label="标题">
-        <w-input v-model="node.props.title" />
-      </w-form-item>
+      <component :is="formItemTag" label="标题">
+        <component :is="inputTag" v-model="node.props.title" />
+      </component>
     </template>
 
     <!-- 栅格 -->
     <template v-if="node.type === 'row'">
-      <w-form-item label="列数">
-        <w-input-number v-model="node.props.columns" :min="1" :max="6" />
-      </w-form-item>
-      <w-form-item label="间距">
-        <w-input v-model="node.props.gap" />
-      </w-form-item>
+      <component :is="formItemTag" label="列数">
+        <component :is="inputNumberTag" v-model="node.props.columns" :min="1" :max="6" />
+      </component>
+      <component :is="formItemTag" label="间距">
+        <component :is="inputTag" v-model="node.props.gap" />
+      </component>
     </template>
 
     <!-- 标签页 -->
     <template v-if="node.type === 'tabs'">
-      <w-form-item label="标签配置（JSON）">
-        <w-input v-model="tabsText" type="textarea" :rows="4" />
-      </w-form-item>
+      <component :is="formItemTag" label="标签配置（JSON）">
+        <component :is="inputTag" v-model="tabsText" type="textarea" :rows="4" />
+      </component>
     </template>
 
     <!-- 数据模型 -->
     <template v-if="node.type === 'model'">
-      <w-form-item label="模型编码">
-        <w-input v-model="node.props.modelCode" />
-      </w-form-item>
-      <w-form-item label="高度">
-        <w-input v-model="node.props.height" />
-      </w-form-item>
+      <component :is="formItemTag" label="模型编码">
+        <component :is="inputTag" v-model="node.props.modelCode" />
+      </component>
+      <component :is="formItemTag" label="高度">
+        <component :is="inputTag" v-model="node.props.height" />
+      </component>
     </template>
 
     <!-- 仪表盘 -->
     <template v-if="node.type === 'dashboard'">
-      <w-form-item label="仪表盘编码">
-        <w-input v-model="node.props.dashboardCode" />
-      </w-form-item>
+      <component :is="formItemTag" label="仪表盘编码">
+        <component :is="inputTag" v-model="node.props.dashboardCode" />
+      </component>
     </template>
 
     <!-- 报表 -->
     <template v-if="node.type === 'report'">
-      <w-form-item label="报表编码">
-        <w-input v-model="node.props.reportCode" />
-      </w-form-item>
+      <component :is="formItemTag" label="报表编码">
+        <component :is="inputTag" v-model="node.props.reportCode" />
+      </component>
     </template>
 
     <!-- 按钮 -->
     <template v-if="node.type === 'button'">
-      <w-form-item label="按钮文字">
-        <w-input v-model="node.props.label" />
-      </w-form-item>
-      <w-form-item label="按钮类型">
-        <w-select v-model="node.props.type" :options="buttonTypeOptions" />
-      </w-form-item>
+      <component :is="formItemTag" label="按钮文字">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="按钮类型">
+        <component :is="selectTag" v-model="node.props.type" :options="buttonTypeOptions" />
+      </component>
       <event-editor v-model="node.events" />
     </template>
 
     <!-- 链接 -->
     <template v-if="node.type === 'link'">
-      <w-form-item label="链接文字">
-        <w-input v-model="node.props.label" />
-      </w-form-item>
-      <w-form-item label="链接路径">
-        <w-input v-model="node.props.path" />
-      </w-form-item>
+      <component :is="formItemTag" label="链接文字">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="链接路径">
+        <component :is="inputTag" v-model="node.props.path" />
+      </component>
     </template>
 
     <!-- 插件组件 -->
     <template v-else-if="pluginComponent">
-      <w-form-item label="组件编码">
-        <w-input :model-value="node.type" disabled />
-      </w-form-item>
-      <w-form-item label="属性（JSON）">
-        <w-input v-model="propsText" type="textarea" :rows="8" />
-      </w-form-item>
+      <component :is="formItemTag" label="组件编码">
+        <component :is="inputTag" :model-value="node.type" disabled />
+      </component>
+      <component :is="formItemTag" label="属性（JSON）">
+        <component :is="inputTag" v-model="propsText" type="textarea" :rows="8" />
+      </component>
     </template>
   </div>
 </template>
@@ -234,9 +234,16 @@ import { computed } from 'vue'
 import DataSourceEditor from './data-source-editor.vue'
 import EventEditor from './event-editor.vue'
 import { listCharts, getChart, getComponent } from './plugin-manager'
+import { usePrefix } from '../../utils/prefix'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPagePropertyEditor' })
+
+const { withPrefix } = usePrefix()
+const formItemTag = withPrefix('form-item')
+const inputTag = withPrefix('input')
+const selectTag = withPrefix('select')
+const inputNumberTag = withPrefix('input-number')
 
 const props = defineProps<{
   node: PageNode

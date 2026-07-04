@@ -1,12 +1,12 @@
 <template>
   <div class="designer-page">
     <div class="toolbar">
-      <w-button size="small" @click="goBack">返回</w-button>
-      <w-space>
-        <w-button size="small" @click="handlePreview">预览</w-button>
-        <w-button size="small" @click="handlePreviewConfig">预览配置</w-button>
-        <w-button type="primary" size="small" @click="handleSave">保存</w-button>
-      </w-space>
+      <component :is="buttonTag" size="small" @click="goBack">返回</component>
+      <component :is="spaceTag">
+        <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
+        <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
+        <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
+      </component>
     </div>
 
     <div v-if="isMobile" class="mobile-panel-tabs">
@@ -121,19 +121,19 @@
       </div>
     </div>
 
-    <w-dialog v-model="previewVisible" title="页面预览" width="900">
+    <component :is="dialogTag" v-model="previewVisible" title="页面预览" width="900">
       <page-renderer :code="page.code" :config="config" :preview="true" />
       <template #footer>
-        <w-button @click="previewVisible = false">关闭</w-button>
+        <component :is="buttonTag" @click="previewVisible = false">关闭</component>
       </template>
-    </w-dialog>
+    </component>
 
-    <w-dialog v-model="configVisible" title="页面配置（JSON）" width="700">
-      <w-input v-model="configJson" type="textarea" :rows="16" readonly />
+    <component :is="dialogTag" v-model="configVisible" title="页面配置（JSON）" width="700">
+      <component :is="inputTag" v-model="configJson" type="textarea" :rows="16" readonly />
       <template #footer>
-        <w-button @click="configVisible = false">关闭</w-button>
+        <component :is="buttonTag" @click="configVisible = false">关闭</component>
       </template>
-    </w-dialog>
+    </component>
   </div>
 </template>
 
@@ -143,7 +143,14 @@ import ComponentNode from './component-node.vue'
 import PropertyEditor from './property-editor.vue'
 import PageRenderer from './page-renderer.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
+import { usePrefix } from '../../utils/prefix'
 import type { PageConfig, PageNode } from './types'
+
+const { withPrefix } = usePrefix()
+const buttonTag = withPrefix('button')
+const spaceTag = withPrefix('space')
+const dialogTag = withPrefix('dialog')
+const inputTag = withPrefix('input')
 
 defineOptions({ name: 'WPageDesigner' })
 

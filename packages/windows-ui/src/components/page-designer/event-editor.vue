@@ -1,40 +1,46 @@
 <template>
   <div class="event-editor">
     <div class="section-title">事件</div>
-    <w-form-item label="事件类型">
-      <w-select :model-value="eventName" :options="eventNameOptions" @update:model-value="updateEventName" />
-    </w-form-item>
+    <component :is="formItemTag" label="事件类型">
+      <component :is="selectTag" :model-value="eventName" :options="eventNameOptions" @update:model-value="updateEventName" />
+    </component>
 
     <template v-if="eventName && eventConfig">
-      <w-form-item label="动作">
-        <w-select v-model="eventConfig.action" :options="actionOptions" />
-      </w-form-item>
-      <w-form-item v-if="showTarget" label="目标">
-        <w-input v-model="eventConfig.target" placeholder="路径 / 页面编码 / URL / 变量名" />
-      </w-form-item>
-      <w-form-item v-if="showMethod" label="请求方法">
-        <w-select v-model="eventConfig.method" :options="methodOptions" />
-      </w-form-item>
-      <w-form-item v-if="showParams" label="查询参数(JSON)">
-        <w-input v-model="paramsText" type="textarea" :rows="2" />
-      </w-form-item>
-      <w-form-item v-if="showBody" label="请求体(JSON)">
-        <w-input v-model="bodyText" type="textarea" :rows="2" />
-      </w-form-item>
-      <w-form-item v-if="showVariable" label="变量名">
-        <w-input v-model="eventConfig.variable" placeholder="pageState 中的变量名" />
-      </w-form-item>
-      <w-form-item v-if="showValue" label="变量值">
-        <w-input v-model="valueText" type="textarea" :rows="2" placeholder="支持字符串、数字或 JSON" />
-      </w-form-item>
+      <component :is="formItemTag" label="动作">
+        <component :is="selectTag" v-model="eventConfig.action" :options="actionOptions" />
+      </component>
+      <component :is="formItemTag" v-if="showTarget" label="目标">
+        <component :is="inputTag" v-model="eventConfig.target" placeholder="路径 / 页面编码 / URL / 变量名" />
+      </component>
+      <component :is="formItemTag" v-if="showMethod" label="请求方法">
+        <component :is="selectTag" v-model="eventConfig.method" :options="methodOptions" />
+      </component>
+      <component :is="formItemTag" v-if="showParams" label="查询参数(JSON)">
+        <component :is="inputTag" v-model="paramsText" type="textarea" :rows="2" />
+      </component>
+      <component :is="formItemTag" v-if="showBody" label="请求体(JSON)">
+        <component :is="inputTag" v-model="bodyText" type="textarea" :rows="2" />
+      </component>
+      <component :is="formItemTag" v-if="showVariable" label="变量名">
+        <component :is="inputTag" v-model="eventConfig.variable" placeholder="pageState 中的变量名" />
+      </component>
+      <component :is="formItemTag" v-if="showValue" label="变量值">
+        <component :is="inputTag" v-model="valueText" type="textarea" :rows="2" placeholder="支持字符串、数字或 JSON" />
+      </component>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { usePrefix } from '../../utils/prefix'
 
 defineOptions({ name: 'WPageEventEditor' })
+
+const { withPrefix } = usePrefix()
+const formItemTag = withPrefix('form-item')
+const inputTag = withPrefix('input')
+const selectTag = withPrefix('select')
 
 const props = defineProps<{
   modelValue: any
