@@ -17,23 +17,6 @@
       </component>
     </div>
 
-    <!-- 页面管理 tabs -->
-    <div class="page-tabs-bar">
-      <div class="page-tabs">
-        <div
-          v-for="p in allPages"
-          :key="p.code"
-          :class="['page-tab', { active: activePageCode === p.code }]"
-          @click="switchPage(p.code)"
-        >
-          <component :is="iconTag" v-if="p.isMain" name="document" class="page-tab-icon" />
-          <span class="page-tab-name">{{ p.name }}</span>
-          <span v-if="!p.isMain" class="page-tab-close" title="删除子页面" @click.stop="deleteSubPage(p.code)">×</span>
-        </div>
-      </div>
-      <component :is="buttonTag" size="mini" @click="addSubPage">+ 子页面</component>
-    </div>
-
     <div v-if="isMobile" class="mobile-panel-tabs">
       <div
         v-for="tab in mobileTabs"
@@ -45,7 +28,25 @@
       </div>
     </div>
 
-    <div class="designer-layout" :class="{ mobile: isMobile }">
+    <div class="designer-workspace" :class="{ mobile: isMobile }">
+      <!-- 页面管理 tabs -->
+      <div class="page-tabs-bar">
+        <div class="page-tabs">
+          <div
+            v-for="p in allPages"
+            :key="p.code"
+            :class="['page-tab', { active: activePageCode === p.code }]"
+            @click="switchPage(p.code)"
+          >
+            <component :is="iconTag" v-if="p.isMain" name="document" class="page-tab-icon" />
+            <span class="page-tab-name">{{ p.name }}</span>
+            <span v-if="!p.isMain" class="page-tab-close" title="删除子页面" @click.stop="deleteSubPage(p.code)">×</span>
+          </div>
+        </div>
+        <component :is="buttonTag" size="mini" @click="addSubPage">+ 子页面</component>
+      </div>
+
+      <div class="designer-layout">
       <!-- 左侧边栏 + 面板 -->
       <div v-if="!isMobile || activePanel === 'library' || activePanel === 'pages'" class="left-panel">
         <div class="left-sidebar">
@@ -227,8 +228,9 @@
         </template>
       </div>
     </div>
+  </div>
 
-    <component :is="dialogTag" v-model="previewVisible" title="页面预览" width="900">
+  <component :is="dialogTag" v-model="previewVisible" title="页面预览" width="900">
       <page-renderer :code="page.code" :config="config" :preview="true" />
       <template #footer>
         <component :is="buttonTag" @click="previewVisible = false">关闭</component>
@@ -1025,16 +1027,17 @@ function goBack() {
 <style scoped>
 .designer-page { padding: 8px; }
 .toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; }
-.page-tabs-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 6px; background: #fff; border: 1px solid #ddd; }
+.designer-workspace { border: 1px solid #ddd; background: #fff; border-radius: 4px; overflow: hidden; }
+.page-tabs-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8f8f8; border-bottom: 1px solid #ddd; }
 .page-tabs { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
-.page-tab { display: flex; align-items: center; gap: 4px; padding: 6px 12px; cursor: pointer; border: 1px solid #ddd; border-radius: 4px; background: #f8f8f8; font-size: 13px; white-space: nowrap; }
-.page-tab:hover { background: #f0f0f0; }
-.page-tab.active { background: var(--w-color-primary); color: #fff; border-color: var(--w-color-primary); }
+.page-tab { display: flex; align-items: center; gap: 4px; padding: 6px 12px; cursor: pointer; border: 1px solid transparent; border-radius: 4px; background: transparent; font-size: 13px; white-space: nowrap; color: #666; }
+.page-tab:hover { background: #eee; color: #333; }
+.page-tab.active { background: #fff; color: var(--w-color-primary); border-color: #ddd; font-weight: bold; }
 .page-tab-icon { font-size: 14px; }
 .page-tab-close { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border-radius: 50%; font-size: 14px; line-height: 1; }
-.page-tab-close:hover { background: rgba(255, 255, 255, 0.2); }
-.designer-layout { display: flex; gap: 12px; min-height: 600px; }
-.left-panel { display: flex; width: 220px; border: 1px solid #ddd; background: #fff; }
+.page-tab-close:hover { background: rgba(0, 0, 0, 0.1); }
+.designer-layout { display: flex; min-height: 600px; }
+.left-panel { display: flex; width: 220px; border-right: 1px solid #ddd; background: #fff; }
 .left-sidebar { width: 44px; display: flex; flex-direction: column; border-right: 1px solid #ddd; background: #f5f5f5; flex-shrink: 0; }
 .sidebar-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; cursor: pointer; color: #666; font-size: 11px; gap: 4px; transition: background 0.15s; }
 .sidebar-btn:hover { background: #e9e9e9; color: #333; }
@@ -1043,8 +1046,8 @@ function goBack() {
 .left-panel-content { flex: 1; min-width: 0; overflow: auto; }
 .component-library { padding: 12px; }
 .page-info { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
-.canvas-panel { flex: 1; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; overflow: auto; }
-.property-panel { width: 280px; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
+.canvas-panel { flex: 1; background: #fff; padding: 12px; display: flex; flex-direction: column; overflow: auto; }
+.property-panel { width: 280px; background: #fff; border-left: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
 .panel-title { font-weight: bold; margin-bottom: 12px; }
 .panel-tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #eee; }
 .panel-tab { padding: 6px 12px; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; }
@@ -1086,7 +1089,8 @@ function goBack() {
 @media (max-width: 768px) {
   .designer-page { padding: 6px; }
   .toolbar { margin-bottom: 8px; }
-  .page-tabs-bar { margin-bottom: 8px; padding: 4px; }
+  .designer-workspace { border-radius: 0; }
+  .page-tabs-bar { padding: 6px; }
   .mobile-panel-tabs {
     display: flex;
     gap: 4px;
@@ -1108,20 +1112,21 @@ function goBack() {
     color: #fff;
     border-color: var(--w-color-primary);
   }
-  .designer-layout.mobile {
+  .designer-workspace.mobile .designer-layout {
     flex-direction: column;
-    gap: 8px;
     min-height: auto;
   }
-  .designer-layout.mobile .left-panel,
-  .designer-layout.mobile .canvas-panel,
-  .designer-layout.mobile .property-panel {
+  .designer-workspace.mobile .left-panel,
+  .designer-workspace.mobile .canvas-panel,
+  .designer-workspace.mobile .property-panel {
     width: auto;
     flex: none;
     min-height: 300px;
+    border: none;
+    border-bottom: 1px solid #ddd;
   }
-  .designer-layout.mobile .left-sidebar { flex-direction: row; width: auto; border-right: none; border-bottom: 1px solid #ddd; }
-  .designer-layout.mobile .sidebar-btn { flex: 1; flex-direction: row; padding: 8px; }
+  .designer-workspace.mobile .left-sidebar { flex-direction: row; width: auto; border-right: none; border-bottom: 1px solid #ddd; }
+  .designer-workspace.mobile .sidebar-btn { flex: 1; flex-direction: row; padding: 8px; }
   .component-item { cursor: pointer; }
 }
 </style>
