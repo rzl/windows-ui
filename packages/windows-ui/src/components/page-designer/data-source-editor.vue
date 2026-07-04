@@ -116,6 +116,6 @@ const bodyText = computed({
 </script>
 
 <style scoped>
-.data-source-editor { margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; }
+.data-source-editor { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--w-border-color-light); }
 .section-title { font-weight: bold; margin-bottom: 8px; }
 </style>

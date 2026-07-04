@@ -656,5 +656,5 @@ const columnsText = computed({
 
 <style scoped>
 .property-editor { padding: 8px 0; }
-.section-title { font-weight: bold; margin-bottom: 8px; color: #333; }
+.section-title { font-weight: bold; margin-bottom: 8px; color: var(--w-text-color-regular); }
 </style>

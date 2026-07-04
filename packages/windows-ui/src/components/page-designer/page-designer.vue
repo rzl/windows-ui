@@ -1,21 +1,25 @@
 <template>
   <div class="designer-page">
-    <div class="toolbar">
-      <component :is="buttonTag" size="small" @click="goBack">返回</component>
-      <component :is="spaceTag">
-        <component :is="buttonTag" size="small" :disabled="!canUndo" @click="undo">撤销</component>
-        <component :is="buttonTag" size="small" :disabled="!canRedo" @click="redo">重做</component>
-        <component :is="buttonTag" size="small" :disabled="!selectedNode" @click="copySelectedNode">复制</component>
-        <component :is="buttonTag" size="small" :disabled="!clipboardNode" @click="pasteNode">粘贴</component>
-        <component :is="buttonTag" size="small" @click="zoomOut">缩小</component>
-        <component :is="buttonTag" size="small" @click="zoomReset">{{ Math.round(zoom * 100) }}%</component>
-        <component :is="buttonTag" size="small" @click="zoomIn">放大</component>
-        <component :is="buttonTag" size="small" :type="showGrid ? 'primary' : 'default'" @click="showGrid = !showGrid">网格</component>
-        <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
-        <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
-        <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
-      </component>
-    </div>
+    <designer-toolbar
+      :can-undo="canUndo"
+      :can-redo="canRedo"
+      :zoom="zoom"
+      :show-grid="showGrid"
+      :has-selected="!!selectedNode"
+      :has-clipboard="!!clipboardNode"
+      @back="goBack"
+      @undo="undo"
+      @redo="redo"
+      @copy="copySelectedNode"
+      @paste="pasteNode"
+      @zoom-out="zoomOut"
+      @zoom-reset="zoomReset"
+      @zoom-in="zoomIn"
+      @toggle-grid="showGrid = !showGrid"
+      @preview="handlePreview"
+      @preview-config="handlePreviewConfig"
+      @save="handleSave"
+    />
 
     <div v-if="isMobile" class="mobile-panel-tabs">
       <div
@@ -29,165 +33,79 @@
     </div>
 
     <div class="designer-workspace" :class="{ mobile: isMobile }">
-      <!-- 页面管理 tabs -->
-      <div class="page-tabs-bar">
-        <div class="page-tabs">
-          <div
-            v-for="p in allPages"
-            :key="p.code"
-            :class="['page-tab', { active: activePageCode === p.code }]"
-            @click="switchPage(p.code)"
-          >
-            <component :is="iconTag" v-if="p.isMain" name="document" class="page-tab-icon" />
-            <span class="page-tab-name">{{ p.name }}</span>
-            <span v-if="!p.isMain" class="page-tab-close" title="删除子页面" @click.stop="deleteSubPage(p.code)">×</span>
-          </div>
-        </div>
-        <component :is="buttonTag" size="mini" @click="addSubPage">+ 子页面</component>
-      </div>
+      <designer-page-tabs
+        :pages="allPages"
+        :active-code="activePageCode"
+        @switch="switchPage"
+        @add="addSubPage"
+        @delete="deleteSubPage"
+      />
 
       <div class="designer-layout">
-      <!-- 左侧边栏 + 面板 -->
-      <div v-if="!isMobile || activePanel === 'library' || activePanel === 'outline' || activePanel === 'pages'" class="left-panel">
-        <div class="left-sidebar">
-          <div
-            :class="['sidebar-btn', { active: leftPanelMode === 'library' }]"
-            title="组件库"
-            @click="leftPanelMode = 'library'"
-          >
-            <component :is="iconTag" name="grid" />
-            <span class="sidebar-label">组件库</span>
-          </div>
-          <div
-            :class="['sidebar-btn', { active: leftPanelMode === 'outline' }]"
-            title="大纲"
-            @click="leftPanelMode = 'outline'"
-          >
-            <component :is="iconTag" name="list" />
-            <span class="sidebar-label">大纲</span>
-          </div>
-          <div
-            :class="['sidebar-btn', { active: leftPanelMode === 'pages' }]"
-            title="页面信息"
-            @click="leftPanelMode = 'pages'"
-          >
-            <component :is="iconTag" name="document" />
-            <span class="sidebar-label">页面信息</span>
-          </div>
-        </div>
+        <!-- 左侧边栏 + 面板 -->
+        <div v-if="!isMobile || activePanel === 'library' || activePanel === 'outline' || activePanel === 'pages'" class="left-panel">
+          <designer-sidebar
+            :mode="leftPanelMode"
+            @change-mode="leftPanelMode = $event"
+          />
 
-        <div class="left-panel-content">
-          <!-- 组件库 -->
-          <div v-if="leftPanelMode === 'library'" class="component-library" :class="`component-library--${globalSize}`">
-            <div class="panel-title">组件库</div>
-            <div
-              v-for="group in componentGroups"
-              :key="group.key"
-              class="component-group"
-            >
-              <div
-                class="group-title"
-                :class="{ collapsed: !expandedGroups[group.key] }"
-                @click="toggleGroup(group.key)"
-              >
-                <component :is="iconTag" name="chevron-down" class="group-arrow" />
-                {{ group.title }}
-              </div>
-              <div v-show="expandedGroups[group.key]" class="component-group-items">
-                <div
-                  v-for="type in group.items"
-                  :key="type.value"
-                  class="component-item"
-                  :draggable="!isMobile"
-                  @dragstart="handleDragStart($event, type.value)"
-                  @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-                >
-                  {{ type.label }}
-                </div>
-              </div>
-            </div>
-          </div>
+          <div class="left-panel-content">
+            <component-library-panel
+              v-if="leftPanelMode === 'library'"
+              :groups="componentGroups"
+              :expanded-groups="expandedGroups"
+              :global-size="globalSize"
+              :is-mobile="isMobile"
+              @drag-start="handleDragStart"
+              @touch-start="handleTouchStart"
+              @toggle-group="toggleGroup"
+            />
 
-          <!-- 大纲 -->
-          <div v-else-if="leftPanelMode === 'outline'" class="outline-panel">
-            <div class="panel-title">大纲</div>
-            <outline-tree
-              :components="config.components || []"
+            <outline-panel
+              v-else-if="leftPanelMode === 'outline'"
+              :components="config.components"
               :selected-id="selectedId"
               @select="selectNode"
             />
-          </div>
 
-          <!-- 页面信息 -->
-          <div v-else class="page-info">
-            <div class="panel-title">页面信息</div>
-            <div class="page-info-form">
-              <w-form-item label="编码">
-                <w-input :model-value="currentPage?.code || ''" readonly />
-              </w-form-item>
-              <w-form-item label="名称">
-                <w-input v-model="currentPageName" />
-              </w-form-item>
-              <w-form-item label="配置（JSON）">
-                <textarea v-model="pageInfoConfigText" class="sub-page-config-textarea" rows="8" placeholder='{"components":[]}' />
-              </w-form-item>
-              <div class="sub-page-actions">
-                <component :is="buttonTag" size="small" type="primary" @click="applyPageInfo">应用</component>
-                <component :is="buttonTag" size="small" @click="resetPageInfo">重置</component>
-              </div>
-            </div>
+            <page-info-panel
+              v-else
+              :code="currentPage?.code || ''"
+              :name="currentPageName"
+              :config-text="pageInfoConfigText"
+              @update:name="currentPageName = $event"
+              @update:config-text="pageInfoConfigText = $event"
+              @apply="applyPageInfo"
+              @reset="resetPageInfo"
+            />
           </div>
         </div>
-      </div>
 
-      <!-- 画布 -->
-      <div
-        v-if="!isMobile || activePanel === 'canvas'"
-        class="canvas-panel"
-        @dragover.prevent
-        @drop="handleDropToRoot($event)"
-        @wheel="handleCanvasWheel"
-      >
-        <div class="panel-title">画布</div>
-        <div
-          class="canvas-body"
-          :class="{ 'is-empty': !config.components?.length, 'show-grid': showGrid }"
-          :style="canvasBodyStyle"
-          data-droppable="root"
-          @click.self="selectedId = ''"
-        >
-          <component-node
-            v-for="(node, index) in config.components"
-            :key="node.id"
-            :node="node"
-            :index="index"
-            :selected-id="selectedId"
-            :parent-list="config.components || []"
-            @select="selectNode"
-            @delete="deleteNode"
-            @move="moveNode"
-            @change="recordHistory"
-          />
-          <div v-if="!config.components?.length" class="empty-tip">
-            拖拽或点击组件到此处
-          </div>
-        </div>
-      </div>
+        <!-- 画布 -->
+        <designer-canvas
+          v-if="!isMobile || activePanel === 'canvas'"
+          :components="config.components"
+          :selected-id="selectedId"
+          :zoom="zoom"
+          :show-grid="showGrid"
+          @drop="handleDropToRoot"
+          @wheel="handleCanvasWheel"
+          @select="selectNode"
+          @delete="deleteNode"
+          @move="moveNode"
+          @change="recordHistory"
+        />
 
-      <!-- 属性面板 -->
-      <div v-if="!isMobile || activePanel === 'property'" class="property-panel">
-        <div class="panel-title">属性</div>
-        <property-editor
-          v-if="selectedNode"
-          :node="selectedNode"
+        <!-- 属性面板 -->
+        <property-panel
+          v-if="!isMobile || activePanel === 'property'"
+          :selected-node="selectedNode"
           @update="onPropertyUpdate"
         />
-        <div v-else class="empty-tip">选中画布中的组件以编辑属性</div>
       </div>
     </div>
-  </div>
 
-  <component :is="dialogTag" v-model="previewVisible" title="页面预览" width="900">
+    <component :is="dialogTag" v-model="previewVisible" title="页面预览" width="900">
       <page-renderer :code="page.code" :config="config" :preview="true" />
       <template #footer>
         <component :is="buttonTag" @click="previewVisible = false">关闭</component>
@@ -205,24 +123,25 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
-import ComponentNode from './component-node.vue'
-import PropertyEditor from './property-editor.vue'
 import PageRenderer from './page-renderer.vue'
-import OutlineTree from './outline-tree.vue'
+import DesignerToolbar from './designer-toolbar.vue'
+import DesignerPageTabs from './designer-page-tabs.vue'
+import DesignerSidebar from './designer-sidebar.vue'
+import ComponentLibraryPanel from './component-library-panel.vue'
+import OutlinePanel from './outline-panel.vue'
+import PageInfoPanel from './page-info-panel.vue'
+import DesignerCanvas from './designer-canvas.vue'
+import PropertyPanel from './property-panel.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
 import './built-in-components'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
-import WFormItem from '../form/form-item.vue'
-import WInput from '../input/input.vue'
-import type { PageConfig, PageNode } from './types'
+import type { PageConfig, PageNode, PageItem, ComponentGroup } from './types'
 
 const { withPrefix } = usePrefix()
 const globalSize = useGlobalSize()
 const buttonTag = withPrefix('button')
-const spaceTag = withPrefix('space')
 const dialogTag = withPrefix('dialog')
 const inputTag = withPrefix('input')
-const iconTag = withPrefix('icon')
 
 defineOptions({ name: 'WPageDesigner' })
 
@@ -244,13 +163,6 @@ const config = reactive<PageConfig>({
   formData: {},
   components: []
 })
-
-interface PageItem {
-  code: string
-  name: string
-  config: PageConfig
-  isMain?: boolean
-}
 
 const allPages = reactive<PageItem[]>([])
 const activePageCode = ref('')
@@ -300,10 +212,6 @@ function handleCanvasWheel(event: WheelEvent) {
 }
 
 const configJson = computed(() => JSON.stringify(config, null, 2))
-const canvasBodyStyle = computed(() => ({
-  transform: `scale(${zoom.value})`,
-  transformOrigin: 'top left'
-}))
 
 // 撤销/重做历史栈
 const history = reactive<{
@@ -481,12 +389,6 @@ const formTypes = computed(() => [
   { label: '开关', value: 'switch' },
   ...listComponentsByCategory('form').map((c) => ({ label: c.label, value: c.type }))
 ])
-
-interface ComponentGroup {
-  key: string
-  title: string
-  items: { label: string; value: string }[]
-}
 
 const expandedGroups = reactive<Record<string, boolean>>({
   layout: true,
@@ -1010,77 +912,16 @@ function goBack() {
 
 <style scoped>
 .designer-page { padding: 8px; }
-.toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; }
-.designer-workspace { border: 1px solid #ddd; background: #fff; border-radius: 4px; overflow: hidden; }
-.page-tabs-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8f8f8; border-bottom: 1px solid #ddd; }
-.page-tabs { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
-.page-tab { display: flex; align-items: center; gap: 4px; padding: 6px 12px; cursor: pointer; border: 1px solid transparent; border-radius: 4px; background: transparent; font-size: 13px; white-space: nowrap; color: #666; }
-.page-tab:hover { background: #eee; color: #333; }
-.page-tab.active { background: #fff; color: var(--w-color-primary); border-color: #ddd; font-weight: bold; }
-.page-tab-icon { font-size: 14px; }
-.page-tab-close { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border-radius: 50%; font-size: 14px; line-height: 1; }
-.page-tab-close:hover { background: rgba(0, 0, 0, 0.1); }
+.designer-workspace { border: 1px solid var(--w-border-color); background: var(--w-bg-color); border-radius: 4px; overflow: hidden; }
 .designer-layout { display: flex; min-height: 600px; }
-.left-panel { display: flex; width: 260px; border-right: 1px solid #ddd; background: #fff; }
-.left-sidebar { width: 44px; display: flex; flex-direction: column; border-right: 1px solid #ddd; background: #f5f5f5; flex-shrink: 0; }
-.sidebar-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; cursor: pointer; color: #666; font-size: 11px; gap: 4px; transition: background 0.15s; }
-.sidebar-btn:hover { background: #e9e9e9; color: #333; }
-.sidebar-btn.active { background: var(--w-color-primary, #245edb); color: #fff; }
-.sidebar-label { writing-mode: horizontal-tb; }
+.left-panel { display: flex; width: 260px; border-right: 1px solid var(--w-border-color); background: var(--w-bg-color); }
 .left-panel-content { flex: 1; min-width: 0; overflow: auto; }
-.component-library { padding: 12px; }
-.outline-panel { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
-.page-info { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
-.canvas-panel { flex: 1; background: #fff; padding: 12px; display: flex; flex-direction: column; overflow: auto; }
-.property-panel { width: 280px; background: #fff; border-left: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
-.panel-title { font-weight: bold; margin-bottom: 12px; }
-.panel-tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #eee; }
-.panel-tab { padding: 6px 12px; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; }
-.panel-tab:hover { color: #333; }
-.panel-tab.active { color: var(--w-color-primary); border-bottom-color: var(--w-color-primary); font-weight: bold; }
-.component-group { margin-bottom: 12px; }
-.component-group-items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-.group-title { color: #666; font-size: 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
-.group-arrow { transition: transform 0.2s; font-size: 12px; }
-.group-title.collapsed .group-arrow { transform: rotate(-90deg); }
-.component-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; cursor: grab; background: #f8f8f8; font-size: var(--w-font-size-base); }
-.component-library--small .component-item { padding: 4px; font-size: var(--w-font-size-small); }
-.component-library--large .component-item { padding: 12px; font-size: var(--w-font-size-medium); }
-.component-item:hover { background: #f0f0f0; }
-.canvas-body { flex: 1; border: 1px dashed #ccc; padding: 12px; position: relative; transition: transform 0.15s ease; }
-.canvas-body.is-empty { display: flex; align-items: center; justify-content: center; }
-.canvas-body.drop-target-active { background: rgba(0, 120, 215, 0.1); border-color: var(--w-color-primary); }
-.canvas-body.show-grid {
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-.empty-tip { color: #999; }
-.drag-ghost {
-  position: fixed;
-  z-index: 9999;
-  pointer-events: none;
-  padding: 8px 12px;
-  background: var(--w-color-primary);
-  color: #fff;
-  border-radius: 4px;
-  opacity: 0.9;
-  transform: translate(-50%, -50%);
-  font-size: 14px;
-}
-
-.page-info-form { padding: 12px; border: 1px dashed #d4d0c8; border-radius: 4px; background: #fafafa; }
-.sub-page-actions { display: flex; gap: 8px; margin-top: 8px; }
-.sub-page-config-textarea { width: 100%; box-sizing: border-box; border: 1px solid #7f9db9; padding: 4px; font-family: var(--w-font-family); font-size: var(--w-font-size-base); resize: vertical; }
 
 .mobile-panel-tabs { display: none; }
 
 @media (max-width: 768px) {
   .designer-page { padding: 6px; }
-  .toolbar { margin-bottom: 8px; }
   .designer-workspace { border-radius: 0; }
-  .page-tabs-bar { padding: 6px; }
   .mobile-panel-tabs {
     display: flex;
     gap: 4px;
@@ -1099,7 +940,7 @@ function goBack() {
   }
   .mobile-panel-tab.active {
     background: var(--w-color-primary);
-    color: #fff;
+    color: var(--w-text-color-inverse);
     border-color: var(--w-color-primary);
   }
   .designer-workspace.mobile .designer-layout {
@@ -1113,10 +954,7 @@ function goBack() {
     flex: none;
     min-height: 300px;
     border: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--w-border-color);
   }
-  .designer-workspace.mobile .left-sidebar { flex-direction: row; width: auto; border-right: none; border-bottom: 1px solid #ddd; }
-  .designer-workspace.mobile .sidebar-btn { flex: 1; flex-direction: row; padding: 8px; }
-  .component-item { cursor: pointer; }
 }
 </style>

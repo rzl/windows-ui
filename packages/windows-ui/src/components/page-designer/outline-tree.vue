@@ -135,13 +135,13 @@ function selectNode(id: string) {
   border-radius: 3px;
   user-select: none;
 }
-.outline-node:hover { background: #f0f0f0; }
-.outline-node.selected { background: #e6f2ff; color: var(--w-color-primary); }
+.outline-node:hover { background: var(--w-fill-color-light); }
+.outline-node.selected { background: var(--w-table-current-row-bg); color: var(--w-color-primary); }
 .outline-toggle {
   width: 14px;
   text-align: center;
   font-size: 10px;
-  color: #999;
+  color: var(--w-text-color-placeholder);
 }
 .outline-spacer { width: 14px; }
 .outline-icon { font-size: 12px; width: 16px; text-align: center; }

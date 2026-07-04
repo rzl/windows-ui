@@ -26,6 +26,19 @@ export interface PageConfig {
   subPages?: PageSubPage[]
 }
 
+export interface PageItem {
+  code: string
+  name: string
+  config: PageConfig
+  isMain?: boolean
+}
+
+export interface ComponentGroup {
+  key: string
+  title: string
+  items: { label: string; value: string }[]
+}
+
 export interface PageEventConfig {
   action: string
   target?: string

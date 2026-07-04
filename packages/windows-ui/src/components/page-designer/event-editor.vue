@@ -257,10 +257,10 @@ function removeAction(index: number) {
 </script>
 
 <style scoped>
-.event-editor { margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; }
-.section-title { font-weight: bold; margin-bottom: 8px; }
+.event-editor { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--w-border-color-light); }
+.section-title { font-weight: bold; margin-bottom: 8px; color: var(--w-text-color-regular); }
 .chain-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
-.chain-item { padding: 12px; border: 1px dashed #d4d0c8; border-radius: 4px; background: #fafafa; }
-.chain-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; color: #666; }
+.chain-item { padding: 12px; border: 1px dashed var(--w-border-color-darker); border-radius: 4px; background: var(--w-fill-color-lighter); }
+.chain-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; color: var(--w-text-color-secondary); }
 .chain-actions { display: flex; gap: 8px; }
 </style>
