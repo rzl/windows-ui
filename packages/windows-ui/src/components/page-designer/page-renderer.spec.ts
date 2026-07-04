@@ -119,4 +119,24 @@ describe('WPageRenderer', () => {
     })
     expect(wrapper.emitted('navigate')).toHaveLength(1)
   })
+
+  it('openDialog 应优先使用当前页面的子页面配置', async () => {
+    const wrapper = mount(PageRenderer, {
+      props: {
+        config: {
+          components: [],
+          subPages: [
+            { code: 'sub1', name: '子页面1', config: { components: [{ id: 't1', type: 'text', props: { content: '子页面内容', tag: 'p' }, styles: {} }] } }
+          ]
+        },
+        preview: true
+      },
+      global: { stubs: ['WDialog', 'WResult'] }
+    })
+    await wrapper.vm.$nextTick()
+    ;(wrapper.vm as any).executeEvent({ action: 'openDialog', target: 'sub1' })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('openDialog')).toHaveLength(1)
+    expect(wrapper.emitted('openDialog')![0]).toEqual([{ target: 'sub1', title: '子页面1' }])
+  })
 })

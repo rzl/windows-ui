@@ -11,6 +11,7 @@
         <component :is="buttonTag" size="small" @click="zoomReset">{{ Math.round(zoom * 100) }}%</component>
         <component :is="buttonTag" size="small" @click="zoomIn">放大</component>
         <component :is="buttonTag" size="small" :type="showGrid ? 'primary' : 'default'" @click="showGrid = !showGrid">网格</component>
+        <component :is="buttonTag" size="small" @click="subPageVisible = true">子页面</component>
         <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
         <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
         <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
@@ -180,6 +181,42 @@
         <component :is="buttonTag" @click="configVisible = false">关闭</component>
       </template>
     </component>
+
+    <component :is="dialogTag" v-model="subPageVisible" title="子页面管理" width="700">
+      <div class="sub-page-manager">
+        <div class="sub-page-form">
+          <component :is="formItemTag" label="编码">
+            <component :is="inputTag" v-model="editingSubPage.code" placeholder="子页面唯一编码" />
+          </component>
+          <component :is="formItemTag" label="名称">
+            <component :is="inputTag" v-model="editingSubPage.name" placeholder="子页面名称" />
+          </component>
+          <component :is="formItemTag" label="配置（JSON）">
+            <component :is="inputTag" v-model="editingSubPage.configText" type="textarea" :rows="8" placeholder='{"components":[]}' />
+          </component>
+          <div class="sub-page-actions">
+            <component :is="buttonTag" size="small" type="primary" @click="saveSubPage">保存</component>
+            <component :is="buttonTag" size="small" @click="resetSubPageForm">清空</component>
+          </div>
+        </div>
+        <div class="sub-page-list">
+          <div v-for="(sp, index) in config.subPages" :key="sp.code" class="sub-page-item">
+            <div class="sub-page-info">
+              <div class="sub-page-name">{{ sp.name || sp.code }}</div>
+              <div class="sub-page-code">{{ sp.code }}</div>
+            </div>
+            <div class="sub-page-item-actions">
+              <component :is="buttonTag" size="mini" @click="editSubPage(index)">编辑</component>
+              <component :is="buttonTag" size="mini" type="danger" @click="deleteSubPage(index)">删除</component>
+            </div>
+          </div>
+          <div v-if="!config.subPages?.length" class="empty-tip">暂无子页面</div>
+        </div>
+      </div>
+      <template #footer>
+        <component :is="buttonTag" @click="subPageVisible = false">关闭</component>
+      </template>
+    </component>
   </div>
 </template>
 
@@ -192,13 +229,14 @@ import OutlineTree from './outline-tree.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
 import './built-in-components'
 import { usePrefix } from '../../utils/prefix'
-import type { PageConfig, PageNode } from './types'
+import type { PageConfig, PageNode, PageSubPage } from './types'
 
 const { withPrefix } = usePrefix()
 const buttonTag = withPrefix('button')
 const spaceTag = withPrefix('space')
 const dialogTag = withPrefix('dialog')
 const inputTag = withPrefix('input')
+const formItemTag = withPrefix('form-item')
 
 defineOptions({ name: 'WPageDesigner' })
 
@@ -217,11 +255,15 @@ const page = reactive<any>({ code: props.code || '', name: '', description: '', 
 const config = reactive<PageConfig>({
   title: '',
   description: '',
-  components: []
+  formData: {},
+  components: [],
+  subPages: []
 })
 const selectedId = ref<string>('')
 const previewVisible = ref(false)
 const configVisible = ref(false)
+const subPageVisible = ref(false)
+const editingSubPage = reactive<PageSubPage & { configText: string }>({ code: '', name: '', config: {}, configText: '{}' })
 const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
 const activeRightPanel = ref<'property' | 'outline'>('property')
 const zoom = ref(1)
@@ -471,6 +513,8 @@ async function loadData() {
     config.description = cfg.description || page.description || ''
     config.components = cfg.components || []
   }
+  config.formData = config.formData || {}
+  config.subPages = config.subPages || []
   // 初始状态记入历史
   history.stack = [takeSnapshot(config)]
   history.index = 0
@@ -780,6 +824,56 @@ function handlePreviewConfig() {
   configVisible.value = true
 }
 
+function resetSubPageForm() {
+  editingSubPage.code = ''
+  editingSubPage.name = ''
+  editingSubPage.config = {}
+  editingSubPage.configText = '{}'
+}
+
+function saveSubPage() {
+  let cfg: PageConfig
+  try {
+    cfg = JSON.parse(editingSubPage.configText || '{}')
+  } catch {
+    window.alert('配置 JSON 格式错误')
+    return
+  }
+  if (!editingSubPage.code.trim()) {
+    window.alert('请输入子页面编码')
+    return
+  }
+  if (!config.subPages) config.subPages = []
+  const index = config.subPages.findIndex((sp) => sp.code === editingSubPage.code)
+  const item: PageSubPage = {
+    code: editingSubPage.code.trim(),
+    name: editingSubPage.name.trim(),
+    config: cfg
+  }
+  if (index >= 0) {
+    config.subPages[index] = item
+  } else {
+    config.subPages.push(item)
+  }
+  resetSubPageForm()
+  recordHistory()
+}
+
+function editSubPage(index: number) {
+  const sp = config.subPages?.[index]
+  if (!sp) return
+  editingSubPage.code = sp.code
+  editingSubPage.name = sp.name
+  editingSubPage.config = sp.config
+  editingSubPage.configText = JSON.stringify(sp.config || {}, null, 2)
+}
+
+function deleteSubPage(index: number) {
+  if (!config.subPages) return
+  config.subPages.splice(index, 1)
+  recordHistory()
+}
+
 function buildFormData(components: PageNode[]): Record<string, any> {
   const formTypes = new Set(['input', 'select', 'switch', 'radio', 'checkbox', 'date-picker'])
   const result: Record<string, any> = {}
@@ -806,7 +900,8 @@ async function handleSave() {
       title: config.title,
       description: config.description,
       formData: buildFormData(config.components || []),
-      components: config.components
+      components: config.components,
+      subPages: config.subPages || []
     }
   }
   if (props.savePage) {
@@ -858,6 +953,15 @@ function goBack() {
   transform: translate(-50%, -50%);
   font-size: 14px;
 }
+
+.sub-page-manager { display: flex; flex-direction: column; gap: 16px; }
+.sub-page-form { padding: 12px; border: 1px dashed #d4d0c8; border-radius: 4px; background: #fafafa; }
+.sub-page-actions { display: flex; gap: 8px; margin-top: 8px; }
+.sub-page-list { display: flex; flex-direction: column; gap: 8px; }
+.sub-page-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #eee; border-radius: 4px; }
+.sub-page-name { font-weight: bold; }
+.sub-page-code { font-size: 12px; color: #999; }
+.sub-page-item-actions { display: flex; gap: 8px; }
 
 .mobile-panel-tabs { display: none; }
 

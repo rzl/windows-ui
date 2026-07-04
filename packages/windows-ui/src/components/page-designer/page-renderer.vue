@@ -47,7 +47,7 @@ defineOptions({ name: 'WPageRenderer' })
 import RenderComponent from './render-component.vue'
 import './built-in-components'
 import { usePrefix } from '../../utils/prefix'
-import type { PageConfig, PageDataSource, PageEventConfig, PageNode } from './types'
+import type { PageConfig, PageDataSource, PageEventConfig, PageNode, PageSubPage } from './types'
 
 const { withPrefix } = usePrefix()
 const resultTag = withPrefix('result')
@@ -85,6 +85,7 @@ const pageConfig = reactive<PageConfig>({
   formData: {},
   components: []
 })
+const pageSubPages = reactive<PageSubPage[]>([])
 
 const pageState = reactive<Record<string, any>>({})
 const formData = reactive<Record<string, any>>({})
@@ -111,6 +112,7 @@ async function loadConfig() {
     pageConfig.description = props.config.description || ''
     pageConfig.components = props.config.components || []
     initFormData(props.config.formData || {}, pageConfig.components)
+    pageSubPages.splice(0, pageSubPages.length, ...(props.config.subPages || []))
   } else if (props.code && props.loadPage) {
     const data = await props.loadPage(props.code)
     pageInfo.id = data.id
@@ -121,6 +123,7 @@ async function loadConfig() {
     pageConfig.description = data.config?.description || ''
     pageConfig.components = data.config?.components || []
     initFormData(data.config?.formData || {}, pageConfig.components)
+    pageSubPages.splice(0, pageSubPages.length, ...(data.config?.subPages || []))
   }
 }
 
@@ -224,16 +227,23 @@ async function openDialog(target: string) {
 
   if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('//')) {
     dialogUrl.value = target
-  } else if (props.loadPage) {
-    try {
-      const data = await props.loadPage(target)
-      dialogTitle.value = data.name || '弹窗'
-      dialogConfig.value = data.config || {}
-    } catch {
+  } else {
+    // 优先匹配当前页面的子页面
+    const subPage = pageSubPages.find((p) => p.code === target)
+    if (subPage) {
+      dialogTitle.value = subPage.name || '弹窗'
+      dialogConfig.value = subPage.config || {}
+    } else if (props.loadPage) {
+      try {
+        const data = await props.loadPage(target)
+        dialogTitle.value = data.name || '弹窗'
+        dialogConfig.value = data.config || {}
+      } catch {
+        dialogUrl.value = target
+      }
+    } else {
       dialogUrl.value = target
     }
-  } else {
-    dialogUrl.value = target
   }
   dialogVisible.value = true
   emit('openDialog', { target, title: dialogTitle.value })

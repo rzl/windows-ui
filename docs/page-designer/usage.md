@@ -67,6 +67,37 @@ async function savePage(data: any) {
 
 页面保存时，`config.formData` 会按字段默认值自动生成；`WPageRenderer` 渲染时也会用 `config.formData` 初始化页面状态。
 
+## 子页面
+
+页面配置支持 `subPages`，用于在当前页面内定义可被 `openDialog` 打开的弹窗子页面：
+
+```json
+{
+  "title": "主页面",
+  "subPages": [
+    {
+      "code": "user-form",
+      "name": "用户表单",
+      "config": {
+        "components": [
+          { "id": "i1", "type": "input", "props": { "label": "用户名", "field": "username" }, "styles": {} }
+        ]
+      }
+    }
+  ],
+  "components": [
+    {
+      "id": "btn1",
+      "type": "button",
+      "props": { "label": "打开用户表单" },
+      "events": { "onClick": { "action": "openDialog", "target": "user-form" } }
+    }
+  ]
+}
+```
+
+在页面设计器中可通过工具栏「子页面」按钮管理子页面编码、名称与 JSON 配置。
+
 ## 事件与链式动作
 
 交互组件（按钮、链接、图片等）支持配置 `onClick` 事件。事件配置支持：

@@ -328,6 +328,17 @@
   "title": "页面标题",
   "description": "页面描述",
   "formData": { "username": "" },
+  "subPages": [
+    {
+      "code": "user-form",
+      "name": "用户表单",
+      "config": {
+        "components": [
+          { "id": "i1", "type": "input", "props": { "label": "用户名", "field": "username" }, "styles": {} }
+        ]
+      }
+    }
+  ],
   "components": [
     {
       "id": "comp_xxx",
@@ -361,6 +372,14 @@
 | dataSource | object | 数据绑定配置 |
 | events | object | 交互事件配置 |
 | tab | string | 在 `tabs` 容器中表示所属标签页 |
+
+### 子页面
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| code | string | 子页面编码，作为 `openDialog` 的 target |
+| name | string | 子页面名称，弹窗标题默认使用该值 |
+| config | PageConfig | 子页面配置，结构与主页面 `config` 一致 |
 
 ### 布局组件
 

@@ -12,11 +12,18 @@ export interface PageNode {
   tab?: string
 }
 
+export interface PageSubPage {
+  code: string
+  name: string
+  config: PageConfig
+}
+
 export interface PageConfig {
   title?: string
   description?: string
   formData?: Record<string, any>
   components?: PageNode[]
+  subPages?: PageSubPage[]
 }
 
 export interface PageEventConfig {
