@@ -226,8 +226,23 @@ describe('WPageDesigner', () => {
     expect(wrapper.find('.left-sidebar').exists()).toBe(true)
     expect(wrapper.find('.component-library').exists()).toBe(true)
     expect(wrapper.find('.page-info').exists()).toBe(false)
-    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面信息'))
-    expect(pageBtn).toBeTruthy()
+    expect(wrapper.findAll('.sidebar-btn').some((el) => el.text().includes('组件库'))).toBe(true)
+    expect(wrapper.findAll('.sidebar-btn').some((el) => el.text().includes('大纲'))).toBe(true)
+    expect(wrapper.findAll('.sidebar-btn').some((el) => el.text().includes('页面信息'))).toBe(true)
+  })
+
+  it('点击大纲按钮应切换到大纲面板', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const outlineBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('大纲'))
+    expect(outlineBtn).toBeTruthy()
+    await outlineBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.outline-panel').exists()).toBe(true)
+    expect(wrapper.find('.component-library').exists()).toBe(false)
   })
 
   it('点击页面信息按钮应切换到页面信息面板', async () => {

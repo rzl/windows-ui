@@ -48,7 +48,7 @@
 
       <div class="designer-layout">
       <!-- 左侧边栏 + 面板 -->
-      <div v-if="!isMobile || activePanel === 'library' || activePanel === 'pages'" class="left-panel">
+      <div v-if="!isMobile || activePanel === 'library' || activePanel === 'outline' || activePanel === 'pages'" class="left-panel">
         <div class="left-sidebar">
           <div
             :class="['sidebar-btn', { active: leftPanelMode === 'library' }]"
@@ -57,6 +57,14 @@
           >
             <component :is="iconTag" name="grid" />
             <span class="sidebar-label">组件库</span>
+          </div>
+          <div
+            :class="['sidebar-btn', { active: leftPanelMode === 'outline' }]"
+            title="大纲"
+            @click="leftPanelMode = 'outline'"
+          >
+            <component :is="iconTag" name="list" />
+            <span class="sidebar-label">大纲</span>
           </div>
           <div
             :class="['sidebar-btn', { active: leftPanelMode === 'pages' }]"
@@ -139,6 +147,16 @@
             </div>
           </div>
 
+          <!-- 大纲 -->
+          <div v-else-if="leftPanelMode === 'outline'" class="outline-panel">
+            <div class="panel-title">大纲</div>
+            <outline-tree
+              :components="config.components || []"
+              :selected-id="selectedId"
+              @select="selectNode"
+            />
+          </div>
+
           <!-- 页面信息 -->
           <div v-else class="page-info">
             <div class="panel-title">页面信息</div>
@@ -197,35 +215,13 @@
 
       <!-- 属性面板 -->
       <div v-if="!isMobile || activePanel === 'property'" class="property-panel">
-        <div class="panel-tabs">
-          <div
-            :class="['panel-tab', { active: activeRightPanel === 'property' }]"
-            @click="activeRightPanel = 'property'"
-          >
-            属性
-          </div>
-          <div
-            :class="['panel-tab', { active: activeRightPanel === 'outline' }]"
-            @click="activeRightPanel = 'outline'"
-          >
-            大纲
-          </div>
-        </div>
-        <template v-if="activeRightPanel === 'property'">
-          <property-editor
-            v-if="selectedNode"
-            :node="selectedNode"
-            @update="onPropertyUpdate"
-          />
-          <div v-else class="empty-tip">选中画布中的组件以编辑属性</div>
-        </template>
-        <template v-else>
-          <outline-tree
-            :components="config.components || []"
-            :selected-id="selectedId"
-            @select="selectNode"
-          />
-        </template>
+        <div class="panel-title">属性</div>
+        <property-editor
+          v-if="selectedNode"
+          :node="selectedNode"
+          @update="onPropertyUpdate"
+        />
+        <div v-else class="empty-tip">选中画布中的组件以编辑属性</div>
       </div>
     </div>
   </div>
@@ -299,9 +295,8 @@ const activePageCode = ref('')
 const selectedId = ref<string>('')
 const previewVisible = ref(false)
 const configVisible = ref(false)
-const leftPanelMode = ref<'library' | 'pages'>('library')
-const activePanel = ref<'library' | 'pages' | 'canvas' | 'property'>('canvas')
-const activeRightPanel = ref<'property' | 'outline'>('property')
+const leftPanelMode = ref<'library' | 'outline' | 'pages'>('library')
+const activePanel = ref<'library' | 'outline' | 'pages' | 'canvas' | 'property'>('canvas')
 const zoom = ref(1)
 const minZoom = 0.5
 const maxZoom = 2
@@ -527,6 +522,7 @@ const formTypes = computed(() => [
 
 const mobileTabs = [
   { label: '组件库', value: 'library' as const },
+  { label: '大纲', value: 'outline' as const },
   { label: '页面信息', value: 'pages' as const },
   { label: '画布', value: 'canvas' as const },
   { label: '属性', value: 'property' as const }
@@ -1045,6 +1041,7 @@ function goBack() {
 .sidebar-label { writing-mode: horizontal-tb; }
 .left-panel-content { flex: 1; min-width: 0; overflow: auto; }
 .component-library { padding: 12px; }
+.outline-panel { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 .page-info { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 .canvas-panel { flex: 1; background: #fff; padding: 12px; display: flex; flex-direction: column; overflow: auto; }
 .property-panel { width: 280px; background: #fff; border-left: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
