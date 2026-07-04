@@ -10,13 +10,18 @@
     </component>
 
     <!-- 统计卡片 -->
-    <div v-else-if="node.type === 'statistic'" class="stat-card" :class="`is-${node.props.color || 'primary'}`">
-      <component :is="iconTag" :name="node.props.icon || 'star'" :size="40" />
-      <div class="stat-info">
-        <div class="stat-title">{{ node.props.title }}</div>
-        <div class="stat-value">{{ displayValue }}</div>
-      </div>
-    </div>
+    <component
+      :is="statisticTag"
+      v-else-if="node.type === 'statistic'"
+      :title="node.props.title"
+      :value="displayValue"
+      :prefix="node.props.prefix"
+      :suffix="node.props.suffix"
+      :precision="node.props.precision"
+      :icon="node.props.icon"
+      :color="node.props.color"
+      :value-style="node.props.valueStyle"
+    />
 
     <!-- 图表 -->
     <div v-else-if="node.type === 'chart'" class="chart-wrapper">
@@ -290,6 +295,7 @@ const props = defineProps<{
 
 const { withPrefix } = usePrefix()
 const iconTag = withPrefix('icon')
+const statisticTag = withPrefix('statistic')
 const alertTag = withPrefix('alert')
 const buttonTag = withPrefix('button')
 const tableTag = withPrefix('table')

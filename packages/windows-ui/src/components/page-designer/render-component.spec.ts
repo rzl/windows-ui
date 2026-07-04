@@ -28,6 +28,16 @@ describe('WPageRenderComponent', () => {
           styles: {},
           dataSource: { type: 'static', value: 1024 }
         }
+      },
+      global: {
+        stubs: {
+          WStatistic: {
+            props: ['title', 'value', 'prefix', 'suffix', 'precision', 'icon', 'color', 'valueStyle'],
+            setup(props: { title?: string; value?: number | string }) {
+              return () => h('div', { class: 'w-statistic-stub' }, [props.title, String(props.value)])
+            }
+          }
+        }
       }
     })
     expect(wrapper.text()).toContain('访问量')

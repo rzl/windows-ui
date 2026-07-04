@@ -26,12 +26,18 @@
       </template>
 
       <!-- 统计卡片 -->
-      <template v-else-if="node.type === 'statistic'">
-        <div class="stat-preview">
-          <div class="stat-title">{{ node.props.title }}</div>
-          <div class="stat-value">{{ node.dataSource?.value ?? '-' }}</div>
-        </div>
-      </template>
+      <component
+        :is="statisticTag"
+        v-else-if="node.type === 'statistic'"
+        :title="node.props.title"
+        :value="node.dataSource?.value ?? 0"
+        :prefix="node.props.prefix"
+        :suffix="node.props.suffix"
+        :precision="node.props.precision"
+        :icon="node.props.icon"
+        :color="node.props.color"
+        :value-style="node.props.valueStyle"
+      />
 
       <!-- 图表 -->
       <template v-else-if="node.type === 'chart'">
@@ -195,6 +201,7 @@ const emit = defineEmits(['select', 'delete', 'move', 'change'])
 
 const { withPrefix } = usePrefix()
 const alertTag = withPrefix('alert')
+const statisticTag = withPrefix('statistic')
 const buttonTag = withPrefix('button')
 const spaceTag = withPrefix('space')
 const inputTag = withPrefix('input')

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { h } from 'vue'
 import PageDesigner from './page-designer.vue'
 import ComponentNode from './component-node.vue'
 
@@ -80,7 +81,19 @@ describe('WPageDesigner', () => {
           ]
         }
       },
-      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+      global: {
+        stubs: {
+          WDialog: true,
+          WPageRenderer: true,
+          WPagePropertyEditor: true,
+          WStatistic: {
+            props: ['title', 'value', 'prefix', 'suffix', 'precision', 'icon', 'color', 'valueStyle'],
+            setup(props: { title?: string; value?: number | string }) {
+              return () => h('div', { class: 'w-statistic-stub' }, [props.title, String(props.value)])
+            }
+          }
+        }
+      }
     })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.unknown-type').exists()).toBe(false)

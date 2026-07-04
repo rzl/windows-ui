@@ -30,7 +30,9 @@ import { WStatistic, WRow, WCol } from '@windows-ui/core'
 | prefix | 前缀内容 | string | - |
 | suffix | 后缀内容 | string | - |
 | precision | 精度 | number | - |
-| valueStyle | - | object | - |
+| valueStyle | 数值自定义样式 | object | - |
+| icon | 数值前的图标名称 | string | - |
+| color | 数值主题色，支持 `primary/success/warning/danger` 等 | string | - |
 
 ## 主题定制
 
