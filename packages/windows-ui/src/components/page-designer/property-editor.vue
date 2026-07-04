@@ -79,6 +79,48 @@
       </component>
     </template>
 
+    <!-- 标签 -->
+    <template v-if="node.type === 'tag'">
+      <component :is="formItemTag" label="文字">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="类型">
+        <component :is="selectTag" v-model="node.props.type" :options="tagTypeOptions" />
+      </component>
+    </template>
+
+    <!-- 进度条 -->
+    <template v-if="node.type === 'progress'">
+      <component :is="formItemTag" label="百分比">
+        <component :is="inputNumberTag" v-model="node.props.percentage" :min="0" :max="100" />
+      </component>
+      <component :is="formItemTag" label="状态">
+        <component :is="selectTag" v-model="node.props.status" :options="progressStatusOptions" />
+      </component>
+      <component :is="formItemTag" label="宽度">
+        <component :is="inputNumberTag" v-model="node.props.width" :min="50" :max="600" />
+      </component>
+      <component :is="formItemTag" label="显示文字">
+        <component :is="switchTag" v-model="node.props.showText" />
+      </component>
+    </template>
+
+    <!-- 头像 -->
+    <template v-if="node.type === 'avatar'">
+      <component :is="formItemTag" label="图片地址">
+        <component :is="inputTag" v-model="node.props.src" />
+      </component>
+      <component :is="formItemTag" label="替代文本">
+        <component :is="inputTag" v-model="node.props.alt" />
+      </component>
+      <component :is="formItemTag" label="图标">
+        <component :is="inputTag" v-model="node.props.icon" placeholder="无图片时显示" />
+      </component>
+      <component :is="formItemTag" label="形状">
+        <component :is="selectTag" v-model="node.props.shape" :options="avatarShapeOptions" />
+      </component>
+    </template>
+
     <!-- 图片 -->
     <template v-if="node.type === 'image'">
       <component :is="formItemTag" label="图片地址">
@@ -329,6 +371,9 @@ const typeLabelMap: Record<string, string> = {
   alert: '公告',
   image: '图片',
   divider: '分隔线',
+  tag: '标签',
+  progress: '进度条',
+  avatar: '头像',
   table: '表格',
   list: '列表',
   model: '数据模型',
@@ -399,6 +444,26 @@ const objectFitOptions = [
   { label: '包含', value: 'contain' },
   { label: '填充', value: 'fill' },
   { label: '原始大小', value: 'none' }
+]
+
+const tagTypeOptions = [
+  { label: '默认', value: 'default' },
+  { label: '主要', value: 'primary' },
+  { label: '成功', value: 'success' },
+  { label: '警告', value: 'warning' },
+  { label: '危险', value: 'danger' }
+]
+
+const progressStatusOptions = [
+  { label: '默认', value: '' },
+  { label: '成功', value: 'success' },
+  { label: '警告', value: 'warning' },
+  { label: '危险', value: 'danger' }
+]
+
+const avatarShapeOptions = [
+  { label: '圆形', value: 'circle' },
+  { label: '方形', value: 'square' }
 ]
 
 const directionOptions = [

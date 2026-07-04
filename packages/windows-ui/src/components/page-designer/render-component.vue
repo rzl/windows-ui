@@ -32,6 +32,35 @@
       :closable="false"
     />
 
+    <!-- 标签 -->
+    <component
+      :is="tagTag"
+      v-else-if="node.type === 'tag'"
+      :type="node.props.type || 'default'"
+    >
+      {{ node.props.label }}
+    </component>
+
+    <!-- 进度条 -->
+    <component
+      :is="progressTag"
+      v-else-if="node.type === 'progress'"
+      :percentage="node.props.percentage ?? 50"
+      :status="node.props.status"
+      :width="node.props.width ?? 200"
+      :show-text="node.props.showText ?? true"
+    />
+
+    <!-- 头像 -->
+    <component
+      :is="avatarTag"
+      v-else-if="node.type === 'avatar'"
+      :src="node.props.src"
+      :alt="node.props.alt"
+      :icon="node.props.src ? '' : (node.props.icon || 'user')"
+      :shape="node.props.shape || 'circle'"
+    />
+
     <!-- 图片 -->
     <img
       v-else-if="node.type === 'image'"
@@ -271,6 +300,9 @@ const switchTag = withPrefix('switch')
 const radioTag = withPrefix('radio')
 const checkboxTag = withPrefix('checkbox')
 const datePickerTag = withPrefix('date-picker')
+const tagTag = withPrefix('tag')
+const progressTag = withPrefix('progress')
+const avatarTag = withPrefix('avatar')
 
 const pageContext = inject<PageContext | null>('pageContext', null)
 const activeTab = ref('')

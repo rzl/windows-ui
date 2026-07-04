@@ -82,6 +82,24 @@ const config = ref<PageConfig>({
       type: 'date-picker',
       props: { label: '出生日期', placeholder: '请选择日期', modelValue: '' },
       styles: { marginTop: '16px' }
+    },
+    {
+      id: 'tag1',
+      type: 'tag',
+      props: { label: '已完成', type: 'success' },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 'p1',
+      type: 'progress',
+      props: { percentage: 75, status: 'success', width: 200, showText: true },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 'a1',
+      type: 'avatar',
+      props: { src: '', alt: '张三', icon: 'user', shape: 'circle' },
+      styles: { marginTop: '16px' }
     }
   ]
 })
@@ -112,7 +130,10 @@ const config = ref({
     { id: 'sw1', type: 'switch', props: { label: '是否启用', modelValue: true }, styles: { marginTop: '16px' } },
     { id: 'r1', type: 'radio', props: { label: '性别', options: [{ label: '男', value: 'male' }, { label: '女', value: 'female' }], modelValue: '' }, styles: { marginTop: '16px' } },
     { id: 'c1', type: 'checkbox', props: { label: '爱好', options: [{ label: '读书', value: 'read' }, { label: '运动', value: 'sport' }], modelValue: [] }, styles: { marginTop: '16px' } },
-    { id: 'd1', type: 'date-picker', props: { label: '出生日期', placeholder: '请选择日期', modelValue: '' }, styles: { marginTop: '16px' } }
+    { id: 'd1', type: 'date-picker', props: { label: '出生日期', placeholder: '请选择日期', modelValue: '' }, styles: { marginTop: '16px' } },
+    { id: 'tag1', type: 'tag', props: { label: '已完成', type: 'success' }, styles: { marginTop: '16px' } },
+    { id: 'p1', type: 'progress', props: { percentage: 75, status: 'success', width: 200, showText: true }, styles: { marginTop: '16px' } },
+    { id: 'a1', type: 'avatar', props: { src: '', alt: '张三', icon: 'user', shape: 'circle' }, styles: { marginTop: '16px' } }
   ]
 })
 <\/script>

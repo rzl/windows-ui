@@ -43,6 +43,21 @@
         <component :is="alertTag" :type="node.props.type || 'info'" :title="node.props.content" :closable="false" />
       </template>
 
+      <!-- 标签 -->
+      <template v-else-if="node.type === 'tag'">
+        <component :is="tagTag" :type="node.props.type || 'default'">{{ node.props.label }}</component>
+      </template>
+
+      <!-- 进度条 -->
+      <template v-else-if="node.type === 'progress'">
+        <component :is="progressTag" :percentage="node.props.percentage ?? 50" :status="node.props.status" :width="node.props.width ?? 200" :show-text="node.props.showText ?? true" />
+      </template>
+
+      <!-- 头像 -->
+      <template v-else-if="node.type === 'avatar'">
+        <component :is="avatarTag" :src="node.props.src" :alt="node.props.alt" :icon="node.props.src ? '' : (node.props.icon || 'user')" :shape="node.props.shape || 'circle'" />
+      </template>
+
       <!-- 数据模型 -->
       <template v-else-if="node.type === 'model'">
         <div class="embed-preview">[嵌入模型] {{ node.props.modelCode || '未配置' }}</div>
@@ -188,6 +203,9 @@ const switchTag = withPrefix('switch')
 const radioTag = withPrefix('radio')
 const checkboxTag = withPrefix('checkbox')
 const datePickerTag = withPrefix('date-picker')
+const tagTag = withPrefix('tag')
+const progressTag = withPrefix('progress')
+const avatarTag = withPrefix('avatar')
 
 const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
@@ -204,6 +222,9 @@ const typeLabelMap: Record<string, string> = {
   alert: '公告',
   image: '图片',
   divider: '分隔线',
+  tag: '标签',
+  progress: '进度条',
+  avatar: '头像',
   table: '表格',
   list: '列表',
   model: '数据模型',
@@ -294,6 +315,12 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { height: '300px', chartType: 'echarts' }, dataSource: { type: 'static' }, option: { title: { text: '示例图表' }, xAxis: { data: ['一月', '二月', '三月'] }, yAxis: {}, series: [{ type: 'bar', data: [5, 20, 36] }] } }
     case 'alert':
       return { ...base, props: { content: '公告内容', type: 'info' } }
+    case 'tag':
+      return { ...base, props: { label: '标签', type: 'default' } }
+    case 'progress':
+      return { ...base, props: { percentage: 50, status: '', width: 200, showText: true } }
+    case 'avatar':
+      return { ...base, props: { src: '', alt: '用户', icon: 'user', shape: 'circle' } }
     case 'image':
       return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
     case 'divider':

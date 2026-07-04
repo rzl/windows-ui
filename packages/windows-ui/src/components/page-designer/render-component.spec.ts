@@ -114,6 +114,34 @@ describe('WPageRenderComponent', () => {
     expect(wrapper.text()).not.toContain('未知组件')
   })
 
+  it('应渲染标签节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'tag1', type: 'tag', props: { label: '示例标签', type: 'primary' }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).toContain('示例标签')
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染进度条节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'p1', type: 'progress', props: { percentage: 75, status: 'success', width: 200, showText: true }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染头像节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'a1', type: 'avatar', props: { src: '', alt: '用户', icon: 'user', shape: 'circle' }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
   it('应渲染未知组件兜底', () => {
     const wrapper = mount(RenderComponent, {
       props: {

@@ -214,6 +214,9 @@ const displayTypes = computed(() => [
   { label: '统计卡片', value: 'statistic' },
   { label: '图表', value: 'chart' },
   { label: '公告', value: 'alert' },
+  { label: '标签', value: 'tag' },
+  { label: '进度条', value: 'progress' },
+  { label: '头像', value: 'avatar' },
   { label: '表格', value: 'table' },
   { label: '列表', value: 'list' },
   ...listComponentsByCategory('display').map((c) => ({ label: c.label, value: c.type }))
@@ -320,6 +323,12 @@ function createDefaultComponent(type: string): PageNode {
     }
     case 'alert':
       return { ...base, props: { content: '公告内容', type: 'info' } }
+    case 'tag':
+      return { ...base, props: { label: '标签', type: 'default' } }
+    case 'progress':
+      return { ...base, props: { percentage: 50, status: '', width: 200, showText: true } }
+    case 'avatar':
+      return { ...base, props: { src: '', alt: '用户', icon: 'user', shape: 'circle' } }
     case 'image':
       return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
     case 'divider':
