@@ -16,7 +16,7 @@
           <div v-for="(action, index) in eventConfig.actions" :key="index" class="chain-item">
             <div class="chain-header">
               <span>动作 {{ index + 1 }}</span>
-              <component :is="buttonTag" :size="globalSize" type="danger" @click="removeAction(index)">删除</component>
+              <component :is="buttonTag" :size="globalSize" type="danger" icon="delete" title="删除" @click="removeAction(index)" />
             </div>
             <component :is="formItemTag" label="动作">
               <component :is="selectTag" v-model="action.action" :options="actionOptions" />
