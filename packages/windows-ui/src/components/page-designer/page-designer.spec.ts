@@ -183,4 +183,35 @@ describe('WPageDesigner', () => {
     const canvasBody = wrapper.find('.canvas-body')
     expect(canvasBody.attributes('style')).toContain('transform: scale(1)')
   })
+
+  it('应支持切换画布网格', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).showGrid).toBe(false)
+    ;(wrapper.vm as any).showGrid = true
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.canvas-body').classes()).toContain('show-grid')
+  })
+
+  it('按 Delete 键应删除选中节点', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const canvas = wrapper.find('.canvas-body')
+    await canvas.trigger('drop', { dataTransfer: { getData: () => 'text' } })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(1)
+
+    await wrapper.findComponent(ComponentNode).trigger('click')
+    await wrapper.vm.$nextTick()
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete' }))
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(0)
+  })
 })

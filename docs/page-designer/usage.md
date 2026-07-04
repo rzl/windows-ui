@@ -106,4 +106,12 @@ registerComponent({
 
 ## 主题定制
 
+## 画布辅助
+
+- 点击工具栏「网格」可显示/隐藏 20px 方格辅助线，便于对齐。
+- 选中节点后按 `Delete` / `Backspace` 可快速删除，`Esc` 取消选中。
+- 拖拽组件到画布或容器时，目标区域会高亮提示。
+
+## 主题定制
+
 设计器内部使用 `--w-color-primary`、`--w-border-color`、`--w-bg-color` 等 CSS 变量，可通过 `WConfigProvider` 或覆盖 `:root` 变量调整外观。

@@ -10,6 +10,7 @@
         <component :is="buttonTag" size="small" @click="zoomOut">缩小</component>
         <component :is="buttonTag" size="small" @click="zoomReset">{{ Math.round(zoom * 100) }}%</component>
         <component :is="buttonTag" size="small" @click="zoomIn">放大</component>
+        <component :is="buttonTag" size="small" :type="showGrid ? 'primary' : 'default'" @click="showGrid = !showGrid">网格</component>
         <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
         <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
         <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
@@ -109,7 +110,7 @@
         <div class="panel-title">画布</div>
         <div
           class="canvas-body"
-          :class="{ 'is-empty': !config.components?.length }"
+          :class="{ 'is-empty': !config.components?.length, 'show-grid': showGrid }"
           :style="canvasBodyStyle"
           data-droppable="root"
           @click.self="selectedId = ''"
@@ -226,6 +227,7 @@ const zoom = ref(1)
 const minZoom = 0.5
 const maxZoom = 2
 const zoomStep = 0.1
+const showGrid = ref(false)
 
 function zoomIn() {
   zoom.value = Math.min(maxZoom, Math.round((zoom.value + zoomStep) * 10) / 10)
@@ -346,19 +348,33 @@ function pasteNode() {
 
 function handleKeyDown(event: KeyboardEvent) {
   const isCtrl = event.ctrlKey || event.metaKey
-  if (!isCtrl) return
-  if (event.key === 'z' && !event.shiftKey) {
-    event.preventDefault()
-    undo()
-  } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
-    event.preventDefault()
-    redo()
-  } else if (event.key === 'c') {
-    event.preventDefault()
-    copySelectedNode()
-  } else if (event.key === 'v') {
-    event.preventDefault()
-    pasteNode()
+  if (isCtrl) {
+    if (event.key === 'z' && !event.shiftKey) {
+      event.preventDefault()
+      undo()
+      return
+    } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
+      event.preventDefault()
+      redo()
+      return
+    } else if (event.key === 'c') {
+      event.preventDefault()
+      copySelectedNode()
+      return
+    } else if (event.key === 'v') {
+      event.preventDefault()
+      pasteNode()
+      return
+    }
+  }
+
+  if (event.key === 'Delete' || event.key === 'Backspace') {
+    if (selectedNode.value) {
+      event.preventDefault()
+      deleteNode({ id: selectedId.value })
+    }
+  } else if (event.key === 'Escape') {
+    selectedId.value = ''
   }
 }
 
@@ -822,6 +838,12 @@ function goBack() {
 .canvas-body { flex: 1; border: 1px dashed #ccc; padding: 12px; position: relative; transition: transform 0.15s ease; }
 .canvas-body.is-empty { display: flex; align-items: center; justify-content: center; }
 .canvas-body.drop-target-active { background: rgba(0, 120, 215, 0.1); border-color: var(--w-color-primary); }
+.canvas-body.show-grid {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
 .empty-tip { color: #999; }
 .drag-ghost {
   position: fixed;
