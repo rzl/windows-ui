@@ -52,6 +52,24 @@ const designerConfig: PageConfig = {
       props: { title: '访问量', icon: 'eye', color: 'primary' },
       styles: { marginTop: '16px' },
       dataSource: { type: 'static', value: 1024 }
+    },
+    {
+      id: 'input_1',
+      type: 'input',
+      props: { label: '用户名', placeholder: '请输入用户名', type: 'text', modelValue: '' },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 'select_1',
+      type: 'select',
+      props: { label: '状态', placeholder: '请选择', options: [{ label: '启用', value: '1' }, { label: '禁用', value: '0' }], modelValue: '' },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 'switch_1',
+      type: 'switch',
+      props: { label: '是否启用', modelValue: true },
+      styles: { marginTop: '16px' }
     }
   ]
 }
@@ -77,7 +95,10 @@ const designerConfig = {
   title: '示例页面',
   components: [
     { id: 'text_1', type: 'text', props: { content: '这是一段示例文本', tag: 'p', align: 'left' }, styles: {} },
-    { id: 'stat_1', type: 'statistic', props: { title: '访问量', icon: 'eye', color: 'primary' }, styles: { marginTop: '16px' }, dataSource: { type: 'static', value: 1024 } }
+    { id: 'stat_1', type: 'statistic', props: { title: '访问量', icon: 'eye', color: 'primary' }, styles: { marginTop: '16px' }, dataSource: { type: 'static', value: 1024 } },
+    { id: 'input_1', type: 'input', props: { label: '用户名', placeholder: '请输入用户名', type: 'text', modelValue: '' }, styles: { marginTop: '16px' } },
+    { id: 'select_1', type: 'select', props: { label: '状态', placeholder: '请选择', options: [{ label: '启用', value: '1' }, { label: '禁用', value: '0' }], modelValue: '' }, styles: { marginTop: '16px' } },
+    { id: 'switch_1', type: 'switch', props: { label: '是否启用', modelValue: true }, styles: { marginTop: '16px' } }
   ]
 }
 

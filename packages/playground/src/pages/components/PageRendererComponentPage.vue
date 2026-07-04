@@ -46,6 +46,24 @@ const config = ref<PageConfig>({
       type: 'alert',
       props: { content: '这是一条公告信息', type: 'info' },
       styles: {}
+    },
+    {
+      id: 'i1',
+      type: 'input',
+      props: { label: '用户名', placeholder: '请输入用户名', type: 'text', modelValue: '' },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 's2',
+      type: 'select',
+      props: { label: '状态', placeholder: '请选择', options: [{ label: '启用', value: '1' }, { label: '禁用', value: '0' }], modelValue: '' },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 'sw1',
+      type: 'switch',
+      props: { label: '是否启用', modelValue: true },
+      styles: { marginTop: '16px' }
     }
   ]
 })
@@ -70,7 +88,10 @@ const config = ref({
   components: [
     { id: 't1', type: 'text', props: { content: '欢迎使用页面渲染器', tag: 'h3', align: 'center' }, styles: {} },
     { id: 's1', type: 'statistic', props: { title: '今日访问', icon: 'user', color: 'primary' }, styles: {}, dataSource: { type: 'static', value: 1280 } },
-    { id: 'n1', type: 'alert', props: { content: '这是一条公告信息', type: 'info' }, styles: {} }
+    { id: 'n1', type: 'alert', props: { content: '这是一条公告信息', type: 'info' }, styles: {} },
+    { id: 'i1', type: 'input', props: { label: '用户名', placeholder: '请输入用户名', type: 'text', modelValue: '' }, styles: { marginTop: '16px' } },
+    { id: 's2', type: 'select', props: { label: '状态', placeholder: '请选择', options: [{ label: '启用', value: '1' }, { label: '禁用', value: '0' }], modelValue: '' }, styles: { marginTop: '16px' } },
+    { id: 'sw1', type: 'switch', props: { label: '是否启用', modelValue: true }, styles: { marginTop: '16px' } }
   ]
 })
 <\/script>

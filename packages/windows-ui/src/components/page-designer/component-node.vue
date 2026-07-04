@@ -93,6 +93,21 @@
         <a href="javascript:void(0)">{{ node.props.label }}</a>
       </template>
 
+      <!-- 输入框 -->
+      <template v-else-if="node.type === 'input'">
+        <component :is="inputTag" :model-value="node.props.modelValue" :placeholder="node.props.placeholder" :type="node.props.type || 'text'" disabled />
+      </template>
+
+      <!-- 选择器 -->
+      <template v-else-if="node.type === 'select'">
+        <component :is="selectTag" :model-value="node.props.modelValue" :options="node.props.options || []" :placeholder="node.props.placeholder" disabled />
+      </template>
+
+      <!-- 开关 -->
+      <template v-else-if="node.type === 'switch'">
+        <component :is="switchTag" :model-value="node.props.modelValue" disabled />
+      </template>
+
       <!-- 容器/卡片/栅格/标签页 -->
       <template v-else-if="isContainer">
         <div v-if="node.type === 'card'" class="card-title">{{ node.props.title }}</div>
@@ -152,6 +167,9 @@ const { withPrefix } = usePrefix()
 const alertTag = withPrefix('alert')
 const buttonTag = withPrefix('button')
 const spaceTag = withPrefix('space')
+const inputTag = withPrefix('input')
+const selectTag = withPrefix('select')
+const switchTag = withPrefix('switch')
 
 const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
@@ -174,7 +192,10 @@ const typeLabelMap: Record<string, string> = {
   dashboard: '仪表盘',
   report: '报表',
   button: '按钮',
-  link: '链接'
+  link: '链接',
+  input: '输入框',
+  select: '选择器',
+  switch: '开关'
 }
 
 const typeLabel = computed(() => typeLabelMap[props.node.type] || pluginComponent.value?.label || props.node.type)
@@ -270,6 +291,12 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { label: '按钮', type: 'default' }, events: { onClick: { action: 'navigate', target: '' } } }
     case 'link':
       return { ...base, props: { label: '链接', path: '' } }
+    case 'input':
+      return { ...base, props: { label: '输入框', placeholder: '请输入', type: 'text', modelValue: '' } }
+    case 'select':
+      return { ...base, props: { label: '选择器', placeholder: '请选择', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
+    case 'switch':
+      return { ...base, props: { label: '开关', modelValue: false } }
     default:
       return base
   }

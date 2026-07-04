@@ -92,6 +92,31 @@
     <!-- 链接 -->
     <a v-else-if="node.type === 'link'" href="javascript:void(0)" @click="handleLinkClick">{{ node.props.label }}</a>
 
+    <!-- 输入框 -->
+    <component
+      :is="inputTag"
+      v-else-if="node.type === 'input'"
+      v-model="node.props.modelValue"
+      :placeholder="node.props.placeholder"
+      :type="node.props.type || 'text'"
+    />
+
+    <!-- 选择器 -->
+    <component
+      :is="selectTag"
+      v-else-if="node.type === 'select'"
+      v-model="node.props.modelValue"
+      :options="node.props.options || []"
+      :placeholder="node.props.placeholder"
+    />
+
+    <!-- 开关 -->
+    <component
+      :is="switchTag"
+      v-else-if="node.type === 'switch'"
+      v-model="node.props.modelValue"
+    />
+
     <!-- 容器 -->
     <div
       v-else-if="node.type === 'container'"
@@ -216,6 +241,9 @@ const alertTag = withPrefix('alert')
 const buttonTag = withPrefix('button')
 const tableTag = withPrefix('table')
 const cardTag = withPrefix('card')
+const inputTag = withPrefix('input')
+const selectTag = withPrefix('select')
+const switchTag = withPrefix('switch')
 
 const pageContext = inject<PageContext | null>('pageContext', null)
 const activeTab = ref('')

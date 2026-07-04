@@ -217,6 +217,42 @@
       </component>
     </template>
 
+    <!-- 输入框 -->
+    <template v-if="node.type === 'input'">
+      <component :is="formItemTag" label="标签">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="占位提示">
+        <component :is="inputTag" v-model="node.props.placeholder" />
+      </component>
+      <component :is="formItemTag" label="类型">
+        <component :is="selectTag" v-model="node.props.type" :options="inputTypeOptions" />
+      </component>
+    </template>
+
+    <!-- 选择器 -->
+    <template v-if="node.type === 'select'">
+      <component :is="formItemTag" label="标签">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="占位提示">
+        <component :is="inputTag" v-model="node.props.placeholder" />
+      </component>
+      <component :is="formItemTag" label="选项（JSON）">
+        <component :is="inputTag" v-model="optionsText" type="textarea" :rows="4" placeholder='[{"label":"选项1","value":"1"}]' />
+      </component>
+    </template>
+
+    <!-- 开关 -->
+    <template v-if="node.type === 'switch'">
+      <component :is="formItemTag" label="标签">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="默认值">
+        <component :is="switchTag" v-model="node.props.modelValue" />
+      </component>
+    </template>
+
     <!-- 插件组件 -->
     <template v-else-if="pluginComponent">
       <component :is="formItemTag" label="组件编码">
@@ -244,6 +280,7 @@ const formItemTag = withPrefix('form-item')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')
 const inputNumberTag = withPrefix('input-number')
+const switchTag = withPrefix('switch')
 
 const props = defineProps<{
   node: PageNode
@@ -268,7 +305,10 @@ const typeLabelMap: Record<string, string> = {
   dashboard: '仪表盘',
   report: '报表',
   button: '按钮',
-  link: '链接'
+  link: '链接',
+  input: '输入框',
+  select: '选择器',
+  switch: '开关'
 }
 
 const typeLabel = computed(() => typeLabelMap[props.node.type] || props.node.type)
@@ -333,6 +373,13 @@ const directionOptions = [
   { label: '垂直', value: 'vertical' }
 ]
 
+const inputTypeOptions = [
+  { label: '文本', value: 'text' },
+  { label: '密码', value: 'password' },
+  { label: '数字', value: 'number' },
+  { label: '多行文本', value: 'textarea' }
+]
+
 const optionText = computed({
   get() {
     return JSON.stringify(props.node.option || {}, null, 2)
@@ -355,6 +402,21 @@ const tabsText = computed({
     try {
       if (!props.node.props) props.node.props = {}
       props.node.props.tabs = JSON.parse(value)
+      emit('update', props.node)
+    } catch {
+      // ignore invalid json
+    }
+  }
+})
+
+const optionsText = computed({
+  get() {
+    return JSON.stringify(props.node.props?.options || [], null, 2)
+  },
+  set(value: string) {
+    try {
+      if (!props.node.props) props.node.props = {}
+      props.node.props.options = JSON.parse(value)
       emit('update', props.node)
     } catch {
       // ignore invalid json

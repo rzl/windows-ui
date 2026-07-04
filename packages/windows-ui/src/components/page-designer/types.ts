@@ -60,7 +60,7 @@ export interface ChartPluginDefinition {
 export interface PageComponentDefinition {
   type: string
   label: string
-  category: 'layout' | 'display' | 'data' | 'action'
+  category: 'layout' | 'display' | 'data' | 'action' | 'form'
   icon?: string
   isContainer?: boolean
   defaultNode: () => Omit<PageNode, 'id'>

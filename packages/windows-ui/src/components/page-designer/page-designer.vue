@@ -51,6 +51,19 @@
           </div>
         </div>
         <div class="component-group">
+          <div class="group-title">表单</div>
+          <div
+            v-for="type in formTypes"
+            :key="type.value"
+            class="component-item"
+            :draggable="!isMobile"
+            @dragstart="handleDragStart($event, type.value)"
+            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+          >
+            {{ type.label }}
+          </div>
+        </div>
+        <div class="component-group">
           <div class="group-title">数据</div>
           <div
             v-for="type in dataTypes"
@@ -218,6 +231,13 @@ const actionTypes = computed(() => [
   ...listComponentsByCategory('action').map((c) => ({ label: c.label, value: c.type }))
 ])
 
+const formTypes = computed(() => [
+  { label: '输入框', value: 'input' },
+  { label: '选择器', value: 'select' },
+  { label: '开关', value: 'switch' },
+  ...listComponentsByCategory('form').map((c) => ({ label: c.label, value: c.type }))
+])
+
 const mobileTabs = [
   { label: '组件库', value: 'library' as const },
   { label: '画布', value: 'canvas' as const },
@@ -315,6 +335,12 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { label: '按钮', type: 'default' }, events: { onClick: { action: 'navigate', target: '' } } }
     case 'link':
       return { ...base, props: { label: '链接', path: '' } }
+    case 'input':
+      return { ...base, props: { label: '输入框', placeholder: '请输入', type: 'text', modelValue: '' } }
+    case 'select':
+      return { ...base, props: { label: '选择器', placeholder: '请选择', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
+    case 'switch':
+      return { ...base, props: { label: '开关', modelValue: false } }
     default:
       return base
   }

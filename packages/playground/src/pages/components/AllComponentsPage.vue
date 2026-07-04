@@ -569,7 +569,10 @@ const pageRendererConfig = {
   title: '全部组件预览',
   components: [
     { id: 't1', type: 'text', props: { content: '页面渲染器示例', tag: 'p', align: 'left' }, styles: {} },
-    { id: 's1', type: 'statistic', props: { title: '在线', icon: 'user', color: 'success' }, styles: { marginTop: '8px' }, dataSource: { type: 'static', value: 1280 } }
+    { id: 's1', type: 'statistic', props: { title: '在线', icon: 'user', color: 'success' }, styles: { marginTop: '8px' }, dataSource: { type: 'static', value: 1280 } },
+    { id: 'i1', type: 'input', props: { label: '用户名', placeholder: '请输入用户名', type: 'text', modelValue: '' }, styles: { marginTop: '8px' } },
+    { id: 's2', type: 'select', props: { label: '状态', placeholder: '请选择', options: [{ label: '启用', value: '1' }, { label: '禁用', value: '0' }], modelValue: '' }, styles: { marginTop: '8px' } },
+    { id: 'sw1', type: 'switch', props: { label: '是否启用', modelValue: true }, styles: { marginTop: '8px' } }
   ]
 }
 

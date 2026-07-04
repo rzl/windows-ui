@@ -60,6 +60,33 @@ describe('WPageRenderComponent', () => {
     expect(wrapper.text()).not.toContain('未知组件')
   })
 
+  it('应渲染输入框节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'i1', type: 'input', props: { label: '用户名', placeholder: '请输入用户名', type: 'text', modelValue: '' }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染选择器节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 's1', type: 'select', props: { label: '状态', placeholder: '请选择', options: [{ label: '启用', value: '1' }], modelValue: '' }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染开关节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'sw1', type: 'switch', props: { label: '是否启用', modelValue: true }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
   it('应渲染未知组件兜底', () => {
     const wrapper = mount(RenderComponent, {
       props: {
