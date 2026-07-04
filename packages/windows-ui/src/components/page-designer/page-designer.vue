@@ -127,13 +127,35 @@
 
       <!-- 属性面板 -->
       <div v-if="!isMobile || activePanel === 'property'" class="property-panel">
-        <div class="panel-title">属性</div>
-        <property-editor
-          v-if="selectedNode"
-          :node="selectedNode"
-          @update="onPropertyUpdate"
-        />
-        <div v-else class="empty-tip">选中画布中的组件以编辑属性</div>
+        <div class="panel-tabs">
+          <div
+            :class="['panel-tab', { active: activeRightPanel === 'property' }]"
+            @click="activeRightPanel = 'property'"
+          >
+            属性
+          </div>
+          <div
+            :class="['panel-tab', { active: activeRightPanel === 'outline' }]"
+            @click="activeRightPanel = 'outline'"
+          >
+            大纲
+          </div>
+        </div>
+        <template v-if="activeRightPanel === 'property'">
+          <property-editor
+            v-if="selectedNode"
+            :node="selectedNode"
+            @update="onPropertyUpdate"
+          />
+          <div v-else class="empty-tip">选中画布中的组件以编辑属性</div>
+        </template>
+        <template v-else>
+          <outline-tree
+            :components="config.components || []"
+            :selected-id="selectedId"
+            @select="selectNode"
+          />
+        </template>
       </div>
     </div>
 
@@ -158,6 +180,7 @@ import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import ComponentNode from './component-node.vue'
 import PropertyEditor from './property-editor.vue'
 import PageRenderer from './page-renderer.vue'
+import OutlineTree from './outline-tree.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
 import { usePrefix } from '../../utils/prefix'
 import type { PageConfig, PageNode } from './types'
@@ -191,6 +214,7 @@ const selectedId = ref<string>('')
 const previewVisible = ref(false)
 const configVisible = ref(false)
 const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
+const activeRightPanel = ref<'property' | 'outline'>('property')
 
 const configJson = computed(() => JSON.stringify(config, null, 2))
 
@@ -684,8 +708,12 @@ function goBack() {
 .designer-layout { display: flex; gap: 12px; min-height: 600px; }
 .component-library { width: 180px; background: #fff; border: 1px solid #ddd; padding: 12px; }
 .canvas-panel { flex: 1; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
-.property-panel { width: 280px; background: #fff; border: 1px solid #ddd; padding: 12px; }
+.property-panel { width: 280px; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
 .panel-title { font-weight: bold; margin-bottom: 12px; }
+.panel-tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #eee; }
+.panel-tab { padding: 6px 12px; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; }
+.panel-tab:hover { color: #333; }
+.panel-tab.active { color: var(--w-color-primary); border-bottom-color: var(--w-color-primary); font-weight: bold; }
 .component-group { margin-bottom: 12px; }
 .group-title { color: #666; font-size: 12px; margin-bottom: 6px; }
 .component-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 6px; cursor: grab; background: #f8f8f8; }
