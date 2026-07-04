@@ -27,6 +27,8 @@ export interface PageEventConfig {
   body?: Record<string, any>
   variable?: string
   value?: any
+  condition?: string
+  actions?: PageEventConfig[]
 }
 
 export interface PageDataSource {

@@ -67,6 +67,26 @@ async function savePage(data: any) {
 
 页面保存时，`config.formData` 会按字段默认值自动生成；`WPageRenderer` 渲染时也会用 `config.formData` 初始化页面状态。
 
+## 事件与链式动作
+
+交互组件（按钮、链接、图片等）支持配置 `onClick` 事件。事件配置支持：
+
+- **执行条件**：通过 JS 表达式判断，如 `formData.status === '1'`，可引用 `formData` 与 `pageState`。
+- **链式动作**：一个事件可配置多个动作，按顺序执行；每个动作也可单独设置条件。
+- **动作类型**：跳转、打开弹窗、调用接口、设置变量、刷新页面、返回、打开外部链接。
+
+```json
+{
+  "onClick": {
+    "condition": "formData.agree === true",
+    "actions": [
+      { "action": "setVariable", "variable": "submitted", "value": true },
+      { "action": "navigate", "target": "/success" }
+    ]
+  }
+}
+```
+
 ## 扩展组件
 
 通过 `registerComponent` 注册自定义页面组件：

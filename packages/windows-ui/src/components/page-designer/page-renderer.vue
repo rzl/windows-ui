@@ -147,8 +147,39 @@ function updateFormData(key: string, value: any) {
   formData[key] = value
 }
 
+function createEventContext() {
+  return { pageState, formData }
+}
+
+function evaluateCondition(condition: string, ctx: { pageState: Record<string, any>; formData: Record<string, any> }): boolean {
+  if (!condition.trim()) return true
+  try {
+    const fn = new Function('pageState', 'formData', `return (${condition})`)
+    return !!fn(ctx.pageState, ctx.formData)
+  } catch {
+    return false
+  }
+}
+
 async function executeEvent(event: PageEventConfig | undefined) {
   if (!event) return
+  const ctx = createEventContext()
+
+  // 链式动作：整体条件 + 依次执行每个动作
+  if (event.actions && event.actions.length) {
+    if (event.condition && !evaluateCondition(event.condition, ctx)) return
+    for (const action of event.actions) {
+      if (action.condition && !evaluateCondition(action.condition, ctx)) continue
+      await executeSingleAction(action)
+    }
+    return
+  }
+
+  if (event.condition && !evaluateCondition(event.condition, ctx)) return
+  await executeSingleAction(event)
+}
+
+async function executeSingleAction(event: PageEventConfig) {
   const { action, target, method = 'GET', params = {}, body = {}, variable = '', value = '' } = event
 
   switch (action) {

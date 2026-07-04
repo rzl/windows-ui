@@ -90,4 +90,33 @@ describe('WPageRenderer', () => {
     expect(wrapper.emitted('navigate')).toHaveLength(1)
     expect(wrapper.emitted('navigate')![0]).toEqual(['/home'])
   })
+
+  it('executeEvent 条件不满足时不应执行动作', () => {
+    const wrapper = mount(PageRenderer, {
+      props: {
+        config: { components: [] },
+        preview: true
+      },
+      global: { stubs: ['WDialog', 'WResult'] }
+    })
+    ;(wrapper.vm as any).executeEvent({ action: 'navigate', target: '/home', condition: 'false' })
+    expect(wrapper.emitted('navigate')).toBeUndefined()
+  })
+
+  it('executeEvent 应按顺序执行链式动作', async () => {
+    const wrapper = mount(PageRenderer, {
+      props: {
+        config: { components: [] },
+        preview: true
+      },
+      global: { stubs: ['WDialog', 'WResult'] }
+    })
+    await (wrapper.vm as any).executeEvent({
+      actions: [
+        { action: 'setVariable', variable: 'name', value: 'test' },
+        { action: 'navigate', target: '/home' }
+      ]
+    })
+    expect(wrapper.emitted('navigate')).toHaveLength(1)
+  })
 })
