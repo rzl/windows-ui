@@ -6,20 +6,30 @@
     </component>
 
     <!-- 通用样式 -->
-    <component :is="formItemTag" label="上边距">
-      <component :is="inputTag" v-model="node.styles.marginTop" />
-    </component>
-    <component :is="formItemTag" label="下边距">
-      <component :is="inputTag" v-model="node.styles.marginBottom" />
-    </component>
-    <component :is="formItemTag" label="左边距">
-      <component :is="inputTag" v-model="node.styles.marginLeft" />
-    </component>
-    <component :is="formItemTag" label="右边距">
-      <component :is="inputTag" v-model="node.styles.marginRight" />
-    </component>
+    <div class="section-title">样式</div>
     <component :is="formItemTag" label="宽度">
       <component :is="inputTag" v-model="node.styles.width" placeholder="如 100% 或 300px" />
+    </component>
+    <component :is="formItemTag" label="外边距">
+      <component :is="inputTag" v-model="node.styles.margin" placeholder="如 16px 或 8px 12px" />
+    </component>
+    <component :is="formItemTag" label="内边距">
+      <component :is="inputTag" v-model="node.styles.padding" placeholder="如 16px 或 8px 12px" />
+    </component>
+    <component :is="formItemTag" label="背景色">
+      <component :is="colorPickerTag" v-model="node.styles.backgroundColor" />
+    </component>
+    <component :is="formItemTag" label="文字颜色">
+      <component :is="colorPickerTag" v-model="node.styles.color" />
+    </component>
+    <component :is="formItemTag" label="字体大小">
+      <component :is="inputTag" v-model="node.styles.fontSize" placeholder="如 14px" />
+    </component>
+    <component :is="formItemTag" label="圆角">
+      <component :is="inputTag" v-model="node.styles.borderRadius" placeholder="如 4px" />
+    </component>
+    <component :is="formItemTag" label="对齐">
+      <component :is="selectTag" v-model="node.styles.textAlign" :options="textAlignOptions" />
     </component>
 
     <!-- 文本 -->
@@ -353,6 +363,7 @@ const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')
 const inputNumberTag = withPrefix('input-number')
 const switchTag = withPrefix('switch')
+const colorPickerTag = withPrefix('color-picker')
 
 const props = defineProps<{
   node: PageNode
@@ -469,6 +480,13 @@ const avatarShapeOptions = [
 const directionOptions = [
   { label: '水平', value: 'horizontal' },
   { label: '垂直', value: 'vertical' }
+]
+
+const textAlignOptions = [
+  { label: '默认', value: '' },
+  { label: '左对齐', value: 'left' },
+  { label: '居中', value: 'center' },
+  { label: '右对齐', value: 'right' }
 ]
 
 const inputTypeOptions = [
