@@ -45,6 +45,7 @@ import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 defineOptions({ name: 'WPageRenderer' })
 
 import RenderComponent from './render-component.vue'
+import './built-in-components'
 import { usePrefix } from '../../utils/prefix'
 import type { PageConfig, PageDataSource, PageEventConfig, PageNode } from './types'
 

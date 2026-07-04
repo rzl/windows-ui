@@ -190,6 +190,7 @@ import PropertyEditor from './property-editor.vue'
 import PageRenderer from './page-renderer.vue'
 import OutlineTree from './outline-tree.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
+import './built-in-components'
 import { usePrefix } from '../../utils/prefix'
 import type { PageConfig, PageNode } from './types'
 

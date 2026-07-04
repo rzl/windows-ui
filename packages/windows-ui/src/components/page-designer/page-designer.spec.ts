@@ -15,6 +15,8 @@ describe('WPageDesigner', () => {
     expect(wrapper.find('.property-panel').exists()).toBe(true)
     expect(wrapper.text()).toContain('文本')
     expect(wrapper.text()).toContain('按钮')
+    expect(wrapper.text()).toContain('评分')
+    expect(wrapper.text()).toContain('日历')
   })
 
   it('拖拽添加组件到根画布后应渲染节点', async () => {

@@ -66,3 +66,5 @@ registerChart({
 </html>`
   }
 })
+
+
