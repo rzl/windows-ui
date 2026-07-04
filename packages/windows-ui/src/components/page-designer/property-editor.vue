@@ -131,6 +131,39 @@
       </component>
     </template>
 
+    <!-- 徽标 -->
+    <template v-if="node.type === 'badge'">
+      <component :is="formItemTag" label="包裹文字">
+        <component :is="inputTag" v-model="node.props.text" />
+      </component>
+      <component :is="formItemTag" label="数值">
+        <component :is="inputTag" v-model="node.props.value" />
+      </component>
+      <component :is="formItemTag" label="类型">
+        <component :is="selectTag" v-model="node.props.type" :options="tagTypeOptions" />
+      </component>
+      <component :is="formItemTag" label="圆点">
+        <component :is="switchTag" v-model="node.props.isDot" />
+      </component>
+    </template>
+
+    <!-- 步骤条 -->
+    <template v-if="node.type === 'steps'">
+      <component :is="formItemTag" label="当前步骤">
+        <component :is="inputNumberTag" v-model="node.props.active" :min="0" />
+      </component>
+      <component :is="formItemTag" label="步骤（JSON）">
+        <component :is="inputTag" v-model="itemsText" type="textarea" :rows="4" placeholder='[{"title":"步骤1"}]' />
+      </component>
+    </template>
+
+    <!-- 时间线 -->
+    <template v-if="node.type === 'timeline'">
+      <component :is="formItemTag" label="数据（JSON）">
+        <component :is="inputTag" v-model="itemsText" type="textarea" :rows="6" placeholder='[{"time":"2026-07-01","title":"事件","content":"描述"}]' />
+      </component>
+    </template>
+
     <!-- 图片 -->
     <template v-if="node.type === 'image'">
       <component :is="formItemTag" label="图片地址">
@@ -418,6 +451,9 @@ const typeLabelMap: Record<string, string> = {
   tag: '标签',
   progress: '进度条',
   avatar: '头像',
+  badge: '徽标',
+  steps: '步骤条',
+  timeline: '时间线',
   table: '表格',
   list: '列表',
   model: '数据模型',
@@ -566,6 +602,21 @@ const optionsText = computed({
     try {
       if (!props.node.props) props.node.props = {}
       props.node.props.options = JSON.parse(value)
+      emit('update', props.node)
+    } catch {
+      // ignore invalid json
+    }
+  }
+})
+
+const itemsText = computed({
+  get() {
+    return JSON.stringify(props.node.props?.items || [], null, 2)
+  },
+  set(value: string) {
+    try {
+      if (!props.node.props) props.node.props = {}
+      props.node.props.items = JSON.parse(value)
       emit('update', props.node)
     } catch {
       // ignore invalid json

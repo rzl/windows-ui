@@ -64,6 +64,21 @@
         <component :is="avatarTag" :src="node.props.src" :alt="node.props.alt" :icon="node.props.src ? '' : (node.props.icon || 'user')" :shape="node.props.shape || 'circle'" />
       </template>
 
+      <!-- 徽标 -->
+      <template v-else-if="node.type === 'badge'">
+        <component :is="badgeTag" :value="node.props.value" :is-dot="node.props.isDot" :type="node.props.type || 'danger'">{{ node.props.text || '徽标' }}</component>
+      </template>
+
+      <!-- 步骤条 -->
+      <template v-else-if="node.type === 'steps'">
+        <component :is="stepsTag" :items="node.props.items || []" :active="node.props.active ?? 0" />
+      </template>
+
+      <!-- 时间线 -->
+      <template v-else-if="node.type === 'timeline'">
+        <component :is="timelineTag" :items="node.props.items || []" />
+      </template>
+
       <!-- 数据模型 -->
       <template v-else-if="node.type === 'model'">
         <div class="embed-preview">[嵌入模型] {{ node.props.modelCode || '未配置' }}</div>
@@ -213,6 +228,9 @@ const datePickerTag = withPrefix('date-picker')
 const tagTag = withPrefix('tag')
 const progressTag = withPrefix('progress')
 const avatarTag = withPrefix('avatar')
+const badgeTag = withPrefix('badge')
+const stepsTag = withPrefix('steps')
+const timelineTag = withPrefix('timeline')
 
 const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
@@ -232,6 +250,9 @@ const typeLabelMap: Record<string, string> = {
   tag: '标签',
   progress: '进度条',
   avatar: '头像',
+  badge: '徽标',
+  steps: '步骤条',
+  timeline: '时间线',
   table: '表格',
   list: '列表',
   model: '数据模型',
@@ -329,6 +350,12 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { percentage: 50, status: '', width: 200, showText: true } }
     case 'avatar':
       return { ...base, props: { src: '', alt: '用户', icon: 'user', shape: 'circle' } }
+    case 'badge':
+      return { ...base, props: { text: '徽标', value: 5, isDot: false, type: 'danger' } }
+    case 'steps':
+      return { ...base, props: { items: [{ title: '步骤1' }, { title: '步骤2' }, { title: '步骤3' }], active: 1 } }
+    case 'timeline':
+      return { ...base, props: { items: [{ time: '2026-07-01', title: '事件1', content: '描述内容', color: '#245edb' }, { time: '2026-07-02', title: '事件2' }] } }
     case 'image':
       return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
     case 'divider':

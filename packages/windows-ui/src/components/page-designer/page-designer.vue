@@ -388,6 +388,9 @@ const displayTypes = computed(() => [
   { label: '标签', value: 'tag' },
   { label: '进度条', value: 'progress' },
   { label: '头像', value: 'avatar' },
+  { label: '徽标', value: 'badge' },
+  { label: '步骤条', value: 'steps' },
+  { label: '时间线', value: 'timeline' },
   { label: '表格', value: 'table' },
   { label: '列表', value: 'list' },
   ...listComponentsByCategory('display').map((c) => ({ label: c.label, value: c.type }))
@@ -510,6 +513,12 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { percentage: 50, status: '', width: 200, showText: true } }
     case 'avatar':
       return { ...base, props: { src: '', alt: '用户', icon: 'user', shape: 'circle' } }
+    case 'badge':
+      return { ...base, props: { text: '徽标', value: 5, isDot: false, type: 'danger' } }
+    case 'steps':
+      return { ...base, props: { items: [{ title: '步骤1' }, { title: '步骤2' }, { title: '步骤3' }], active: 1 } }
+    case 'timeline':
+      return { ...base, props: { items: [{ time: '2026-07-01', title: '事件1', content: '描述内容', color: '#245edb' }, { time: '2026-07-02', title: '事件2' }] } }
     case 'image':
       return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
     case 'divider':

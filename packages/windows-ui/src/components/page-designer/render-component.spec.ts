@@ -174,6 +174,56 @@ describe('WPageRenderComponent', () => {
     expect(wrapper.text()).not.toContain('未知组件')
   })
 
+  it('应渲染徽标节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'b1', type: 'badge', props: { text: '消息', value: 12, type: 'danger' }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).toContain('消息')
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染步骤条节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'st1', type: 'steps', props: { items: [{ title: '提交' }, { title: '审核' }], active: 0 }, styles: {} }
+      },
+      global: {
+        stubs: {
+          WSteps: {
+            props: ['items', 'active'],
+            setup(props: { items?: { title: string }[] }) {
+              return () => h('div', { class: 'w-steps-stub' }, props.items?.map((i) => i.title).join(','))
+            }
+          }
+        }
+      }
+    })
+    expect(wrapper.text()).toContain('提交')
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染时间线节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'tl1', type: 'timeline', props: { items: [{ time: '2026-07-01', title: '上线' }] }, styles: {} }
+      },
+      global: {
+        stubs: {
+          WTimeline: {
+            props: ['items'],
+            setup(props: { items?: { title: string }[] }) {
+              return () => h('div', { class: 'w-timeline-stub' }, props.items?.map((i) => i.title).join(','))
+            }
+          }
+        }
+      }
+    })
+    expect(wrapper.text()).toContain('上线')
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
   it('应渲染未知组件兜底', () => {
     const wrapper = mount(RenderComponent, {
       props: {

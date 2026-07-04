@@ -66,6 +66,32 @@
       :shape="node.props.shape || 'circle'"
     />
 
+    <!-- 徽标 -->
+    <component
+      :is="badgeTag"
+      v-else-if="node.type === 'badge'"
+      :value="node.props.value"
+      :is-dot="node.props.isDot"
+      :type="node.props.type || 'danger'"
+    >
+      {{ node.props.text || '徽标' }}
+    </component>
+
+    <!-- 步骤条 -->
+    <component
+      :is="stepsTag"
+      v-else-if="node.type === 'steps'"
+      :items="node.props.items || []"
+      :active="node.props.active ?? 0"
+    />
+
+    <!-- 时间线 -->
+    <component
+      :is="timelineTag"
+      v-else-if="node.type === 'timeline'"
+      :items="node.props.items || []"
+    />
+
     <!-- 图片 -->
     <img
       v-else-if="node.type === 'image'"
@@ -309,6 +335,9 @@ const datePickerTag = withPrefix('date-picker')
 const tagTag = withPrefix('tag')
 const progressTag = withPrefix('progress')
 const avatarTag = withPrefix('avatar')
+const badgeTag = withPrefix('badge')
+const stepsTag = withPrefix('steps')
+const timelineTag = withPrefix('timeline')
 
 const pageContext = inject<PageContext | null>('pageContext', null)
 const activeTab = ref('')
