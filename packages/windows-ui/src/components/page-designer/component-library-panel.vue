@@ -31,6 +31,7 @@
           v-for="type in group.items"
           :key="type.value"
           type="button"
+          plain
           class="component-item"
           :size="globalSize"
           :icon="type.icon"
