@@ -216,4 +216,56 @@ describe('WPageDesigner', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.findAllComponents(ComponentNode).length).toBe(0)
   })
+
+  it('应渲染左侧图标按钮组并默认显示组件库', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.left-sidebar').exists()).toBe(true)
+    expect(wrapper.find('.component-library').exists()).toBe(true)
+    expect(wrapper.find('.page-manager').exists()).toBe(false)
+    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面'))
+    expect(pageBtn).toBeTruthy()
+  })
+
+  it('点击页面按钮应切换到页面管理面板', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面'))
+    expect(pageBtn).toBeTruthy()
+    await pageBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.page-manager').exists()).toBe(true)
+    expect(wrapper.find('.component-library').exists()).toBe(false)
+  })
+
+  it('页面管理面板应支持添加子页面', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面'))
+    await pageBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const inputs = wrapper.findAll('.page-manager input')
+    // 编码、名称两个输入框
+    expect(inputs.length).toBeGreaterThanOrEqual(2)
+    await inputs[0].setValue('sub1')
+    await inputs[1].setValue('子页面1')
+
+    const saveBtn = wrapper.findAll('.page-manager .sub-page-actions > *').find((el) => el.text().includes('保存'))
+    expect(saveBtn).toBeTruthy()
+    await saveBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('sub1')
+    expect((wrapper.vm as any).config.subPages).toHaveLength(1)
+  })
 })

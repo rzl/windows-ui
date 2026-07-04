@@ -11,7 +11,6 @@
         <component :is="buttonTag" size="small" @click="zoomReset">{{ Math.round(zoom * 100) }}%</component>
         <component :is="buttonTag" size="small" @click="zoomIn">放大</component>
         <component :is="buttonTag" size="small" :type="showGrid ? 'primary' : 'default'" @click="showGrid = !showGrid">网格</component>
-        <component :is="buttonTag" size="small" @click="subPageVisible = true">子页面</component>
         <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
         <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
         <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
@@ -30,72 +29,129 @@
     </div>
 
     <div class="designer-layout" :class="{ mobile: isMobile }">
-      <!-- 组件库 -->
-      <div v-if="!isMobile || activePanel === 'library'" class="component-library">
-        <div class="panel-title">组件库</div>
-        <div class="component-group">
-          <div class="group-title">布局</div>
+      <!-- 左侧边栏 + 面板 -->
+      <div v-if="!isMobile || activePanel === 'library' || activePanel === 'pages'" class="left-panel">
+        <div class="left-sidebar">
           <div
-            v-for="type in layoutTypes"
-            :key="type.value"
-            class="component-item"
-            :draggable="!isMobile"
-            @dragstart="handleDragStart($event, type.value)"
-            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+            :class="['sidebar-btn', { active: leftPanelMode === 'library' }]"
+            title="组件库"
+            @click="leftPanelMode = 'library'"
           >
-            {{ type.label }}
+            <component :is="iconTag" name="grid" />
+            <span class="sidebar-label">组件库</span>
+          </div>
+          <div
+            :class="['sidebar-btn', { active: leftPanelMode === 'pages' }]"
+            title="页面管理"
+            @click="leftPanelMode = 'pages'"
+          >
+            <component :is="iconTag" name="document" />
+            <span class="sidebar-label">页面</span>
           </div>
         </div>
-        <div class="component-group">
-          <div class="group-title">展示</div>
-          <div
-            v-for="type in displayTypes"
-            :key="type.value"
-            class="component-item"
-            :draggable="!isMobile"
-            @dragstart="handleDragStart($event, type.value)"
-            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-          >
-            {{ type.label }}
+
+        <div class="left-panel-content">
+          <!-- 组件库 -->
+          <div v-if="leftPanelMode === 'library'" class="component-library">
+            <div class="panel-title">组件库</div>
+            <div class="component-group">
+              <div class="group-title">布局</div>
+              <div
+                v-for="type in layoutTypes"
+                :key="type.value"
+                class="component-item"
+                :draggable="!isMobile"
+                @dragstart="handleDragStart($event, type.value)"
+                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+              >
+                {{ type.label }}
+              </div>
+            </div>
+            <div class="component-group">
+              <div class="group-title">展示</div>
+              <div
+                v-for="type in displayTypes"
+                :key="type.value"
+                class="component-item"
+                :draggable="!isMobile"
+                @dragstart="handleDragStart($event, type.value)"
+                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+              >
+                {{ type.label }}
+              </div>
+            </div>
+            <div class="component-group">
+              <div class="group-title">表单</div>
+              <div
+                v-for="type in formTypes"
+                :key="type.value"
+                class="component-item"
+                :draggable="!isMobile"
+                @dragstart="handleDragStart($event, type.value)"
+                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+              >
+                {{ type.label }}
+              </div>
+            </div>
+            <div class="component-group">
+              <div class="group-title">数据</div>
+              <div
+                v-for="type in dataTypes"
+                :key="type.value"
+                class="component-item"
+                :draggable="!isMobile"
+                @dragstart="handleDragStart($event, type.value)"
+                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+              >
+                {{ type.label }}
+              </div>
+            </div>
+            <div class="component-group">
+              <div class="group-title">交互</div>
+              <div
+                v-for="type in actionTypes"
+                :key="type.value"
+                class="component-item"
+                :draggable="!isMobile"
+                @dragstart="handleDragStart($event, type.value)"
+                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+              >
+                {{ type.label }}
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="component-group">
-          <div class="group-title">表单</div>
-          <div
-            v-for="type in formTypes"
-            :key="type.value"
-            class="component-item"
-            :draggable="!isMobile"
-            @dragstart="handleDragStart($event, type.value)"
-            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-          >
-            {{ type.label }}
-          </div>
-        </div>
-        <div class="component-group">
-          <div class="group-title">数据</div>
-          <div
-            v-for="type in dataTypes"
-            :key="type.value"
-            class="component-item"
-            :draggable="!isMobile"
-            @dragstart="handleDragStart($event, type.value)"
-            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-          >
-            {{ type.label }}
-          </div>
-        </div>
-        <div class="component-group">
-          <div class="group-title">交互</div>
-          <div
-            v-for="type in actionTypes"
-            :key="type.value"
-            class="component-item"
-            :draggable="!isMobile"
-            @dragstart="handleDragStart($event, type.value)"
-            @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-          >
-            {{ type.label }}
+
+          <!-- 页面管理 -->
+          <div v-else class="page-manager">
+            <div class="panel-title">页面管理</div>
+            <div class="sub-page-form">
+              <w-form-item label="编码">
+                <w-input v-model="editingSubPage.code" placeholder="子页面唯一编码" />
+              </w-form-item>
+              <w-form-item label="名称">
+                <w-input v-model="editingSubPage.name" placeholder="子页面名称" />
+              </w-form-item>
+              <w-form-item label="配置（JSON）">
+                <textarea v-model="editingSubPage.configText" class="sub-page-config-textarea" rows="8" placeholder='{"components":[]}' />
+              </w-form-item>
+              <div class="sub-page-actions">
+                <component :is="buttonTag" size="small" type="primary" @click="saveSubPage">保存</component>
+                <component :is="buttonTag" size="small" @click="resetSubPageForm">清空</component>
+              </div>
+            </div>
+            <div class="sub-page-list">
+              <div v-for="(sp, index) in config.subPages" :key="sp.code" class="sub-page-item">
+                <div class="sub-page-info">
+                  <div class="sub-page-name">{{ sp.name || sp.code }}</div>
+                  <div class="sub-page-code">{{ sp.code }}</div>
+                </div>
+                <div class="sub-page-item-actions">
+                  <component :is="buttonTag" size="mini" @click="editSubPage(index)">编辑</component>
+                  <component :is="buttonTag" size="mini" type="danger" @click="deleteSubPage(index)">删除</component>
+                </div>
+              </div>
+              <div v-if="!config.subPages?.length" class="empty-tip">暂无子页面</div>
+            </div>
           </div>
         </div>
       </div>
@@ -181,42 +237,6 @@
         <component :is="buttonTag" @click="configVisible = false">关闭</component>
       </template>
     </component>
-
-    <component :is="dialogTag" v-model="subPageVisible" title="子页面管理" width="700">
-      <div class="sub-page-manager">
-        <div class="sub-page-form">
-          <component :is="formItemTag" label="编码">
-            <component :is="inputTag" v-model="editingSubPage.code" placeholder="子页面唯一编码" />
-          </component>
-          <component :is="formItemTag" label="名称">
-            <component :is="inputTag" v-model="editingSubPage.name" placeholder="子页面名称" />
-          </component>
-          <component :is="formItemTag" label="配置（JSON）">
-            <component :is="inputTag" v-model="editingSubPage.configText" type="textarea" :rows="8" placeholder='{"components":[]}' />
-          </component>
-          <div class="sub-page-actions">
-            <component :is="buttonTag" size="small" type="primary" @click="saveSubPage">保存</component>
-            <component :is="buttonTag" size="small" @click="resetSubPageForm">清空</component>
-          </div>
-        </div>
-        <div class="sub-page-list">
-          <div v-for="(sp, index) in config.subPages" :key="sp.code" class="sub-page-item">
-            <div class="sub-page-info">
-              <div class="sub-page-name">{{ sp.name || sp.code }}</div>
-              <div class="sub-page-code">{{ sp.code }}</div>
-            </div>
-            <div class="sub-page-item-actions">
-              <component :is="buttonTag" size="mini" @click="editSubPage(index)">编辑</component>
-              <component :is="buttonTag" size="mini" type="danger" @click="deleteSubPage(index)">删除</component>
-            </div>
-          </div>
-          <div v-if="!config.subPages?.length" class="empty-tip">暂无子页面</div>
-        </div>
-      </div>
-      <template #footer>
-        <component :is="buttonTag" @click="subPageVisible = false">关闭</component>
-      </template>
-    </component>
   </div>
 </template>
 
@@ -229,6 +249,8 @@ import OutlineTree from './outline-tree.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
 import './built-in-components'
 import { usePrefix } from '../../utils/prefix'
+import WFormItem from '../form/form-item.vue'
+import WInput from '../input/input.vue'
 import type { PageConfig, PageNode, PageSubPage } from './types'
 
 const { withPrefix } = usePrefix()
@@ -236,7 +258,7 @@ const buttonTag = withPrefix('button')
 const spaceTag = withPrefix('space')
 const dialogTag = withPrefix('dialog')
 const inputTag = withPrefix('input')
-const formItemTag = withPrefix('form-item')
+const iconTag = withPrefix('icon')
 
 defineOptions({ name: 'WPageDesigner' })
 
@@ -262,9 +284,9 @@ const config = reactive<PageConfig>({
 const selectedId = ref<string>('')
 const previewVisible = ref(false)
 const configVisible = ref(false)
-const subPageVisible = ref(false)
 const editingSubPage = reactive<PageSubPage & { configText: string }>({ code: '', name: '', config: {}, configText: '{}' })
-const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
+const leftPanelMode = ref<'library' | 'pages'>('library')
+const activePanel = ref<'library' | 'pages' | 'canvas' | 'property'>('canvas')
 const activeRightPanel = ref<'property' | 'outline'>('property')
 const zoom = ref(1)
 const minZoom = 0.5
@@ -479,6 +501,7 @@ const formTypes = computed(() => [
 
 const mobileTabs = [
   { label: '组件库', value: 'library' as const },
+  { label: '页面', value: 'pages' as const },
   { label: '画布', value: 'canvas' as const },
   { label: '属性', value: 'property' as const }
 ]
@@ -919,7 +942,15 @@ function goBack() {
 .designer-page { padding: 8px; }
 .toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; }
 .designer-layout { display: flex; gap: 12px; min-height: 600px; }
-.component-library { width: 180px; background: #fff; border: 1px solid #ddd; padding: 12px; }
+.left-panel { display: flex; width: 220px; border: 1px solid #ddd; background: #fff; }
+.left-sidebar { width: 44px; display: flex; flex-direction: column; border-right: 1px solid #ddd; background: #f5f5f5; flex-shrink: 0; }
+.sidebar-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; cursor: pointer; color: #666; font-size: 11px; gap: 4px; transition: background 0.15s; }
+.sidebar-btn:hover { background: #e9e9e9; color: #333; }
+.sidebar-btn.active { background: var(--w-color-primary, #245edb); color: #fff; }
+.sidebar-label { writing-mode: horizontal-tb; }
+.left-panel-content { flex: 1; min-width: 0; overflow: auto; }
+.component-library { padding: 12px; }
+.page-manager { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 .canvas-panel { flex: 1; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; overflow: auto; }
 .property-panel { width: 280px; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
 .panel-title { font-weight: bold; margin-bottom: 12px; }
@@ -954,11 +985,11 @@ function goBack() {
   font-size: 14px;
 }
 
-.sub-page-manager { display: flex; flex-direction: column; gap: 16px; }
 .sub-page-form { padding: 12px; border: 1px dashed #d4d0c8; border-radius: 4px; background: #fafafa; }
 .sub-page-actions { display: flex; gap: 8px; margin-top: 8px; }
+.sub-page-config-textarea { width: 100%; box-sizing: border-box; border: 1px solid #7f9db9; padding: 4px; font-family: var(--w-font-family); font-size: var(--w-font-size-base); resize: vertical; }
 .sub-page-list { display: flex; flex-direction: column; gap: 8px; }
-.sub-page-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #eee; border-radius: 4px; }
+.sub-page-item { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
 .sub-page-name { font-weight: bold; }
 .sub-page-code { font-size: 12px; color: #999; }
 .sub-page-item-actions { display: flex; gap: 8px; }
@@ -994,13 +1025,15 @@ function goBack() {
     gap: 8px;
     min-height: auto;
   }
-  .designer-layout.mobile .component-library,
+  .designer-layout.mobile .left-panel,
   .designer-layout.mobile .canvas-panel,
   .designer-layout.mobile .property-panel {
     width: auto;
     flex: none;
     min-height: 300px;
   }
+  .designer-layout.mobile .left-sidebar { flex-direction: row; width: auto; border-right: none; border-bottom: 1px solid #ddd; }
+  .designer-layout.mobile .sidebar-btn { flex: 1; flex-direction: row; padding: 8px; }
   .component-item { cursor: pointer; }
 }
 </style>
