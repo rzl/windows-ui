@@ -67,9 +67,11 @@ async function savePage(data: any) {
 
 页面保存时，`config.formData` 会按字段默认值自动生成；`WPageRenderer` 渲染时也会用 `config.formData` 初始化页面状态。
 
-## 子页面
+## 页面与子页面
 
-页面配置支持 `subPages`，用于在当前页面内定义可被 `openDialog` 打开的弹窗子页面：
+页面设计器将「页面」作为最高维度进行管理。顶部 tabs 默认显示「主页面」，点击「+ 子页面」可新增子页面，点击子页面 tab 可切换编辑，点击 tab 上的 × 可删除子页面。
+
+每个页面（主页面/子页面）拥有独立的组件画布。页面配置支持 `subPages`，用于在当前页面内定义可被 `openDialog` 打开的弹窗子页面：
 
 ```json
 {
@@ -96,7 +98,7 @@ async function savePage(data: any) {
 }
 ```
 
-在页面设计器中可通过左侧边栏的「页面」按钮切换到页面管理面板，管理子页面编码、名称与 JSON 配置。
+点击左侧边栏的「页面信息」按钮，可在左侧面板中编辑当前选中页面的编码、名称与 JSON 配置。
 
 ## 事件与链式动作
 

@@ -17,6 +17,23 @@
       </component>
     </div>
 
+    <!-- 页面管理 tabs -->
+    <div class="page-tabs-bar">
+      <div class="page-tabs">
+        <div
+          v-for="p in allPages"
+          :key="p.code"
+          :class="['page-tab', { active: activePageCode === p.code }]"
+          @click="switchPage(p.code)"
+        >
+          <component :is="iconTag" v-if="p.isMain" name="document" class="page-tab-icon" />
+          <span class="page-tab-name">{{ p.name }}</span>
+          <span v-if="!p.isMain" class="page-tab-close" title="删除子页面" @click.stop="deleteSubPage(p.code)">×</span>
+        </div>
+      </div>
+      <component :is="buttonTag" size="mini" @click="addSubPage">+ 子页面</component>
+    </div>
+
     <div v-if="isMobile" class="mobile-panel-tabs">
       <div
         v-for="tab in mobileTabs"
@@ -42,11 +59,11 @@
           </div>
           <div
             :class="['sidebar-btn', { active: leftPanelMode === 'pages' }]"
-            title="页面管理"
+            title="页面信息"
             @click="leftPanelMode = 'pages'"
           >
             <component :is="iconTag" name="document" />
-            <span class="sidebar-label">页面</span>
+            <span class="sidebar-label">页面信息</span>
           </div>
         </div>
 
@@ -121,36 +138,23 @@
             </div>
           </div>
 
-          <!-- 页面管理 -->
-          <div v-else class="page-manager">
-            <div class="panel-title">页面管理</div>
-            <div class="sub-page-form">
+          <!-- 页面信息 -->
+          <div v-else class="page-info">
+            <div class="panel-title">页面信息</div>
+            <div class="page-info-form">
               <w-form-item label="编码">
-                <w-input v-model="editingSubPage.code" placeholder="子页面唯一编码" />
+                <w-input :model-value="currentPage?.code || ''" readonly />
               </w-form-item>
               <w-form-item label="名称">
-                <w-input v-model="editingSubPage.name" placeholder="子页面名称" />
+                <w-input v-model="currentPageName" />
               </w-form-item>
               <w-form-item label="配置（JSON）">
-                <textarea v-model="editingSubPage.configText" class="sub-page-config-textarea" rows="8" placeholder='{"components":[]}' />
+                <textarea v-model="pageInfoConfigText" class="sub-page-config-textarea" rows="8" placeholder='{"components":[]}' />
               </w-form-item>
               <div class="sub-page-actions">
-                <component :is="buttonTag" size="small" type="primary" @click="saveSubPage">保存</component>
-                <component :is="buttonTag" size="small" @click="resetSubPageForm">清空</component>
+                <component :is="buttonTag" size="small" type="primary" @click="applyPageInfo">应用</component>
+                <component :is="buttonTag" size="small" @click="resetPageInfo">重置</component>
               </div>
-            </div>
-            <div class="sub-page-list">
-              <div v-for="(sp, index) in config.subPages" :key="sp.code" class="sub-page-item">
-                <div class="sub-page-info">
-                  <div class="sub-page-name">{{ sp.name || sp.code }}</div>
-                  <div class="sub-page-code">{{ sp.code }}</div>
-                </div>
-                <div class="sub-page-item-actions">
-                  <component :is="buttonTag" size="mini" @click="editSubPage(index)">编辑</component>
-                  <component :is="buttonTag" size="mini" type="danger" @click="deleteSubPage(index)">删除</component>
-                </div>
-              </div>
-              <div v-if="!config.subPages?.length" class="empty-tip">暂无子页面</div>
             </div>
           </div>
         </div>
@@ -241,7 +245,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import ComponentNode from './component-node.vue'
 import PropertyEditor from './property-editor.vue'
 import PageRenderer from './page-renderer.vue'
@@ -251,7 +255,7 @@ import './built-in-components'
 import { usePrefix } from '../../utils/prefix'
 import WFormItem from '../form/form-item.vue'
 import WInput from '../input/input.vue'
-import type { PageConfig, PageNode, PageSubPage } from './types'
+import type { PageConfig, PageNode } from './types'
 
 const { withPrefix } = usePrefix()
 const buttonTag = withPrefix('button')
@@ -278,13 +282,21 @@ const config = reactive<PageConfig>({
   title: '',
   description: '',
   formData: {},
-  components: [],
-  subPages: []
+  components: []
 })
+
+interface PageItem {
+  code: string
+  name: string
+  config: PageConfig
+  isMain?: boolean
+}
+
+const allPages = reactive<PageItem[]>([])
+const activePageCode = ref('')
 const selectedId = ref<string>('')
 const previewVisible = ref(false)
 const configVisible = ref(false)
-const editingSubPage = reactive<PageSubPage & { configText: string }>({ code: '', name: '', config: {}, configText: '{}' })
 const leftPanelMode = ref<'library' | 'pages'>('library')
 const activePanel = ref<'library' | 'pages' | 'canvas' | 'property'>('canvas')
 const activeRightPanel = ref<'property' | 'outline'>('property')
@@ -293,6 +305,18 @@ const minZoom = 0.5
 const maxZoom = 2
 const zoomStep = 0.1
 const showGrid = ref(false)
+const pageInfoConfigText = ref('')
+
+const currentPage = computed(() => allPages.find((p) => p.code === activePageCode.value))
+const currentPageName = computed({
+  get: () => currentPage.value?.name || '',
+  set: (val) => {
+    if (currentPage.value) currentPage.value.name = val
+    if (currentPage.value?.isMain) {
+      page.name = val
+    }
+  }
+})
 
 function zoomIn() {
   zoom.value = Math.min(maxZoom, Math.round((zoom.value + zoomStep) * 10) / 10)
@@ -501,7 +525,7 @@ const formTypes = computed(() => [
 
 const mobileTabs = [
   { label: '组件库', value: 'library' as const },
-  { label: '页面', value: 'pages' as const },
+  { label: '页面信息', value: 'pages' as const },
   { label: '画布', value: 'canvas' as const },
   { label: '属性', value: 'property' as const }
 ]
@@ -528,19 +552,117 @@ async function loadData() {
     const data = await props.loadPage(props.code)
     Object.assign(page, data)
   }
+
+  let cfg: PageConfig
   if (props.config) {
-    Object.assign(config, props.config)
+    cfg = takeSnapshot(props.config) as PageConfig
   } else {
-    const cfg = page.config || {}
-    config.title = cfg.title || page.name || ''
-    config.description = cfg.description || page.description || ''
-    config.components = cfg.components || []
+    cfg = takeSnapshot(page.config || {}) as PageConfig
   }
-  config.formData = config.formData || {}
-  config.subPages = config.subPages || []
+
+  config.title = cfg.title || page.name || ''
+  config.description = cfg.description || page.description || ''
+  config.formData = cfg.formData || {}
+  config.components = cfg.components || []
+  config.subPages = cfg.subPages || []
+
+  initPages()
+
   // 初始状态记入历史
   history.stack = [takeSnapshot(config)]
   history.index = 0
+}
+
+function initPages() {
+  const mainCfg = takeSnapshot(config) as PageConfig
+  const subPages = mainCfg.subPages || []
+  delete (mainCfg as any).subPages
+
+  allPages.length = 0
+  allPages.push({
+    code: page.code || 'main',
+    name: page.name || '主页面',
+    config: mainCfg,
+    isMain: true
+  })
+  for (const sp of subPages) {
+    allPages.push({
+      code: sp.code,
+      name: sp.name || sp.code,
+      config: (sp.config || { components: [] }) as PageConfig
+    })
+  }
+
+  activePageCode.value = page.code || 'main'
+  Object.assign(config, takeSnapshot(mainCfg))
+  resetPageInfo()
+}
+
+function switchPage(code: string) {
+  if (code === activePageCode.value) return
+  const current = allPages.find((p) => p.code === activePageCode.value)
+  if (current) {
+    current.config = takeSnapshot(config) as PageConfig
+  }
+  const target = allPages.find((p) => p.code === code)
+  if (target) {
+    Object.assign(config, takeSnapshot(target.config))
+    activePageCode.value = code
+    selectedId.value = ''
+    history.stack = [takeSnapshot(config)]
+    history.index = 0
+    resetPageInfo()
+  }
+}
+
+function addSubPage() {
+  const index = allPages.length
+  const code = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`
+  const newPage: PageItem = {
+    code,
+    name: `子页面${index}`,
+    config: { components: [] }
+  }
+  allPages.push(newPage)
+  switchPage(code)
+}
+
+function deleteSubPage(code: string) {
+  const index = allPages.findIndex((p) => p.code === code)
+  if (index <= 0) return
+  allPages.splice(index, 1)
+  if (activePageCode.value === code) {
+    switchPage(allPages[0].code)
+  }
+}
+
+watch(activePageCode, resetPageInfo)
+
+function resetPageInfo() {
+  const snapshot = takeSnapshot(config)
+  if (currentPage.value?.isMain) {
+    delete (snapshot as any).subPages
+  }
+  pageInfoConfigText.value = JSON.stringify(snapshot, null, 2)
+}
+
+function applyPageInfo() {
+  let cfg: PageConfig
+  try {
+    cfg = JSON.parse(pageInfoConfigText.value || '{}')
+  } catch {
+    window.alert('配置 JSON 格式错误')
+    return
+  }
+  if (currentPage.value?.isMain) {
+    cfg.subPages = allPages.slice(1).map((p) => ({ code: p.code, name: p.name, config: p.config }))
+  }
+  Object.assign(config, cfg)
+  recordHistory()
+  const current = allPages.find((p) => p.code === activePageCode.value)
+  if (current) {
+    current.config = takeSnapshot(config) as PageConfig
+  }
 }
 
 function findNode(list: PageNode[], id: string): PageNode | null {
@@ -847,56 +969,6 @@ function handlePreviewConfig() {
   configVisible.value = true
 }
 
-function resetSubPageForm() {
-  editingSubPage.code = ''
-  editingSubPage.name = ''
-  editingSubPage.config = {}
-  editingSubPage.configText = '{}'
-}
-
-function saveSubPage() {
-  let cfg: PageConfig
-  try {
-    cfg = JSON.parse(editingSubPage.configText || '{}')
-  } catch {
-    window.alert('配置 JSON 格式错误')
-    return
-  }
-  if (!editingSubPage.code.trim()) {
-    window.alert('请输入子页面编码')
-    return
-  }
-  if (!config.subPages) config.subPages = []
-  const index = config.subPages.findIndex((sp) => sp.code === editingSubPage.code)
-  const item: PageSubPage = {
-    code: editingSubPage.code.trim(),
-    name: editingSubPage.name.trim(),
-    config: cfg
-  }
-  if (index >= 0) {
-    config.subPages[index] = item
-  } else {
-    config.subPages.push(item)
-  }
-  resetSubPageForm()
-  recordHistory()
-}
-
-function editSubPage(index: number) {
-  const sp = config.subPages?.[index]
-  if (!sp) return
-  editingSubPage.code = sp.code
-  editingSubPage.name = sp.name
-  editingSubPage.config = sp.config
-  editingSubPage.configText = JSON.stringify(sp.config || {}, null, 2)
-}
-
-function deleteSubPage(index: number) {
-  if (!config.subPages) return
-  config.subPages.splice(index, 1)
-  recordHistory()
-}
-
 function buildFormData(components: PageNode[]): Record<string, any> {
   const formTypes = new Set(['input', 'select', 'switch', 'radio', 'checkbox', 'date-picker'])
   const result: Record<string, any> = {}
@@ -913,18 +985,30 @@ function buildFormData(components: PageNode[]): Record<string, any> {
 }
 
 async function handleSave() {
+  const current = allPages.find((p) => p.code === activePageCode.value)
+  if (current) {
+    current.config = takeSnapshot(config) as PageConfig
+  }
+
+  const mainPage = allPages[0]
+  const subPages = allPages.slice(1).map((p) => ({
+    code: p.code,
+    name: p.name,
+    config: p.config
+  }))
+
   const data = {
     id: page.id,
-    code: page.code,
-    name: page.name,
+    code: mainPage.code,
+    name: mainPage.name,
     description: page.description,
     status: page.status,
     config: {
-      title: config.title,
-      description: config.description,
-      formData: buildFormData(config.components || []),
-      components: config.components,
-      subPages: config.subPages || []
+      title: mainPage.config.title,
+      description: mainPage.config.description,
+      formData: buildFormData(mainPage.config.components || []),
+      components: mainPage.config.components,
+      subPages
     }
   }
   if (props.savePage) {
@@ -941,6 +1025,14 @@ function goBack() {
 <style scoped>
 .designer-page { padding: 8px; }
 .toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.page-tabs-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 6px; background: #fff; border: 1px solid #ddd; }
+.page-tabs { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
+.page-tab { display: flex; align-items: center; gap: 4px; padding: 6px 12px; cursor: pointer; border: 1px solid #ddd; border-radius: 4px; background: #f8f8f8; font-size: 13px; white-space: nowrap; }
+.page-tab:hover { background: #f0f0f0; }
+.page-tab.active { background: var(--w-color-primary); color: #fff; border-color: var(--w-color-primary); }
+.page-tab-icon { font-size: 14px; }
+.page-tab-close { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border-radius: 50%; font-size: 14px; line-height: 1; }
+.page-tab-close:hover { background: rgba(255, 255, 255, 0.2); }
 .designer-layout { display: flex; gap: 12px; min-height: 600px; }
 .left-panel { display: flex; width: 220px; border: 1px solid #ddd; background: #fff; }
 .left-sidebar { width: 44px; display: flex; flex-direction: column; border-right: 1px solid #ddd; background: #f5f5f5; flex-shrink: 0; }
@@ -950,7 +1042,7 @@ function goBack() {
 .sidebar-label { writing-mode: horizontal-tb; }
 .left-panel-content { flex: 1; min-width: 0; overflow: auto; }
 .component-library { padding: 12px; }
-.page-manager { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+.page-info { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 .canvas-panel { flex: 1; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; overflow: auto; }
 .property-panel { width: 280px; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
 .panel-title { font-weight: bold; margin-bottom: 12px; }
@@ -985,20 +1077,16 @@ function goBack() {
   font-size: 14px;
 }
 
-.sub-page-form { padding: 12px; border: 1px dashed #d4d0c8; border-radius: 4px; background: #fafafa; }
+.page-info-form { padding: 12px; border: 1px dashed #d4d0c8; border-radius: 4px; background: #fafafa; }
 .sub-page-actions { display: flex; gap: 8px; margin-top: 8px; }
 .sub-page-config-textarea { width: 100%; box-sizing: border-box; border: 1px solid #7f9db9; padding: 4px; font-family: var(--w-font-family); font-size: var(--w-font-size-base); resize: vertical; }
-.sub-page-list { display: flex; flex-direction: column; gap: 8px; }
-.sub-page-item { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
-.sub-page-name { font-weight: bold; }
-.sub-page-code { font-size: 12px; color: #999; }
-.sub-page-item-actions { display: flex; gap: 8px; }
 
 .mobile-panel-tabs { display: none; }
 
 @media (max-width: 768px) {
   .designer-page { padding: 6px; }
   .toolbar { margin-bottom: 8px; }
+  .page-tabs-bar { margin-bottom: 8px; padding: 4px; }
   .mobile-panel-tabs {
     display: flex;
     gap: 4px;

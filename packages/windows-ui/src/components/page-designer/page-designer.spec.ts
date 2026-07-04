@@ -225,47 +225,87 @@ describe('WPageDesigner', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.left-sidebar').exists()).toBe(true)
     expect(wrapper.find('.component-library').exists()).toBe(true)
-    expect(wrapper.find('.page-manager').exists()).toBe(false)
-    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面'))
+    expect(wrapper.find('.page-info').exists()).toBe(false)
+    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面信息'))
     expect(pageBtn).toBeTruthy()
   })
 
-  it('点击页面按钮应切换到页面管理面板', async () => {
+  it('点击页面信息按钮应切换到页面信息面板', async () => {
     const wrapper = mount(PageDesigner, {
       props: { code: 'test' },
       global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
     })
     await wrapper.vm.$nextTick()
-    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面'))
+    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面信息'))
     expect(pageBtn).toBeTruthy()
     await pageBtn!.trigger('click')
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.page-manager').exists()).toBe(true)
+    expect(wrapper.find('.page-info').exists()).toBe(true)
     expect(wrapper.find('.component-library').exists()).toBe(false)
   })
 
-  it('页面管理面板应支持添加子页面', async () => {
+  it('页面信息面板应显示当前页面编码与名称', async () => {
     const wrapper = mount(PageDesigner, {
       props: { code: 'test' },
       global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
     })
     await wrapper.vm.$nextTick()
-    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面'))
+    const pageBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('页面信息'))
     await pageBtn!.trigger('click')
     await wrapper.vm.$nextTick()
+    const codeInput = wrapper.find('.page-info input')
+    expect(codeInput.exists()).toBe(true)
+    expect((codeInput.element as HTMLInputElement).value).toBe('test')
+    expect(wrapper.text()).toContain('页面信息')
+  })
 
-    const inputs = wrapper.findAll('.page-manager input')
-    // 编码、名称两个输入框
-    expect(inputs.length).toBeGreaterThanOrEqual(2)
-    await inputs[0].setValue('sub1')
-    await inputs[1].setValue('子页面1')
+  it('顶部 tabs 默认显示主页面且支持添加子页面', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.page-tabs-bar').exists()).toBe(true)
+    expect(wrapper.text()).toContain('主页面')
 
-    const saveBtn = wrapper.findAll('.page-manager .sub-page-actions > *').find((el) => el.text().includes('保存'))
-    expect(saveBtn).toBeTruthy()
-    await saveBtn!.trigger('click')
+    const addBtn = wrapper.findAll('.page-tabs-bar > *').find((el) => el.text().includes('子页面'))
+    expect(addBtn).toBeTruthy()
+    await addBtn!.trigger('click')
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.text()).toContain('sub1')
-    expect((wrapper.vm as any).config.subPages).toHaveLength(1)
+    expect((wrapper.vm as any).allPages.length).toBe(2)
+    expect(wrapper.text()).toContain('子页面1')
+  })
+
+  it('顶部 tabs 支持切换与删除子页面', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          subPages: [
+            { code: 'sub1', name: '子页面1', config: { components: [] } }
+          ],
+          components: []
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).allPages.length).toBe(2)
+
+    const subTab = wrapper.findAll('.page-tab').find((el) => el.text().includes('子页面1'))
+    expect(subTab).toBeTruthy()
+    await subTab!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).activePageCode).toBe('sub1')
+
+    const close = wrapper.findAll('.page-tab-close').find((el) => el.text().includes('×'))
+    expect(close).toBeTruthy()
+    await close!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect((wrapper.vm as any).allPages.length).toBe(1)
+    expect((wrapper.vm as any).activePageCode).toBe('test')
   })
 })
