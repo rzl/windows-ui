@@ -327,6 +327,7 @@
 {
   "title": "页面标题",
   "description": "页面描述",
+  "formData": { "username": "" },
   "components": [
     {
       "id": "comp_xxx",
@@ -334,7 +335,15 @@
       "props": { "content": "Hello", "tag": "p", "align": "left" },
       "styles": { "marginTop": "12px" },
       "dataSource": { "type": "static", "value": "" },
-      "events": { "onClick": { "action": "navigate", "target": "" } }
+      "events": {
+        "onClick": {
+          "condition": "formData.agree === true",
+          "actions": [
+            { "action": "setVariable", "variable": "submitted", "value": true },
+            { "action": "navigate", "target": "/success" }
+          ]
+        }
+      }
     }
   ]
 }
@@ -351,6 +360,7 @@
 | children | array | 容器类组件的子组件 |
 | dataSource | object | 数据绑定配置 |
 | events | object | 交互事件配置 |
+| tab | string | 在 `tabs` 容器中表示所属标签页 |
 
 ### 布局组件
 
@@ -366,9 +376,19 @@
 | type | 说明 | props |
 |------|------|-------|
 | text | 文本 | content、tag、align |
-| statistic | 统计卡片 | title、field、icon、color |
+| image | 图片 | src、alt、width、height、objectFit |
+| divider | 分隔线 | text、direction、margin |
+| statistic | 统计卡片 | title、value、prefix、suffix、precision、icon、color、valueStyle |
 | chart | 图表 | title、height、chartType、option |
 | alert | 公告 | content、type |
+| tag | 标签 | label、type |
+| progress | 进度条 | percentage、status、width、showText |
+| avatar | 头像 | src、alt、icon、shape |
+| badge | 徽标 | text、value、isDot、type |
+| steps | 步骤条 | items、active |
+| timeline | 时间线 | items |
+| table | 表格 | title、columns、height、dataSource |
+| list | 列表 | itemTitle、itemDesc、itemIcon、dataSource |
 
 ### 数据组件
 
@@ -377,6 +397,19 @@
 | model | 嵌入模型 CRUD 页面 | modelCode、height |
 | dashboard | 嵌入仪表盘 | dashboardCode |
 | report | 嵌入报表 | reportCode |
+
+### 表单组件
+
+| type | 说明 | props |
+|------|------|-------|
+| input | 输入框 | label、placeholder、type、field、modelValue |
+| select | 选择器 | label、placeholder、options、field、modelValue |
+| radio | 单选框 | label、options、field、modelValue |
+| checkbox | 多选框 | label、options、field、modelValue |
+| switch | 开关 | label、field、modelValue |
+| date-picker | 日期选择 | label、placeholder、field、modelValue |
+
+表单组件通过 `props.field` 与页面级 `formData` 双向绑定；未配置 `field` 时仅作为默认值展示。
 
 ### 交互组件
 
@@ -394,11 +427,37 @@
 | api | api.method / api.url / api.params / api.body / transformScript | 调用内部接口 |
 | script | script | 在线 JS 脚本，可调用 `db.raw()` 与 `http()` |
 
+### 画布交互
+
+- 左侧组件库拖拽/点击添加组件；容器组件（container/card/row/tabs）可嵌套子组件。
+- 工具栏提供撤销/重做、复制/粘贴、缩放、网格显示、预览、保存。
+- 选中节点后按 `Delete` / `Backspace` 删除，`Esc` 取消选中。
+- 拖拽到画布或容器时，目标区域会高亮提示。
+- 按住 `Ctrl` + 滚轮可缩放画布。
+
 ### 事件动作
 
-| action | target | 说明 |
-|--------|--------|------|
-| navigate | 路由路径 | 跳转页面 |
+单个事件可包含 `condition` 执行条件表达式，以及 `actions` 链式动作数组。条件表达式可访问 `formData` 与 `pageState`。
+
+| action | target / 其他字段 | 说明 |
+|--------|-------------------|------|
+| navigate | target：路由路径 | 跳转页面 |
+| openExternal | target：URL | 打开外部链接 |
+| openDialog | target：页面编码 / URL | 打开弹窗 |
+| callApi | target、method、params、body | 调用接口 |
+| setVariable | variable、value | 设置 pageState 变量 |
 | refresh | - | 刷新当前组件数据源 |
-| openDialog | 对话框标识 | 打开弹窗（预留） |
+| goBack | - | 返回上一页 |
+
+```json
+{
+  "onClick": {
+    "condition": "formData.status === '1'",
+    "actions": [
+      { "action": "setVariable", "variable": "done", "value": true },
+      { "action": "navigate", "target": "/detail" }
+    ]
+  }
+}
+```
 
