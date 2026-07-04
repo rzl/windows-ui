@@ -86,4 +86,44 @@ describe('WPageDesigner', () => {
     expect(wrapper.find('.unknown-type').exists()).toBe(false)
     expect(wrapper.text()).toContain('访问量')
   })
+
+  it('应支持撤销与重做', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const canvas = wrapper.find('.canvas-body')
+    await canvas.trigger('drop', { dataTransfer: { getData: () => 'text' } })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(1)
+    await canvas.trigger('drop', { dataTransfer: { getData: () => 'button' } })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(2)
+
+    // 撤销一次
+    ;(wrapper.vm as any).undo()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(1)
+
+    // 重做
+    ;(wrapper.vm as any).redo()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(2)
+  })
+
+  it('初始状态下撤销按钮应禁用，操作后可用', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).canUndo).toBe(false)
+    expect((wrapper.vm as any).canRedo).toBe(false)
+
+    const canvas = wrapper.find('.canvas-body')
+    await canvas.trigger('drop', { dataTransfer: { getData: () => 'text' } })
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).canUndo).toBe(true)
+  })
 })

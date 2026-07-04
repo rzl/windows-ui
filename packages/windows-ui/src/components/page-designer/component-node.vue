@@ -191,7 +191,7 @@ const props = defineProps<{
   parentList: PageNode[]
 }>()
 
-const emit = defineEmits(['select', 'delete', 'move'])
+const emit = defineEmits(['select', 'delete', 'move', 'change'])
 
 const { withPrefix } = usePrefix()
 const alertTag = withPrefix('alert')
@@ -263,6 +263,7 @@ function addChild() {
   const child = createDefaultComponent('text')
   props.node.children.push(child)
   emit('select', child.id)
+  emit('change')
 }
 
 function handleDragOver(event: DragEvent) {

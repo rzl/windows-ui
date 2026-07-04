@@ -3,6 +3,8 @@
     <div class="toolbar">
       <component :is="buttonTag" size="small" @click="goBack">返回</component>
       <component :is="spaceTag">
+        <component :is="buttonTag" size="small" :disabled="!canUndo" @click="undo">撤销</component>
+        <component :is="buttonTag" size="small" :disabled="!canRedo" @click="redo">重做</component>
         <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
         <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
         <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
@@ -115,6 +117,7 @@
             @select="selectNode"
             @delete="deleteNode"
             @move="moveNode"
+            @change="recordHistory"
           />
           <div v-if="!config.components?.length" class="empty-tip">
             拖拽或点击组件到此处
@@ -151,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import ComponentNode from './component-node.vue'
 import PropertyEditor from './property-editor.vue'
 import PageRenderer from './page-renderer.vue'
@@ -190,6 +193,74 @@ const configVisible = ref(false)
 const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
 
 const configJson = computed(() => JSON.stringify(config, null, 2))
+
+// 撤销/重做历史栈
+const history = reactive<{
+  stack: PageConfig[]
+  index: number
+  maxLength: number
+  isRestoring: boolean
+}>({
+  stack: [],
+  index: -1,
+  maxLength: 50,
+  isRestoring: false
+})
+
+const canUndo = computed(() => history.index > 0)
+const canRedo = computed(() => history.index < history.stack.length - 1)
+
+function takeSnapshot(cfg: PageConfig): PageConfig {
+  return JSON.parse(JSON.stringify(cfg))
+}
+
+function recordHistory(cfg: PageConfig = config) {
+  if (history.isRestoring) return
+  const snapshot = takeSnapshot(cfg)
+  // 删除当前指针之后的历史（重做记录）
+  if (history.index < history.stack.length - 1) {
+    history.stack = history.stack.slice(0, history.index + 1)
+  }
+  history.stack.push(snapshot)
+  if (history.stack.length > history.maxLength) {
+    history.stack.shift()
+  } else {
+    history.index++
+  }
+}
+
+function undo() {
+  if (!canUndo.value) return
+  history.index--
+  restoreHistory()
+}
+
+function redo() {
+  if (!canRedo.value) return
+  history.index++
+  restoreHistory()
+}
+
+function restoreHistory() {
+  const snapshot = history.stack[history.index]
+  if (!snapshot) return
+  history.isRestoring = true
+  Object.assign(config, takeSnapshot(snapshot))
+  selectedId.value = ''
+  history.isRestoring = false
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+  const isCtrl = event.ctrlKey || event.metaKey
+  if (!isCtrl) return
+  if (event.key === 'z' && !event.shiftKey) {
+    event.preventDefault()
+    undo()
+  } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
+    event.preventDefault()
+    redo()
+  }
+}
 
 const touchState = reactive({
   type: '',
@@ -256,7 +327,14 @@ const selectedNode = computed(() => {
   return findNode(config.components || [], selectedId.value)
 })
 
-onMounted(() => loadData())
+onMounted(() => {
+  loadData()
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+})
 
 async function loadData() {
   if (props.page) {
@@ -273,6 +351,9 @@ async function loadData() {
     config.description = cfg.description || page.description || ''
     config.components = cfg.components || []
   }
+  // 初始状态记入历史
+  history.stack = [takeSnapshot(config)]
+  history.index = 0
 }
 
 function findNode(list: PageNode[], id: string): PageNode | null {
@@ -378,6 +459,7 @@ function handleDropToRoot(event: DragEvent) {
   const node = createDefaultComponent(type)
   config.components.push(node)
   selectNode(node.id)
+  recordHistory()
 }
 
 function selectNode(id: string) {
@@ -407,6 +489,7 @@ function addComponent(type: string) {
     config.components.push(node)
     selectNode(node.id)
   }
+  recordHistory()
 }
 
 function handleTouchStart(event: TouchEvent, label: string, type: string) {
@@ -511,11 +594,13 @@ function doDrop(x: number, y: number) {
     }
   }
   selectNode(node.id)
+  recordHistory()
 }
 
 function deleteNode({ id }: { id: string }) {
   removeNode(config.components || [], id)
   if (selectedId.value === id) selectedId.value = ''
+  recordHistory()
 }
 
 function removeNode(list: PageNode[], id: string): boolean {
@@ -531,7 +616,8 @@ function removeNode(list: PageNode[], id: string): boolean {
 }
 
 function moveNode({ id, direction }: { id: string; direction: 'up' | 'down' }) {
-  moveNodeInList(config.components || [], id, direction)
+  const moved = moveNodeInList(config.components || [], id, direction)
+  if (moved) recordHistory()
 }
 
 function moveNodeInList(list: PageNode[], id: string, direction: 'up' | 'down'): boolean {
@@ -555,7 +641,8 @@ function moveNodeInList(list: PageNode[], id: string, direction: 'up' | 'down'):
 }
 
 function onPropertyUpdate(_node: PageNode) {
-  // reactive 会自动更新，这里仅做校验或后续扩展
+  // reactive 会自动更新，这里记录属性变更历史
+  recordHistory()
 }
 
 function handlePreview() {
