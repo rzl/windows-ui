@@ -5,6 +5,8 @@
       <component :is="spaceTag">
         <component :is="buttonTag" size="small" :disabled="!canUndo" @click="undo">撤销</component>
         <component :is="buttonTag" size="small" :disabled="!canRedo" @click="redo">重做</component>
+        <component :is="buttonTag" size="small" :disabled="!selectedNode" @click="copySelectedNode">复制</component>
+        <component :is="buttonTag" size="small" :disabled="!clipboardNode" @click="pasteNode">粘贴</component>
         <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
         <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
         <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
@@ -234,7 +236,7 @@ const history = reactive<{
 const canUndo = computed(() => history.index > 0)
 const canRedo = computed(() => history.index < history.stack.length - 1)
 
-function takeSnapshot(cfg: PageConfig): PageConfig {
+function takeSnapshot<T>(cfg: T): T {
   return JSON.parse(JSON.stringify(cfg))
 }
 
@@ -274,6 +276,39 @@ function restoreHistory() {
   history.isRestoring = false
 }
 
+const clipboardNode = ref<PageNode | null>(null)
+
+function cloneNodeWithNewIds(node: PageNode): PageNode {
+  const cloned = takeSnapshot(node) as PageNode
+  cloned.id = generateId()
+  if (cloned.children?.length) {
+    cloned.children = cloned.children.map(cloneNodeWithNewIds)
+  }
+  return cloned
+}
+
+function copySelectedNode() {
+  const node = selectedNode.value
+  if (!node) return
+  clipboardNode.value = cloneNodeWithNewIds(node)
+}
+
+function pasteNode() {
+  const source = clipboardNode.value
+  if (!source) return
+  const pasted = cloneNodeWithNewIds(source)
+  const targetContainer = selectedNode.value && isContainerNode(selectedNode.value) ? selectedNode.value : null
+  if (targetContainer) {
+    if (!targetContainer.children) targetContainer.children = []
+    targetContainer.children.push(pasted)
+  } else {
+    if (!config.components) config.components = []
+    config.components.push(pasted)
+  }
+  selectNode(pasted.id)
+  recordHistory()
+}
+
 function handleKeyDown(event: KeyboardEvent) {
   const isCtrl = event.ctrlKey || event.metaKey
   if (!isCtrl) return
@@ -283,6 +318,12 @@ function handleKeyDown(event: KeyboardEvent) {
   } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
     event.preventDefault()
     redo()
+  } else if (event.key === 'c') {
+    event.preventDefault()
+    copySelectedNode()
+  } else if (event.key === 'v') {
+    event.preventDefault()
+    pasteNode()
   }
 }
 

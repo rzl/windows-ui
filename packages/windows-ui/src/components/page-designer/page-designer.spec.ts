@@ -126,4 +126,26 @@ describe('WPageDesigner', () => {
     await wrapper.vm.$nextTick()
     expect((wrapper.vm as any).canUndo).toBe(true)
   })
+
+  it('应支持复制与粘贴组件', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const canvas = wrapper.find('.canvas-body')
+    await canvas.trigger('drop', { dataTransfer: { getData: () => 'text' } })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(1)
+
+    // 选中新拖入的节点
+    await wrapper.findComponent(ComponentNode).trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // 复制并粘贴
+    ;(wrapper.vm as any).copySelectedNode()
+    ;(wrapper.vm as any).pasteNode()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAllComponents(ComponentNode).length).toBe(2)
+  })
 })
