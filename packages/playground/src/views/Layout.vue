@@ -1,66 +1,74 @@
 <template>
   <w-config-provider prefix="w" :size="globalSize" :theme="globalTheme" :locale="globalLocale" :mode="globalMode">
     <div class="playground">
-      <header class="playground-header">
-        <div class="header-left">
-          <h1>🖥️ Windows UI</h1>
-          <p>Vue 3 UI Library - Windows XP Style</p>
-        </div>
-        <div class="mobile-actions">
-          <button class="mobile-nav-toggle" @click="showMobileNav = !showMobileNav" aria-label="切换导航">☰</button>
-          <button class="mobile-controls-toggle" @click="showMobileControls = !showMobileControls" aria-label="切换配置">⚙️</button>
-        </div>
-        <div class="header-right" :class="{ 'mobile-open': showMobileControls }">
-          <div class="global-controls-row">
-            <a href="admin.html" class="admin-link" title="Admin">🏢 {{ t('Admin后台') }}</a>
-            <div class="control-group">
-              <span class="control-label">{{ t('尺寸') }}</span>
-              <button
-                v-for="s in ['small', 'default', 'large']"
-                :key="s"
-                :class="['size-btn', { active: globalSize === s }]"
-                @click="globalSize = s as any"
-              >
-                {{ s }}
-              </button>
+      <header class="playground-header" :class="{ collapsed: headerCollapsed }">
+        <template v-if="!headerCollapsed">
+          <div class="header-left">
+            <h1>🖥️ Windows UI</h1>
+            <p>Vue 3 UI Library - Windows XP Style</p>
+          </div>
+          <div class="mobile-actions">
+            <button class="mobile-nav-toggle" @click="showMobileNav = !showMobileNav" aria-label="切换导航">☰</button>
+            <button class="mobile-controls-toggle" @click="showMobileControls = !showMobileControls" aria-label="切换配置">⚙️</button>
+          </div>
+          <div class="header-right" :class="{ 'mobile-open': showMobileControls }">
+            <div class="global-controls-row">
+              <a href="admin.html" class="admin-link" title="Admin">🏢 {{ t('Admin后台') }}</a>
+              <div class="control-group">
+                <span class="control-label">{{ t('尺寸') }}</span>
+                <button
+                  v-for="s in ['small', 'default', 'large']"
+                  :key="s"
+                  :class="['size-btn', { active: globalSize === s }]"
+                  @click="globalSize = s as any"
+                >
+                  {{ s }}
+                </button>
+              </div>
+              <div class="control-group">
+                <span class="control-label">{{ t('语言') }}</span>
+                <button
+                  v-for="lang in [{ k: 'zh-CN', l: '中文' }, { k: 'en-US', l: 'English' }]"
+                  :key="lang.k"
+                  :class="['size-btn', { active: globalLocale === lang.k }]"
+                  @click="switchLang(lang.k as 'zh-CN' | 'en-US')"
+                >
+                  {{ lang.l }}
+                </button>
+              </div>
             </div>
-            <div class="control-group">
-              <span class="control-label">{{ t('语言') }}</span>
-              <button
-                v-for="lang in [{ k: 'zh-CN', l: '中文' }, { k: 'en-US', l: 'English' }]"
-                :key="lang.k"
-                :class="['size-btn', { active: globalLocale === lang.k }]"
-                @click="switchLang(lang.k as 'zh-CN' | 'en-US')"
-              >
-                {{ lang.l }}
-              </button>
+            <div class="global-controls-row">
+              <div class="control-group">
+                <span class="control-label">{{ t('模式') }}</span>
+                <button
+                  v-for="m in modeOptions"
+                  :key="m"
+                  :class="['size-btn', { active: globalMode === m }]"
+                  @click="switchMode(m)"
+                >
+                  {{ t(modeLabels[m]) }}
+                </button>
+              </div>
+              <div class="control-group">
+                <span class="control-label">{{ t('主题色') }}</span>
+                <button class="preset-btn" style="background:#245edb" @click="themeColors.primary = '#245edb'; updateTheme()" />
+                <button class="preset-btn" style="background:#ff69b4" @click="themeColors.primary = '#ff69b4'; updateTheme()" />
+                <button class="preset-btn" style="background:#d92b2b" @click="themeColors.primary = '#d92b2b'; updateTheme()" />
+                <button class="preset-btn" style="background:#3a9e3a" @click="themeColors.primary = '#3a9e3a'; updateTheme()" />
+                <input type="color" :value="themeColors.primary" @change="e => { themeColors.primary = (e.target as HTMLInputElement).value; updateTheme() }" class="color-input" title="primary" />
+                <button class="reset-btn" @click="resetTheme">{{ t('重置') }}</button>
+                <div class="color-preview" :style="{ backgroundColor: themeColors.primary }"></div>
+              </div>
             </div>
           </div>
-          <div class="global-controls-row">
-            <div class="control-group">
-              <span class="control-label">{{ t('模式') }}</span>
-              <button
-                v-for="m in modeOptions"
-                :key="m"
-                :class="['size-btn', { active: globalMode === m }]"
-                @click="switchMode(m)"
-              >
-                {{ t(modeLabels[m]) }}
-              </button>
-            </div>
-            <div class="control-group">
-              <span class="control-label">{{ t('主题色') }}</span>
-              <button class="preset-btn" style="background:#245edb" @click="themeColors.primary = '#245edb'; updateTheme()" />
-              <button class="preset-btn" style="background:#ff69b4" @click="themeColors.primary = '#ff69b4'; updateTheme()" />
-              <button class="preset-btn" style="background:#d92b2b" @click="themeColors.primary = '#d92b2b'; updateTheme()" />
-              <button class="preset-btn" style="background:#3a9e3a" @click="themeColors.primary = '#3a9e3a'; updateTheme()" />
-              <input type="color" :value="themeColors.primary" @change="e => { themeColors.primary = (e.target as HTMLInputElement).value; updateTheme() }" class="color-input" title="primary" />
-              <button class="reset-btn" @click="resetTheme">{{ t('重置') }}</button>
-              <div class="color-preview" :style="{ backgroundColor: themeColors.primary }"></div>
-            </div>
-          </div>
-        </div>
+          <button class="collapse-btn" @click="headerCollapsed = true" aria-label="收起顶部">
+            <w-icon name="chevron-up" />
+          </button>
+        </template>
       </header>
+      <button v-if="headerCollapsed" class="floating-expand-btn" @click="headerCollapsed = false" aria-label="展开顶部">
+        <w-icon name="chevron-down" />
+      </button>
 
       <div class="playground-body">
         <aside class="playground-sidebar" :class="{ 'mobile-open': showMobileNav }">
@@ -97,6 +105,7 @@ const { t } = useI18n()
 
 const showMobileNav = ref(false)
 const showMobileControls = ref(false)
+const headerCollapsed = ref(false)
 const closeMobileNav = () => { showMobileNav.value = false }
 
 const isActive = (path: string) => {
@@ -283,6 +292,11 @@ const navItems = [
 .mobile-actions { display: none; }
 .mobile-nav-toggle, .mobile-controls-toggle { padding: 6px 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.15); color: #fff; font-size: 16px; border-radius: 2px; cursor: pointer; }
 .mobile-nav-toggle:hover, .mobile-controls-toggle:hover { background: rgba(255,255,255,0.3); }
+.collapse-btn { position: absolute; top: 12px; right: 24px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.15); color: #fff; border-radius: 3px; cursor: pointer; padding: 0; }
+.collapse-btn:hover { background: rgba(255,255,255,0.3); }
+.playground-header.collapsed { padding: 0; min-height: 0; height: 0; border: none; }
+.floating-expand-btn { position: fixed; top: 12px; right: 24px; z-index: 1000; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.4); background: var(--w-xp-title-bar); color: #fff; border-radius: 4px; cursor: pointer; padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+.floating-expand-btn:hover { background: var(--w-color-primary-light); }
 .playground-body { display: flex; flex: 1; min-height: 0; max-width: 1600px; margin: 0 auto; width: 100%; gap: 16px; overflow: hidden; box-sizing: border-box; }
 .playground-sidebar { width: 220px; flex-shrink: 0; height: 100%; overflow-x: hidden; overflow-y: auto; }
 .playground-content { flex: 1; min-width: 0; height: 100%; overflow-x: hidden; overflow-y: auto; }
@@ -297,6 +311,8 @@ const navItems = [
 
 @media (max-width: 768px) {
   .playground-header { flex-direction: column; align-items: flex-start; padding: 12px 16px; position: relative; }
+  .collapse-btn { display: none; }
+  .floating-expand-btn { top: 8px; right: 8px; }
   .mobile-actions { display: flex; position: absolute; top: 12px; right: 16px; gap: 8px; }
   .header-left { margin-bottom: 12px; }
   .playground-header h1 { font-size: 22px; }
