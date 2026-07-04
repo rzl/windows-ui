@@ -59,6 +59,7 @@
               @drag-start="handleDragStart"
               @touch-start="handleTouchStart"
               @toggle-group="toggleGroup"
+              @add="addComponent"
             />
 
             <outline-panel
@@ -343,51 +344,170 @@ const touchState = reactive({
   ghost: null as HTMLElement | null
 })
 
-const layoutTypes = [
-  { label: '容器', value: 'container' },
-  { label: '卡片', value: 'card' },
-  { label: '栅格', value: 'row' },
-  { label: '标签页', value: 'tabs' }
-]
+const componentIconMap: Record<string, string> = {
+  // 布局
+  container: 'box',
+  card: 'card',
+  row: 'layout',
+  col: 'layout',
+  tabs: 'tabs',
+  collapse: 'collapse',
+  space: 'space',
+  'page-header': 'document',
+  'page-container': 'box',
+  layout: 'layout',
+  border: 'border',
+  splitter: 'splitter',
+  affix: 'affix',
+  // 展示
+  text: 'font',
+  typography: 'font',
+  image: 'image',
+  divider: 'divider',
+  statistic: 'stats',
+  chart: 'chart',
+  alert: 'alert',
+  tag: 'tag',
+  progress: 'progress',
+  avatar: 'avatar',
+  badge: 'badge',
+  steps: 'steps',
+  timeline: 'timeline',
+  table: 'table',
+  list: 'list',
+  descriptions: 'descriptions',
+  empty: 'empty',
+  result: 'info',
+  skeleton: 'skeleton',
+  carousel: 'carousel',
+  // 表单
+  input: 'input',
+  textarea: 'input',
+  'input-number': 'number',
+  'input-tag': 'tag',
+  'input-otp': 'checkbox',
+  select: 'select',
+  radio: 'radio',
+  checkbox: 'checkbox',
+  switch: 'switch',
+  'date-picker': 'calendar',
+  'date-picker-panel': 'date-picker-panel',
+  'date-time-picker': 'calendar',
+  'time-picker': 'clock',
+  'time-select': 'clock',
+  calendar: 'calendar',
+  cascader: 'cascader',
+  'tree-select': 'tree',
+  autocomplete: 'autocomplete',
+  mention: 'message',
+  slider: 'slider',
+  rate: 'rate',
+  'color-picker': 'color',
+  'color-picker-panel': 'color',
+  upload: 'upload',
+  transfer: 'transfer',
+  form: 'form',
+  'dynamic-form': 'dynamic-form',
+  'search-form': 'search-form',
+  // 数据
+  model: 'model',
+  dashboard: 'dashboard',
+  report: 'report',
+  'crud-table': 'table',
+  'advanced-query-builder': 'query-builder',
+  'query-builder': 'query-builder',
+  'virtualized-table': 'table',
+  'virtualized-select': 'select',
+  'virtualized-tree': 'tree',
+  // 交互
+  button: 'button',
+  link: 'link',
+  dropdown: 'menu',
+  dialog: 'dialog',
+  drawer: 'drawer',
+  popover: 'popover',
+  popconfirm: 'alert',
+  tooltip: 'tooltip',
+  menu: 'menu',
+  pagination: 'pagination',
+  breadcrumb: 'breadcrumb',
+  segmented: 'segmented',
+  tour: 'tour',
+  backtop: 'backtop',
+  anchor: 'anchor',
+  // 其他
+  monaco: 'code',
+  'monaco-editor': 'code',
+  'rich-text': 'rich-text',
+  watermark: 'image',
+  permission: 'lock',
+  loading: 'loading',
+  infinite: 'infinite-scroll',
+  'infinite-scroll': 'infinite-scroll',
+  scrollbar: 'scrollbar',
+  icon: 'star',
+  notification: 'notification',
+  message: 'message',
+  'message-box': 'message-box',
+  'config-provider': 'settings',
+  'page-designer': 'page-designer'
+}
 
-const displayTypes = computed(() => [
-  { label: '文本', value: 'text' },
-  { label: '图片', value: 'image' },
-  { label: '分隔线', value: 'divider' },
-  { label: '统计卡片', value: 'statistic' },
-  { label: '图表', value: 'chart' },
-  { label: '公告', value: 'alert' },
-  { label: '标签', value: 'tag' },
-  { label: '进度条', value: 'progress' },
-  { label: '头像', value: 'avatar' },
-  { label: '徽标', value: 'badge' },
-  { label: '步骤条', value: 'steps' },
-  { label: '时间线', value: 'timeline' },
-  { label: '表格', value: 'table' },
-  { label: '列表', value: 'list' },
-  ...listComponentsByCategory('display').map((c) => ({ label: c.label, value: c.type }))
+function getComponentIcon(type: string) {
+  return componentIconMap[type] || 'component'
+}
+
+const layoutTypes = computed(() => [
+  { label: '容器', value: 'container', icon: getComponentIcon('container') },
+  { label: '卡片', value: 'card', icon: getComponentIcon('card') },
+  { label: '栅格', value: 'row', icon: getComponentIcon('row') },
+  { label: '标签页', value: 'tabs', icon: getComponentIcon('tabs') },
+  { label: '折叠面板', value: 'collapse', icon: getComponentIcon('collapse') },
+  { label: '间距', value: 'space', icon: getComponentIcon('space') },
+  ...listComponentsByCategory('layout').map((c) => ({ label: c.label, value: c.type, icon: c.icon || getComponentIcon(c.type) }))
 ])
 
-const dataTypes = [
-  { label: '数据模型', value: 'model' },
-  { label: '仪表盘', value: 'dashboard' },
-  { label: '报表', value: 'report' }
-]
+const displayTypes = computed(() => [
+  { label: '文本', value: 'text', icon: getComponentIcon('text') },
+  { label: '图片', value: 'image', icon: getComponentIcon('image') },
+  { label: '分隔线', value: 'divider', icon: getComponentIcon('divider') },
+  { label: '统计卡片', value: 'statistic', icon: getComponentIcon('statistic') },
+  { label: '图表', value: 'chart', icon: getComponentIcon('chart') },
+  { label: '公告', value: 'alert', icon: getComponentIcon('alert') },
+  { label: '标签', value: 'tag', icon: getComponentIcon('tag') },
+  { label: '进度条', value: 'progress', icon: getComponentIcon('progress') },
+  { label: '头像', value: 'avatar', icon: getComponentIcon('avatar') },
+  { label: '徽标', value: 'badge', icon: getComponentIcon('badge') },
+  { label: '步骤条', value: 'steps', icon: getComponentIcon('steps') },
+  { label: '时间线', value: 'timeline', icon: getComponentIcon('timeline') },
+  { label: '表格', value: 'table', icon: getComponentIcon('table') },
+  { label: '列表', value: 'list', icon: getComponentIcon('list') },
+  ...listComponentsByCategory('display').map((c) => ({ label: c.label, value: c.type, icon: c.icon || getComponentIcon(c.type) }))
+])
+
+const dataTypes = computed(() => [
+  { label: '数据模型', value: 'model', icon: getComponentIcon('model') },
+  { label: '仪表盘', value: 'dashboard', icon: getComponentIcon('dashboard') },
+  { label: '报表', value: 'report', icon: getComponentIcon('report') },
+  { label: 'CRUD表格', value: 'crud-table', icon: getComponentIcon('crud-table') },
+  { label: '高级查询', value: 'advanced-query-builder', icon: getComponentIcon('advanced-query-builder') },
+  ...listComponentsByCategory('data').map((c) => ({ label: c.label, value: c.type, icon: c.icon || getComponentIcon(c.type) }))
+])
 
 const actionTypes = computed(() => [
-  { label: '按钮', value: 'button' },
-  { label: '链接', value: 'link' },
-  ...listComponentsByCategory('action').map((c) => ({ label: c.label, value: c.type }))
+  { label: '按钮', value: 'button', icon: getComponentIcon('button') },
+  { label: '链接', value: 'link', icon: getComponentIcon('link') },
+  ...listComponentsByCategory('action').map((c) => ({ label: c.label, value: c.type, icon: c.icon || getComponentIcon(c.type) }))
 ])
 
 const formTypes = computed(() => [
-  { label: '输入框', value: 'input' },
-  { label: '选择器', value: 'select' },
-  { label: '单选框', value: 'radio' },
-  { label: '多选框', value: 'checkbox' },
-  { label: '日期选择', value: 'date-picker' },
-  { label: '开关', value: 'switch' },
-  ...listComponentsByCategory('form').map((c) => ({ label: c.label, value: c.type }))
+  { label: '输入框', value: 'input', icon: getComponentIcon('input') },
+  { label: '选择器', value: 'select', icon: getComponentIcon('select') },
+  { label: '单选框', value: 'radio', icon: getComponentIcon('radio') },
+  { label: '多选框', value: 'checkbox', icon: getComponentIcon('checkbox') },
+  { label: '日期选择', value: 'date-picker', icon: getComponentIcon('date-picker') },
+  { label: '开关', value: 'switch', icon: getComponentIcon('switch') },
+  ...listComponentsByCategory('form').map((c) => ({ label: c.label, value: c.type, icon: c.icon || getComponentIcon(c.type) }))
 ])
 
 const expandedGroups = reactive<Record<string, boolean>>({
@@ -403,10 +523,10 @@ function toggleGroup(key: string) {
 }
 
 const componentGroups = computed<ComponentGroup[]>(() => [
-  { key: 'layout', title: '布局', items: layoutTypes },
+  { key: 'layout', title: '布局', items: layoutTypes.value },
   { key: 'display', title: '展示', items: displayTypes.value },
   { key: 'form', title: '表单', items: formTypes.value },
-  { key: 'data', title: '数据', items: dataTypes },
+  { key: 'data', title: '数据', items: dataTypes.value },
   { key: 'action', title: '交互', items: actionTypes.value }
 ])
 
