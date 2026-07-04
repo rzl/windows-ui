@@ -234,6 +234,9 @@ const actionTypes = computed(() => [
 const formTypes = computed(() => [
   { label: '输入框', value: 'input' },
   { label: '选择器', value: 'select' },
+  { label: '单选框', value: 'radio' },
+  { label: '多选框', value: 'checkbox' },
+  { label: '日期选择', value: 'date-picker' },
   { label: '开关', value: 'switch' },
   ...listComponentsByCategory('form').map((c) => ({ label: c.label, value: c.type }))
 ])
@@ -339,6 +342,12 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { label: '输入框', placeholder: '请输入', type: 'text', modelValue: '' } }
     case 'select':
       return { ...base, props: { label: '选择器', placeholder: '请选择', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
+    case 'radio':
+      return { ...base, props: { label: '单选框', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
+    case 'checkbox':
+      return { ...base, props: { label: '多选框', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: [] } }
+    case 'date-picker':
+      return { ...base, props: { label: '日期', placeholder: '请选择日期', modelValue: '' } }
     case 'switch':
       return { ...base, props: { label: '开关', modelValue: false } }
     default:

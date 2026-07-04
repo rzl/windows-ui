@@ -117,6 +117,30 @@
       v-model="node.props.modelValue"
     />
 
+    <!-- 单选框 -->
+    <component
+      :is="radioTag"
+      v-else-if="node.type === 'radio'"
+      v-model="node.props.modelValue"
+      :options="node.props.options || []"
+    />
+
+    <!-- 多选框 -->
+    <component
+      :is="checkboxTag"
+      v-else-if="node.type === 'checkbox'"
+      v-model="node.props.modelValue"
+      :options="node.props.options || []"
+    />
+
+    <!-- 日期选择 -->
+    <component
+      :is="datePickerTag"
+      v-else-if="node.type === 'date-picker'"
+      v-model="node.props.modelValue"
+      :placeholder="node.props.placeholder"
+    />
+
     <!-- 容器 -->
     <div
       v-else-if="node.type === 'container'"
@@ -244,6 +268,9 @@ const cardTag = withPrefix('card')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')
 const switchTag = withPrefix('switch')
+const radioTag = withPrefix('radio')
+const checkboxTag = withPrefix('checkbox')
+const datePickerTag = withPrefix('date-picker')
 
 const pageContext = inject<PageContext | null>('pageContext', null)
 const activeTab = ref('')

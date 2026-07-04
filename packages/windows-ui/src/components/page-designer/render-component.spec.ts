@@ -87,6 +87,33 @@ describe('WPageRenderComponent', () => {
     expect(wrapper.text()).not.toContain('未知组件')
   })
 
+  it('应渲染单选框节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'r1', type: 'radio', props: { label: '性别', options: [{ label: '男', value: 'male' }, { label: '女', value: 'female' }], modelValue: '' }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染多选框节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'c1', type: 'checkbox', props: { label: '爱好', options: [{ label: '读书', value: 'read' }, { label: '运动', value: 'sport' }], modelValue: [] }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('应渲染日期选择节点', () => {
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'd1', type: 'date-picker', props: { label: '出生日期', placeholder: '请选择日期', modelValue: '' }, styles: {} }
+      }
+    })
+    expect(wrapper.text()).not.toContain('未知组件')
+  })
+
   it('应渲染未知组件兜底', () => {
     const wrapper = mount(RenderComponent, {
       props: {

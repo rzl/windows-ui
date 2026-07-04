@@ -253,6 +253,36 @@
       </component>
     </template>
 
+    <!-- 单选框 -->
+    <template v-if="node.type === 'radio'">
+      <component :is="formItemTag" label="标签">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="选项（JSON）">
+        <component :is="inputTag" v-model="optionsText" type="textarea" :rows="4" placeholder='[{"label":"选项1","value":"1"}]' />
+      </component>
+    </template>
+
+    <!-- 多选框 -->
+    <template v-if="node.type === 'checkbox'">
+      <component :is="formItemTag" label="标签">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="选项（JSON）">
+        <component :is="inputTag" v-model="optionsText" type="textarea" :rows="4" placeholder='[{"label":"选项1","value":"1"}]' />
+      </component>
+    </template>
+
+    <!-- 日期选择 -->
+    <template v-if="node.type === 'date-picker'">
+      <component :is="formItemTag" label="标签">
+        <component :is="inputTag" v-model="node.props.label" />
+      </component>
+      <component :is="formItemTag" label="占位提示">
+        <component :is="inputTag" v-model="node.props.placeholder" />
+      </component>
+    </template>
+
     <!-- 插件组件 -->
     <template v-else-if="pluginComponent">
       <component :is="formItemTag" label="组件编码">
@@ -308,6 +338,9 @@ const typeLabelMap: Record<string, string> = {
   link: '链接',
   input: '输入框',
   select: '选择器',
+  radio: '单选框',
+  checkbox: '多选框',
+  'date-picker': '日期选择',
   switch: '开关'
 }
 

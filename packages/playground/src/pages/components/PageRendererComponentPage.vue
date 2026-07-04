@@ -64,6 +64,24 @@ const config = ref<PageConfig>({
       type: 'switch',
       props: { label: '是否启用', modelValue: true },
       styles: { marginTop: '16px' }
+    },
+    {
+      id: 'r1',
+      type: 'radio',
+      props: { label: '性别', options: [{ label: '男', value: 'male' }, { label: '女', value: 'female' }], modelValue: '' },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 'c1',
+      type: 'checkbox',
+      props: { label: '爱好', options: [{ label: '读书', value: 'read' }, { label: '运动', value: 'sport' }], modelValue: [] },
+      styles: { marginTop: '16px' }
+    },
+    {
+      id: 'd1',
+      type: 'date-picker',
+      props: { label: '出生日期', placeholder: '请选择日期', modelValue: '' },
+      styles: { marginTop: '16px' }
     }
   ]
 })
@@ -91,7 +109,10 @@ const config = ref({
     { id: 'n1', type: 'alert', props: { content: '这是一条公告信息', type: 'info' }, styles: {} },
     { id: 'i1', type: 'input', props: { label: '用户名', placeholder: '请输入用户名', type: 'text', modelValue: '' }, styles: { marginTop: '16px' } },
     { id: 's2', type: 'select', props: { label: '状态', placeholder: '请选择', options: [{ label: '启用', value: '1' }, { label: '禁用', value: '0' }], modelValue: '' }, styles: { marginTop: '16px' } },
-    { id: 'sw1', type: 'switch', props: { label: '是否启用', modelValue: true }, styles: { marginTop: '16px' } }
+    { id: 'sw1', type: 'switch', props: { label: '是否启用', modelValue: true }, styles: { marginTop: '16px' } },
+    { id: 'r1', type: 'radio', props: { label: '性别', options: [{ label: '男', value: 'male' }, { label: '女', value: 'female' }], modelValue: '' }, styles: { marginTop: '16px' } },
+    { id: 'c1', type: 'checkbox', props: { label: '爱好', options: [{ label: '读书', value: 'read' }, { label: '运动', value: 'sport' }], modelValue: [] }, styles: { marginTop: '16px' } },
+    { id: 'd1', type: 'date-picker', props: { label: '出生日期', placeholder: '请选择日期', modelValue: '' }, styles: { marginTop: '16px' } }
   ]
 })
 <\/script>

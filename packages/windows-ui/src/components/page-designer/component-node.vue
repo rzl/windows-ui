@@ -108,6 +108,21 @@
         <component :is="switchTag" :model-value="node.props.modelValue" disabled />
       </template>
 
+      <!-- 单选框 -->
+      <template v-else-if="node.type === 'radio'">
+        <component :is="radioTag" :model-value="node.props.modelValue" :options="node.props.options || []" disabled />
+      </template>
+
+      <!-- 多选框 -->
+      <template v-else-if="node.type === 'checkbox'">
+        <component :is="checkboxTag" :model-value="node.props.modelValue" :options="node.props.options || []" disabled />
+      </template>
+
+      <!-- 日期选择 -->
+      <template v-else-if="node.type === 'date-picker'">
+        <component :is="datePickerTag" :model-value="node.props.modelValue" :placeholder="node.props.placeholder" disabled />
+      </template>
+
       <!-- 容器/卡片/栅格/标签页 -->
       <template v-else-if="isContainer">
         <div v-if="node.type === 'card'" class="card-title">{{ node.props.title }}</div>
@@ -170,6 +185,9 @@ const spaceTag = withPrefix('space')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')
 const switchTag = withPrefix('switch')
+const radioTag = withPrefix('radio')
+const checkboxTag = withPrefix('checkbox')
+const datePickerTag = withPrefix('date-picker')
 
 const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
@@ -195,6 +213,9 @@ const typeLabelMap: Record<string, string> = {
   link: '链接',
   input: '输入框',
   select: '选择器',
+  radio: '单选框',
+  checkbox: '多选框',
+  'date-picker': '日期选择',
   switch: '开关'
 }
 
@@ -295,6 +316,12 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { label: '输入框', placeholder: '请输入', type: 'text', modelValue: '' } }
     case 'select':
       return { ...base, props: { label: '选择器', placeholder: '请选择', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
+    case 'radio':
+      return { ...base, props: { label: '单选框', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
+    case 'checkbox':
+      return { ...base, props: { label: '多选框', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: [] } }
+    case 'date-picker':
+      return { ...base, props: { label: '日期', placeholder: '请选择日期', modelValue: '' } }
     case 'switch':
       return { ...base, props: { label: '开关', modelValue: false } }
     default:
