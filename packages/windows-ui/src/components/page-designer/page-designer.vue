@@ -7,6 +7,9 @@
         <component :is="buttonTag" size="small" :disabled="!canRedo" @click="redo">重做</component>
         <component :is="buttonTag" size="small" :disabled="!selectedNode" @click="copySelectedNode">复制</component>
         <component :is="buttonTag" size="small" :disabled="!clipboardNode" @click="pasteNode">粘贴</component>
+        <component :is="buttonTag" size="small" @click="zoomOut">缩小</component>
+        <component :is="buttonTag" size="small" @click="zoomReset">{{ Math.round(zoom * 100) }}%</component>
+        <component :is="buttonTag" size="small" @click="zoomIn">放大</component>
         <component :is="buttonTag" size="small" @click="handlePreview">预览</component>
         <component :is="buttonTag" size="small" @click="handlePreviewConfig">预览配置</component>
         <component :is="buttonTag" type="primary" size="small" @click="handleSave">保存</component>
@@ -101,11 +104,13 @@
         class="canvas-panel"
         @dragover.prevent
         @drop="handleDropToRoot($event)"
+        @wheel="handleCanvasWheel"
       >
         <div class="panel-title">画布</div>
         <div
           class="canvas-body"
           :class="{ 'is-empty': !config.components?.length }"
+          :style="canvasBodyStyle"
           data-droppable="root"
           @click.self="selectedId = ''"
         >
@@ -217,8 +222,38 @@ const previewVisible = ref(false)
 const configVisible = ref(false)
 const activePanel = ref<'library' | 'canvas' | 'property'>('canvas')
 const activeRightPanel = ref<'property' | 'outline'>('property')
+const zoom = ref(1)
+const minZoom = 0.5
+const maxZoom = 2
+const zoomStep = 0.1
+
+function zoomIn() {
+  zoom.value = Math.min(maxZoom, Math.round((zoom.value + zoomStep) * 10) / 10)
+}
+
+function zoomOut() {
+  zoom.value = Math.max(minZoom, Math.round((zoom.value - zoomStep) * 10) / 10)
+}
+
+function zoomReset() {
+  zoom.value = 1
+}
+
+function handleCanvasWheel(event: WheelEvent) {
+  if (!event.ctrlKey && !event.metaKey) return
+  event.preventDefault()
+  if (event.deltaY < 0) {
+    zoomIn()
+  } else {
+    zoomOut()
+  }
+}
 
 const configJson = computed(() => JSON.stringify(config, null, 2))
+const canvasBodyStyle = computed(() => ({
+  transform: `scale(${zoom.value})`,
+  transformOrigin: 'top left'
+}))
 
 // 撤销/重做历史栈
 const history = reactive<{
@@ -748,7 +783,7 @@ function goBack() {
 .toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; }
 .designer-layout { display: flex; gap: 12px; min-height: 600px; }
 .component-library { width: 180px; background: #fff; border: 1px solid #ddd; padding: 12px; }
-.canvas-panel { flex: 1; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
+.canvas-panel { flex: 1; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; overflow: auto; }
 .property-panel { width: 280px; background: #fff; border: 1px solid #ddd; padding: 12px; display: flex; flex-direction: column; }
 .panel-title { font-weight: bold; margin-bottom: 12px; }
 .panel-tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #eee; }
@@ -759,7 +794,7 @@ function goBack() {
 .group-title { color: #666; font-size: 12px; margin-bottom: 6px; }
 .component-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 6px; cursor: grab; background: #f8f8f8; }
 .component-item:hover { background: #f0f0f0; }
-.canvas-body { flex: 1; border: 1px dashed #ccc; padding: 12px; position: relative; }
+.canvas-body { flex: 1; border: 1px dashed #ccc; padding: 12px; position: relative; transition: transform 0.15s ease; }
 .canvas-body.is-empty { display: flex; align-items: center; justify-content: center; }
 .canvas-body.drop-target-active { background: rgba(0, 120, 215, 0.1); border-color: var(--w-color-primary); }
 .empty-tip { color: #999; }

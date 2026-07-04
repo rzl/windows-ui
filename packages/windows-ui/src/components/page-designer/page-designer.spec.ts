@@ -148,4 +148,26 @@ describe('WPageDesigner', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.findAllComponents(ComponentNode).length).toBe(2)
   })
+
+  it('应支持画布缩放', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).zoom).toBe(1)
+
+    ;(wrapper.vm as any).zoomIn()
+    expect((wrapper.vm as any).zoom).toBeGreaterThan(1)
+
+    ;(wrapper.vm as any).zoomOut()
+    ;(wrapper.vm as any).zoomOut()
+    expect((wrapper.vm as any).zoom).toBeLessThan(1)
+
+    ;(wrapper.vm as any).zoomReset()
+    expect((wrapper.vm as any).zoom).toBe(1)
+
+    const canvasBody = wrapper.find('.canvas-body')
+    expect(canvasBody.attributes('style')).toContain('transform: scale(1)')
+  })
 })
