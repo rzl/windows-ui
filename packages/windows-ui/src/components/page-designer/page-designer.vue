@@ -754,6 +754,21 @@ function handlePreviewConfig() {
   configVisible.value = true
 }
 
+function buildFormData(components: PageNode[]): Record<string, any> {
+  const formTypes = new Set(['input', 'select', 'switch', 'radio', 'checkbox', 'date-picker'])
+  const result: Record<string, any> = {}
+  function walk(list: PageNode[]) {
+    for (const node of list) {
+      if (formTypes.has(node.type) && node.props?.field) {
+        result[node.props.field] = node.props.modelValue ?? ''
+      }
+      if (node.children?.length) walk(node.children)
+    }
+  }
+  walk(components)
+  return result
+}
+
 async function handleSave() {
   const data = {
     id: page.id,
@@ -764,6 +779,7 @@ async function handleSave() {
     config: {
       title: config.title,
       description: config.description,
+      formData: buildFormData(config.components || []),
       components: config.components
     }
   }

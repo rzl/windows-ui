@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h } from 'vue'
+import { h, reactive } from 'vue'
 import RenderComponent from './render-component.vue'
 
 describe('WPageRenderComponent', () => {
@@ -77,6 +77,28 @@ describe('WPageRenderComponent', () => {
       }
     })
     expect(wrapper.text()).not.toContain('未知组件')
+  })
+
+  it('表单字段应绑定到页面级 formData', async () => {
+    const formData = reactive<Record<string, any>>({ username: '张三' })
+    const wrapper = mount(RenderComponent, {
+      props: {
+        node: { id: 'i2', type: 'input', props: { label: '用户名', field: 'username', modelValue: '' }, styles: {} }
+      },
+      global: {
+        provide: {
+          pageContext: {
+            pageCode: { value: '' },
+            pageState: {},
+            formData,
+            updateFormData: (key: string, value: any) => { formData[key] = value },
+            executeEvent: () => {},
+            refreshKey: { value: 0 }
+          }
+        }
+      }
+    })
+    expect((wrapper.vm as any).modelValue).toBe('张三')
   })
 
   it('应渲染选择器节点', () => {

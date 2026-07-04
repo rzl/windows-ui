@@ -46,7 +46,7 @@ defineOptions({ name: 'WPageRenderer' })
 
 import RenderComponent from './render-component.vue'
 import { usePrefix } from '../../utils/prefix'
-import type { PageConfig, PageDataSource, PageEventConfig } from './types'
+import type { PageConfig, PageDataSource, PageEventConfig, PageNode } from './types'
 
 const { withPrefix } = usePrefix()
 const resultTag = withPrefix('result')
@@ -81,10 +81,12 @@ const pageInfo = reactive<{
 const pageConfig = reactive<PageConfig>({
   title: '',
   description: '',
+  formData: {},
   components: []
 })
 
 const pageState = reactive<Record<string, any>>({})
+const formData = reactive<Record<string, any>>({})
 const dialogVisible = ref(false)
 const dialogTitle = ref('弹窗')
 const dialogConfig = ref<PageConfig | null>(null)
@@ -107,6 +109,7 @@ async function loadConfig() {
     pageConfig.title = props.config.title || ''
     pageConfig.description = props.config.description || ''
     pageConfig.components = props.config.components || []
+    initFormData(props.config.formData || {}, pageConfig.components)
   } else if (props.code && props.loadPage) {
     const data = await props.loadPage(props.code)
     pageInfo.id = data.id
@@ -116,7 +119,32 @@ async function loadConfig() {
     pageConfig.title = data.config?.title || ''
     pageConfig.description = data.config?.description || ''
     pageConfig.components = data.config?.components || []
+    initFormData(data.config?.formData || {}, pageConfig.components)
   }
+}
+
+function initFormData(initial: Record<string, any>, components: PageNode[] = []) {
+  // 清空旧值并写入传入的初始数据
+  Object.keys(formData).forEach((key) => delete formData[key])
+  Object.assign(formData, initial)
+  // 扫描表单组件，未初始化的字段使用默认值
+  const formTypes = new Set(['input', 'select', 'switch', 'radio', 'checkbox', 'date-picker'])
+  function walk(list: PageNode[]) {
+    for (const node of list) {
+      if (formTypes.has(node.type) && node.props?.field) {
+        const key = node.props.field
+        if (!(key in formData)) {
+          formData[key] = node.props.modelValue ?? ''
+        }
+      }
+      if (node.children?.length) walk(node.children)
+    }
+  }
+  walk(components)
+}
+
+function updateFormData(key: string, value: any) {
+  formData[key] = value
 }
 
 async function executeEvent(event: PageEventConfig | undefined) {
@@ -198,6 +226,8 @@ function handleCallApi(payload: any) {
 provide('pageContext', {
   pageCode,
   pageState,
+  formData,
+  updateFormData,
   executeEvent,
   executeDataSource: props.executeDataSource,
   refreshKey

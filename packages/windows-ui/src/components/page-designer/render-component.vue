@@ -130,7 +130,7 @@
     <component
       :is="inputTag"
       v-else-if="node.type === 'input'"
-      v-model="node.props.modelValue"
+      v-model="modelValue"
       :placeholder="node.props.placeholder"
       :type="node.props.type || 'text'"
     />
@@ -139,7 +139,7 @@
     <component
       :is="selectTag"
       v-else-if="node.type === 'select'"
-      v-model="node.props.modelValue"
+      v-model="modelValue"
       :options="node.props.options || []"
       :placeholder="node.props.placeholder"
     />
@@ -148,14 +148,14 @@
     <component
       :is="switchTag"
       v-else-if="node.type === 'switch'"
-      v-model="node.props.modelValue"
+      v-model="modelValue"
     />
 
     <!-- 单选框 -->
     <component
       :is="radioTag"
       v-else-if="node.type === 'radio'"
-      v-model="node.props.modelValue"
+      v-model="modelValue"
       :options="node.props.options || []"
     />
 
@@ -163,7 +163,7 @@
     <component
       :is="checkboxTag"
       v-else-if="node.type === 'checkbox'"
-      v-model="node.props.modelValue"
+      v-model="modelValue"
       :options="node.props.options || []"
     />
 
@@ -171,7 +171,7 @@
     <component
       :is="datePickerTag"
       v-else-if="node.type === 'date-picker'"
-      v-model="node.props.modelValue"
+      v-model="modelValue"
       :placeholder="node.props.placeholder"
     />
 
@@ -318,6 +318,23 @@ const modelUrl = ref('')
 const dashboardUrl = ref('')
 const reportUrl = ref('')
 const pluginComponent = computed(() => getComponent(props.node.type))
+const fieldKey = computed(() => props.node.props?.field as string | undefined)
+
+const modelValue = computed({
+  get: () => {
+    if (fieldKey.value && pageContext) {
+      return pageContext.formData[fieldKey.value]
+    }
+    return props.node.props?.modelValue
+  },
+  set: (value) => {
+    if (fieldKey.value && pageContext) {
+      pageContext.updateFormData(fieldKey.value, value)
+    } else {
+      props.node.props.modelValue = value
+    }
+  }
+})
 
 const displayValue = computed(() => {
   if (dataValue.value !== null && dataValue.value !== undefined) {

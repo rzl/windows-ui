@@ -51,7 +51,21 @@ async function savePage(data: any) {
 - 布局：容器、卡片、栅格、标签页
 - 展示：文本、图片、分隔线、统计卡片、图表、公告、表格、列表
 - 数据：数据模型、仪表盘、报表
+- 表单：输入框、选择器、单选框、多选框、开关、日期选择
 - 交互：按钮、链接
+
+## 表单数据绑定
+
+表单组件（输入框、选择器等）支持在属性面板中配置 `绑定字段`，渲染时会自动读写页面级的 `formData`。例如：
+
+```json
+{
+  "type": "input",
+  "props": { "label": "用户名", "field": "username", "modelValue": "" }
+}
+```
+
+页面保存时，`config.formData` 会按字段默认值自动生成；`WPageRenderer` 渲染时也会用 `config.formData` 初始化页面状态。
 
 ## 扩展组件
 

@@ -271,6 +271,9 @@
 
     <!-- 输入框 -->
     <template v-if="node.type === 'input'">
+      <component :is="formItemTag" label="绑定字段">
+        <component :is="inputTag" v-model="node.props.field" placeholder="formData 中的键名" />
+      </component>
       <component :is="formItemTag" label="标签">
         <component :is="inputTag" v-model="node.props.label" />
       </component>
@@ -280,10 +283,16 @@
       <component :is="formItemTag" label="类型">
         <component :is="selectTag" v-model="node.props.type" :options="inputTypeOptions" />
       </component>
+      <component :is="formItemTag" label="默认值">
+        <component :is="inputTag" v-model="node.props.modelValue" />
+      </component>
     </template>
 
     <!-- 选择器 -->
     <template v-if="node.type === 'select'">
+      <component :is="formItemTag" label="绑定字段">
+        <component :is="inputTag" v-model="node.props.field" placeholder="formData 中的键名" />
+      </component>
       <component :is="formItemTag" label="标签">
         <component :is="inputTag" v-model="node.props.label" />
       </component>
@@ -293,10 +302,16 @@
       <component :is="formItemTag" label="选项（JSON）">
         <component :is="inputTag" v-model="optionsText" type="textarea" :rows="4" placeholder='[{"label":"选项1","value":"1"}]' />
       </component>
+      <component :is="formItemTag" label="默认值">
+        <component :is="inputTag" v-model="node.props.modelValue" />
+      </component>
     </template>
 
     <!-- 开关 -->
     <template v-if="node.type === 'switch'">
+      <component :is="formItemTag" label="绑定字段">
+        <component :is="inputTag" v-model="node.props.field" placeholder="formData 中的键名" />
+      </component>
       <component :is="formItemTag" label="标签">
         <component :is="inputTag" v-model="node.props.label" />
       </component>
@@ -307,31 +322,49 @@
 
     <!-- 单选框 -->
     <template v-if="node.type === 'radio'">
+      <component :is="formItemTag" label="绑定字段">
+        <component :is="inputTag" v-model="node.props.field" placeholder="formData 中的键名" />
+      </component>
       <component :is="formItemTag" label="标签">
         <component :is="inputTag" v-model="node.props.label" />
       </component>
       <component :is="formItemTag" label="选项（JSON）">
         <component :is="inputTag" v-model="optionsText" type="textarea" :rows="4" placeholder='[{"label":"选项1","value":"1"}]' />
+      </component>
+      <component :is="formItemTag" label="默认值">
+        <component :is="inputTag" v-model="node.props.modelValue" />
       </component>
     </template>
 
     <!-- 多选框 -->
     <template v-if="node.type === 'checkbox'">
+      <component :is="formItemTag" label="绑定字段">
+        <component :is="inputTag" v-model="node.props.field" placeholder="formData 中的键名" />
+      </component>
       <component :is="formItemTag" label="标签">
         <component :is="inputTag" v-model="node.props.label" />
       </component>
       <component :is="formItemTag" label="选项（JSON）">
         <component :is="inputTag" v-model="optionsText" type="textarea" :rows="4" placeholder='[{"label":"选项1","value":"1"}]' />
       </component>
+      <component :is="formItemTag" label="默认值">
+        <component :is="inputTag" v-model="node.props.modelValue" />
+      </component>
     </template>
 
     <!-- 日期选择 -->
     <template v-if="node.type === 'date-picker'">
+      <component :is="formItemTag" label="绑定字段">
+        <component :is="inputTag" v-model="node.props.field" placeholder="formData 中的键名" />
+      </component>
       <component :is="formItemTag" label="标签">
         <component :is="inputTag" v-model="node.props.label" />
       </component>
       <component :is="formItemTag" label="占位提示">
         <component :is="inputTag" v-model="node.props.placeholder" />
+      </component>
+      <component :is="formItemTag" label="默认值">
+        <component :is="inputTag" v-model="node.props.modelValue" />
       </component>
     </template>
 

@@ -15,6 +15,7 @@ export interface PageNode {
 export interface PageConfig {
   title?: string
   description?: string
+  formData?: Record<string, any>
   components?: PageNode[]
 }
 
@@ -45,6 +46,8 @@ export interface PageDataSource {
 export interface PageContext {
   pageCode: { value: string }
   pageState: Record<string, any>
+  formData: Record<string, any>
+  updateFormData: (key: string, value: any) => void
   executeEvent: (event: PageEventConfig | undefined) => void
   executeDataSource?: (code: string, ds: PageDataSource, ctx?: any) => Promise<any>
   refreshKey: { value: number }
