@@ -36,14 +36,14 @@ const config = ref<PageConfig>({
     },
     {
       id: 's1',
-      type: 'stat',
+      type: 'statistic',
       props: { title: '今日访问', icon: 'user', color: 'primary' },
       styles: { marginBottom: '16px' },
       dataSource: { type: 'static', value: 1280 }
     },
     {
       id: 'n1',
-      type: 'notice',
+      type: 'alert',
       props: { content: '这是一条公告信息', type: 'info' },
       styles: {}
     }
@@ -69,8 +69,8 @@ const config = ref({
   title: '演示页面',
   components: [
     { id: 't1', type: 'text', props: { content: '欢迎使用页面渲染器', tag: 'h3', align: 'center' }, styles: {} },
-    { id: 's1', type: 'stat', props: { title: '今日访问', icon: 'user', color: 'primary' }, styles: {}, dataSource: { type: 'static', value: 1280 } },
-    { id: 'n1', type: 'notice', props: { content: '这是一条公告信息', type: 'info' }, styles: {} }
+    { id: 's1', type: 'statistic', props: { title: '今日访问', icon: 'user', color: 'primary' }, styles: {}, dataSource: { type: 'static', value: 1280 } },
+    { id: 'n1', type: 'alert', props: { content: '这是一条公告信息', type: 'info' }, styles: {} }
   ]
 })
 <\/script>

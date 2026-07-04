@@ -36,7 +36,7 @@
     </template>
 
     <!-- 统计卡片 -->
-    <template v-if="node.type === 'stat'">
+    <template v-if="node.type === 'statistic'">
       <w-form-item label="标题">
         <w-input v-model="node.props.title" />
       </w-form-item>
@@ -70,7 +70,7 @@
     </template>
 
     <!-- 公告 -->
-    <template v-if="node.type === 'notice'">
+    <template v-if="node.type === 'alert'">
       <w-form-item label="内容">
         <w-input v-model="node.props.content" type="textarea" :rows="2" />
       </w-form-item>
@@ -156,7 +156,7 @@
     </template>
 
     <!-- 栅格 -->
-    <template v-if="node.type === 'grid'">
+    <template v-if="node.type === 'row'">
       <w-form-item label="列数">
         <w-input-number v-model="node.props.columns" :min="1" :max="6" />
       </w-form-item>
@@ -247,12 +247,12 @@ const emit = defineEmits(['update'])
 const typeLabelMap: Record<string, string> = {
   container: '容器',
   card: '卡片',
-  grid: '栅格',
+  row: '栅格',
   tabs: '标签页',
   text: '文本',
-  stat: '统计卡片',
+  statistic: '统计卡片',
   chart: '图表',
-  notice: '公告',
+  alert: '公告',
   image: '图片',
   divider: '分隔线',
   table: '表格',

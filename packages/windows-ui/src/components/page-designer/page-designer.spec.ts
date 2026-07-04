@@ -68,4 +68,22 @@ describe('WPageDesigner', () => {
     expect(loadPage).toHaveBeenCalledWith('test')
     expect(wrapper.findComponent(ComponentNode).props('node').props.content).toBe('已加载')
   })
+
+  it('应渲染 statistic 类型节点而不显示未知组件', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [
+            { id: 's1', type: 'statistic', props: { title: '访问量', icon: 'eye', color: 'primary' }, styles: {}, dataSource: { type: 'static', value: 1024 } }
+          ]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.unknown-type').exists()).toBe(false)
+    expect(wrapper.text()).toContain('访问量')
+  })
 })

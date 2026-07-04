@@ -358,7 +358,7 @@
 |------|------|-------|
 | container | 容器 | padding |
 | card | 卡片 | title |
-| grid | 栅格 | columns、gap |
+| row | 栅格 | columns、gap |
 | tabs | 标签页 | tabs（数组：{title, name}） |
 
 ### 展示组件
@@ -366,9 +366,9 @@
 | type | 说明 | props |
 |------|------|-------|
 | text | 文本 | content、tag、align |
-| stat | 统计卡片 | title、field、icon、color |
+| statistic | 统计卡片 | title、field、icon、color |
 | chart | 图表 | title、height、chartType、option |
-| notice | 公告 | content、type |
+| alert | 公告 | content、type |
 
 ### 数据组件
 

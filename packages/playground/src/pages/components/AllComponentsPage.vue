@@ -569,7 +569,7 @@ const pageRendererConfig = {
   title: '全部组件预览',
   components: [
     { id: 't1', type: 'text', props: { content: '页面渲染器示例', tag: 'p', align: 'left' }, styles: {} },
-    { id: 's1', type: 'stat', props: { title: '在线', icon: 'user', color: 'success' }, styles: { marginTop: '8px' }, dataSource: { type: 'static', value: 1280 } }
+    { id: 's1', type: 'statistic', props: { title: '在线', icon: 'user', color: 'success' }, styles: { marginTop: '8px' }, dataSource: { type: 'static', value: 1280 } }
   ]
 }
 

@@ -48,7 +48,7 @@ const designerConfig: PageConfig = {
     },
     {
       id: 'stat_1',
-      type: 'stat',
+      type: 'statistic',
       props: { title: '访问量', icon: 'eye', color: 'primary' },
       styles: { marginTop: '16px' },
       dataSource: { type: 'static', value: 1024 }
@@ -77,7 +77,7 @@ const designerConfig = {
   title: '示例页面',
   components: [
     { id: 'text_1', type: 'text', props: { content: '这是一段示例文本', tag: 'p', align: 'left' }, styles: {} },
-    { id: 'stat_1', type: 'stat', props: { title: '访问量', icon: 'eye', color: 'primary' }, styles: { marginTop: '16px' }, dataSource: { type: 'static', value: 1024 } }
+    { id: 'stat_1', type: 'statistic', props: { title: '访问量', icon: 'eye', color: 'primary' }, styles: { marginTop: '16px' }, dataSource: { type: 'static', value: 1024 } }
   ]
 }
 

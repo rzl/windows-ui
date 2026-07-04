@@ -9,12 +9,12 @@
   >
     <div class="node-toolbar">
       <span class="node-type">{{ typeLabel }}</span>
-      <w-space>
-        <w-button v-if="isContainer" size="mini" @click.stop="addChild">+ 子组件</w-button>
-        <w-button size="mini" @click.stop="moveUp">上移</w-button>
-        <w-button size="mini" @click.stop="moveDown">下移</w-button>
-        <w-button size="mini" type="danger" @click.stop="remove">删除</w-button>
-      </w-space>
+      <component :is="spaceTag">
+        <component :is="buttonTag" v-if="isContainer" size="mini" @click.stop="addChild">+ 子组件</component>
+        <component :is="buttonTag" size="mini" @click.stop="moveUp">上移</component>
+        <component :is="buttonTag" size="mini" @click.stop="moveDown">下移</component>
+        <component :is="buttonTag" size="mini" type="danger" @click.stop="remove">删除</component>
+      </component>
     </div>
 
     <div class="node-content">
@@ -26,7 +26,7 @@
       </template>
 
       <!-- 统计卡片 -->
-      <template v-else-if="node.type === 'stat'">
+      <template v-else-if="node.type === 'statistic'">
         <div class="stat-preview">
           <div class="stat-title">{{ node.props.title }}</div>
           <div class="stat-value">{{ node.dataSource?.value ?? '-' }}</div>
@@ -39,8 +39,8 @@
       </template>
 
       <!-- 公告 -->
-      <template v-else-if="node.type === 'notice'">
-        <w-alert :type="node.props.type || 'info'" :title="node.props.content" :closable="false" />
+      <template v-else-if="node.type === 'alert'">
+        <component :is="alertTag" :type="node.props.type || 'info'" :title="node.props.content" :closable="false" />
       </template>
 
       <!-- 数据模型 -->
@@ -85,7 +85,7 @@
 
       <!-- 按钮 -->
       <template v-else-if="node.type === 'button'">
-        <w-button :type="node.props.type || 'default'">{{ node.props.label }}</w-button>
+        <component :is="buttonTag" :type="node.props.type || 'default'">{{ node.props.label }}</component>
       </template>
 
       <!-- 链接 -->
@@ -134,6 +134,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { listComponents, getComponent } from './plugin-manager'
+import { usePrefix } from '../../utils/prefix'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPageComponentNode' })
@@ -147,19 +148,25 @@ const props = defineProps<{
 
 const emit = defineEmits(['select', 'delete', 'move'])
 
+const { withPrefix } = usePrefix()
+const iconTag = withPrefix('icon')
+const alertTag = withPrefix('alert')
+const buttonTag = withPrefix('button')
+const spaceTag = withPrefix('space')
+
 const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
-const isContainer = computed(() => ['container', 'card', 'grid', 'tabs'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
+const isContainer = computed(() => ['container', 'card', 'row', 'tabs'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
 
 const typeLabelMap: Record<string, string> = {
   container: '容器',
   card: '卡片',
-  grid: '栅格',
+  row: '栅格',
   tabs: '标签页',
   text: '文本',
-  stat: '统计卡片',
+  statistic: '统计卡片',
   chart: '图表',
-  notice: '公告',
+  alert: '公告',
   image: '图片',
   divider: '分隔线',
   table: '表格',
@@ -234,17 +241,17 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { padding: '12px' }, children: [] }
     case 'card':
       return { ...base, props: { title: '卡片标题' }, children: [] }
-    case 'grid':
+    case 'row':
       return { ...base, props: { columns: 2, gap: '12px' }, children: [] }
     case 'tabs':
       return { ...base, props: { tabs: [{ title: '标签1', name: 'tab1' }] }, children: [] }
     case 'text':
       return { ...base, props: { content: '这是一段文本', tag: 'p', align: 'left' } }
-    case 'stat':
+    case 'statistic':
       return { ...base, props: { title: '统计标题', field: 'value', icon: 'star', color: 'primary' }, dataSource: { type: 'static', value: 0 } }
     case 'chart':
       return { ...base, props: { height: '300px', chartType: 'echarts' }, dataSource: { type: 'static' }, option: { title: { text: '示例图表' }, xAxis: { data: ['一月', '二月', '三月'] }, yAxis: {}, series: [{ type: 'bar', data: [5, 20, 36] }] } }
-    case 'notice':
+    case 'alert':
       return { ...base, props: { content: '公告内容', type: 'info' } }
     case 'image':
       return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }

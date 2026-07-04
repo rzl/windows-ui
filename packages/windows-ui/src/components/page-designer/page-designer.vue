@@ -183,7 +183,7 @@ const touchState = reactive({
 const layoutTypes = [
   { label: '容器', value: 'container' },
   { label: '卡片', value: 'card' },
-  { label: '栅格', value: 'grid' },
+  { label: '栅格', value: 'row' },
   { label: '标签页', value: 'tabs' }
 ]
 
@@ -191,9 +191,9 @@ const displayTypes = computed(() => [
   { label: '文本', value: 'text' },
   { label: '图片', value: 'image' },
   { label: '分隔线', value: 'divider' },
-  { label: '统计卡片', value: 'stat' },
+  { label: '统计卡片', value: 'statistic' },
   { label: '图表', value: 'chart' },
-  { label: '公告', value: 'notice' },
+  { label: '公告', value: 'alert' },
   { label: '表格', value: 'table' },
   { label: '列表', value: 'list' },
   ...listComponentsByCategory('display').map((c) => ({ label: c.label, value: c.type }))
@@ -276,19 +276,19 @@ function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { padding: '12px' }, children: [] }
     case 'card':
       return { ...base, props: { title: '卡片标题' }, children: [] }
-    case 'grid':
+    case 'row':
       return { ...base, props: { columns: 2, gap: '12px' }, children: [] }
     case 'tabs':
       return { ...base, props: { tabs: [{ title: '标签1', name: 'tab1' }] }, children: [] }
     case 'text':
       return { ...base, props: { content: '这是一段文本', tag: 'p', align: 'left' } }
-    case 'stat':
+    case 'statistic':
       return { ...base, props: { title: '统计标题', field: 'value', icon: 'star', color: 'primary' }, dataSource: { type: 'static', value: 0 } }
     case 'chart': {
       const chartPlugin = getChart('echarts')
       return { ...base, props: { height: '300px', chartType: 'echarts' }, dataSource: { type: 'static' }, option: chartPlugin ? chartPlugin.defaultOption() : {} }
     }
-    case 'notice':
+    case 'alert':
       return { ...base, props: { content: '公告内容', type: 'info' } }
     case 'image':
       return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
@@ -338,7 +338,7 @@ function selectNode(id: string) {
 
 function isContainerNode(node: PageNode | null): boolean {
   if (!node) return false
-  if (['container', 'card', 'grid', 'tabs'].includes(node.type)) return true
+  if (['container', 'card', 'row', 'tabs'].includes(node.type)) return true
   const pluginDef = listComponents().find((c) => c.type === node.type)
   return !!pluginDef?.isContainer
 }

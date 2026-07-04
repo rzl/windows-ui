@@ -10,8 +10,8 @@
     </component>
 
     <!-- 统计卡片 -->
-    <div v-else-if="node.type === 'stat'" class="stat-card" :class="`is-${node.props.color || 'primary'}`">
-      <w-icon :name="node.props.icon || 'star'" :size="40" />
+    <div v-else-if="node.type === 'statistic'" class="stat-card" :class="`is-${node.props.color || 'primary'}`">
+      <component :is="iconTag" :name="node.props.icon || 'star'" :size="40" />
       <div class="stat-info">
         <div class="stat-title">{{ node.props.title }}</div>
         <div class="stat-value">{{ displayValue }}</div>
@@ -24,8 +24,9 @@
     </div>
 
     <!-- 公告 -->
-    <w-alert
-      v-else-if="node.type === 'notice'"
+    <component
+      :is="alertTag"
+      v-else-if="node.type === 'alert'"
       :type="node.props.type || 'info'"
       :title="node.props.content"
       :closable="false"
@@ -52,7 +53,8 @@
 
     <!-- 表格 -->
     <div v-else-if="node.type === 'table'" class="render-table-wrapper">
-      <w-table
+      <component
+        :is="tableTag"
         :data="tableData"
         :columns="tableColumns"
         :height="node.props.height"
@@ -69,7 +71,7 @@
         class="render-list-item"
         @click="handleItemClick(item)"
       >
-        <w-icon v-if="item.icon || node.props.itemIcon" :name="item.icon || node.props.itemIcon" />
+        <component :is="iconTag" v-if="item.icon || node.props.itemIcon" :name="item.icon || node.props.itemIcon" />
         <div class="render-list-content">
           <div class="render-list-title">{{ item[node.props.itemTitle || 'title'] }}</div>
           <div class="render-list-desc">{{ item[node.props.itemDesc || 'description'] }}</div>
@@ -78,13 +80,14 @@
     </div>
 
     <!-- 按钮 -->
-    <w-button
+    <component
+      :is="buttonTag"
       v-else-if="node.type === 'button'"
       :type="node.props.type || 'default'"
       @click="handleEvent(node.events?.onClick)"
     >
       {{ node.props.label }}
-    </w-button>
+    </component>
 
     <!-- 链接 -->
     <a v-else-if="node.type === 'link'" href="javascript:void(0)" @click="handleLinkClick">{{ node.props.label }}</a>
@@ -104,7 +107,8 @@
     </div>
 
     <!-- 卡片 -->
-    <w-card
+    <component
+      :is="cardTag"
       v-else-if="node.type === 'card'"
       :header="node.props.title"
     >
@@ -114,11 +118,11 @@
         :node="child"
         :page-code="pageCode"
       />
-    </w-card>
+    </component>
 
     <!-- 栅格 -->
     <div
-      v-else-if="node.type === 'grid'"
+      v-else-if="node.type === 'row'"
       class="render-grid"
       :style="gridStyle"
     >
@@ -196,6 +200,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getChart, getComponent } from './plugin-manager'
+import { usePrefix } from '../../utils/prefix'
 import type { PageContext, PageNode } from './types'
 
 defineOptions({ name: 'WPageRenderComponent' })
@@ -204,6 +209,13 @@ const props = defineProps<{
   node: PageNode
   pageCode?: string
 }>()
+
+const { withPrefix } = usePrefix()
+const iconTag = withPrefix('icon')
+const alertTag = withPrefix('alert')
+const buttonTag = withPrefix('button')
+const tableTag = withPrefix('table')
+const cardTag = withPrefix('card')
 
 const pageContext = inject<PageContext | null>('pageContext', null)
 const activeTab = ref('')
