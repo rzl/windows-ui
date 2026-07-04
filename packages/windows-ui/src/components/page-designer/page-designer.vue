@@ -78,71 +78,32 @@
 
         <div class="left-panel-content">
           <!-- 组件库 -->
-          <div v-if="leftPanelMode === 'library'" class="component-library">
+          <div v-if="leftPanelMode === 'library'" class="component-library" :class="`component-library--${globalSize}`">
             <div class="panel-title">组件库</div>
-            <div class="component-group">
-              <div class="group-title">布局</div>
+            <div
+              v-for="group in componentGroups"
+              :key="group.key"
+              class="component-group"
+            >
               <div
-                v-for="type in layoutTypes"
-                :key="type.value"
-                class="component-item"
-                :draggable="!isMobile"
-                @dragstart="handleDragStart($event, type.value)"
-                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+                class="group-title"
+                :class="{ collapsed: !expandedGroups[group.key] }"
+                @click="toggleGroup(group.key)"
               >
-                {{ type.label }}
+                <component :is="iconTag" name="chevron-down" class="group-arrow" />
+                {{ group.title }}
               </div>
-            </div>
-            <div class="component-group">
-              <div class="group-title">展示</div>
-              <div
-                v-for="type in displayTypes"
-                :key="type.value"
-                class="component-item"
-                :draggable="!isMobile"
-                @dragstart="handleDragStart($event, type.value)"
-                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-              >
-                {{ type.label }}
-              </div>
-            </div>
-            <div class="component-group">
-              <div class="group-title">表单</div>
-              <div
-                v-for="type in formTypes"
-                :key="type.value"
-                class="component-item"
-                :draggable="!isMobile"
-                @dragstart="handleDragStart($event, type.value)"
-                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-              >
-                {{ type.label }}
-              </div>
-            </div>
-            <div class="component-group">
-              <div class="group-title">数据</div>
-              <div
-                v-for="type in dataTypes"
-                :key="type.value"
-                class="component-item"
-                :draggable="!isMobile"
-                @dragstart="handleDragStart($event, type.value)"
-                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-              >
-                {{ type.label }}
-              </div>
-            </div>
-            <div class="component-group">
-              <div class="group-title">交互</div>
-              <div
-                v-for="type in actionTypes"
-                :key="type.value"
-                class="component-item"
-                :draggable="!isMobile"
-                @dragstart="handleDragStart($event, type.value)"
-                @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
-              >
-                {{ type.label }}
+              <div v-show="expandedGroups[group.key]" class="component-group-items">
+                <div
+                  v-for="type in group.items"
+                  :key="type.value"
+                  class="component-item"
+                  :draggable="!isMobile"
+                  @dragstart="handleDragStart($event, type.value)"
+                  @touchstart.stop.prevent="handleTouchStart($event, type.label, type.value)"
+                >
+                  {{ type.label }}
+                </div>
               </div>
             </div>
           </div>
@@ -250,12 +211,13 @@ import PageRenderer from './page-renderer.vue'
 import OutlineTree from './outline-tree.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
 import './built-in-components'
-import { usePrefix } from '../../utils/prefix'
+import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import WFormItem from '../form/form-item.vue'
 import WInput from '../input/input.vue'
 import type { PageConfig, PageNode } from './types'
 
 const { withPrefix } = usePrefix()
+const globalSize = useGlobalSize()
 const buttonTag = withPrefix('button')
 const spaceTag = withPrefix('space')
 const dialogTag = withPrefix('dialog')
@@ -518,6 +480,32 @@ const formTypes = computed(() => [
   { label: '日期选择', value: 'date-picker' },
   { label: '开关', value: 'switch' },
   ...listComponentsByCategory('form').map((c) => ({ label: c.label, value: c.type }))
+])
+
+interface ComponentGroup {
+  key: string
+  title: string
+  items: { label: string; value: string }[]
+}
+
+const expandedGroups = reactive<Record<string, boolean>>({
+  layout: true,
+  display: true,
+  form: true,
+  data: true,
+  action: true
+})
+
+function toggleGroup(key: string) {
+  expandedGroups[key] = !expandedGroups[key]
+}
+
+const componentGroups = computed<ComponentGroup[]>(() => [
+  { key: 'layout', title: '布局', items: layoutTypes },
+  { key: 'display', title: '展示', items: displayTypes.value },
+  { key: 'form', title: '表单', items: formTypes.value },
+  { key: 'data', title: '数据', items: dataTypes },
+  { key: 'action', title: '交互', items: actionTypes.value }
 ])
 
 const mobileTabs = [
@@ -1033,7 +1021,7 @@ function goBack() {
 .page-tab-close { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border-radius: 50%; font-size: 14px; line-height: 1; }
 .page-tab-close:hover { background: rgba(0, 0, 0, 0.1); }
 .designer-layout { display: flex; min-height: 600px; }
-.left-panel { display: flex; width: 220px; border-right: 1px solid #ddd; background: #fff; }
+.left-panel { display: flex; width: 260px; border-right: 1px solid #ddd; background: #fff; }
 .left-sidebar { width: 44px; display: flex; flex-direction: column; border-right: 1px solid #ddd; background: #f5f5f5; flex-shrink: 0; }
 .sidebar-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; cursor: pointer; color: #666; font-size: 11px; gap: 4px; transition: background 0.15s; }
 .sidebar-btn:hover { background: #e9e9e9; color: #333; }
@@ -1051,8 +1039,13 @@ function goBack() {
 .panel-tab:hover { color: #333; }
 .panel-tab.active { color: var(--w-color-primary); border-bottom-color: var(--w-color-primary); font-weight: bold; }
 .component-group { margin-bottom: 12px; }
-.group-title { color: #666; font-size: 12px; margin-bottom: 6px; }
-.component-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 6px; cursor: grab; background: #f8f8f8; }
+.component-group-items { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.group-title { color: #666; font-size: 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+.group-arrow { transition: transform 0.2s; font-size: 12px; }
+.group-title.collapsed .group-arrow { transform: rotate(-90deg); }
+.component-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; cursor: grab; background: #f8f8f8; font-size: var(--w-font-size-base); }
+.component-library--small .component-item { padding: 4px; font-size: var(--w-font-size-small); }
+.component-library--large .component-item { padding: 12px; font-size: var(--w-font-size-medium); }
 .component-item:hover { background: #f0f0f0; }
 .canvas-body { flex: 1; border: 1px dashed #ccc; padding: 12px; position: relative; transition: transform 0.15s ease; }
 .canvas-body.is-empty { display: flex; align-items: center; justify-content: center; }

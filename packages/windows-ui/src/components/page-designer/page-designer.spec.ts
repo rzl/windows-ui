@@ -1,8 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h } from 'vue'
+import { h, ref } from 'vue'
 import PageDesigner from './page-designer.vue'
 import ComponentNode from './component-node.vue'
+import { configProviderContextKey } from '../../utils/prefix'
 
 describe('WPageDesigner', () => {
   it('应渲染三栏布局与组件库项', () => {
@@ -322,5 +323,67 @@ describe('WPageDesigner', () => {
 
     expect((wrapper.vm as any).allPages.length).toBe(1)
     expect((wrapper.vm as any).activePageCode).toBe('test')
+  })
+
+  it('组件库应默认使用 default 尺寸类', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.component-library').classes()).toContain('component-library--default')
+  })
+
+  it('组件库分组默认展开且可点击收起/展开', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    const firstGroup = wrapper.findAll('.component-group')[0]
+    const title = firstGroup.find('.group-title')
+
+    expect(title.exists()).toBe(true)
+    expect(title.classes()).not.toContain('collapsed')
+    expect(firstGroup.find('.component-group-items').isVisible()).toBe(true)
+
+    await title.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(title.classes()).toContain('collapsed')
+    expect(firstGroup.find('.component-group-items').attributes('style')).toContain('display: none')
+
+    await title.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(title.classes()).not.toContain('collapsed')
+    expect(firstGroup.find('.component-group-items').attributes('style')).not.toContain('display: none')
+  })
+
+  it('组件库应响应全局尺寸配置 small / large', async () => {
+    function createWrapper(size: string) {
+      const plugin = {
+        install(app: any) {
+          app.provide(
+            configProviderContextKey,
+            ref({ prefix: 'w', size, zIndex: 2000, locale: 'zh-CN', mode: 'light' })
+          )
+        }
+      }
+      return mount(PageDesigner, {
+        props: { code: 'test' },
+        global: {
+          stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'],
+          plugins: [plugin]
+        }
+      })
+    }
+
+    const wrapperSmall = createWrapper('small')
+    await wrapperSmall.vm.$nextTick()
+    expect(wrapperSmall.find('.component-library').classes()).toContain('component-library--small')
+
+    const wrapperLarge = createWrapper('large')
+    await wrapperLarge.vm.$nextTick()
+    expect(wrapperLarge.find('.component-library').classes()).toContain('component-library--large')
   })
 })
