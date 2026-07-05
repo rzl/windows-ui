@@ -69,6 +69,7 @@
               :components="config.components"
               :selected-id="selectedId"
               @select="selectNode"
+              @reorder="handleReorder"
             />
 
             <page-info-panel
@@ -96,6 +97,7 @@
           @select="selectNode"
           @delete="deleteNode"
           @move="moveNode"
+          @reorder="handleReorder"
           @change="recordHistory"
         />
 
@@ -300,7 +302,11 @@ const nodeTree = useNodeTree({
   onSelect: selectNode,
   onChange: recordHistory
 })
-const { addComponent, deleteNode, moveNode } = nodeTree
+const { addComponent, deleteNode, moveNode, moveNodeTo } = nodeTree
+
+function handleReorder(payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) {
+  moveNodeTo(payload)
+}
 
 const clipboardNode = ref<PageNode | null>(null)
 

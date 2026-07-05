@@ -26,6 +26,7 @@
         @select="emit('select', $event)"
         @delete="emit('delete', $event)"
         @move="emit('move', $event)"
+        @reorder="emit('reorder', $event)"
         @change="emit('change')"
       />
       <div v-if="!components?.length" class="empty-tip">
@@ -55,6 +56,7 @@ const emit = defineEmits<{
   (e: 'select', id: string): void
   (e: 'delete', payload: { id: string }): void
   (e: 'move', payload: { id: string; direction: 'up' | 'down' }): void
+  (e: 'reorder', payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }): void
   (e: 'change'): void
 }>()
 

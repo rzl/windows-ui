@@ -2,7 +2,7 @@
   <div
     ref="nodeRef"
     class="component-node"
-    :class="{ selected: isSelected, container: isContainer }"
+    :class="{ selected: isSelected, container: isContainer, 'drop-before': dropIndicator === 'before', 'drop-after': dropIndicator === 'after', 'drop-inside': dropIndicator === 'inside' }"
     :style="node.styles"
     @click.stop="selectNode(node.id)"
     @dragenter.stop.prevent="handleDragEnter"
@@ -13,6 +13,16 @@
     <div class="node-toolbar">
       <span class="node-type">{{ typeLabel }}</span>
       <component :is="spaceTag">
+        <component
+          :is="buttonTag"
+          :size="globalSize"
+          icon="sort"
+          title="拖动排序"
+          draggable="true"
+          class="drag-handle"
+          @dragstart.stop="handleNodeDragStart"
+          @click.stop
+        />
         <component :is="buttonTag" v-if="isContainer" :size="globalSize" icon="plus" title="添加子组件" @click.stop="addChild" />
         <component :is="buttonTag" :size="globalSize" icon="arrowUp" title="上移" @click.stop="moveUp" />
         <component :is="buttonTag" :size="globalSize" icon="arrowDown" title="下移" @click.stop="moveDown" />
@@ -216,10 +226,11 @@ const props = defineProps<{
   parentList: PageNode[]
 }>()
 
-const emit = defineEmits(['select', 'delete', 'move', 'change'])
+const emit = defineEmits(['select', 'delete', 'move', 'change', 'reorder'])
 
 const nodeRef = ref<HTMLElement>()
 const dragOverCount = ref(0)
+const dropIndicator = ref<'before' | 'after' | 'inside' | null>(null)
 
 const { withPrefix } = usePrefix()
 const globalSize = useGlobalSize()
@@ -308,32 +319,77 @@ function setChildrenAreaHighlight(active: boolean) {
   area.classList.toggle('drop-target-active', active)
 }
 
-function handleDragEnter(_event: DragEvent) {
-  if (!isContainer.value) return
-  dragOverCount.value++
-  setChildrenAreaHighlight(true)
+function hasLibraryType(transfer: DataTransfer | null) {
+  return transfer?.types.includes('componentType') ?? false
 }
 
-function handleDragLeave(_event: DragEvent) {
-  if (!isContainer.value) return
-  dragOverCount.value--
-  if (dragOverCount.value <= 0) {
-    dragOverCount.value = 0
-    setChildrenAreaHighlight(false)
+function hasNodeType(transfer: DataTransfer | null) {
+  return transfer?.types.includes('pageNodeId') ?? false
+}
+
+function handleNodeDragStart(event: DragEvent) {
+  if (!event.dataTransfer) return
+  event.dataTransfer.setData('pageNodeId', props.node.id)
+  event.dataTransfer.effectAllowed = 'move'
+}
+
+function computeDropPosition(event: DragEvent): 'before' | 'after' | 'inside' {
+  const target = event.target as HTMLElement | null
+  const childrenArea = nodeRef.value?.querySelector('.children-area')
+  if (childrenArea && target && childrenArea.contains(target)) return 'inside'
+  const rect = nodeRef.value?.getBoundingClientRect()
+  if (!rect) return 'after'
+  return event.clientY < rect.top + rect.height / 2 ? 'before' : 'after'
+}
+
+function clearDropState() {
+  dragOverCount.value = 0
+  dropIndicator.value = null
+  setChildrenAreaHighlight(false)
+}
+
+function handleDragEnter(event: DragEvent) {
+  if (hasLibraryType(event.dataTransfer) && isContainer.value) {
+    dragOverCount.value++
+    setChildrenAreaHighlight(true)
+  }
+}
+
+function handleDragLeave(event: DragEvent) {
+  if (hasLibraryType(event.dataTransfer) && isContainer.value) {
+    dragOverCount.value--
+    if (dragOverCount.value <= 0) {
+      dragOverCount.value = 0
+      setChildrenAreaHighlight(false)
+    }
   }
 }
 
 function handleDragOver(event: DragEvent) {
-  if (!isContainer.value) return
-  event.preventDefault()
+  if (hasLibraryType(event.dataTransfer) || hasNodeType(event.dataTransfer)) {
+    event.preventDefault()
+  }
+  if (hasNodeType(event.dataTransfer)) {
+    dropIndicator.value = computeDropPosition(event)
+  }
 }
 
 function handleDrop(event: DragEvent) {
-  if (!isContainer.value) return
   event.preventDefault()
-  dragOverCount.value = 0
-  setChildrenAreaHighlight(false)
+  const nodeId = event.dataTransfer?.getData('pageNodeId')
+  if (nodeId) {
+    const position = computeDropPosition(event)
+    clearDropState()
+    emit('reorder', { sourceId: nodeId, targetId: props.node.id, position })
+    return
+  }
+
+  if (!isContainer.value) {
+    clearDropState()
+    return
+  }
   const type = event.dataTransfer?.getData('componentType')
+  clearDropState()
   if (!type) return
   if (!props.node.children) props.node.children = []
   const child = createDefaultComponent(type)
@@ -368,9 +424,14 @@ function handleDrop(event: DragEvent) {
   display: flex;
 }
 .node-type { font-size: 12px; color: var(--w-text-color-secondary); }
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
 .node-content { min-height: 24px; }
 .children-area { min-height: 40px; padding: 8px; border: 1px dashed var(--w-border-color-light); }
 .children-area.drop-target-active { background: var(--w-table-current-row-bg); border-color: var(--w-color-primary); }
+.component-node.drop-before { border-top: 2px solid var(--w-color-primary); }
+.component-node.drop-after { border-bottom: 2px solid var(--w-color-primary); }
+.component-node.drop-inside .children-area { background: var(--w-table-current-row-bg); border-color: var(--w-color-primary); }
 .layout-grid { display: grid; grid-template-columns: repeat(var(--columns, 2), 1fr); gap: var(--gap, 12px); }
 .card-title { font-weight: bold; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--w-border-color-light); }
 .tabs-header { display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--w-border-color); }

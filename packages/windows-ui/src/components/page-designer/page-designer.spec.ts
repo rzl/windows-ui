@@ -437,7 +437,12 @@ describe('WPageDesigner', () => {
     const container = wrapper.find('[data-droppable="container"]')
     expect(container.exists()).toBe(true)
 
-    await container.trigger('drop', { dataTransfer: { getData: () => 'text' } })
+    await container.trigger('drop', {
+      dataTransfer: {
+        types: ['componentType'],
+        getData: (key: string) => (key === 'componentType' ? 'text' : '')
+      }
+    })
     await wrapper.vm.$nextTick()
 
     expect((wrapper.vm as any).config.components[0].children.length).toBe(1)
@@ -447,5 +452,111 @@ describe('WPageDesigner', () => {
     ;(wrapper.vm as any).undo()
     await wrapper.vm.$nextTick()
     expect((wrapper.vm as any).config.components[0].children.length).toBe(0)
+  })
+
+  it('应支持画布节点拖拽排序', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [
+            { id: 't1', type: 'text', props: { content: '文本1' }, styles: {} },
+            { id: 't2', type: 'text', props: { content: '文本2' }, styles: {} }
+          ]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const nodes = wrapper.findAllComponents(ComponentNode)
+    expect(nodes.length).toBe(2)
+
+    const dragHandle = nodes[0].find('button[title="拖动排序"]')
+    expect(dragHandle.exists()).toBe(true)
+    await dragHandle.trigger('dragstart', {
+      dataTransfer: { setData: () => {}, types: ['pageNodeId'], getData: (key: string) => (key === 'pageNodeId' ? 't1' : '') }
+    })
+
+    await nodes[1].trigger('drop', {
+      dataTransfer: { types: ['pageNodeId'], getData: (key: string) => (key === 'pageNodeId' ? 't1' : '') }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect((wrapper.vm as any).config.components.map((n: any) => n.id)).toEqual(['t2', 't1'])
+  })
+
+  it('选中嵌套节点时大纲应自动展开祖先', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [
+            {
+              id: 'c1',
+              type: 'container',
+              props: {},
+              styles: {},
+              children: [{ id: 't1', type: 'text', props: { content: '嵌套文本' }, styles: {} }]
+            }
+          ]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    const outlineBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('大纲'))
+    expect(outlineBtn).toBeTruthy()
+    await outlineBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // 默认未展开，大纲中只有容器
+    expect(wrapper.findAll('.outline-node').length).toBe(1)
+
+    // 通过画布选中子节点
+    ;(wrapper.vm as any).selectNode('t1')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('.outline-node').length).toBe(2)
+    expect(wrapper.find('.outline-tree').text()).toContain('嵌套文本')
+  })
+
+  it('应支持大纲节点拖拽排序', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [
+            { id: 't1', type: 'text', props: { content: '文本1' }, styles: {} },
+            { id: 't2', type: 'text', props: { content: '文本2' }, styles: {} }
+          ]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    const outlineBtn = wrapper.findAll('.sidebar-btn').find((el) => el.text().includes('大纲'))
+    await outlineBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const outlineNodes = wrapper.findAll('.outline-node')
+    expect(outlineNodes.length).toBe(2)
+
+    const dragHandle = outlineNodes[0].find('.outline-drag-handle')
+    expect(dragHandle.exists()).toBe(true)
+    await dragHandle.trigger('dragstart', {
+      dataTransfer: { setData: () => {}, types: ['pageNodeId'], getData: (key: string) => (key === 'pageNodeId' ? 't1' : '') }
+    })
+
+    await outlineNodes[1].trigger('drop', {
+      dataTransfer: { types: ['pageNodeId'], getData: (key: string) => (key === 'pageNodeId' ? 't1' : '') }
+    })
+    await wrapper.vm.$nextTick()
+
+    expect((wrapper.vm as any).config.components.map((n: any) => n.id)).toEqual(['t2', 't1'])
   })
 })

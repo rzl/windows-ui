@@ -89,4 +89,64 @@ describe('useNodeTree', () => {
     tree.moveNode({ id: 'b', direction: 'down' })
     expect(components.map((n) => n.id)).toEqual(['a', 'b', 'c'])
   })
+
+  it('moveNodeTo 应支持 before/after 重排', () => {
+    const components = reactive<PageNode[]>([
+      createNode('text', 'a'),
+      createNode('button', 'b'),
+      createNode('image', 'c')
+    ])
+    const tree = useNodeTree({
+      getComponents: () => components,
+      selectedNode: ref(null),
+      isContainerNode: () => false,
+      createDefaultComponent: (type) => createNode(type, 'new'),
+      onSelect: vi.fn(),
+      onChange: vi.fn()
+    })
+
+    tree.moveNodeTo({ sourceId: 'c', targetId: 'a', position: 'before' })
+    expect(components.map((n) => n.id)).toEqual(['c', 'a', 'b'])
+
+    tree.moveNodeTo({ sourceId: 'a', targetId: 'b', position: 'after' })
+    expect(components.map((n) => n.id)).toEqual(['c', 'b', 'a'])
+  })
+
+  it('moveNodeTo 应支持拖入容器', () => {
+    const container = createNode('container', 'c1')
+    container.children = [createNode('text', 'child')]
+    const components = reactive<PageNode[]>([container, createNode('button', 'btn')])
+    const tree = useNodeTree({
+      getComponents: () => components,
+      selectedNode: ref(null),
+      isContainerNode: (node) => node?.type === 'container',
+      createDefaultComponent: (type) => createNode(type, 'new'),
+      onSelect: vi.fn(),
+      onChange: vi.fn()
+    })
+
+    tree.moveNodeTo({ sourceId: 'btn', targetId: 'c1', position: 'inside' })
+    expect(components.length).toBe(1)
+    expect(container.children?.length).toBe(2)
+    expect(container.children?.map((n) => n.id)).toContain('btn')
+  })
+
+  it('moveNodeTo 应禁止把祖先拖入后代', () => {
+    const container = createNode('container', 'c1')
+    const child = createNode('text', 'child')
+    container.children = [child]
+    const components = reactive<PageNode[]>([container])
+    const tree = useNodeTree({
+      getComponents: () => components,
+      selectedNode: ref(null),
+      isContainerNode: (node) => node?.type === 'container',
+      createDefaultComponent: (type) => createNode(type, 'new'),
+      onSelect: vi.fn(),
+      onChange: vi.fn()
+    })
+
+    tree.moveNodeTo({ sourceId: 'c1', targetId: 'child', position: 'inside' })
+    expect(container.children?.length).toBe(1)
+    expect(container.children?.[0].id).toBe('child')
+  })
 })

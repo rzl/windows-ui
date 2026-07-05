@@ -5,6 +5,7 @@
       :components="components || []"
       :selected-id="selectedId"
       @select="emit('select', $event)"
+      @reorder="emit('reorder', $event)"
     />
   </div>
 </template>
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'select', id: string): void
+  (e: 'reorder', payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }): void
 }>()
 
 void props
