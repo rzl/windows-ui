@@ -1,46 +1,46 @@
 <template>
   <div class="data-source-editor">
     <div class="section-title">数据源</div>
-    <component :is="formItemTag" label="数据源类型">
-      <component :is="selectTag" :model-value="modelValue?.type" :options="typeOptions" @update:model-value="updateType" />
+    <component :is="formItemTag" :size="controlSize" label="数据源类型">
+      <component :is="selectTag" :size="controlSize" :model-value="modelValue?.type" :options="typeOptions" @update:model-value="updateType" />
     </component>
 
     <template v-if="modelValue?.type === 'static'">
-      <component :is="formItemTag" label="静态值">
-        <component :is="inputTag" v-model="modelValue.value" type="textarea" :rows="3" />
+      <component :is="formItemTag" :size="controlSize" label="静态值">
+        <component :is="inputTag" :size="controlSize" v-model="modelValue.value" type="textarea" :rows="3" />
       </component>
     </template>
 
     <template v-if="modelValue?.type === 'sql'">
-      <component :is="formItemTag" label="SQL 查询">
-        <component :is="inputTag" v-model="modelValue.sql" type="textarea" :rows="4" placeholder="仅支持 SELECT 查询" />
+      <component :is="formItemTag" :size="controlSize" label="SQL 查询">
+        <component :is="inputTag" :size="controlSize" v-model="modelValue.sql" type="textarea" :rows="4" placeholder="仅支持 SELECT 查询" />
       </component>
-      <component :is="formItemTag" label="转换脚本">
-        <component :is="inputTag" v-model="modelValue.transformScript" type="textarea" :rows="4" placeholder="接收 data 参数，返回处理后的数据" />
+      <component :is="formItemTag" :size="controlSize" label="转换脚本">
+        <component :is="inputTag" :size="controlSize" v-model="modelValue.transformScript" type="textarea" :rows="4" placeholder="接收 data 参数，返回处理后的数据" />
       </component>
     </template>
 
     <template v-if="modelValue?.type === 'api'">
-      <component :is="formItemTag" label="请求方法">
-        <component :is="selectTag" v-model="modelValue.api.method" :options="methodOptions" />
+      <component :is="formItemTag" :size="controlSize" label="请求方法">
+        <component :is="selectTag" :size="controlSize" v-model="modelValue.api.method" :options="methodOptions" />
       </component>
-      <component :is="formItemTag" label="请求地址">
-        <component :is="inputTag" v-model="modelValue.api.url" placeholder="/api/lowcode/xxx" />
+      <component :is="formItemTag" :size="controlSize" label="请求地址">
+        <component :is="inputTag" :size="controlSize" v-model="modelValue.api.url" placeholder="/api/lowcode/xxx" />
       </component>
-      <component :is="formItemTag" label="查询参数（JSON）">
-        <component :is="inputTag" v-model="paramsText" type="textarea" :rows="2" />
+      <component :is="formItemTag" :size="controlSize" label="查询参数（JSON）">
+        <component :is="inputTag" :size="controlSize" v-model="paramsText" type="textarea" :rows="2" />
       </component>
-      <component :is="formItemTag" label="请求体（JSON）">
-        <component :is="inputTag" v-model="bodyText" type="textarea" :rows="2" />
+      <component :is="formItemTag" :size="controlSize" label="请求体（JSON）">
+        <component :is="inputTag" :size="controlSize" v-model="bodyText" type="textarea" :rows="2" />
       </component>
-      <component :is="formItemTag" label="转换脚本">
-        <component :is="inputTag" v-model="modelValue.transformScript" type="textarea" :rows="4" />
+      <component :is="formItemTag" :size="controlSize" label="转换脚本">
+        <component :is="inputTag" :size="controlSize" v-model="modelValue.transformScript" type="textarea" :rows="4" />
       </component>
     </template>
 
     <template v-if="modelValue?.type === 'script'">
-      <component :is="formItemTag" label="执行脚本">
-        <component :is="inputTag" v-model="modelValue.script" type="textarea" :rows="8" placeholder="可调用 db.raw() 和 http()，需返回数据" />
+      <component :is="formItemTag" :size="controlSize" label="执行脚本">
+        <component :is="inputTag" :size="controlSize" v-model="modelValue.script" type="textarea" :rows="8" placeholder="可调用 db.raw() 和 http()，需返回数据" />
       </component>
     </template>
   </div>
@@ -48,18 +48,22 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePrefix } from '../../utils/prefix'
+import { usePrefix, useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WPageDataSourceEditor' })
 
 const { withPrefix } = usePrefix()
+const globalSize = useGlobalSize()
 const formItemTag = withPrefix('form-item')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')
 
 const props = defineProps<{
   modelValue: any
+  size?: string
 }>()
+
+const controlSize = computed(() => props.size || globalSize.value)
 
 const emit = defineEmits(['update:modelValue'])
 

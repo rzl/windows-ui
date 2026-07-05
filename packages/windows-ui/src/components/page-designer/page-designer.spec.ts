@@ -421,4 +421,31 @@ describe('WPageDesigner', () => {
     expect(wrapper.find('.toolbar').text()).not.toContain('撤销')
     expect(wrapper.find('.toolbar').text()).not.toContain('保存')
   })
+
+  it('拖拽组件到容器时应添加子组件并记录历史', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [{ id: 'c1', type: 'container', props: {}, styles: {}, children: [] }]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const container = wrapper.find('[data-droppable="container"]')
+    expect(container.exists()).toBe(true)
+
+    await container.trigger('drop', { dataTransfer: { getData: () => 'text' } })
+    await wrapper.vm.$nextTick()
+
+    expect((wrapper.vm as any).config.components[0].children.length).toBe(1)
+    expect((wrapper.vm as any).config.components[0].children[0].type).toBe('text')
+
+    // 撤销应能移除刚拖入的子组件
+    ;(wrapper.vm as any).undo()
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).config.components[0].children.length).toBe(0)
+  })
 })

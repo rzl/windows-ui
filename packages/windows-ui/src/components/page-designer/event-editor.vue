@@ -1,6 +1,6 @@
 <template>
   <div class="event-editor">
-    <component :is="formTag" :size="globalSize" label-width="80">
+    <component :is="formTag" :size="controlSize" label-width="80">
       <div class="section-title">事件</div>
       <component :is="formItemTag" label="事件类型">
       <component :is="selectTag" :model-value="eventName" :options="eventNameOptions" @update:model-value="updateEventName" />
@@ -17,7 +17,7 @@
           <div v-for="(action, index) in eventConfig.actions" :key="index" class="chain-item">
             <div class="chain-header">
               <span>动作 {{ index + 1 }}</span>
-              <component :is="buttonTag" :size="globalSize" type="danger" icon="delete" title="删除" @click="removeAction(index)" />
+              <component :is="buttonTag" :size="controlSize" type="danger" icon="delete" title="删除" @click="removeAction(index)" />
             </div>
             <component :is="formItemTag" label="动作">
               <component :is="selectTag" v-model="action.action" :options="actionOptions" />
@@ -46,8 +46,8 @@
           </div>
         </div>
         <div class="chain-actions">
-          <component :is="buttonTag" :size="globalSize" @click="addAction">+ 添加动作</component>
-          <component :is="buttonTag" :size="globalSize" @click="convertToSingle">切换为单个动作</component>
+          <component :is="buttonTag" :size="controlSize" @click="addAction">+ 添加动作</component>
+          <component :is="buttonTag" :size="controlSize" @click="convertToSingle">切换为单个动作</component>
         </div>
       </template>
 
@@ -75,7 +75,7 @@
           <component :is="inputTag" v-model="valueText" type="textarea" :rows="2" placeholder="支持字符串、数字或 JSON" />
         </component>
         <div class="chain-actions">
-          <component :is="buttonTag" :size="globalSize" @click="convertToChain">+ 添加链式动作</component>
+          <component :is="buttonTag" :size="controlSize" @click="convertToChain">+ 添加链式动作</component>
         </div>
       </template>
     </template>
@@ -100,9 +100,12 @@ const buttonTag = withPrefix('button')
 
 const props = defineProps<{
   modelValue: any
+  size?: string
 }>()
 
 const emit = defineEmits(['update:modelValue'])
+
+const controlSize = computed(() => props.size || globalSize.value)
 
 const eventNameOptions = [
   { label: '无', value: '' },

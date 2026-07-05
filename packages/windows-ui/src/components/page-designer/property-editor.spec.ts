@@ -7,32 +7,37 @@ function createWrapper(node: any) {
     props: { node },
     global: {
       stubs: {
+        'w-form': {
+          name: 'WFormStub',
+          props: ['size', 'labelWidth'],
+          template: '<form class="form-stub"><slot /></form>'
+        },
         'w-form-item': {
-          props: ['label'],
+          props: ['label', 'size'],
           template: '<div class="form-item-stub"><label v-if="label">{{ label }}</label><slot /></div>'
         },
         'w-input': {
-          props: ['modelValue', 'placeholder'],
+          props: ['modelValue', 'placeholder', 'size'],
           emits: ['update:modelValue'],
           template: '<input class="input-stub" :value="modelValue" :placeholder="placeholder" @input="$emit(\'update:modelValue\', $event.target.value)" />'
         },
         'w-select': {
-          props: ['modelValue', 'options'],
+          props: ['modelValue', 'options', 'size'],
           emits: ['update:modelValue'],
           template: '<select class="select-stub" :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option></select>'
         },
         'w-color-picker': {
-          props: ['modelValue'],
+          props: ['modelValue', 'size'],
           emits: ['update:modelValue'],
           template: '<input class="color-picker-stub" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />'
         },
         'w-input-number': {
-          props: ['modelValue'],
+          props: ['modelValue', 'size'],
           emits: ['update:modelValue'],
           template: '<input type="number" class="input-number-stub" :value="modelValue" @input="$emit(\'update:modelValue\', Number($event.target.value))" />'
         },
         'w-switch': {
-          props: ['modelValue'],
+          props: ['modelValue', 'size'],
           emits: ['update:modelValue'],
           template: '<input type="checkbox" class="switch-stub" :checked="modelValue" @change="$emit(\'update:modelValue\', $event.target.checked)" />'
         }
@@ -72,5 +77,16 @@ describe('WPagePropertyEditor', () => {
     expect(marginInput).toBeDefined()
     await marginInput!.setValue('20px')
     expect((wrapper.vm as any).node.styles.margin).toBe('20px')
+  })
+
+  it('属性表单应向表单组件注入全局尺寸', () => {
+    const wrapper = createWrapper({
+      id: 't1',
+      type: 'text',
+      props: { content: '示例', tag: 'p', align: 'left' },
+      styles: {}
+    })
+    const form = wrapper.findComponent({ name: 'WFormStub' })
+    expect(form.props('size')).toBe('default')
   })
 })

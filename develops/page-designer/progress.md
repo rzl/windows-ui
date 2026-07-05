@@ -33,6 +33,8 @@
 - [x] 组件库支持每行两个、分组收起、搜索过滤、全局尺寸联动。
 - [x] 支持深色模式切换。
 - [x] 代码拆分为 `usePageHistory` / `usePageSelection` / `usePageDragDrop` composables。
+- [x] 属性面板统一使用 Windows UI 表单组件并显式注入全局尺寸。
+- [x] 组件库拖拽到容器时正确记录历史并高亮目标区域。
 
 ## 变更记录
 
@@ -52,3 +54,4 @@
 - 2026-07-04：新增深色模式切换（`mode` prop + 工具栏按钮）。
 - 2026-07-04：修复 `WFormItem` 在属性面板中的注入警告。
 - 2026-07-04：抽取 `usePageHistory` / `usePageSelection` / `usePageDragDrop` composables，拆分 `page-designer.vue` 代码。
+- 2026-07-05：属性面板统一使用 Windows UI 表单组件并显式注入尺寸；修复容器拖拽未记录历史的问题，增加根画布与容器拖拽高亮。

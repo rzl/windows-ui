@@ -1,8 +1,11 @@
 <template>
   <div
+    ref="panelRef"
     class="canvas-panel"
-    @dragover.prevent
-    @drop="emit('drop', $event)"
+    @dragenter.prevent="handleDragEnter"
+    @dragleave="handleDragLeave"
+    @dragover.prevent="handleDragOver"
+    @drop="handleDrop"
     @wheel="emit('wheel', $event)"
   >
     <div class="panel-title">画布</div>
@@ -33,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import ComponentNode from './component-node.vue'
 import type { PageNode } from './types'
 
@@ -54,6 +57,38 @@ const emit = defineEmits<{
   (e: 'move', payload: { id: string; direction: 'up' | 'down' }): void
   (e: 'change'): void
 }>()
+
+const panelRef = ref<HTMLElement>()
+const dragOverCount = ref(0)
+
+function setCanvasBodyHighlight(active: boolean) {
+  const body = panelRef.value?.querySelector('.canvas-body') as HTMLElement | null
+  if (!body) return
+  body.classList.toggle('drop-target-active', active)
+}
+
+function handleDragEnter(_event: DragEvent) {
+  dragOverCount.value++
+  setCanvasBodyHighlight(true)
+}
+
+function handleDragLeave(_event: DragEvent) {
+  dragOverCount.value--
+  if (dragOverCount.value <= 0) {
+    dragOverCount.value = 0
+    setCanvasBodyHighlight(false)
+  }
+}
+
+function handleDragOver(event: DragEvent) {
+  event.preventDefault()
+}
+
+function handleDrop(event: DragEvent) {
+  dragOverCount.value = 0
+  setCanvasBodyHighlight(false)
+  emit('drop', event)
+}
 
 const canvasBodyStyle = computed(() => ({
   transform: `scale(${props.zoom})`,
