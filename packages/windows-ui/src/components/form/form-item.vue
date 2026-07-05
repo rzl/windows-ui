@@ -17,9 +17,9 @@ import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WFormItem' })
 const props = defineProps({ label: String, prop: String, size: { type: String, default: undefined } })
 
-const formSize = inject<Ref<string>>('formSize')
-const formLabelWidth = inject<Ref<string | number>>('formLabelWidth')
 const globalSize = useGlobalSize()
+const formSize = inject<Ref<string>>('formSize', ref(globalSize.value))
+const formLabelWidth = inject<Ref<string | number>>('formLabelWidth', ref('100px'))
 const size = computed(() => props.size || formSize?.value || globalSize.value)
 const labelWidth = computed(() => {
   const w = formLabelWidth?.value

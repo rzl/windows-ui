@@ -1,7 +1,8 @@
 <template>
   <div class="event-editor">
-    <div class="section-title">事件</div>
-    <component :is="formItemTag" label="事件类型">
+    <component :is="formTag" :size="globalSize" label-width="80">
+      <div class="section-title">事件</div>
+      <component :is="formItemTag" label="事件类型">
       <component :is="selectTag" :model-value="eventName" :options="eventNameOptions" @update:model-value="updateEventName" />
     </component>
 
@@ -78,6 +79,7 @@
         </div>
       </template>
     </template>
+    </component>
   </div>
 </template>
 
@@ -90,6 +92,7 @@ defineOptions({ name: 'WPageEventEditor' })
 
 const { withPrefix } = usePrefix()
 const globalSize = useGlobalSize()
+const formTag = withPrefix('form')
 const formItemTag = withPrefix('form-item')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')

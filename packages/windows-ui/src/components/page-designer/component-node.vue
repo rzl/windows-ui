@@ -10,7 +10,7 @@
     <div class="node-toolbar">
       <span class="node-type">{{ typeLabel }}</span>
       <component :is="spaceTag">
-        <component :is="buttonTag" v-if="isContainer" :size="globalSize" @click.stop="addChild">+ 子组件</component>
+        <component :is="buttonTag" v-if="isContainer" :size="globalSize" icon="plus" title="添加子组件" @click.stop="addChild" />
         <component :is="buttonTag" :size="globalSize" icon="arrowUp" title="上移" @click.stop="moveUp" />
         <component :is="buttonTag" :size="globalSize" icon="arrowDown" title="下移" @click.stop="moveDown" />
         <component :is="buttonTag" :size="globalSize" type="danger" icon="delete" title="删除" @click.stop="remove" />

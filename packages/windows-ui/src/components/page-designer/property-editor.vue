@@ -1,7 +1,8 @@
 <template>
   <div class="property-editor">
-    <div class="section-title">基础</div>
-    <component :is="formItemTag" label="组件类型">
+    <component :is="formTag" :size="globalSize" label-width="80">
+      <div class="section-title">基础</div>
+      <component :is="formItemTag" label="组件类型">
       <component :is="inputTag" :model-value="typeLabel" disabled />
     </component>
 
@@ -410,6 +411,7 @@
         <component :is="inputTag" v-model="propsText" type="textarea" :rows="8" />
       </component>
     </template>
+    </component>
   </div>
 </template>
 
@@ -418,12 +420,14 @@ import { computed } from 'vue'
 import DataSourceEditor from './data-source-editor.vue'
 import EventEditor from './event-editor.vue'
 import { listCharts, getChart, getComponent } from './plugin-manager'
-import { usePrefix } from '../../utils/prefix'
+import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPagePropertyEditor' })
 
 const { withPrefix } = usePrefix()
+const globalSize = useGlobalSize()
+const formTag = withPrefix('form')
 const formItemTag = withPrefix('form-item')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')

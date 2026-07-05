@@ -10,6 +10,7 @@
       <component :is="buttonTag" :size="globalSize" @click="emit('zoom-reset')">{{ Math.round(zoom * 100) }}%</component>
       <component :is="buttonTag" :size="globalSize" @click="emit('zoom-in')">放大</component>
       <component :is="buttonTag" :size="globalSize" :type="showGrid ? 'primary' : 'default'" @click="emit('toggle-grid')">网格</component>
+      <component :is="buttonTag" :size="globalSize" @click="emit('toggle-dark')">{{ isDark ? '浅色' : '深色' }}</component>
       <component :is="buttonTag" :size="globalSize" @click="emit('preview')">预览</component>
       <component :is="buttonTag" :size="globalSize" @click="emit('preview-config')">预览配置</component>
       <component :is="buttonTag" type="primary" :size="globalSize" @click="emit('save')">保存</component>
@@ -29,6 +30,7 @@ const props = defineProps<{
   showGrid: boolean
   hasSelected: boolean
   hasClipboard: boolean
+  isDark?: boolean
 }>()
 
 const emit = defineEmits([
@@ -41,6 +43,7 @@ const emit = defineEmits([
   'zoom-reset',
   'zoom-in',
   'toggle-grid',
+  'toggle-dark',
   'preview',
   'preview-config',
   'save'

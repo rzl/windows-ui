@@ -7,6 +7,7 @@
       :show-grid="showGrid"
       :has-selected="!!selectedNode"
       :has-clipboard="!!clipboardNode"
+      :is-dark="isDark"
       @back="goBack"
       @undo="undo"
       @redo="redo"
@@ -19,6 +20,7 @@
       @preview="handlePreview"
       @preview-config="handlePreviewConfig"
       @save="handleSave"
+      @toggle-dark="toggleDark"
     />
 
     <div v-if="isMobile" class="mobile-panel-tabs">
@@ -134,6 +136,9 @@ import PageInfoPanel from './page-info-panel.vue'
 import DesignerCanvas from './designer-canvas.vue'
 import PropertyPanel from './property-panel.vue'
 import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
+import { usePageHistory } from './composables/usePageHistory'
+import { usePageSelection } from './composables/usePageSelection'
+import { usePageDragDrop } from './composables/usePageDragDrop'
 import './built-in-components'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import type { PageConfig, PageNode, PageItem, ComponentGroup } from './types'
@@ -146,14 +151,20 @@ const inputTag = withPrefix('input')
 
 defineOptions({ name: 'WPageDesigner' })
 
-const props = defineProps<{
-  code?: string
-  page?: any
-  config?: PageConfig
-  loadPage?: (code: string) => Promise<any>
-  savePage?: (data: any) => Promise<any>
-  isMobile?: boolean
-}>()
+type ThemeMode = 'light' | 'dark' | 'auto'
+
+const props = withDefaults(
+  defineProps<{
+    code?: string
+    page?: any
+    config?: PageConfig
+    loadPage?: (code: string) => Promise<any>
+    savePage?: (data: any) => Promise<any>
+    isMobile?: boolean
+    mode?: ThemeMode
+  }>(),
+  { mode: 'auto' }
+)
 
 const emit = defineEmits(['save', 'back', 'preview'])
 
@@ -167,7 +178,9 @@ const config = reactive<PageConfig>({
 
 const allPages = reactive<PageItem[]>([])
 const activePageCode = ref('')
-const selectedId = ref<string>('')
+const selection = usePageSelection(() => config.components || [])
+const { selectedId, selectedNode, findNode, select } = selection
+
 const previewVisible = ref(false)
 const configVisible = ref(false)
 const leftPanelMode = ref<'library' | 'outline' | 'pages'>('library')
@@ -178,6 +191,30 @@ const maxZoom = 2
 const zoomStep = 0.1
 const showGrid = ref(false)
 const pageInfoConfigText = ref('')
+const activeMode = ref<ThemeMode>(props.mode)
+
+function isSystemDark() {
+  if (typeof window === 'undefined' || !window.matchMedia) return false
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
+
+const isDark = computed(() => {
+  if (activeMode.value === 'dark') return true
+  if (activeMode.value === 'light') return false
+  return isSystemDark()
+})
+
+function applyDarkClass() {
+  if (typeof document === 'undefined') return
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
+
+function toggleDark() {
+  activeMode.value = isDark.value ? 'light' : 'dark'
+}
+
+watch(isDark, applyDarkClass, { immediate: true })
+watch(() => props.mode, (mode) => { activeMode.value = mode })
 
 const currentPage = computed(() => allPages.find((p) => p.code === activePageCode.value))
 const currentPageName = computed({
@@ -214,61 +251,43 @@ function handleCanvasWheel(event: WheelEvent) {
 
 const configJson = computed(() => JSON.stringify(config, null, 2))
 
-// 撤销/重做历史栈
-const history = reactive<{
-  stack: PageConfig[]
-  index: number
-  maxLength: number
-  isRestoring: boolean
-}>({
-  stack: [],
-  index: -1,
-  maxLength: 50,
-  isRestoring: false
-})
-
-const canUndo = computed(() => history.index > 0)
-const canRedo = computed(() => history.index < history.stack.length - 1)
-
 function takeSnapshot<T>(cfg: T): T {
   return JSON.parse(JSON.stringify(cfg))
 }
 
+const history = usePageHistory<PageConfig>({
+  maxLength: 50,
+  snapshot: takeSnapshot,
+  onRestore: (snapshot) => {
+    Object.assign(config, snapshot)
+    selectedId.value = ''
+  }
+})
+
+const canUndo = history.canUndo
+const canRedo = history.canRedo
+
 function recordHistory(cfg: PageConfig = config) {
-  if (history.isRestoring) return
-  const snapshot = takeSnapshot(cfg)
-  // 删除当前指针之后的历史（重做记录）
-  if (history.index < history.stack.length - 1) {
-    history.stack = history.stack.slice(0, history.index + 1)
-  }
-  history.stack.push(snapshot)
-  if (history.stack.length > history.maxLength) {
-    history.stack.shift()
-  } else {
-    history.index++
-  }
+  history.record(cfg)
 }
 
 function undo() {
-  if (!canUndo.value) return
-  history.index--
-  restoreHistory()
+  history.undo()
 }
 
 function redo() {
-  if (!canRedo.value) return
-  history.index++
-  restoreHistory()
+  history.redo()
 }
 
-function restoreHistory() {
-  const snapshot = history.stack[history.index]
-  if (!snapshot) return
-  history.isRestoring = true
-  Object.assign(config, takeSnapshot(snapshot))
-  selectedId.value = ''
-  history.isRestoring = false
-}
+const dragDrop = usePageDragDrop({
+  getComponents: () => config.components || [],
+  findNode,
+  isContainerNode,
+  createDefaultComponent,
+  onSelect: selectNode,
+  onChange: recordHistory
+})
+const { handleDragStart, handleDropToRoot, handleTouchStart } = dragDrop
 
 const clipboardNode = ref<PageNode | null>(null)
 
@@ -334,15 +353,6 @@ function handleKeyDown(event: KeyboardEvent) {
     selectedId.value = ''
   }
 }
-
-const touchState = reactive({
-  type: '',
-  label: '',
-  startX: 0,
-  startY: 0,
-  dragging: false,
-  ghost: null as HTMLElement | null
-})
 
 const componentIconMap: Record<string, string> = {
   // 布局
@@ -540,10 +550,6 @@ const mobileTabs = [
 
 const isMobile = computed(() => !!props.isMobile)
 
-const selectedNode = computed(() => {
-  return findNode(config.components || [], selectedId.value)
-})
-
 onMounted(() => {
   loadData()
   window.addEventListener('keydown', handleKeyDown)
@@ -577,8 +583,7 @@ async function loadData() {
   initPages()
 
   // 初始状态记入历史
-  history.stack = [takeSnapshot(config)]
-  history.index = 0
+  history.init(config)
 }
 
 function initPages() {
@@ -617,8 +622,7 @@ function switchPage(code: string) {
     Object.assign(config, takeSnapshot(target.config))
     activePageCode.value = code
     selectedId.value = ''
-    history.stack = [takeSnapshot(config)]
-    history.index = 0
+    history.init(config)
     resetPageInfo()
   }
 }
@@ -671,18 +675,6 @@ function applyPageInfo() {
   if (current) {
     current.config = takeSnapshot(config) as PageConfig
   }
-}
-
-function findNode(list: PageNode[], id: string): PageNode | null {
-  if (!list) return null
-  for (const node of list) {
-    if (node.id === id) return node
-    if (node.children?.length) {
-      const found = findNode(node.children, id)
-      if (found) return found
-    }
-  }
-  return null
 }
 
 function generateId() {
@@ -768,25 +760,8 @@ function createDefaultComponent(type: string): PageNode {
   }
 }
 
-function handleDragStart(event: DragEvent, type: string) {
-  if (event.dataTransfer) {
-    event.dataTransfer.setData('componentType', type)
-  }
-}
-
-function handleDropToRoot(event: DragEvent) {
-  event.preventDefault()
-  const type = event.dataTransfer?.getData('componentType')
-  if (!type) return
-  if (!config.components) config.components = []
-  const node = createDefaultComponent(type)
-  config.components.push(node)
-  selectNode(node.id)
-  recordHistory()
-}
-
 function selectNode(id: string) {
-  selectedId.value = id
+  select(id)
   if (isMobile.value) {
     activePanel.value = 'property'
   }
@@ -812,111 +787,6 @@ function addComponent(type: string) {
     config.components.push(node)
     selectNode(node.id)
   }
-  recordHistory()
-}
-
-function handleTouchStart(event: TouchEvent, label: string, type: string) {
-  const touch = event.touches[0]
-  touchState.type = type
-  touchState.label = label
-  touchState.startX = touch.clientX
-  touchState.startY = touch.clientY
-  touchState.dragging = false
-  document.addEventListener('touchmove', handleTouchMove, { passive: false })
-  document.addEventListener('touchend', handleTouchEnd)
-}
-
-function handleTouchMove(event: TouchEvent) {
-  if (!touchState.type) return
-  const touch = event.touches[0]
-  const dx = touch.clientX - touchState.startX
-  const dy = touch.clientY - touchState.startY
-  if (!touchState.dragging && Math.sqrt(dx * dx + dy * dy) > 10) {
-    touchState.dragging = true
-    touchState.ghost = createGhost(touchState.label)
-  }
-  if (touchState.dragging) {
-    event.preventDefault()
-    if (touchState.ghost) {
-      touchState.ghost.style.left = `${touch.clientX}px`
-      touchState.ghost.style.top = `${touch.clientY}px`
-    }
-    highlightDropTarget(touch.clientX, touch.clientY)
-  }
-}
-
-function handleTouchEnd(event: TouchEvent) {
-  document.removeEventListener('touchmove', handleTouchMove)
-  document.removeEventListener('touchend', handleTouchEnd)
-  if (touchState.dragging && touchState.ghost) {
-    const touch = event.changedTouches[0]
-    doDrop(touch.clientX, touch.clientY)
-    touchState.ghost.remove()
-  } else {
-    addComponent(touchState.type)
-  }
-  clearDropHighlight()
-  touchState.type = ''
-  touchState.label = ''
-  touchState.dragging = false
-  touchState.ghost = null
-}
-
-function createGhost(text: string) {
-  const el = document.createElement('div')
-  el.className = 'drag-ghost'
-  el.textContent = text
-  document.body.appendChild(el)
-  return el
-}
-
-function findDropTarget(x: number, y: number) {
-  let element = document.elementFromPoint(x, y)
-  while (element && element !== document.body) {
-    const droppable = element.getAttribute('data-droppable')
-    if (droppable === 'root') return { type: 'root' as const }
-    if (droppable === 'container') {
-      const nodeId = element.getAttribute('data-node-id')
-      if (nodeId) return { type: 'container' as const, nodeId }
-    }
-    element = element.parentElement
-  }
-  return null
-}
-
-function highlightDropTarget(x: number, y: number) {
-  clearDropHighlight()
-  const target = findDropTarget(x, y)
-  if (!target) return
-  if (target.type === 'root') {
-    document.querySelector('.canvas-body')?.classList.add('drop-target-active')
-  } else {
-    document.querySelector(`[data-node-id="${target.nodeId}"][data-droppable="container"]`)?.classList.add('drop-target-active')
-  }
-}
-
-function clearDropHighlight() {
-  document.querySelectorAll('.drop-target-active').forEach((el) => el.classList.remove('drop-target-active'))
-}
-
-function doDrop(x: number, y: number) {
-  const target = findDropTarget(x, y)
-  if (!target) return
-  const node = createDefaultComponent(touchState.type)
-  if (target.type === 'root') {
-    if (!config.components) config.components = []
-    config.components.push(node)
-  } else {
-    const container = findNode(config.components || [], target.nodeId)
-    if (container && isContainerNode(container)) {
-      if (!container.children) container.children = []
-      container.children.push(node)
-    } else {
-      if (!config.components) config.components = []
-      config.components.push(node)
-    }
-  }
-  selectNode(node.id)
   recordHistory()
 }
 

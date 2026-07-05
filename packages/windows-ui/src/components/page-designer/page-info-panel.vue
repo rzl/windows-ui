@@ -1,8 +1,9 @@
 <template>
   <div class="page-info">
     <div class="panel-title">页面信息</div>
-    <div class="page-info-form">
-      <component :is="formItemTag" label="编码">
+    <component :is="formTag" :size="globalSize" label-width="80">
+      <div class="page-info-form">
+        <component :is="formItemTag" label="编码">
         <component :is="inputTag" :model-value="code" readonly />
       </component>
       <component :is="formItemTag" label="名称">
@@ -18,11 +19,12 @@
           @update:model-value="emit('update:config-text', $event)"
         />
       </component>
-      <div class="sub-page-actions">
-        <component :is="buttonTag" :size="globalSize" type="primary" @click="emit('apply')">应用</component>
-        <component :is="buttonTag" :size="globalSize" @click="emit('reset')">重置</component>
+        <div class="sub-page-actions">
+          <component :is="buttonTag" :size="globalSize" type="primary" @click="emit('apply')">应用</component>
+          <component :is="buttonTag" :size="globalSize" @click="emit('reset')">重置</component>
+        </div>
       </div>
-    </div>
+    </component>
   </div>
 </template>
 
@@ -47,6 +49,7 @@ const emit = defineEmits<{
 const { withPrefix } = usePrefix()
 const globalSize = useGlobalSize()
 const buttonTag = withPrefix('button')
+const formTag = withPrefix('form')
 const formItemTag = withPrefix('form-item')
 const inputTag = withPrefix('input')
 
