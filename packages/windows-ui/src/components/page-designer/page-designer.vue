@@ -12,7 +12,7 @@
       @undo="undo"
       @redo="redo"
       @copy="copySelectedNode"
-      @paste="pasteNode"
+      @paste="handlePasteNode"
       @zoom-out="zoomOut"
       @zoom-reset="zoomReset"
       @zoom-in="zoomIn"
@@ -61,7 +61,7 @@
               @drag-start="handleDragStart"
               @touch-start="handleTouchStart"
               @toggle-group="toggleGroup"
-              @add="addComponent"
+              @add="handleAddComponent"
             />
 
             <outline-panel
@@ -79,7 +79,7 @@
               :config-text="pageInfoConfigText"
               @update:name="currentPageName = $event"
               @update:config-text="pageInfoConfigText = $event"
-              @apply="applyPageInfo"
+              @apply="handleApplyPageInfo"
               @reset="resetPageInfo"
             />
           </div>
@@ -92,13 +92,13 @@
           :selected-id="selectedId"
           :zoom="zoom"
           :show-grid="showGrid"
-          @drop="handleDropToRoot"
+          @drop="handleDropToRootWithFlush"
           @wheel="handleCanvasWheel"
           @select="selectNode"
-          @delete="deleteNode"
-          @move="moveNode"
-          @reorder="handleReorder"
-          @change="recordHistory"
+          @delete="handleDeleteNode"
+          @move="handleMoveNode"
+          @reorder="handleReorderWithFlush"
+          @change="handleNodeChange"
         />
 
         <!-- 属性面板 -->
@@ -275,11 +275,31 @@ function recordHistory(cfg: PageConfig = config) {
   history.record(cfg)
 }
 
+let propertyChangeTimer: ReturnType<typeof setTimeout> | null = null
+const PROPERTY_CHANGE_DELAY = 300
+
+function recordPropertyChange() {
+  if (propertyChangeTimer) clearTimeout(propertyChangeTimer)
+  propertyChangeTimer = setTimeout(() => {
+    propertyChangeTimer = null
+    recordHistory()
+  }, PROPERTY_CHANGE_DELAY)
+}
+
+function flushPropertyChange() {
+  if (!propertyChangeTimer) return
+  clearTimeout(propertyChangeTimer)
+  propertyChangeTimer = null
+  recordHistory()
+}
+
 function undo() {
+  flushPropertyChange()
   history.undo()
 }
 
 function redo() {
+  flushPropertyChange()
   history.redo()
 }
 
@@ -304,8 +324,38 @@ const nodeTree = useNodeTree({
 })
 const { addComponent, deleteNode, moveNode, moveNodeTo } = nodeTree
 
+function handleAddComponent(type: string) {
+  flushPropertyChange()
+  addComponent(type)
+}
+
+function handleDropToRootWithFlush(event: DragEvent) {
+  flushPropertyChange()
+  handleDropToRoot(event)
+}
+
+function handleDeleteNode(payload: { id: string }) {
+  flushPropertyChange()
+  deleteNode(payload)
+}
+
+function handleMoveNode(payload: { id: string; direction: 'up' | 'down' }) {
+  flushPropertyChange()
+  moveNode(payload)
+}
+
 function handleReorder(payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) {
   moveNodeTo(payload)
+}
+
+function handleReorderWithFlush(payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) {
+  flushPropertyChange()
+  handleReorder(payload)
+}
+
+function handleNodeChange() {
+  flushPropertyChange()
+  recordHistory()
 }
 
 const clipboardNode = ref<PageNode | null>(null)
@@ -341,6 +391,11 @@ function pasteNode() {
   recordHistory()
 }
 
+function handlePasteNode() {
+  flushPropertyChange()
+  pasteNode()
+}
+
 function handleKeyDown(event: KeyboardEvent) {
   const isCtrl = event.ctrlKey || event.metaKey
   if (isCtrl) {
@@ -358,7 +413,7 @@ function handleKeyDown(event: KeyboardEvent) {
       return
     } else if (event.key === 'v') {
       event.preventDefault()
-      pasteNode()
+      handlePasteNode()
       return
     }
   }
@@ -366,7 +421,7 @@ function handleKeyDown(event: KeyboardEvent) {
   if (event.key === 'Delete' || event.key === 'Backspace') {
     if (selectedNode.value) {
       event.preventDefault()
-      deleteNode({ id: selectedId.value })
+      handleDeleteNode({ id: selectedId.value })
     }
   } else if (event.key === 'Escape') {
     selectedId.value = ''
@@ -696,7 +751,13 @@ function applyPageInfo() {
   }
 }
 
+function handleApplyPageInfo() {
+  flushPropertyChange()
+  applyPageInfo()
+}
+
 function selectNode(id: string) {
+  flushPropertyChange()
   select(id)
   if (isMobile.value) {
     activePanel.value = 'property'
@@ -711,8 +772,8 @@ function isContainerNode(node: PageNode | null): boolean {
 }
 
 function onPropertyUpdate(_node: PageNode) {
-  // reactive 会自动更新，这里记录属性变更历史
-  recordHistory()
+  // 属性编辑使用防抖，避免连续输入产生大量撤销点
+  recordPropertyChange()
 }
 
 function handlePreview() {
@@ -740,6 +801,7 @@ function buildFormData(components: PageNode[]): Record<string, any> {
 }
 
 async function handleSave() {
+  flushPropertyChange()
   const current = allPages.find((p) => p.code === activePageCode.value)
   if (current) {
     current.config = takeSnapshot(config) as PageConfig

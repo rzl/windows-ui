@@ -24,7 +24,7 @@
 - 属性面板：选中节点后展示对应属性表单，统一使用 `WForm` / `WFormItem` 与 Windows UI 基础输入组件；通过 `WForm` 统一注入尺寸与标签宽，所有控件跟随全局尺寸；支持 JSON 文本编辑与数据源、事件子编辑器。
 - 预览：弹窗内使用 `WPageRenderer` 实时渲染当前配置。
 - 深色模式：工具栏提供一键切换，状态保存在组件内部，同步切换全局 `html.dark` 类。
-- 撤销/重做：基于 `usePageHistory` 维护历史栈，支持 Ctrl+Z / Ctrl+Shift+Z。
+- 撤销/重做：基于 `usePageHistory` 维护历史栈；属性编辑采用防抖合并连续输入，结构操作立即记录并先刷新待定的属性变更，支持 Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y。
 - 表单数据：表单组件的值统一托管在页面级 `formData` 中，便于整页提交与联动。
 
 ## 可访问性

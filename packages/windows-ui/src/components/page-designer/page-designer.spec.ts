@@ -559,4 +559,74 @@ describe('WPageDesigner', () => {
 
     expect((wrapper.vm as any).config.components.map((n: any) => n.id)).toEqual(['t2', 't1'])
   })
+
+  it('属性编辑应防抖记录历史', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [{ id: 't1', type: 'text', props: { content: '原始文本' }, styles: {} }]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    // 选中节点，打开属性面板
+    await wrapper.findComponent(ComponentNode).trigger('click')
+    await wrapper.vm.$nextTick()
+    const input = wrapper.findAll('.property-panel input').find((el) => (el.element as HTMLInputElement).value === '原始文本')
+    expect(input).toBeTruthy()
+
+    // 修改属性后立刻撤销应无效（防抖未触发）
+    await input!.setValue('新文本')
+    expect((wrapper.vm as any).canUndo).toBe(false)
+
+    // 等待防抖结束
+    await new Promise((r) => setTimeout(r, 400))
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).canUndo).toBe(true)
+
+    // 撤销后恢复原文本
+    ;(wrapper.vm as any).undo()
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).config.components[0].props.content).toBe('原始文本')
+  })
+
+  it('即时操作应刷新待定的属性变更历史', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [{ id: 't1', type: 'text', props: { content: '原始文本' }, styles: {} }]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    await wrapper.findComponent(ComponentNode).trigger('click')
+    await wrapper.vm.$nextTick()
+    const input = wrapper.findAll('.property-panel input').find((el) => (el.element as HTMLInputElement).value === '原始文本')
+    expect(input).toBeTruthy()
+    await input!.setValue('新文本')
+
+    // 不等防抖结束，直接添加新组件
+    const addBtn = wrapper.findAll('.component-item').find((el) => el.text().includes('按钮'))
+    expect(addBtn).toBeTruthy()
+    await addBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // 此时应先记录属性变更，再记录添加组件
+    expect((wrapper.vm as any).config.components.length).toBe(2)
+    ;(wrapper.vm as any).undo()
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).config.components.length).toBe(1)
+    expect((wrapper.vm as any).config.components[0].props.content).toBe('新文本')
+    ;(wrapper.vm as any).undo()
+    await wrapper.vm.$nextTick()
+    expect((wrapper.vm as any).config.components[0].props.content).toBe('原始文本')
+  })
 })
