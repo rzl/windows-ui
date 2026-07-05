@@ -41,18 +41,18 @@ describe('WPageDesigner', () => {
     expect(wrapper.findComponent({ name: 'WPagePropertyEditor' }).exists()).toBe(true)
   })
 
-  it('点击保存应触发 save 事件并调用 savePage', async () => {
+  it('点击保存按钮应触发 save 事件并调用 savePage', async () => {
     const savePage = vi.fn().mockResolvedValue(undefined)
     const wrapper = mount(PageDesigner, {
       props: { code: 'test', savePage },
       global: { stubs: ['WDialog', 'WPageRenderer'] }
     })
-    const saveBtn = wrapper.findAll('button').find((el) => el.text().includes('保存'))
-    if (saveBtn) {
-      await saveBtn.trigger('click')
-      expect(savePage).toHaveBeenCalled()
-      expect(wrapper.emitted('save')).toHaveLength(1)
-    }
+    await wrapper.vm.$nextTick()
+    const saveBtn = wrapper.findAll('button').find((el) => el.attributes('title') === '保存')
+    expect(saveBtn).toBeTruthy()
+    await saveBtn!.trigger('click')
+    expect(savePage).toHaveBeenCalled()
+    expect(wrapper.emitted('save')).toHaveLength(1)
   })
 
   it('传入 loadPage 时应加载页面配置', async () => {
@@ -385,5 +385,40 @@ describe('WPageDesigner', () => {
     const wrapperLarge = createWrapper('large')
     await wrapperLarge.vm.$nextTick()
     expect(wrapperLarge.find('.component-library').classes()).toContain('component-library--large')
+  })
+
+  it('点击深色模式按钮应切换 html.dark 类', async () => {
+    document.documentElement.classList.remove('dark')
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test', mode: 'light' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+
+    const darkBtn = wrapper.findAll('button').find((el) => el.attributes('title') === '切换深色')
+    expect(darkBtn).toBeTruthy()
+    await darkBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+
+    // 清理，避免影响后续测试
+    document.documentElement.classList.remove('dark')
+  })
+
+  it('工具栏操作按钮应使用图标而非文字', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: { code: 'test' },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+    const titles = ['返回', '撤销 (Ctrl+Z)', '重做 (Ctrl+Shift+Z)', '复制 (Ctrl+C)', '粘贴 (Ctrl+V)', '放大', '显示网格', '切换深色', '预览', '预览配置', '保存']
+    for (const title of titles) {
+      const btn = wrapper.findAll('button').find((el) => el.attributes('title') === title)
+      expect(btn, `缺少 title="${title}" 的工具栏按钮`).toBeTruthy()
+    }
+    // 确认没有旧文字按钮残留
+    expect(wrapper.find('.toolbar').text()).not.toContain('撤销')
+    expect(wrapper.find('.toolbar').text()).not.toContain('保存')
   })
 })

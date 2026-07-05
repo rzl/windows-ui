@@ -135,10 +135,12 @@ import OutlinePanel from './outline-panel.vue'
 import PageInfoPanel from './page-info-panel.vue'
 import DesignerCanvas from './designer-canvas.vue'
 import PropertyPanel from './property-panel.vue'
-import { getChart, listComponents, listComponentsByCategory } from './plugin-manager'
+import { listComponents, listComponentsByCategory } from './plugin-manager'
 import { usePageHistory } from './composables/usePageHistory'
 import { usePageSelection } from './composables/usePageSelection'
 import { usePageDragDrop } from './composables/usePageDragDrop'
+import { useNodeTree } from './composables/useNodeTree'
+import { createDefaultComponent, generateId } from './utils/createDefaultComponent'
 import './built-in-components'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import type { PageConfig, PageNode, PageItem, ComponentGroup } from './types'
@@ -288,6 +290,17 @@ const dragDrop = usePageDragDrop({
   onChange: recordHistory
 })
 const { handleDragStart, handleDropToRoot, handleTouchStart } = dragDrop
+
+const nodeTree = useNodeTree({
+  getComponents: () => config.components || [],
+  selectedNode,
+  selectedId,
+  isContainerNode,
+  createDefaultComponent,
+  onSelect: selectNode,
+  onChange: recordHistory
+})
+const { addComponent, deleteNode, moveNode } = nodeTree
 
 const clipboardNode = ref<PageNode | null>(null)
 
@@ -677,89 +690,6 @@ function applyPageInfo() {
   }
 }
 
-function generateId() {
-  return `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
-}
-
-function createDefaultComponent(type: string): PageNode {
-  const pluginDef = listComponents().find((c) => c.type === type)
-  if (pluginDef) {
-    return { id: generateId(), ...pluginDef.defaultNode() }
-  }
-
-  const base: PageNode = {
-    id: generateId(),
-    type,
-    props: {},
-    styles: {}
-  }
-
-  switch (type) {
-    case 'container':
-      return { ...base, props: { padding: '12px' }, children: [] }
-    case 'card':
-      return { ...base, props: { title: '卡片标题' }, children: [] }
-    case 'row':
-      return { ...base, props: { columns: 2, gap: '12px' }, children: [] }
-    case 'tabs':
-      return { ...base, props: { tabs: [{ title: '标签1', name: 'tab1' }] }, children: [] }
-    case 'text':
-      return { ...base, props: { content: '这是一段文本', tag: 'p', align: 'left' } }
-    case 'statistic':
-      return { ...base, props: { title: '统计标题', field: 'value', icon: 'star', color: 'primary' }, dataSource: { type: 'static', value: 0 } }
-    case 'chart': {
-      const chartPlugin = getChart('echarts')
-      return { ...base, props: { height: '300px', chartType: 'echarts' }, dataSource: { type: 'static' }, option: chartPlugin ? chartPlugin.defaultOption() : {} }
-    }
-    case 'alert':
-      return { ...base, props: { content: '公告内容', type: 'info' } }
-    case 'tag':
-      return { ...base, props: { label: '标签', type: 'default' } }
-    case 'progress':
-      return { ...base, props: { percentage: 50, status: '', width: 200, showText: true } }
-    case 'avatar':
-      return { ...base, props: { src: '', alt: '用户', icon: 'user', shape: 'circle' } }
-    case 'badge':
-      return { ...base, props: { text: '徽标', value: 5, isDot: false, type: 'danger' } }
-    case 'steps':
-      return { ...base, props: { items: [{ title: '步骤1' }, { title: '步骤2' }, { title: '步骤3' }], active: 1 } }
-    case 'timeline':
-      return { ...base, props: { items: [{ time: '2026-07-01', title: '事件1', content: '描述内容', color: '#245edb' }, { time: '2026-07-02', title: '事件2' }] } }
-    case 'image':
-      return { ...base, props: { src: '', alt: '', width: '100%', height: 'auto', objectFit: 'cover' } }
-    case 'divider':
-      return { ...base, props: { text: '', direction: 'horizontal', margin: '16px 0' } }
-    case 'table':
-      return { ...base, props: { title: '表格', columns: [{ prop: 'name', label: '名称' }, { prop: 'value', label: '值' }], height: '' }, dataSource: { type: 'static', value: [] } }
-    case 'list':
-      return { ...base, props: { itemTitle: 'title', itemDesc: 'description', itemIcon: 'file' }, dataSource: { type: 'static', value: [] } }
-    case 'model':
-      return { ...base, props: { modelCode: '', height: '500px' } }
-    case 'dashboard':
-      return { ...base, props: { dashboardCode: '' } }
-    case 'report':
-      return { ...base, props: { reportCode: '' } }
-    case 'button':
-      return { ...base, props: { label: '按钮', type: 'default' }, events: { onClick: { action: 'navigate', target: '' } } }
-    case 'link':
-      return { ...base, props: { label: '链接', path: '' } }
-    case 'input':
-      return { ...base, props: { label: '输入框', placeholder: '请输入', type: 'text', modelValue: '' } }
-    case 'select':
-      return { ...base, props: { label: '选择器', placeholder: '请选择', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
-    case 'radio':
-      return { ...base, props: { label: '单选框', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: '' } }
-    case 'checkbox':
-      return { ...base, props: { label: '多选框', options: [{ label: '选项1', value: '1' }, { label: '选项2', value: '2' }], modelValue: [] } }
-    case 'date-picker':
-      return { ...base, props: { label: '日期', placeholder: '请选择日期', modelValue: '' } }
-    case 'switch':
-      return { ...base, props: { label: '开关', modelValue: false } }
-    default:
-      return base
-  }
-}
-
 function selectNode(id: string) {
   select(id)
   if (isMobile.value) {
@@ -772,65 +702,6 @@ function isContainerNode(node: PageNode | null): boolean {
   if (['container', 'card', 'row', 'tabs'].includes(node.type)) return true
   const pluginDef = listComponents().find((c) => c.type === node.type)
   return !!pluginDef?.isContainer
-}
-
-function addComponent(type: string) {
-  const targetContainer = selectedNode.value && isContainerNode(selectedNode.value) ? selectedNode.value : null
-  if (targetContainer) {
-    if (!targetContainer.children) targetContainer.children = []
-    const node = createDefaultComponent(type)
-    targetContainer.children.push(node)
-    selectNode(node.id)
-  } else {
-    if (!config.components) config.components = []
-    const node = createDefaultComponent(type)
-    config.components.push(node)
-    selectNode(node.id)
-  }
-  recordHistory()
-}
-
-function deleteNode({ id }: { id: string }) {
-  removeNode(config.components || [], id)
-  if (selectedId.value === id) selectedId.value = ''
-  recordHistory()
-}
-
-function removeNode(list: PageNode[], id: string): boolean {
-  const index = list.findIndex((n) => n.id === id)
-  if (index >= 0) {
-    list.splice(index, 1)
-    return true
-  }
-  for (const node of list) {
-    if (node.children?.length && removeNode(node.children, id)) return true
-  }
-  return false
-}
-
-function moveNode({ id, direction }: { id: string; direction: 'up' | 'down' }) {
-  const moved = moveNodeInList(config.components || [], id, direction)
-  if (moved) recordHistory()
-}
-
-function moveNodeInList(list: PageNode[], id: string, direction: 'up' | 'down'): boolean {
-  const index = list.findIndex((n) => n.id === id)
-  if (index >= 0) {
-    if (direction === 'up' && index > 0) {
-      const temp = list[index - 1]
-      list[index - 1] = list[index]
-      list[index] = temp
-    } else if (direction === 'down' && index < list.length - 1) {
-      const temp = list[index + 1]
-      list[index + 1] = list[index]
-      list[index] = temp
-    }
-    return true
-  }
-  for (const node of list) {
-    if (node.children?.length && moveNodeInList(node.children, id, direction)) return true
-  }
-  return false
 }
 
 function onPropertyUpdate(_node: PageNode) {

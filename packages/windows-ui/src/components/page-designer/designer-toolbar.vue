@@ -1,19 +1,19 @@
 <template>
   <div class="toolbar">
-    <component :is="buttonTag" :size="globalSize" @click="emit('back')">返回</component>
+    <component :is="buttonTag" :size="globalSize" icon="arrowLeft" title="返回" @click="emit('back')" />
     <component :is="spaceTag">
-      <component :is="buttonTag" :size="globalSize" :disabled="!canUndo" @click="emit('undo')">撤销</component>
-      <component :is="buttonTag" :size="globalSize" :disabled="!canRedo" @click="emit('redo')">重做</component>
-      <component :is="buttonTag" :size="globalSize" :disabled="!hasSelected" @click="emit('copy')">复制</component>
-      <component :is="buttonTag" :size="globalSize" :disabled="!hasClipboard" @click="emit('paste')">粘贴</component>
-      <component :is="buttonTag" :size="globalSize" @click="emit('zoom-out')">缩小</component>
-      <component :is="buttonTag" :size="globalSize" @click="emit('zoom-reset')">{{ Math.round(zoom * 100) }}%</component>
-      <component :is="buttonTag" :size="globalSize" @click="emit('zoom-in')">放大</component>
-      <component :is="buttonTag" :size="globalSize" :type="showGrid ? 'primary' : 'default'" @click="emit('toggle-grid')">网格</component>
-      <component :is="buttonTag" :size="globalSize" @click="emit('toggle-dark')">{{ isDark ? '浅色' : '深色' }}</component>
-      <component :is="buttonTag" :size="globalSize" @click="emit('preview')">预览</component>
-      <component :is="buttonTag" :size="globalSize" @click="emit('preview-config')">预览配置</component>
-      <component :is="buttonTag" type="primary" :size="globalSize" @click="emit('save')">保存</component>
+      <component :is="buttonTag" :size="globalSize" icon="undo" title="撤销 (Ctrl+Z)" :disabled="!canUndo" @click="emit('undo')" />
+      <component :is="buttonTag" :size="globalSize" icon="redo" title="重做 (Ctrl+Shift+Z)" :disabled="!canRedo" @click="emit('redo')" />
+      <component :is="buttonTag" :size="globalSize" icon="copy" title="复制 (Ctrl+C)" :disabled="!hasSelected" @click="emit('copy')" />
+      <component :is="buttonTag" :size="globalSize" icon="paste" title="粘贴 (Ctrl+V)" :disabled="!hasClipboard" @click="emit('paste')" />
+      <component :is="buttonTag" :size="globalSize" icon="zoom-out" title="缩小" @click="emit('zoom-out')" />
+      <component :is="buttonTag" :size="globalSize" title="重置缩放" @click="emit('zoom-reset')">{{ Math.round(zoom * 100) }}%</component>
+      <component :is="buttonTag" :size="globalSize" icon="zoom-in" title="放大" @click="emit('zoom-in')" />
+      <component :is="buttonTag" :size="globalSize" icon="grid" title="显示网格" :type="showGrid ? 'primary' : 'default'" @click="emit('toggle-grid')" />
+      <component :is="buttonTag" :size="globalSize" :icon="isDark ? 'sun' : 'moon'" :title="isDark ? '切换浅色' : '切换深色'" @click="emit('toggle-dark')" />
+      <component :is="buttonTag" :size="globalSize" icon="eye" title="预览" @click="emit('preview')" />
+      <component :is="buttonTag" :size="globalSize" icon="code" title="预览配置" @click="emit('preview-config')" />
+      <component :is="buttonTag" type="primary" :size="globalSize" icon="save" title="保存" @click="emit('save')" />
     </component>
   </div>
 </template>

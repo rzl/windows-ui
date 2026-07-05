@@ -37,6 +37,7 @@ async function savePage(data: any) {
 | loadPage | `(code: string) => Promise<any>` | — | 加载页面数据回调 |
 | savePage | `(data: any) => Promise<any>` | — | 保存页面数据回调 |
 | isMobile | `boolean` | `false` | 是否启用移动端面板切换布局 |
+| mode | `'light' \| 'dark' \| 'auto'` | `'auto'` | 设计器主题模式，`auto` 跟随系统偏好 |
 
 ## Events
 
@@ -146,6 +147,30 @@ registerComponent({
 - 拖拽组件到画布或容器时，目标区域会高亮提示。
 - 左侧边栏「大纲」可查看组件层级并快速选中节点。
 
+## 深色模式
+
+页面设计器支持独立切换深色模式，工具栏提供「深色/浅色」按钮，也可通过 `mode` prop 控制：
+
+```vue
+<w-page-designer code="sales_dashboard" mode="dark" />
+```
+
+深色模式通过切换 `html.dark` 类实现，依赖 `variables.css` 与 `dark.css` 中已定义的深色变量与组件覆盖样式。
+
+## 组件库
+
+- 左侧组件库按「布局 / 展示 / 表单 / 数据 / 交互」分组，分组支持收起展开。
+- 每个组件项以图标 + 文字按钮形式展示，每行显示两个组件。
+- 组件项尺寸跟随全局尺寸（small / default / large）。
+- 顶部提供搜索框，支持按组件名称过滤。
+
+## 画布操作
+
+- 悬停或选中节点时显示节点工具栏，包含：添加子组件、上移、下移、删除，均使用图标按钮。
+- 选中节点后按 `Delete` / `Backspace` 可快速删除，`Esc` 取消选中。
+- 拖拽组件到画布或容器时，目标区域会高亮提示。
+- 工具栏提供撤销、重做、复制、粘贴、缩放、网格、深色模式、预览、保存等图标操作。
+
 ## 主题定制
 
-设计器内部使用 `--w-color-primary`、`--w-border-color`、`--w-bg-color` 等 CSS 变量，可通过 `WConfigProvider` 或覆盖 `:root` 变量调整外观。
+设计器内部使用 `--w-color-primary`、`--w-border-color`、`--w-bg-color` 等 CSS 变量，可通过 `WConfigProvider` 或覆盖 `:root` 变量调整外观。所有内部按钮、输入框、表单均使用 Windows UI 基础组件，尺寸跟随 `WConfigProvider` 全局尺寸。
