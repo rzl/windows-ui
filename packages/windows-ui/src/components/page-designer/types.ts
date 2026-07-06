@@ -1,5 +1,49 @@
 import type { VNode } from 'vue'
 
+export type PropertySchemaFieldType =
+  | 'input'
+  | 'textarea'
+  | 'number'
+  | 'select'
+  | 'switch'
+  | 'color'
+  | 'json'
+  | 'dataSource'
+  | 'events'
+  | 'options'
+  | 'items'
+  | 'slider'
+
+export interface PropertySchemaOption {
+  label: string
+  value: any
+}
+
+export interface PropertySchemaField {
+  /** 字段类型 */
+  type: PropertySchemaFieldType
+  /** 属性路径：props.xxx / styles.xxx / dataSource / events */
+  key: string
+  /** 显示名称 */
+  label: string
+  /** 占位提示 */
+  placeholder?: string
+  /** 下拉选项 */
+  options?: PropertySchemaOption[]
+  /** 默认值 */
+  default?: any
+  /** 数字最小值 */
+  min?: number
+  /** 数字最大值 */
+  max?: number
+  /** 数字步长 */
+  step?: number
+  /** 多行文本行数 */
+  rows?: number
+  /** 分组标题 */
+  group?: string
+}
+
 export interface PageNode {
   id: string
   type: string
@@ -49,6 +93,38 @@ export interface PageEventConfig {
   value?: any
   condition?: string
   actions?: PageEventConfig[]
+  dialogOptions?: DialogOpenOptions
+}
+
+export interface PageActionContext {
+  pageCode: string
+  pageState: Record<string, any>
+  formData: Record<string, any>
+  updateFormData: (key: string, value: any) => void
+  executeDataSource?: (code: string, ds: PageDataSource, ctx?: any) => Promise<any>
+  refreshKey: { value: number }
+  emit: (event: string, ...args: any[]) => void
+  openDialog: (target: string, options?: DialogOpenOptions) => void | Promise<void>
+  callApi: (target: string, method: string, params: any, body: any) => void | Promise<void>
+}
+
+export interface DialogOpenOptions {
+  width?: number | string
+  height?: number | string
+  fullscreen?: boolean
+  showFooter?: boolean
+  footerActions?: PageEventConfig[]
+}
+
+export interface PageActionDefinition {
+  /** 动作编码 */
+  action: string
+  /** 显示名称 */
+  label: string
+  /** 字段 schema：动作配置需要哪些字段 */
+  fields?: PropertySchemaField[]
+  /** 执行器 */
+  execute: (config: PageEventConfig, ctx: PageActionContext) => void | Promise<void>
 }
 
 export interface PageDataSource {
@@ -90,5 +166,5 @@ export interface PageComponentDefinition {
   isContainer?: boolean
   defaultNode: () => Omit<PageNode, 'id'>
   render: (ctx: { node: PageNode; pageCode?: string; dataValue?: any }) => VNode
-  propertySchema?: any
+  propertySchema?: PropertySchemaField[]
 }

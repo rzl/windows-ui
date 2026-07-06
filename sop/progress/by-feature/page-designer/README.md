@@ -14,8 +14,12 @@
 | 应用集成 | [phase-14](../../by-phase/phase-14.md) | 页面作为 AppItem 加入应用 | ✅ |
 | 页面设计器增强 | [phase-33](../../by-phase/phase-33.md) | 更多内置组件、事件可视化配置、页面权限控制 | ✅ |
 
+## 已完成增强
+
+- [x] 属性面板 Schema 化：`propertySchema` 驱动，内置组件与插件组件均可声明可视化属性配置。
+- [x] 事件动作插件化注册表：通过 `registerAction` 注册自定义动作，事件编辑器自动读取动作字段 schema。
+- [x] 复杂弹窗配置：`openDialog` 动作支持 `dialogOptions` 配置宽度、高度、全屏、footer 显示。
+
 ## 待增强
 
 - [ ] 页面模板市场
-- [ ] 事件动作插件化注册表
-- [ ] 复杂弹窗配置（尺寸、标题、footer）

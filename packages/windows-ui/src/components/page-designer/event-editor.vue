@@ -3,82 +3,112 @@
     <component :is="formTag" :size="controlSize" label-width="80">
       <div class="section-title">事件</div>
       <component :is="formItemTag" label="事件类型">
-      <component :is="selectTag" :model-value="eventName" :options="eventNameOptions" @update:model-value="updateEventName" />
-    </component>
-
-    <template v-if="eventName && eventConfig">
-      <component :is="formItemTag" label="执行条件">
-        <component :is="inputTag" v-model="eventConfig.condition" placeholder="如 formData.status === '1'，为空则始终执行" />
+        <component :is="selectTag" :model-value="eventName" :options="eventNameOptions" @update:model-value="updateEventName" />
       </component>
 
-      <!-- 链式动作 -->
-      <template v-if="isChain && eventConfig.actions">
-        <div class="chain-list">
-          <div v-for="(action, index) in eventConfig.actions" :key="index" class="chain-item">
-            <div class="chain-header">
-              <span>动作 {{ index + 1 }}</span>
-              <component :is="buttonTag" :size="controlSize" type="danger" icon="delete" title="删除" @click="removeAction(index)" />
-            </div>
-            <component :is="formItemTag" label="动作">
-              <component :is="selectTag" v-model="action.action" :options="actionOptions" />
-            </component>
-            <component :is="formItemTag" v-if="showTarget(action)" label="目标">
-              <component :is="inputTag" v-model="action.target" placeholder="路径 / 页面编码 / URL / 变量名" />
-            </component>
-            <component :is="formItemTag" v-if="showMethod(action)" label="请求方法">
-              <component :is="selectTag" v-model="action.method" :options="methodOptions" />
-            </component>
-            <component :is="formItemTag" v-if="showParams(action)" label="查询参数(JSON)">
-              <component :is="inputTag" :model-value="jsonStringify(action.params)" type="textarea" :rows="2" @update:model-value="(v: string) => updateJson(action, 'params', v)" />
-            </component>
-            <component :is="formItemTag" v-if="showBody(action)" label="请求体(JSON)">
-              <component :is="inputTag" :model-value="jsonStringify(action.body)" type="textarea" :rows="2" @update:model-value="(v: string) => updateJson(action, 'body', v)" />
-            </component>
-            <component :is="formItemTag" v-if="showVariable(action)" label="变量名">
-              <component :is="inputTag" v-model="action.variable" placeholder="pageState 中的变量名" />
-            </component>
-            <component :is="formItemTag" v-if="showValue(action)" label="变量值">
-              <component :is="inputTag" :model-value="valueStringify(action.value)" type="textarea" :rows="2" placeholder="支持字符串、数字或 JSON" @update:model-value="(v: string) => updateValue(action, v)" />
-            </component>
-            <component :is="formItemTag" label="当前条件">
-              <component :is="inputTag" v-model="action.condition" placeholder="可选，满足时才执行该动作" />
-            </component>
-          </div>
-        </div>
-        <div class="chain-actions">
-          <component :is="buttonTag" :size="controlSize" @click="addAction">+ 添加动作</component>
-          <component :is="buttonTag" :size="controlSize" @click="convertToSingle">切换为单个动作</component>
-        </div>
-      </template>
+      <template v-if="eventName && eventConfig">
+        <component :is="formItemTag" label="执行条件">
+          <component :is="inputTag" v-model="eventConfig.condition" placeholder="如 formData.status === '1'，为空则始终执行" />
+        </component>
 
-      <!-- 单个动作 -->
-      <template v-else>
-        <component :is="formItemTag" label="动作">
-          <component :is="selectTag" v-model="eventConfig.action" :options="actionOptions" />
-        </component>
-        <component :is="formItemTag" v-if="showTarget(eventConfig)" label="目标">
-          <component :is="inputTag" v-model="eventConfig.target" placeholder="路径 / 页面编码 / URL / 变量名" />
-        </component>
-        <component :is="formItemTag" v-if="showMethod(eventConfig)" label="请求方法">
-          <component :is="selectTag" v-model="eventConfig.method" :options="methodOptions" />
-        </component>
-        <component :is="formItemTag" v-if="showParams(eventConfig)" label="查询参数(JSON)">
-          <component :is="inputTag" v-model="paramsText" type="textarea" :rows="2" />
-        </component>
-        <component :is="formItemTag" v-if="showBody(eventConfig)" label="请求体(JSON)">
-          <component :is="inputTag" v-model="bodyText" type="textarea" :rows="2" />
-        </component>
-        <component :is="formItemTag" v-if="showVariable(eventConfig)" label="变量名">
-          <component :is="inputTag" v-model="eventConfig.variable" placeholder="pageState 中的变量名" />
-        </component>
-        <component :is="formItemTag" v-if="showValue(eventConfig)" label="变量值">
-          <component :is="inputTag" v-model="valueText" type="textarea" :rows="2" placeholder="支持字符串、数字或 JSON" />
-        </component>
-        <div class="chain-actions">
-          <component :is="buttonTag" :size="controlSize" @click="convertToChain">+ 添加链式动作</component>
-        </div>
+        <!-- 链式动作 -->
+        <template v-if="isChain && eventConfig.actions">
+          <div class="chain-list">
+            <div v-for="(action, index) in eventConfig.actions" :key="index" class="chain-item">
+              <div class="chain-header">
+                <span>动作 {{ index + 1 }}</span>
+                <component :is="buttonTag" :size="controlSize" type="danger" icon="delete" title="删除" @click="removeAction(index)" />
+              </div>
+              <component :is="formItemTag" label="动作">
+                <component :is="selectTag" v-model="action.action" :options="actionOptions" />
+              </component>
+              <template v-for="field in getActionFields(action.action)" :key="field.key">
+                <component :is="formItemTag" :label="field.label">
+                  <component
+                    :is="inputTag"
+                    v-if="field.type === 'input'"
+                    :model-value="getFieldValue(action, field.key)"
+                    :placeholder="field.placeholder || ''"
+                    @update:model-value="(v: any) => setFieldValue(action, field.key, v)"
+                  />
+                  <component
+                    :is="selectTag"
+                    v-else-if="field.type === 'select'"
+                    :model-value="getFieldValue(action, field.key)"
+                    :options="field.options || []"
+                    @update:model-value="(v: any) => setFieldValue(action, field.key, v)"
+                  />
+                  <component
+                    :is="switchTag"
+                    v-else-if="field.type === 'switch'"
+                    :model-value="!!getFieldValue(action, field.key)"
+                    @update:model-value="(v: any) => setFieldValue(action, field.key, v)"
+                  />
+                  <component
+                    :is="inputTag"
+                    v-else-if="field.type === 'json'"
+                    :model-value="jsonStringify(getFieldValue(action, field.key))"
+                    type="textarea"
+                    :rows="field.rows || 2"
+                    :placeholder="field.placeholder || ''"
+                    @update:model-value="(v: string) => updateJson(action, field.key, v)"
+                  />
+                </component>
+              </template>
+              <component :is="formItemTag" label="当前条件">
+                <component :is="inputTag" v-model="action.condition" placeholder="可选，满足时才执行该动作" />
+              </component>
+            </div>
+          </div>
+          <div class="chain-actions">
+            <component :is="buttonTag" :size="controlSize" @click="addAction">+ 添加动作</component>
+            <component :is="buttonTag" :size="controlSize" @click="convertToSingle">切换为单个动作</component>
+          </div>
+        </template>
+
+        <!-- 单个动作 -->
+        <template v-else>
+          <component :is="formItemTag" label="动作">
+            <component :is="selectTag" v-model="eventConfig.action" :options="actionOptions" />
+          </component>
+          <template v-for="field in currentActionFields" :key="field.key">
+            <component :is="formItemTag" :label="field.label">
+              <component
+                :is="inputTag"
+                v-if="field.type === 'input'"
+                :model-value="getFieldValue(eventConfig, field.key)"
+                :placeholder="field.placeholder || ''"
+                @update:model-value="(v: any) => setFieldValue(eventConfig, field.key, v)"
+              />
+              <component
+                :is="selectTag"
+                v-else-if="field.type === 'select'"
+                :model-value="getFieldValue(eventConfig, field.key)"
+                :options="field.options || []"
+                @update:model-value="(v: any) => setFieldValue(eventConfig, field.key, v)"
+              />
+              <component
+                :is="switchTag"
+                v-else-if="field.type === 'switch'"
+                :model-value="!!getFieldValue(eventConfig, field.key)"
+                @update:model-value="(v: any) => setFieldValue(eventConfig, field.key, v)"
+              />
+              <component
+                :is="inputTag"
+                v-else-if="field.type === 'json'"
+                :model-value="jsonStringify(getFieldValue(eventConfig, field.key))"
+                type="textarea"
+                :rows="field.rows || 2"
+                :placeholder="field.placeholder || ''"
+                @update:model-value="(v: string) => updateJson(eventConfig, field.key, v)"
+              />
+            </component>
+          </template>
+          <div class="chain-actions">
+            <component :is="buttonTag" :size="controlSize" @click="convertToChain">+ 添加链式动作</component>
+          </div>
+        </template>
       </template>
-    </template>
     </component>
   </div>
 </template>
@@ -86,7 +116,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
-import type { PageEventConfig } from './types'
+import { listActions, getAction } from './plugin-manager'
+import type { PageEventConfig, PropertySchemaField } from './types'
 
 defineOptions({ name: 'WPageEventEditor' })
 
@@ -96,6 +127,7 @@ const formTag = withPrefix('form')
 const formItemTag = withPrefix('form-item')
 const inputTag = withPrefix('input')
 const selectTag = withPrefix('select')
+const switchTag = withPrefix('switch')
 const buttonTag = withPrefix('button')
 
 const props = defineProps<{
@@ -112,20 +144,7 @@ const eventNameOptions = [
   { label: '点击 onClick', value: 'onClick' }
 ]
 
-const actionOptions = [
-  { label: '跳转', value: 'navigate' },
-  { label: '打开弹窗', value: 'openDialog' },
-  { label: '调用接口', value: 'callApi' },
-  { label: '设置变量', value: 'setVariable' },
-  { label: '刷新页面', value: 'refresh' },
-  { label: '返回上一页', value: 'goBack' },
-  { label: '打开外部链接', value: 'openExternal' }
-]
-
-const methodOptions = [
-  { label: 'GET', value: 'GET' },
-  { label: 'POST', value: 'POST' }
-]
+const actionOptions = computed(() => listActions().map((a) => ({ label: a.label, value: a.action })))
 
 const eventName = computed(() => {
   if (!props.modelValue) return ''
@@ -139,79 +158,39 @@ const eventConfig = computed(() => {
 
 const isChain = computed(() => Array.isArray(eventConfig.value?.actions))
 
-function showTarget(config?: PageEventConfig | null) {
-  return config && ['navigate', 'openDialog', 'callApi', 'openExternal'].includes(config.action)
-}
-function showMethod(config?: PageEventConfig | null) {
-  return config?.action === 'callApi'
-}
-function showParams(config?: PageEventConfig | null) {
-  return config?.action === 'callApi'
-}
-function showBody(config?: PageEventConfig | null) {
-  return config?.action === 'callApi'
-}
-function showVariable(config?: PageEventConfig | null) {
-  return config?.action === 'setVariable'
-}
-function showValue(config?: PageEventConfig | null) {
-  return config?.action === 'setVariable'
-}
-
-const paramsText = computed({
-  get() {
-    return jsonStringify(eventConfig.value?.params)
-  },
-  set(value: string) {
-    updateJson(eventConfig.value, 'params', value)
-  }
+const currentActionFields = computed<PropertySchemaField[]>(() => {
+  if (!eventConfig.value) return []
+  return getActionFields(eventConfig.value.action)
 })
 
-const bodyText = computed({
-  get() {
-    return jsonStringify(eventConfig.value?.body)
-  },
-  set(value: string) {
-    updateJson(eventConfig.value, 'body', value)
-  }
-})
+function getActionFields(action: string): PropertySchemaField[] {
+  return getAction(action)?.fields || []
+}
 
-const valueText = computed({
-  get() {
-    return valueStringify(eventConfig.value?.value)
-  },
-  set(value: string) {
-    updateValue(eventConfig.value, value)
-  }
-})
+function getFieldValue(obj: any, path: string): any {
+  return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj)
+}
+
+function setFieldValue(obj: any, path: string, value: any) {
+  const keys = path.split('.')
+  const last = keys.pop()!
+  const target = keys.reduce((o, k) => {
+    if (o[k] == null) o[k] = {}
+    return o[k]
+  }, obj)
+  target[last] = value
+  emitUpdate()
+}
 
 function jsonStringify(value: any) {
-  return JSON.stringify(value || {}, null, 2)
+  return JSON.stringify(value ?? {}, null, 2)
 }
 
-function valueStringify(value: any) {
-  if (value === undefined || value === null) return ''
-  return typeof value === 'string' ? value : JSON.stringify(value, null, 2)
-}
-
-function updateJson(config: PageEventConfig | null | undefined, key: 'params' | 'body', value: string) {
+function updateJson(config: PageEventConfig | null | undefined, key: string, value: string) {
   if (!config) return
   try {
-    ;(config as any)[key] = JSON.parse(value)
-    emitUpdate()
+    setFieldValue(config, key, JSON.parse(value))
   } catch { /* ignore invalid json */ }
-}
-
-function updateValue(config: PageEventConfig | null | undefined, value: string) {
-  if (!config) return
-  let parsed: any = value
-  try {
-    parsed = JSON.parse(value)
-  } catch {
-    // 保持字符串
-  }
-  config.value = parsed
-  emitUpdate()
 }
 
 function emitUpdate() {

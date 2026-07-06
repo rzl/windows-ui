@@ -16,23 +16,31 @@
       />
     </template>
 
-    <component :is="dialogTag" v-model="dialogVisible" :title="dialogTitle" :width="800">
-      <page-renderer
-        v-if="dialogConfig"
-        :config="dialogConfig"
-        :preview="true"
-        :execute-data-source="executeDataSource"
-        @navigate="handleNavigate"
-        @open-dialog="handleOpenDialog"
-        @call-api="handleCallApi"
-      />
-      <iframe
-        v-else-if="dialogUrl"
-        :src="dialogUrl"
-        class="dialog-frame"
-        sandbox="allow-scripts allow-same-origin allow-popups"
-      />
-      <template #footer>
+    <component
+      :is="dialogTag"
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      :width="dialogWidth"
+      :fullscreen="dialogFullscreen"
+    >
+      <div :style="dialogBodyStyle">
+        <page-renderer
+          v-if="dialogConfig"
+          :config="dialogConfig"
+          :preview="true"
+          :execute-data-source="executeDataSource"
+          @navigate="handleNavigate"
+          @open-dialog="handleOpenDialog"
+          @call-api="handleCallApi"
+        />
+        <iframe
+          v-else-if="dialogUrl"
+          :src="dialogUrl"
+          class="dialog-frame"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+        />
+      </div>
+      <template v-if="dialogShowFooter" #footer>
         <component :is="buttonTag" @click="dialogVisible = false">关闭</component>
       </template>
     </component>
@@ -46,8 +54,9 @@ defineOptions({ name: 'WPageRenderer' })
 
 import RenderComponent from './render-component.vue'
 import './built-in-components'
+import { getAction } from './plugin-manager'
 import { usePrefix } from '../../utils/prefix'
-import type { PageConfig, PageDataSource, PageEventConfig, PageNode, PageSubPage } from './types'
+import type { PageActionContext, PageConfig, PageDataSource, PageEventConfig, PageNode, PageSubPage } from './types'
 
 const { withPrefix } = usePrefix()
 const resultTag = withPrefix('result')
@@ -93,12 +102,21 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('弹窗')
 const dialogConfig = ref<PageConfig | null>(null)
 const dialogUrl = ref('')
+const dialogWidth = ref<number | string>(800)
+const dialogHeight = ref<number | string>('')
+const dialogFullscreen = ref(false)
+const dialogShowFooter = ref(true)
 const refreshKey = ref(0)
 
 const hasPagePermission = computed(() => {
   if (props.preview) return true
   if (!pageInfo.permission) return true
   return props.hasPermission ? props.hasPermission(pageInfo.permission) : true
+})
+
+const dialogBodyStyle = computed(() => {
+  if (!dialogHeight.value) return {}
+  return { height: typeof dialogHeight.value === 'number' ? `${dialogHeight.value}px` : dialogHeight.value, overflow: 'auto' }
 })
 
 onMounted(() => loadConfig())
@@ -183,47 +201,34 @@ async function executeEvent(event: PageEventConfig | undefined) {
   await executeSingleAction(event)
 }
 
-async function executeSingleAction(event: PageEventConfig) {
-  const { action, target, method = 'GET', params = {}, body = {}, variable = '', value = '' } = event
-
-  switch (action) {
-    case 'navigate':
-      if (target) emit('navigate', target)
-      break
-    case 'openExternal':
-      if (target) emit('openExternal', target)
-      break
-    case 'goBack':
-      emit('back')
-      break
-    case 'setVariable':
-      if (variable) {
-        pageState[variable] = value
-      }
-      break
-    case 'refresh':
-      refreshKey.value++
-      emit('refresh')
-      break
-    case 'openDialog':
-      if (target) {
-        await openDialog(target)
-      }
-      break
-    case 'callApi':
-      if (target) {
-        await callApi(target, method, params, body)
-      }
-      break
-    default:
-      break
+function createActionContext(): PageActionContext {
+  return {
+    pageCode: pageCode.value,
+    pageState,
+    formData,
+    updateFormData,
+    executeDataSource: props.executeDataSource,
+    refreshKey,
+    emit: emit as any,
+    openDialog,
+    callApi
   }
 }
 
-async function openDialog(target: string) {
+async function executeSingleAction(event: PageEventConfig) {
+  const actionDef = getAction(event.action)
+  if (!actionDef) return
+  await actionDef.execute(event, createActionContext())
+}
+
+async function openDialog(target: string, options?: { width?: number | string; height?: number | string; fullscreen?: boolean; showFooter?: boolean }) {
   dialogTitle.value = '弹窗'
   dialogConfig.value = null
   dialogUrl.value = ''
+  dialogWidth.value = options?.width ?? 800
+  dialogHeight.value = options?.height ?? ''
+  dialogFullscreen.value = options?.fullscreen ?? false
+  dialogShowFooter.value = options?.showFooter ?? true
 
   if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('//')) {
     dialogUrl.value = target
@@ -246,7 +251,7 @@ async function openDialog(target: string) {
     }
   }
   dialogVisible.value = true
-  emit('openDialog', { target, title: dialogTitle.value })
+  emit('openDialog', { target, title: dialogTitle.value, options })
 }
 
 async function callApi(target: string, method: string, params: any, body: any) {

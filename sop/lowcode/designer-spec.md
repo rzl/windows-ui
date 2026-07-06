@@ -462,7 +462,7 @@
 |--------|-------------------|------|
 | navigate | target：路由路径 | 跳转页面 |
 | openExternal | target：URL | 打开外部链接 |
-| openDialog | target：页面编码 / URL | 打开弹窗 |
+| openDialog | target、dialogOptions | 打开弹窗，支持配置弹窗尺寸与 footer |
 | callApi | target、method、params、body | 调用接口 |
 | setVariable | variable、value | 设置 pageState 变量 |
 | refresh | - | 刷新当前组件数据源 |
@@ -478,5 +478,86 @@
     ]
   }
 }
+```
+
+事件动作已支持插件化注册表，可通过 `registerAction` 新增自定义动作：
+
+```ts
+import { registerAction } from '@windows-ui/core/page-designer/plugin-manager'
+
+registerAction({
+  action: 'sendMessage',
+  label: '发送消息',
+  fields: [
+    { type: 'input', key: 'target', label: '消息模板编码' },
+    { type: 'json', key: 'params', label: '模板参数' }
+  ],
+  execute(config, ctx) {
+    // 通过 ctx 可访问 pageState / formData / emit / callApi 等
+    ctx.emit('sendMessage', { template: config.target, params: config.params })
+  }
+})
+```
+
+`openDialog` 支持 `dialogOptions` 配置：
+
+```json
+{
+  "action": "openDialog",
+  "target": "sub-page-code",
+  "dialogOptions": {
+    "width": 900,
+    "height": 600,
+    "fullscreen": false,
+    "showFooter": true
+  }
+}
+```
+
+### 属性面板 Schema
+
+设计器右侧属性面板由 `propertySchema` 驱动。每个组件（含插件组件）可在注册时声明自己的属性配置，属性编辑器会自动渲染对应表单控件，无需为每种组件硬编码模板。
+
+`propertySchema` 为字段数组，每个字段结构如下：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `type` | string | 控件类型：`input` / `textarea` / `number` / `select` / `switch` / `color` / `json` / `dataSource` / `events` / `options` / `items` / `slider` |
+| `key` | string | 绑定路径：`props.xxx` / `styles.xxx` / `dataSource` / `events` / `option` |
+| `label` | string | 显示名称 |
+| `placeholder` | string | 占位提示 |
+| `options` | array | `select` 类型的可选项 `{ label, value }` |
+| `default` | any | 当节点未配置该字段时的默认值 |
+| `min` / `max` / `step` | number | `number` / `slider` 类型的数值范围与步长 |
+| `rows` | number | `textarea` / `json` / `options` / `items` 的行数 |
+| `group` | string | 分组标题，用于在属性面板中分块展示 |
+
+示例：
+
+```json
+[
+  { "type": "input", "key": "props.title", "label": "标题", "default": "统计标题" },
+  { "type": "select", "key": "props.color", "label": "颜色", "options": [
+    { "label": "主色", "value": "primary" },
+    { "label": "成功", "value": "success" }
+  ], "default": "primary" },
+  { "type": "dataSource", "key": "dataSource", "label": "数据源", "default": { "type": "static", "value": 0 } }
+]
+```
+
+插件组件注册时可通过 `propertySchema` 声明属性，运行时即拥有可视化编辑能力：
+
+```ts
+registerComponent({
+  type: 'my-component',
+  label: '我的组件',
+  category: 'display',
+  defaultNode: () => ({ type: 'my-component', props: { title: '示例' }, styles: {} }),
+  render: ({ node }) => h(MyComponent, { ...node.props }),
+  propertySchema: [
+    { type: 'input', key: 'props.title', label: '标题', default: '示例' },
+    { type: 'color', key: 'styles.backgroundColor', label: '背景色' }
+  ]
+})
 ```
 
