@@ -19,6 +19,9 @@
 - [x] 属性面板 Schema 化：`propertySchema` 驱动，内置组件与插件组件均可声明可视化属性配置。
 - [x] 事件动作插件化注册表：通过 `registerAction` 注册自定义动作，事件编辑器自动读取动作字段 schema。
 - [x] 复杂弹窗配置：`openDialog` 动作支持 `dialogOptions` 配置宽度、高度、全屏、footer 显示。
+- [x] 栅格改用 WRow/WCol：拖拽到 row 自动用 col 包装，支持 span/offset/gutter/justify/align。
+- [x] 标签页改用 WTabs/WTabPane：标签配置使用 `{ label, name }`，渲染与组件库保持一致。
+- [x] 移动端设计器优化：画布节点支持长按选中，底部固定操作条提供上移/下移/删除。
 
 ## 待增强
 

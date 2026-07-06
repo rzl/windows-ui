@@ -5,6 +5,9 @@
     :class="{ selected: isSelected, container: isContainer, 'drop-before': dropIndicator === 'before', 'drop-after': dropIndicator === 'after', 'drop-inside': dropIndicator === 'inside' }"
     :style="node.styles"
     @click.stop="selectNode(node.id)"
+    @touchstart.passive="handleTouchStart"
+    @touchend="handleTouchEnd"
+    @touchmove="handleTouchMove"
     @dragenter.stop.prevent="handleDragEnter"
     @dragleave.stop.prevent="handleDragLeave"
     @dragover.stop.prevent="handleDragOver"
@@ -176,7 +179,7 @@
       <template v-else-if="isContainer">
         <div v-if="node.type === 'card'" class="card-title">{{ node.props.title }}</div>
         <div v-if="node.type === 'tabs'" class="tabs-header">
-          <span v-for="tab in node.props.tabs" :key="tab.name" class="tab-item">{{ tab.title }}</span>
+          <span v-for="tab in node.props.tabs" :key="tab.name" class="tab-item">{{ tab.label || tab.title }}</span>
         </div>
         <div
           class="children-area"
@@ -214,7 +217,7 @@
 import { computed, ref } from 'vue'
 import { getComponent } from './plugin-manager'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
-import { createDefaultComponent } from './utils/createDefaultComponent'
+import { createChildForContainer } from './utils/createDefaultComponent'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPageComponentNode' })
@@ -231,6 +234,8 @@ const emit = defineEmits(['select', 'delete', 'move', 'change', 'reorder'])
 const nodeRef = ref<HTMLElement>()
 const dragOverCount = ref(0)
 const dropIndicator = ref<'before' | 'after' | 'inside' | null>(null)
+const longPressTimer = ref<any>(null)
+const isLongPress = ref(false)
 
 const { withPrefix } = usePrefix()
 const globalSize = useGlobalSize()
@@ -253,12 +258,13 @@ const timelineTag = withPrefix('timeline')
 
 const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
-const isContainer = computed(() => ['container', 'card', 'row', 'tabs'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
+const isContainer = computed(() => ['container', 'card', 'row', 'col', 'tabs'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
 
 const typeLabelMap: Record<string, string> = {
   container: '容器',
   card: '卡片',
   row: '栅格',
+  col: '列',
   tabs: '标签页',
   text: '文本',
   statistic: '统计卡片',
@@ -293,6 +299,28 @@ function selectNode(id: string) {
   emit('select', id)
 }
 
+function handleTouchStart() {
+  isLongPress.value = false
+  longPressTimer.value = setTimeout(() => {
+    isLongPress.value = true
+    emit('select', props.node.id)
+  }, 500)
+}
+
+function handleTouchEnd() {
+  if (longPressTimer.value) {
+    clearTimeout(longPressTimer.value)
+    longPressTimer.value = null
+  }
+}
+
+function handleTouchMove() {
+  if (longPressTimer.value) {
+    clearTimeout(longPressTimer.value)
+    longPressTimer.value = null
+  }
+}
+
 function remove() {
   emit('delete', { id: props.node.id })
 }
@@ -307,7 +335,7 @@ function moveDown() {
 
 function addChild() {
   if (!props.node.children) props.node.children = []
-  const child = createDefaultComponent('text')
+  const child = createChildForContainer('text', props.node.type)
   props.node.children.push(child)
   emit('select', child.id)
   emit('change')
@@ -392,7 +420,7 @@ function handleDrop(event: DragEvent) {
   clearDropState()
   if (!type) return
   if (!props.node.children) props.node.children = []
-  const child = createDefaultComponent(type)
+  const child = createChildForContainer(type, props.node.type)
   props.node.children.push(child)
   emit('select', child.id)
   emit('change')
@@ -432,7 +460,8 @@ function handleDrop(event: DragEvent) {
 .component-node.drop-before { border-top: 2px solid var(--w-color-primary); }
 .component-node.drop-after { border-bottom: 2px solid var(--w-color-primary); }
 .component-node.drop-inside .children-area { background: var(--w-table-current-row-bg); border-color: var(--w-color-primary); }
-.layout-grid { display: grid; grid-template-columns: repeat(var(--columns, 2), 1fr); gap: var(--gap, 12px); }
+.layout-row { display: flex; flex-wrap: wrap; margin: -8px; }
+.layout-col { flex: 1 1 auto; min-width: 0; padding: 8px; border: 1px dashed var(--w-border-color-light); background: var(--w-fill-color-lighter); }
 .card-title { font-weight: bold; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--w-border-color-light); }
 .tabs-header { display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--w-border-color); }
 .tab-item { padding: 4px 12px; background: var(--w-fill-color-light); border: 1px solid var(--w-border-color); border-bottom: none; }

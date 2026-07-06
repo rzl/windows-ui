@@ -387,8 +387,11 @@
 |------|------|-------|
 | container | 容器 | padding |
 | card | 卡片 | title |
-| row | 栅格 | columns、gap |
-| tabs | 标签页 | tabs（数组：{title, name}） |
+| row | 栅格 | gutter、type、justify、align、wrap |
+| col | 列（仅用于 row 内部） | span、offset |
+| tabs | 标签页 | tabs（数组：{label, name}）、modelValue |
+
+栅格布局使用 `row` 包裹 `col`，再由 `col` 包裹实际内容组件。设计器拖拽组件到 `row` 时会自动用 `col` 包装。标签页使用 `WTabs` / `WTabPane` 渲染，子组件通过 `tab` 字段关联到对应 `name` 的标签页。
 
 ### 展示组件
 

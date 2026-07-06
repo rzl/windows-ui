@@ -110,6 +110,13 @@
       </div>
     </div>
 
+    <!-- 移动端底部操作条 -->
+    <div v-if="isMobile && selectedNode" class="mobile-action-bar">
+      <component :is="buttonTag" :size="globalSize" @click="handleMoveNode({ id: selectedId, direction: 'up' })">上移</component>
+      <component :is="buttonTag" :size="globalSize" @click="handleMoveNode({ id: selectedId, direction: 'down' })">下移</component>
+      <component :is="buttonTag" :size="globalSize" type="danger" @click="handleDeleteNode({ id: selectedId })">删除</component>
+    </div>
+
     <component :is="dialogTag" v-model="previewVisible" title="页面预览" :width="900">
       <page-renderer :code="page.code" :config="config" :preview="true" />
       <template #footer>
@@ -303,11 +310,21 @@ function redo() {
   history.redo()
 }
 
+function wrapForContainer(node: PageNode, containerType: string): PageNode {
+  if (containerType === 'row' && node.type !== 'col') {
+    const col = createDefaultComponent('col')
+    col.children = [node]
+    return col
+  }
+  return node
+}
+
 const dragDrop = usePageDragDrop({
   getComponents: () => config.components || [],
   findNode,
   isContainerNode,
   createDefaultComponent,
+  wrapForContainer,
   onSelect: selectNode,
   onChange: recordHistory
 })
@@ -319,6 +336,7 @@ const nodeTree = useNodeTree({
   selectedId,
   isContainerNode,
   createDefaultComponent,
+  wrapForContainer,
   onSelect: selectNode,
   onChange: recordHistory
 })
@@ -545,6 +563,7 @@ const layoutTypes = computed(() => [
   { label: '容器', value: 'container', icon: getComponentIcon('container') },
   { label: '卡片', value: 'card', icon: getComponentIcon('card') },
   { label: '栅格', value: 'row', icon: getComponentIcon('row') },
+  { label: '列', value: 'col', icon: getComponentIcon('col') },
   { label: '标签页', value: 'tabs', icon: getComponentIcon('tabs') },
   { label: '折叠面板', value: 'collapse', icon: getComponentIcon('collapse') },
   { label: '间距', value: 'space', icon: getComponentIcon('space') },
@@ -847,6 +866,19 @@ function goBack() {
 .left-panel-content { flex: 1; min-width: 0; overflow: auto; }
 
 .mobile-panel-tabs { display: none; }
+.mobile-action-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  background: var(--w-bg-color);
+  border-top: 1px solid var(--w-border-color);
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+}
 
 @media (max-width: 768px) {
   .designer-page { padding: 6px; }
@@ -884,6 +916,9 @@ function goBack() {
     min-height: 300px;
     border: none;
     border-bottom: 1px solid var(--w-border-color);
+  }
+  .mobile-action-bar {
+    display: flex;
   }
 }
 </style>

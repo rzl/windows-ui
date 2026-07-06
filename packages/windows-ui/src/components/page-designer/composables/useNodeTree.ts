@@ -7,6 +7,7 @@ export interface UseNodeTreeOptions {
   selectedId?: Ref<string>
   isContainerNode: (node: PageNode | null) => boolean
   createDefaultComponent: (type: string) => PageNode
+  wrapForContainer?: (node: PageNode, containerType: string) => PageNode
   onSelect: (id: string) => void
   onChange: () => void
 }
@@ -65,18 +66,18 @@ function isDescendant(parent: PageNode, childId: string): boolean {
 }
 
 export function useNodeTree(options: UseNodeTreeOptions) {
-  const { getComponents, selectedNode, selectedId, isContainerNode, createDefaultComponent, onSelect, onChange } = options
+  const { getComponents, selectedNode, selectedId, isContainerNode, createDefaultComponent, wrapForContainer, onSelect, onChange } = options
 
   function addComponent(type: string) {
     const components = getComponents()
     const targetContainer = selectedNode.value && isContainerNode(selectedNode.value) ? selectedNode.value : null
+    let node = createDefaultComponent(type)
     if (targetContainer) {
       if (!targetContainer.children) targetContainer.children = []
-      const node = createDefaultComponent(type)
+      if (wrapForContainer) node = wrapForContainer(node, targetContainer.type)
       targetContainer.children.push(node)
       onSelect(node.id)
     } else {
-      const node = createDefaultComponent(type)
       components.push(node)
       onSelect(node.id)
     }
@@ -118,7 +119,9 @@ export function useNodeTree(options: UseNodeTreeOptions) {
     // 如果目标是容器且要求放入内部，则追加到子节点末尾
     if (position === 'inside' && isContainerNode(targetLoc.node)) {
       if (!targetLoc.node.children) targetLoc.node.children = []
-      targetLoc.node.children.push(sourceLoc.node)
+      let node = sourceLoc.node
+      if (wrapForContainer) node = wrapForContainer(node, targetLoc.node.type)
+      targetLoc.node.children.push(node)
       onSelect(sourceId)
       onChange()
       return

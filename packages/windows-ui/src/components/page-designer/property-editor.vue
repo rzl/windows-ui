@@ -200,11 +200,19 @@ const componentSchemas: Record<string, PropertySchemaField[]> = {
     { type: 'input', key: 'props.title', label: '标题', default: '卡片标题' }
   ],
   row: [
-    { type: 'number', key: 'props.columns', label: '列数', min: 1, max: 6, default: 2 },
-    { type: 'input', key: 'props.gap', label: '间距', placeholder: '如 12px', default: '12px' }
+    { type: 'number', key: 'props.gutter', label: '栅格间隔', min: 0, max: 48, default: 16 },
+    { type: 'select', key: 'props.type', label: '布局类型', options: [{ label: '普通', value: '' }, { label: 'Flex', value: 'flex' }], default: '' },
+    { type: 'select', key: 'props.justify', label: '水平排列', options: [{ label: '默认', value: '' }, { label: '起始', value: 'start' }, { label: '居中', value: 'center' }, { label: '末尾', value: 'end' }, { label: '两端对齐', value: 'space-between' }, { label: '间隔对齐', value: 'space-around' }], default: '' },
+    { type: 'select', key: 'props.align', label: '垂直对齐', options: [{ label: '默认', value: '' }, { label: '顶部', value: 'top' }, { label: '居中', value: 'middle' }, { label: '底部', value: 'bottom' }], default: '' },
+    { type: 'switch', key: 'props.wrap', label: '自动换行', default: true }
+  ],
+  col: [
+    { type: 'number', key: 'props.span', label: '占据列数', min: 1, max: 24, default: 12 },
+    { type: 'number', key: 'props.offset', label: '偏移列数', min: 0, max: 24, default: 0 }
   ],
   tabs: [
-    { type: 'items', key: 'props.tabs', label: '标签配置（JSON）', placeholder: '[{"title":"标签1","name":"tab1"}]', default: [] }
+    { type: 'items', key: 'props.tabs', label: '标签配置（JSON）', placeholder: '[{"label":"标签1","name":"tab1"}]', default: [] },
+    { type: 'input', key: 'props.modelValue', label: '当前激活项', placeholder: '对应标签的 name' }
   ],
   text: [
     { type: 'textarea', key: 'props.content', label: '内容', rows: 3, default: '文本内容' },

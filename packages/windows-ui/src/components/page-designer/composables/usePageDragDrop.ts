@@ -6,12 +6,13 @@ export interface PageDragDropOptions {
   findNode: (list: PageNode[], id: string) => PageNode | null
   isContainerNode: (node: PageNode | null) => boolean
   createDefaultComponent: (type: string) => PageNode
+  wrapForContainer?: (node: PageNode, containerType: string) => PageNode
   onSelect: (id: string) => void
   onChange: () => void
 }
 
 export function usePageDragDrop(options: PageDragDropOptions) {
-  const { getComponents, findNode, isContainerNode, createDefaultComponent, onSelect, onChange } = options
+  const { getComponents, findNode, isContainerNode, createDefaultComponent, wrapForContainer, onSelect, onChange } = options
 
   const touchState = reactive({
     type: '',
@@ -86,13 +87,14 @@ export function usePageDragDrop(options: PageDragDropOptions) {
     const target = findDropTarget(x, y)
     if (!target) return
     const components = getComponents()
-    const node = createDefaultComponent(touchState.type)
+    let node = createDefaultComponent(touchState.type)
     if (target.type === 'root') {
       components.push(node)
     } else {
       const container = findNode(components, target.nodeId)
       if (container && isContainerNode(container)) {
         if (!container.children) container.children = []
+        if (wrapForContainer) node = wrapForContainer(node, container.type)
         container.children.push(node)
       } else {
         components.push(node)

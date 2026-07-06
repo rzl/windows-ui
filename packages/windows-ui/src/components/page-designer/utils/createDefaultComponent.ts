@@ -5,6 +5,16 @@ export function generateId() {
   return `comp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
 }
 
+export function createChildForContainer(type: string, containerType?: string): PageNode {
+  const node = createDefaultComponent(type)
+  if (containerType === 'row' && type !== 'col') {
+    const col = createDefaultComponent('col')
+    col.children = [node]
+    return col
+  }
+  return node
+}
+
 export function createDefaultComponent(type: string): PageNode {
   const pluginDef = listComponents().find((c) => c.type === type)
   if (pluginDef) {
@@ -24,9 +34,11 @@ export function createDefaultComponent(type: string): PageNode {
     case 'card':
       return { ...base, props: { title: '卡片标题' }, children: [] }
     case 'row':
-      return { ...base, props: { columns: 2, gap: '12px' }, children: [] }
+      return { ...base, props: { gutter: 16, type: '', justify: '', align: '', wrap: true }, children: [] }
+    case 'col':
+      return { ...base, props: { span: 12, offset: 0 }, children: [] }
     case 'tabs':
-      return { ...base, props: { tabs: [{ title: '标签1', name: 'tab1' }] }, children: [] }
+      return { ...base, props: { tabs: [{ label: '标签1', name: 'tab1' }], modelValue: 'tab1' }, children: [] }
     case 'text':
       return { ...base, props: { content: '这是一段文本', tag: 'p', align: 'left' } }
     case 'statistic':

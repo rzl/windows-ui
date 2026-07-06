@@ -229,39 +229,61 @@
       />
     </component>
 
-    <!-- 栅格 -->
-    <div
-      v-else-if="node.type === 'row'"
-      class="render-grid"
-      :style="gridStyle"
+    <!-- 列（仅作为 row 子容器使用） -->
+    <component
+      :is="colTag"
+      v-else-if="node.type === 'col'"
+      :span="node.props.span ?? 12"
+      :offset="node.props.offset ?? 0"
     >
-      <div v-for="(child, idx) in node.children" :key="child.id || idx" class="grid-item">
-        <render-component :node="child" :page-code="pageCode" />
-      </div>
-    </div>
+      <render-component
+        v-for="(child, idx) in node.children"
+        :key="child.id || idx"
+        :node="child"
+        :page-code="pageCode"
+      />
+    </component>
+
+    <!-- 栅格 -->
+    <component
+      :is="rowTag"
+      v-else-if="node.type === 'row'"
+      :gutter="node.props.gutter ?? 16"
+      :type="node.props.type || ''"
+      :justify="node.props.justify || ''"
+      :align="node.props.align || ''"
+      :wrap="node.props.wrap ?? true"
+    >
+      <render-component
+        v-for="(child, idx) in node.children"
+        :key="child.id || idx"
+        :node="child"
+        :page-code="pageCode"
+      />
+    </component>
 
     <!-- 标签页 -->
-    <div v-else-if="node.type === 'tabs'" class="render-tabs">
-      <div class="tabs-nav">
-        <div
-          v-for="tab in node.props.tabs"
-          :key="tab.name"
-          class="tabs-nav-item"
-          :class="{ active: activeTab === tab.name }"
-          @click="activeTab = tab.name"
-        >
-          {{ tab.title }}
-        </div>
-      </div>
-      <div class="tabs-content">
+    <component
+      :is="tabsTag"
+      v-else-if="node.type === 'tabs'"
+      v-model="activeTabName"
+      :tabs="tabsForRenderer"
+    >
+      <component
+        :is="tabPaneTag"
+        v-for="tab in node.props.tabs"
+        :key="tab.name"
+        :label="tab.label"
+        :name="tab.name"
+      >
         <render-component
-          v-for="(child, idx) in activeTabChildren"
+          v-for="(child, idx) in childrenForTab(tab.name)"
           :key="child.id || idx"
           :node="child"
           :page-code="pageCode"
         />
-      </div>
-    </div>
+      </component>
+    </component>
 
     <!-- 嵌入模型 -->
     <template v-else-if="node.type === 'model'">
@@ -338,9 +360,13 @@ const avatarTag = withPrefix('avatar')
 const badgeTag = withPrefix('badge')
 const stepsTag = withPrefix('steps')
 const timelineTag = withPrefix('timeline')
+const rowTag = withPrefix('row')
+const colTag = withPrefix('col')
+const tabsTag = withPrefix('tabs')
+const tabPaneTag = withPrefix('tab-pane')
 
 const pageContext = inject<PageContext | null>('pageContext', null)
-const activeTab = ref('')
+const activeTabName = ref<string | number>('')
 const dataValue = ref<any>(null)
 const chartUrl = ref('')
 const modelUrl = ref('')
@@ -370,14 +396,6 @@ const displayValue = computed(() => {
     return dataValue.value
   }
   return props.node.dataSource?.value ?? 0
-})
-
-const gridStyle = computed(() => {
-  return {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${props.node.props?.columns || 2}, 1fr)`,
-    gap: props.node.props?.gap || '12px'
-  }
 })
 
 const imageStyle = computed(() => {
@@ -416,15 +434,21 @@ const listData = computed(() => {
   return props.node.props?.items || []
 })
 
-const activeTabChildren = computed(() => {
-  const tabName = activeTab.value
-  if (!tabName || !props.node.children) return []
-  return props.node.children.filter((child: PageNode) => !child.tab || child.tab === tabName)
+const tabsForRenderer = computed(() => {
+  return (props.node.props?.tabs || []).map((tab: any) => ({
+    label: tab.label || tab.title || tab.name,
+    name: tab.name
+  }))
 })
+
+function childrenForTab(tabName: string | number) {
+  if (!props.node.children) return []
+  return props.node.children.filter((child: PageNode) => child.tab === tabName)
+}
 
 onMounted(() => {
   if (props.node.type === 'tabs' && props.node.props?.tabs?.length) {
-    activeTab.value = props.node.props.tabs[0].name
+    activeTabName.value = props.node.props.modelValue || props.node.props.tabs[0].name
   }
   loadDataSource()
   loadEmbedUrls()
