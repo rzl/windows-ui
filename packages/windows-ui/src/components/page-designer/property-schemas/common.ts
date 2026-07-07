@@ -37,14 +37,32 @@ export function getTypeLabel(type: string): string {
   return typeLabelMap[type] || type
 }
 
+export const styleGroupName = '外观'
+
+export const groupIconMap: Record<string, string> = {
+  [styleGroupName]: 'style',
+  常规: 'settings',
+  布局: 'layout',
+  数据: 'database',
+  事件: 'lightning',
+  文本: 'font',
+  图片: 'image',
+  图表: 'chart',
+  高级: 'tools'
+}
+
+export function getGroupIcon(name: string): string {
+  return groupIconMap[name] || 'settings'
+}
+
 export const styleSchema: PropertySchemaField[] = [
-  { type: 'input', key: 'styles.width', label: '宽度', placeholder: '如 100% 或 300px' },
-  { type: 'input', key: 'styles.margin', label: '外边距', placeholder: '如 16px 或 8px 12px' },
-  { type: 'input', key: 'styles.padding', label: '内边距', placeholder: '如 16px 或 8px 12px' },
-  { type: 'color', key: 'styles.backgroundColor', label: '背景色' },
-  { type: 'color', key: 'styles.color', label: '文字颜色' },
-  { type: 'input', key: 'styles.fontSize', label: '字体大小', placeholder: '如 14px' },
-  { type: 'input', key: 'styles.borderRadius', label: '圆角', placeholder: '如 4px' },
+  { type: 'input', key: 'styles.width', label: '宽度', placeholder: '如 100% 或 300px', group: styleGroupName },
+  { type: 'input', key: 'styles.margin', label: '外边距', placeholder: '如 16px 或 8px 12px', group: styleGroupName },
+  { type: 'input', key: 'styles.padding', label: '内边距', placeholder: '如 16px 或 8px 12px', group: styleGroupName },
+  { type: 'color', key: 'styles.backgroundColor', label: '背景色', group: styleGroupName },
+  { type: 'color', key: 'styles.color', label: '文字颜色', group: styleGroupName },
+  { type: 'input', key: 'styles.fontSize', label: '字体大小', placeholder: '如 14px', group: styleGroupName },
+  { type: 'input', key: 'styles.borderRadius', label: '圆角', placeholder: '如 4px', group: styleGroupName },
   {
     type: 'select',
     key: 'styles.textAlign',
@@ -54,6 +72,7 @@ export const styleSchema: PropertySchemaField[] = [
       { label: '左对齐', value: 'left' },
       { label: '居中', value: 'center' },
       { label: '右对齐', value: 'right' }
-    ]
+    ],
+    group: styleGroupName
   }
 ]

@@ -55,7 +55,7 @@ describe('WPagePropertyEditor', () => {
       styles: { margin: '16px', padding: '8px', backgroundColor: '#fff', color: '#333', fontSize: '14px', borderRadius: '4px', textAlign: 'center' }
     })
     expect(wrapper.text()).toContain('组件类型')
-    expect(wrapper.text()).toContain('样式')
+    expect(wrapper.text()).toContain('外观')
     expect(wrapper.text()).toContain('宽度')
     expect(wrapper.text()).toContain('外边距')
     expect(wrapper.text()).toContain('内边距')
