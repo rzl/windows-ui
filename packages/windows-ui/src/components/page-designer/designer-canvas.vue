@@ -27,6 +27,7 @@
         @delete="emit('delete', $event)"
         @move="emit('move', $event)"
         @reorder="emit('reorder', $event)"
+        @move-to-root="emit('move-to-root', $event)"
         @change="emit('change')"
       />
       <div v-if="!components?.length" class="empty-tip">
@@ -57,6 +58,7 @@ const emit = defineEmits<{
   (e: 'delete', payload: { id: string }): void
   (e: 'move', payload: { id: string; direction: 'up' | 'down' }): void
   (e: 'reorder', payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }): void
+  (e: 'move-to-root', payload: { sourceId: string }): void
   (e: 'change'): void
 }>()
 
@@ -86,9 +88,18 @@ function handleDragOver(event: DragEvent) {
   event.preventDefault()
 }
 
+function hasNodeType(transfer: DataTransfer | null) {
+  return transfer?.types?.includes('pageNodeId') ?? false
+}
+
 function handleDrop(event: DragEvent) {
   dragOverCount.value = 0
   setCanvasBodyHighlight(false)
+  const nodeId = event.dataTransfer?.getData('pageNodeId')
+  if (hasNodeType(event.dataTransfer) && nodeId) {
+    emit('move-to-root', { sourceId: nodeId })
+    return
+  }
   emit('drop', event)
 }
 

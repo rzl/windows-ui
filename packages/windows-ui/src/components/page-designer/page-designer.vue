@@ -97,7 +97,8 @@
           @select="selectNode"
           @delete="handleDeleteNode"
           @move="handleMoveNode"
-          @reorder="handleReorderWithFlush"
+          @reorder="handleReorder"
+          @move-to-root="handleMoveNodeToRoot"
           @change="handleNodeChange"
         />
 
@@ -340,7 +341,7 @@ const nodeTree = useNodeTree({
   onSelect: selectNode,
   onChange: recordHistory
 })
-const { addComponent, deleteNode, moveNode, moveNodeTo } = nodeTree
+const { addComponent, deleteNode, moveNode, moveNodeTo, moveNodeToRoot } = nodeTree
 
 function handleAddComponent(type: string) {
   flushPropertyChange()
@@ -363,12 +364,13 @@ function handleMoveNode(payload: { id: string; direction: 'up' | 'down' }) {
 }
 
 function handleReorder(payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) {
+  flushPropertyChange()
   moveNodeTo(payload)
 }
 
-function handleReorderWithFlush(payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) {
+function handleMoveNodeToRoot(payload: { sourceId: string }) {
   flushPropertyChange()
-  handleReorder(payload)
+  moveNodeToRoot(payload.sourceId)
 }
 
 function handleNodeChange() {

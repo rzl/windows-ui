@@ -4,6 +4,7 @@
       v-for="node in treeNodes"
       :key="node.id"
       class="outline-node"
+      :data-node-id="node.id"
       :class="{
         selected: node.id === selectedId,
         container: node.isContainer,
@@ -24,6 +25,7 @@
         title="拖动排序"
         draggable="true"
         @dragstart.stop="handleDragStart($event, node.id)"
+        @touchstart.stop.prevent="handleTouchStart($event, node)"
         @click.stop
       />
       <span
@@ -43,6 +45,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { usePrefix } from '../../utils/prefix'
+import { useOutlineTouchReorder } from './composables/useOutlineTouchReorder'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPageOutlineTree' })
@@ -153,6 +156,16 @@ function selectNode(id: string) {
   emit('select', id)
 }
 
+function handleTouchStart(event: TouchEvent, node: OutlineTreeNode) {
+  const reorder = useOutlineTouchReorder({
+    nodeId: node.id,
+    nodeLabel: node.label,
+    isContainer: node.isContainer,
+    onReorder: (payload) => emit('reorder', payload)
+  })
+  reorder.handleTouchStart(event)
+}
+
 function findAncestorIds(nodes: PageNode[], id: string, ancestors: string[] = []): string[] | null {
   for (const node of nodes) {
     if (node.id === id) return ancestors
@@ -242,6 +255,7 @@ function handleDrop(event: DragEvent, node: OutlineTreeNode) {
   color: var(--w-text-color-placeholder);
   cursor: grab;
   text-align: center;
+  touch-action: none;
 }
 .outline-drag-handle:active { cursor: grabbing; }
 .outline-label {

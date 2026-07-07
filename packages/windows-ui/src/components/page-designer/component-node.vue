@@ -231,7 +231,7 @@ const props = defineProps<{
   parentList: PageNode[]
 }>()
 
-const emit = defineEmits(['select', 'delete', 'move', 'change', 'reorder'])
+const emit = defineEmits(['select', 'delete', 'move', 'change', 'reorder', 'move-to-root'])
 
 const nodeRef = ref<HTMLElement>()
 const dragOverCount = ref(0)
@@ -300,7 +300,8 @@ const typeLabel = computed(() => typeLabelMap[props.node.type] || pluginComponen
 const nodeTouchReorder = useNodeTouchReorder({
   nodeId: props.node.id,
   nodeLabel: typeLabel.value,
-  onReorder: (payload) => emit('reorder', payload)
+  onReorder: (payload) => emit('reorder', payload),
+  onMoveToRoot: () => emit('move-to-root', { sourceId: props.node.id })
 })
 
 function selectNode(id: string) {

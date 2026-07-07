@@ -97,6 +97,16 @@ export function useNodeTree(options: UseNodeTreeOptions) {
     if (moved) onChange()
   }
 
+  function moveNodeToRoot(sourceId: string) {
+    const components = getComponents()
+    const sourceLoc = findNodeLocation(components, sourceId)
+    if (!sourceLoc) return
+    sourceLoc.parent.splice(sourceLoc.index, 1)
+    components.push(sourceLoc.node)
+    onSelect(sourceId)
+    onChange()
+  }
+
   function moveNodeTo(payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) {
     const { sourceId, targetId, position } = payload
     if (sourceId === targetId) return
@@ -142,6 +152,7 @@ export function useNodeTree(options: UseNodeTreeOptions) {
     addComponent,
     deleteNode,
     moveNode,
-    moveNodeTo
+    moveNodeTo,
+    moveNodeToRoot
   }
 }

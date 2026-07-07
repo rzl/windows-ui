@@ -1,25 +1,23 @@
-import { onUnmounted, reactive } from 'vue'
+import { reactive } from 'vue'
 
-export interface UseNodeTouchReorderOptions {
+export interface UseOutlineTouchReorderOptions {
   nodeId: string
   nodeLabel: string
+  isContainer: boolean
   onReorder: (payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) => void
-  onMoveToRoot?: () => void
 }
 
-export function useNodeTouchReorder(options: UseNodeTouchReorderOptions) {
-  const { nodeId, nodeLabel, onReorder, onMoveToRoot } = options
+export function useOutlineTouchReorder(options: UseOutlineTouchReorderOptions) {
+  const { nodeId, nodeLabel, isContainer, onReorder } = options
 
   const state = reactive({
     dragging: false,
-    ghost: null as HTMLElement | null,
-    dropTargetId: '',
-    dropPosition: null as 'before' | 'after' | 'inside' | null
+    ghost: null as HTMLElement | null
   })
 
   function createGhost(text: string) {
     const el = document.createElement('div')
-    el.className = 'node-drag-ghost'
+    el.className = 'outline-drag-ghost'
     el.textContent = text
     el.style.cssText = `
       position: fixed;
@@ -50,73 +48,47 @@ export function useNodeTouchReorder(options: UseNodeTouchReorderOptions) {
   function resetState() {
     state.dragging = false
     state.ghost = null
-    state.dropTargetId = ''
-    state.dropPosition = null
   }
 
   function clearDropIndicator() {
-    document.querySelectorAll('.component-node.drop-before, .component-node.drop-after, .component-node.drop-inside').forEach((el) => {
+    document.querySelectorAll('.outline-node.drop-before, .outline-node.drop-after, .outline-node.drop-inside').forEach((el) => {
       el.classList.remove('drop-before', 'drop-after', 'drop-inside')
-      const area = el.querySelector('.children-area')
-      if (area) area.classList.remove('drop-target-active')
     })
   }
 
   function updateDropIndicator(target: { targetId: string; position: 'before' | 'after' | 'inside' } | null) {
     clearDropIndicator()
     if (!target) return
-    const el = document.querySelector(`[data-node-id="${target.targetId}"].component-node`) as HTMLElement | null
+    const el = document.querySelector(`[data-node-id="${target.targetId}"].outline-node`) as HTMLElement | null
     if (!el) return
-    if (target.position === 'inside') {
-      el.classList.add('drop-inside')
-      const area = el.querySelector('.children-area') as HTMLElement | null
-      if (area) area.classList.add('drop-target-active')
-    } else {
-      el.classList.add(`drop-${target.position}`)
-    }
+    el.classList.add(`drop-${target.position}`)
   }
 
-  function findComponentNodeElement(x: number, y: number): HTMLElement | null {
+  function findOutlineNodeElement(x: number, y: number): HTMLElement | null {
     let element = document.elementFromPoint(x, y) as HTMLElement | null
     while (element && element !== document.body) {
-      if (element.classList?.contains('component-node')) return element
+      if (element.classList?.contains('outline-node')) return element
       element = element.parentElement
     }
     return null
   }
 
-  function isRootCanvasElement(element: HTMLElement | null): boolean {
-    if (!element) return false
-    return element.classList?.contains('canvas-body') || element.dataset.droppable === 'root'
+  function computeDropPosition(rect: DOMRect, y: number): 'before' | 'after' | 'inside' {
+    const third = rect.height / 3
+    const relativeY = y - rect.top
+    if (relativeY < third) return 'before'
+    if (isContainer && relativeY > third * 2) return 'inside'
+    return 'after'
   }
 
   function findDropTarget(x: number, y: number): { targetId: string; position: 'before' | 'after' | 'inside' } | null {
-    let element = document.elementFromPoint(x, y) as HTMLElement | null
-    while (element && element !== document.body) {
-      // 优先判断容器子区域：拖入子节点
-      if (element.classList?.contains('children-area') && element.dataset.nodeId) {
-        return { targetId: element.dataset.nodeId, position: 'inside' }
-      }
-      element = element.parentElement
-    }
-
-    const nodeEl = findComponentNodeElement(x, y)
+    const nodeEl = findOutlineNodeElement(x, y)
     if (!nodeEl) return null
     const targetId = nodeEl.dataset.nodeId
     if (!targetId || targetId === nodeId) return null
-
     const rect = nodeEl.getBoundingClientRect()
-    const position: 'before' | 'after' = y < rect.top + rect.height / 2 ? 'before' : 'after'
+    const position = computeDropPosition(rect, y)
     return { targetId, position }
-  }
-
-  function isOverRootCanvas(x: number, y: number): boolean {
-    let element = document.elementFromPoint(x, y) as HTMLElement | null
-    while (element && element !== document.body) {
-      if (isRootCanvasElement(element)) return true
-      element = element.parentElement
-    }
-    return false
   }
 
   function handleTouchStart(event: TouchEvent) {
@@ -124,8 +96,6 @@ export function useNodeTouchReorder(options: UseNodeTouchReorderOptions) {
     if (!touch) return
     state.dragging = false
     state.ghost = null
-    state.dropTargetId = ''
-    state.dropPosition = null
     document.addEventListener('touchmove', handleTouchMove, { passive: false })
     document.addEventListener('touchend', handleTouchEnd, { passive: false })
     document.addEventListener('touchcancel', handleTouchCancel)
@@ -144,8 +114,6 @@ export function useNodeTouchReorder(options: UseNodeTouchReorderOptions) {
       state.ghost.style.top = `${touch.clientY}px`
     }
     const target = findDropTarget(touch.clientX, touch.clientY)
-    state.dropTargetId = target?.targetId || ''
-    state.dropPosition = target?.position || null
     updateDropIndicator(target)
   }
 
@@ -155,13 +123,9 @@ export function useNodeTouchReorder(options: UseNodeTouchReorderOptions) {
     if (state.dragging) {
       const touch = event.changedTouches[0]
       if (touch) {
-        if (isOverRootCanvas(touch.clientX, touch.clientY)) {
-          onMoveToRoot?.()
-        } else {
-          const target = findDropTarget(touch.clientX, touch.clientY)
-          if (target) {
-            onReorder({ sourceId: nodeId, targetId: target.targetId, position: target.position })
-          }
+        const target = findDropTarget(touch.clientX, touch.clientY)
+        if (target) {
+          onReorder({ sourceId: nodeId, targetId: target.targetId, position: target.position })
         }
       }
       if (state.ghost) state.ghost.remove()
@@ -176,12 +140,6 @@ export function useNodeTouchReorder(options: UseNodeTouchReorderOptions) {
     clearDropIndicator()
     resetState()
   }
-
-  onUnmounted(() => {
-    cleanupListeners()
-    if (state.ghost) state.ghost.remove()
-    clearDropIndicator()
-  })
 
   return {
     handleTouchStart,
