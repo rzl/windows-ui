@@ -113,6 +113,7 @@ const filteredGroups = computed(() => {
   justify-content: center;
   gap: 4px;
   cursor: grab;
+  touch-action: none;
 }
 .component-item:active { cursor: grabbing; }
 .component-item :deep(.w-icon) {

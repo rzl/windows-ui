@@ -50,6 +50,22 @@ export function usePageDragDrop(options: PageDragDropOptions) {
     const el = document.createElement('div')
     el.className = 'drag-ghost'
     el.textContent = text
+    el.style.cssText = `
+      position: fixed;
+      left: 0;
+      top: 0;
+      padding: 8px 12px;
+      background: var(--w-color-primary, #316ac5);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 9999;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      white-space: nowrap;
+      opacity: 0.9;
+      transform: translate(-50%, -50%);
+    `
     document.body.appendChild(el)
     return el
   }
@@ -104,8 +120,23 @@ export function usePageDragDrop(options: PageDragDropOptions) {
     onChange()
   }
 
+  function resetTouchState() {
+    touchState.type = ''
+    touchState.label = ''
+    touchState.dragging = false
+    isTouchDragging.value = false
+    touchState.ghost = null
+  }
+
+  function cleanupTouchListeners() {
+    document.removeEventListener('touchmove', handleTouchMove)
+    document.removeEventListener('touchend', handleTouchEnd)
+    document.removeEventListener('touchcancel', handleTouchCancel)
+  }
+
   function handleTouchStart(event: TouchEvent, label: string, type: string) {
     const touch = event.touches[0]
+    if (!touch) return
     touchState.type = type
     touchState.label = label
     touchState.startX = touch.clientX
@@ -113,12 +144,14 @@ export function usePageDragDrop(options: PageDragDropOptions) {
     touchState.dragging = false
     isTouchDragging.value = false
     document.addEventListener('touchmove', handleTouchMove, { passive: false })
-    document.addEventListener('touchend', handleTouchEnd)
+    document.addEventListener('touchend', handleTouchEnd, { passive: false })
+    document.addEventListener('touchcancel', handleTouchCancel)
   }
 
   function handleTouchMove(event: TouchEvent) {
     if (!touchState.type) return
     const touch = event.touches[0]
+    if (!touch) return
     const dx = touch.clientX - touchState.startX
     const dy = touch.clientY - touchState.startY
     if (!touchState.dragging && Math.sqrt(dx * dx + dy * dy) > 10) {
@@ -137,21 +170,24 @@ export function usePageDragDrop(options: PageDragDropOptions) {
   }
 
   function handleTouchEnd(event: TouchEvent) {
-    document.removeEventListener('touchmove', handleTouchMove)
-    document.removeEventListener('touchend', handleTouchEnd)
+    event.preventDefault()
+    cleanupTouchListeners()
     if (touchState.dragging && touchState.ghost) {
       const touch = event.changedTouches[0]
-      doDrop(touch.clientX, touch.clientY)
+      if (touch) doDrop(touch.clientX, touch.clientY)
       touchState.ghost.remove()
     } else {
       addComponentToRoot(touchState.type)
     }
     clearDropHighlight()
-    touchState.type = ''
-    touchState.label = ''
-    touchState.dragging = false
-    isTouchDragging.value = false
-    touchState.ghost = null
+    resetTouchState()
+  }
+
+  function handleTouchCancel() {
+    cleanupTouchListeners()
+    if (touchState.ghost) touchState.ghost.remove()
+    clearDropHighlight()
+    resetTouchState()
   }
 
   return {

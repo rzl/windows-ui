@@ -24,6 +24,7 @@
           draggable="true"
           class="drag-handle"
           @dragstart.stop="handleNodeDragStart"
+          @touchstart.stop.prevent="nodeTouchReorder.handleTouchStart"
           @click.stop
         />
         <component :is="buttonTag" v-if="isContainer" :size="globalSize" icon="plus" title="添加子组件" @click.stop="addChild" />
@@ -218,6 +219,7 @@ import { computed, ref } from 'vue'
 import { getComponent } from './plugin-manager'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import { createChildForContainer } from './utils/createDefaultComponent'
+import { useNodeTouchReorder } from './composables/useNodeTouchReorder'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPageComponentNode' })
@@ -294,6 +296,12 @@ const typeLabelMap: Record<string, string> = {
 }
 
 const typeLabel = computed(() => typeLabelMap[props.node.type] || pluginComponent.value?.label || props.node.type)
+
+const nodeTouchReorder = useNodeTouchReorder({
+  nodeId: props.node.id,
+  nodeLabel: typeLabel.value,
+  onReorder: (payload) => emit('reorder', payload)
+})
 
 function selectNode(id: string) {
   emit('select', id)
@@ -452,7 +460,7 @@ function handleDrop(event: DragEvent) {
   display: flex;
 }
 .node-type { font-size: 12px; color: var(--w-text-color-secondary); }
-.drag-handle { cursor: grab; }
+.drag-handle { cursor: grab; touch-action: none; }
 .drag-handle:active { cursor: grabbing; }
 .node-content { min-height: 24px; }
 .children-area { min-height: 40px; padding: 8px; border: 1px dashed var(--w-border-color-light); }
