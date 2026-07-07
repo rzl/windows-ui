@@ -20,3 +20,4 @@ export function unregisterPropertySchema(type: string) {
 }
 
 export * from './built-in'
+export * from './common'

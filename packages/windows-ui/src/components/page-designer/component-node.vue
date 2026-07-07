@@ -220,6 +220,7 @@ import { getComponent } from './plugin-manager'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import { createChildForContainer } from './utils/createDefaultComponent'
 import { useNodeTouchReorder } from './composables/useNodeTouchReorder'
+import { getTypeLabel } from './property-schemas'
 import type { PageNode } from './types'
 
 defineOptions({ name: 'WPageComponentNode' })
@@ -262,40 +263,7 @@ const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
 const isContainer = computed(() => ['container', 'card', 'row', 'col', 'tabs'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
 
-const typeLabelMap: Record<string, string> = {
-  container: '容器',
-  card: '卡片',
-  row: '栅格',
-  col: '列',
-  tabs: '标签页',
-  text: '文本',
-  statistic: '统计卡片',
-  chart: '图表',
-  alert: '公告',
-  image: '图片',
-  divider: '分隔线',
-  tag: '标签',
-  progress: '进度条',
-  avatar: '头像',
-  badge: '徽标',
-  steps: '步骤条',
-  timeline: '时间线',
-  table: '表格',
-  list: '列表',
-  model: '数据模型',
-  dashboard: '仪表盘',
-  report: '报表',
-  button: '按钮',
-  link: '链接',
-  input: '输入框',
-  select: '选择器',
-  radio: '单选框',
-  checkbox: '多选框',
-  'date-picker': '日期选择',
-  switch: '开关'
-}
-
-const typeLabel = computed(() => typeLabelMap[props.node.type] || pluginComponent.value?.label || props.node.type)
+const typeLabel = computed(() => getTypeLabel(props.node.type) || pluginComponent.value?.label || props.node.type)
 
 const nodeTouchReorder = useNodeTouchReorder({
   nodeId: props.node.id,

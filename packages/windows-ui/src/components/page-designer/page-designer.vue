@@ -70,6 +70,7 @@
               :selected-id="selectedId"
               @select="selectNode"
               @reorder="handleReorder"
+              @move-to-root="handleMoveNodeToRoot"
             />
 
             <page-info-panel

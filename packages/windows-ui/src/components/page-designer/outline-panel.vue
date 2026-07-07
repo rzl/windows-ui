@@ -6,6 +6,7 @@
       :selected-id="selectedId"
       @select="emit('select', $event)"
       @reorder="emit('reorder', $event)"
+      @move-to-root="emit('move-to-root', $event)"
     />
   </div>
 </template>
@@ -24,6 +25,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'select', id: string): void
   (e: 'reorder', payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }): void
+  (e: 'move-to-root', payload: { sourceId: string }): void
 }>()
 
 void props

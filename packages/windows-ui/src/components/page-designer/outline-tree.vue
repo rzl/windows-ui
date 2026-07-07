@@ -1,5 +1,5 @@
 <template>
-  <div class="outline-tree">
+  <div class="outline-tree" @dragover.prevent="handleDragOverRoot" @drop.prevent="handleRootDrop">
     <div
       v-for="node in treeNodes"
       :key="node.id"
@@ -61,6 +61,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'select', id: string): void
   (e: 'reorder', payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }): void
+  (e: 'move-to-root', payload: { sourceId: string }): void
 }>()
 
 const expandedIds = ref<Set<string>>(new Set())
@@ -161,9 +162,23 @@ function handleTouchStart(event: TouchEvent, node: OutlineTreeNode) {
     nodeId: node.id,
     nodeLabel: node.label,
     isContainer: node.isContainer,
-    onReorder: (payload) => emit('reorder', payload)
+    onReorder: (payload) => emit('reorder', payload),
+    onMoveToRoot: () => emit('move-to-root', { sourceId: node.id })
   })
   reorder.handleTouchStart(event)
+}
+
+function handleRootDrop(event: DragEvent) {
+  const sourceId = event.dataTransfer?.getData('pageNodeId')
+  if (sourceId) {
+    emit('move-to-root', { sourceId })
+  }
+}
+
+function handleDragOverRoot(event: DragEvent) {
+  if (event.dataTransfer?.types?.includes('pageNodeId')) {
+    event.preventDefault()
+  }
 }
 
 function findAncestorIds(nodes: PageNode[], id: string, ancestors: string[] = []): string[] | null {

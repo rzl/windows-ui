@@ -5,10 +5,11 @@ export interface UseOutlineTouchReorderOptions {
   nodeLabel: string
   isContainer: boolean
   onReorder: (payload: { sourceId: string; targetId: string; position: 'before' | 'after' | 'inside' }) => void
+  onMoveToRoot?: () => void
 }
 
 export function useOutlineTouchReorder(options: UseOutlineTouchReorderOptions) {
-  const { nodeId, nodeLabel, isContainer, onReorder } = options
+  const { nodeId, nodeLabel, isContainer, onReorder, onMoveToRoot } = options
 
   const state = reactive({
     dragging: false,
@@ -81,6 +82,19 @@ export function useOutlineTouchReorder(options: UseOutlineTouchReorderOptions) {
     return 'after'
   }
 
+  function isRootTreeElement(element: HTMLElement | null): boolean {
+    return element?.classList?.contains('outline-tree') ?? false
+  }
+
+  function isOverRootTree(x: number, y: number): boolean {
+    let element = document.elementFromPoint(x, y) as HTMLElement | null
+    while (element && element !== document.body) {
+      if (isRootTreeElement(element)) return true
+      element = element.parentElement
+    }
+    return false
+  }
+
   function findDropTarget(x: number, y: number): { targetId: string; position: 'before' | 'after' | 'inside' } | null {
     const nodeEl = findOutlineNodeElement(x, y)
     if (!nodeEl) return null
@@ -123,9 +137,13 @@ export function useOutlineTouchReorder(options: UseOutlineTouchReorderOptions) {
     if (state.dragging) {
       const touch = event.changedTouches[0]
       if (touch) {
-        const target = findDropTarget(touch.clientX, touch.clientY)
-        if (target) {
-          onReorder({ sourceId: nodeId, targetId: target.targetId, position: target.position })
+        if (isOverRootTree(touch.clientX, touch.clientY)) {
+          onMoveToRoot?.()
+        } else {
+          const target = findDropTarget(touch.clientX, touch.clientY)
+          if (target) {
+            onReorder({ sourceId: nodeId, targetId: target.targetId, position: target.position })
+          }
         }
       }
       if (state.ghost) state.ghost.remove()
