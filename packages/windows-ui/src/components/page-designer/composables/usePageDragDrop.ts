@@ -1,6 +1,14 @@
 import { reactive, ref } from 'vue'
 import type { PageNode } from '../types'
 
+export function computeInsertIndex(clientY: number, rects: Array<{ top: number; height: number }>): number {
+  if (!rects.length) return 0
+  for (let i = 0; i < rects.length; i++) {
+    if (clientY < rects[i].top + rects[i].height / 2) return i
+  }
+  return rects.length
+}
+
 export interface PageDragDropOptions {
   getComponents: () => PageNode[]
   findNode: (list: PageNode[], id: string) => PageNode | null
@@ -34,10 +42,23 @@ export function usePageDragDrop(options: PageDragDropOptions) {
     }
   }
 
-  function addComponentToRoot(type: string) {
+  function computeRootInsertIndex(clientY: number): number {
+    const canvasBody = document.querySelector('.canvas-body') as HTMLElement | null
+    if (!canvasBody) return -1
+    const nodeElements = Array.from(canvasBody.children).filter((el) => el.classList.contains('component-node')) as HTMLElement[]
+    const rects = nodeElements.map((el) => el.getBoundingClientRect())
+    return computeInsertIndex(clientY, rects)
+  }
+
+  function addComponentToRoot(type: string, clientY?: number) {
     const components = getComponents()
     const node = createDefaultComponent(type)
-    components.push(node)
+    const insertIndex = clientY !== undefined ? computeRootInsertIndex(clientY) : -1
+    if (insertIndex >= 0) {
+      components.splice(insertIndex, 0, node)
+    } else {
+      components.push(node)
+    }
     onSelect(node.id)
     onChange()
   }
@@ -45,8 +66,9 @@ export function usePageDragDrop(options: PageDragDropOptions) {
   function handleDropToRoot(event: DragEvent) {
     event.preventDefault()
     const type = event.dataTransfer?.getData('componentType')
+      || event.dataTransfer?.getData('text/plain')?.replace(/^w-page-designer-component:/, '')
     if (!type) return
-    addComponentToRoot(type)
+    addComponentToRoot(type, event.clientY)
   }
 
   function createGhost(text: string) {
@@ -109,7 +131,9 @@ export function usePageDragDrop(options: PageDragDropOptions) {
     const components = getComponents()
     let node = createDefaultComponent(touchState.type)
     if (target.type === 'root') {
-      components.push(node)
+      const insertIndex = computeRootInsertIndex(y)
+      if (insertIndex >= 0) components.splice(insertIndex, 0, node)
+      else components.push(node)
     } else {
       const container = findNode(components, target.nodeId)
       if (container && isContainerNode(container)) {
@@ -117,7 +141,9 @@ export function usePageDragDrop(options: PageDragDropOptions) {
         if (wrapForContainer) node = wrapForContainer(node, container.type)
         container.children.push(node)
       } else {
-        components.push(node)
+        const insertIndex = computeRootInsertIndex(y)
+        if (insertIndex >= 0) components.splice(insertIndex, 0, node)
+        else components.push(node)
       }
     }
     onSelect(node.id)
