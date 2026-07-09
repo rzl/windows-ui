@@ -28,6 +28,9 @@ export function usePageDragDrop(options: PageDragDropOptions) {
   function handleDragStart(event: DragEvent, type: string) {
     if (event.dataTransfer) {
       event.dataTransfer.setData('componentType', type)
+      // 部分浏览器在 dragenter/dragover 中对自定义类型支持不稳定，
+      // 额外写入 text/plain 作为兜底，方便目标区域识别拖拽来源。
+      event.dataTransfer.setData('text/plain', `w-page-designer-component:${type}`)
     }
   }
 
@@ -91,12 +94,13 @@ export function usePageDragDrop(options: PageDragDropOptions) {
     if (target.type === 'root') {
       document.querySelector('.canvas-body')?.classList.add('drop-target-active')
     } else {
-      document.querySelector(`[data-node-id="${target.nodeId}"][data-droppable="container"]`)?.classList.add('drop-target-active')
+      document.querySelector(`[data-node-id="${target.nodeId}"][data-node-container]`)?.classList.add('drop-inside')
     }
   }
 
   function clearDropHighlight() {
     document.querySelectorAll('.drop-target-active').forEach((el) => el.classList.remove('drop-target-active'))
+    document.querySelectorAll('.drop-inside').forEach((el) => el.classList.remove('drop-inside'))
   }
 
   function doDrop(x: number, y: number) {

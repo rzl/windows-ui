@@ -2,18 +2,19 @@
   <div
     ref="panelRef"
     class="canvas-panel"
-    @dragenter.prevent="handleDragEnter"
-    @dragleave="handleDragLeave"
-    @dragover.prevent="handleDragOver"
-    @drop="handleDrop"
     @wheel="emit('wheel', $event)"
   >
     <div class="panel-title">画布</div>
     <div
+      ref="bodyRef"
       class="canvas-body"
       :class="{ 'is-empty': !components?.length, 'show-grid': showGrid }"
       :style="canvasBodyStyle"
       data-droppable="root"
+      @dragenter.prevent="handleDragEnter"
+      @dragleave="handleDragLeave"
+      @dragover.prevent="handleDragOver"
+      @drop="handleDrop"
       @click.self="emit('select', '')"
     >
       <component-node
@@ -63,20 +64,22 @@ const emit = defineEmits<{
 }>()
 
 const panelRef = ref<HTMLElement>()
+const bodyRef = ref<HTMLElement>()
 const dragOverCount = ref(0)
 
 function setCanvasBodyHighlight(active: boolean) {
-  const body = panelRef.value?.querySelector('.canvas-body') as HTMLElement | null
-  if (!body) return
-  body.classList.toggle('drop-target-active', active)
+  if (!bodyRef.value) return
+  bodyRef.value.classList.toggle('drop-target-active', active)
 }
 
-function handleDragEnter(_event: DragEvent) {
+function handleDragEnter(event: DragEvent) {
+  if (event.target !== bodyRef.value) return
   dragOverCount.value++
   setCanvasBodyHighlight(true)
 }
 
-function handleDragLeave(_event: DragEvent) {
+function handleDragLeave(event: DragEvent) {
+  if (event.target !== bodyRef.value) return
   dragOverCount.value--
   if (dragOverCount.value <= 0) {
     dragOverCount.value = 0

@@ -4,14 +4,16 @@
     class="component-node"
     :class="{ selected: isSelected, container: isContainer, 'drop-before': dropIndicator === 'before', 'drop-after': dropIndicator === 'after', 'drop-inside': dropIndicator === 'inside' }"
     :style="node.styles"
+    :data-node-id="node.id"
+    :data-node-container="isContainer ? '' : undefined"
     @click.stop="selectNode(node.id)"
     @touchstart.passive="handleTouchStart"
     @touchend="handleTouchEnd"
     @touchmove="handleTouchMove"
-    @dragenter.stop.prevent="handleDragEnter"
-    @dragleave.stop.prevent="handleDragLeave"
-    @dragover.stop.prevent="handleDragOver"
-    @drop.stop.prevent="handleDrop"
+    @dragenter.prevent="handleDragEnter"
+    @dragleave.prevent="handleDragLeave"
+    @dragover.prevent="handleDragOver"
+    @drop.prevent="handleDrop"
   >
     <div class="node-toolbar">
       <span class="node-type">{{ typeLabel }}</span>
@@ -318,18 +320,14 @@ function addChild() {
   emit('change')
 }
 
-function setChildrenAreaHighlight(active: boolean) {
-  const area = nodeRef.value?.querySelector('.children-area') as HTMLElement | null
-  if (!area) return
-  area.classList.toggle('drop-target-active', active)
-}
-
 function hasLibraryType(transfer: DataTransfer | null) {
-  return transfer?.types.includes('componentType') ?? false
+  const types = Array.from(transfer?.types ?? [])
+  // 兼容部分浏览器对自定义类型支持不稳定的情况，同时识别 text/plain 兜底类型
+  return types.includes('componentType') || types.includes('text/plain')
 }
 
 function hasNodeType(transfer: DataTransfer | null) {
-  return transfer?.types.includes('pageNodeId') ?? false
+  return Array.from(transfer?.types ?? []).includes('pageNodeId')
 }
 
 function handleNodeDragStart(event: DragEvent) {
@@ -347,26 +345,51 @@ function computeDropPosition(event: DragEvent): 'before' | 'after' | 'inside' {
   return event.clientY < rect.top + rect.height / 2 ? 'before' : 'after'
 }
 
+function setChildrenAreaHighlight(active: boolean) {
+  const area = nodeRef.value?.querySelector('.children-area') as HTMLElement | null
+  if (!area) return
+  area.classList.toggle('drop-target-active', active)
+}
+
 function clearDropState() {
   dragOverCount.value = 0
   dropIndicator.value = null
   setChildrenAreaHighlight(false)
 }
 
-function handleDragEnter(event: DragEvent) {
-  if (hasLibraryType(event.dataTransfer) && isContainer.value) {
-    dragOverCount.value++
-    setChildrenAreaHighlight(true)
+function isDropTargetContainer(eventTarget: EventTarget | null): boolean {
+  if (!isContainer.value) return false
+  let target = eventTarget as HTMLElement | Element | null
+  if (target && target.nodeType === Node.TEXT_NODE) {
+    target = target.parentElement
   }
+  if (!target || target.nodeType !== Node.ELEMENT_NODE) return false
+  const nodeEl = nodeRef.value
+  const childrenArea = nodeEl?.querySelector('.children-area') as HTMLElement | null
+  if (!nodeEl || !childrenArea) return false
+  if (!nodeEl.contains(target)) return false
+  const nearest = target.closest('[data-droppable="container"], [data-node-container]')
+  if (nearest === nodeEl || nearest === childrenArea) return true
+  // 兜底：当浏览器兼容性导致 closest 未命中时，若当前容器没有子容器，仍允许高亮
+  return !childrenArea.querySelector('[data-node-container]')
+}
+
+function handleDragEnter(event: DragEvent) {
+  if (!hasLibraryType(event.dataTransfer) && !hasNodeType(event.dataTransfer)) return
+  if (!isDropTargetContainer(event.target)) return
+  dragOverCount.value++
+  dropIndicator.value = 'inside'
+  setChildrenAreaHighlight(true)
 }
 
 function handleDragLeave(event: DragEvent) {
-  if (hasLibraryType(event.dataTransfer) && isContainer.value) {
-    dragOverCount.value--
-    if (dragOverCount.value <= 0) {
-      dragOverCount.value = 0
-      setChildrenAreaHighlight(false)
-    }
+  if (!hasLibraryType(event.dataTransfer) && !hasNodeType(event.dataTransfer)) return
+  if (!isDropTargetContainer(event.target)) return
+  dragOverCount.value--
+  if (dragOverCount.value <= 0) {
+    dragOverCount.value = 0
+    dropIndicator.value = null
+    setChildrenAreaHighlight(false)
   }
 }
 
@@ -376,26 +399,31 @@ function handleDragOver(event: DragEvent) {
   }
   if (hasNodeType(event.dataTransfer)) {
     dropIndicator.value = computeDropPosition(event)
+  } else if (hasLibraryType(event.dataTransfer) && isDropTargetContainer(event.target)) {
+    dropIndicator.value = 'inside'
+    setChildrenAreaHighlight(true)
   }
 }
 
 function handleDrop(event: DragEvent) {
   event.preventDefault()
+  if (!isDropTargetContainer(event.target)) return
+
   const nodeId = event.dataTransfer?.getData('pageNodeId')
   if (nodeId) {
     const position = computeDropPosition(event)
     clearDropState()
+    event.stopPropagation()
     emit('reorder', { sourceId: nodeId, targetId: props.node.id, position })
     return
   }
 
-  if (!isContainer.value) {
-    clearDropState()
-    return
-  }
-  const type = event.dataTransfer?.getData('componentType')
+  const rawType = event.dataTransfer?.getData('componentType')
+    || event.dataTransfer?.getData('text/plain')?.replace(/^w-page-designer-component:/, '')
   clearDropState()
-  if (!type) return
+  if (!rawType) return
+  const type = rawType
+  event.stopPropagation()
   if (!props.node.children) props.node.children = []
   const child = createChildForContainer(type, props.node.type)
   props.node.children.push(child)
@@ -436,6 +464,7 @@ function handleDrop(event: DragEvent) {
 .children-area.drop-target-active { background: var(--w-table-current-row-bg); border-color: var(--w-color-primary); }
 .component-node.drop-before { border-top: 2px solid var(--w-color-primary); }
 .component-node.drop-after { border-bottom: 2px solid var(--w-color-primary); }
+.component-node.drop-inside { border: 2px solid var(--w-color-primary); box-shadow: inset 0 0 0 2px var(--w-table-current-row-bg); }
 .component-node.drop-inside .children-area { background: var(--w-table-current-row-bg); border-color: var(--w-color-primary); }
 .layout-row { display: flex; flex-wrap: wrap; margin: -8px; }
 .layout-col { flex: 1 1 auto; min-width: 0; padding: 8px; border: 1px dashed var(--w-border-color-light); background: var(--w-fill-color-lighter); }

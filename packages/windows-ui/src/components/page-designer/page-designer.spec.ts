@@ -454,6 +454,116 @@ describe('WPageDesigner', () => {
     expect((wrapper.vm as any).config.components[0].children.length).toBe(0)
   })
 
+  it('拖拽组件悬停在容器上时应高亮容器并取消画布高亮', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [{ id: 'c1', type: 'container', props: {}, styles: {}, children: [] }]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    const canvasBody = wrapper.find('.canvas-body')
+    const node = wrapper.findComponent(ComponentNode)
+    expect(node.exists()).toBe(true)
+
+    const dataTransfer = {
+      types: ['componentType'],
+      getData: (key: string) => (key === 'componentType' ? 'text' : '')
+    }
+
+    await canvasBody.trigger('dragenter', { dataTransfer })
+    expect(canvasBody.classes()).toContain('drop-target-active')
+
+    // 从画布移入容器：容器整体高亮，画布取消高亮
+    await canvasBody.trigger('dragleave', { dataTransfer })
+    await node.trigger('dragenter', { dataTransfer })
+    await wrapper.vm.$nextTick()
+
+    expect(node.classes()).toContain('drop-inside')
+    expect(canvasBody.classes()).not.toContain('drop-target-active')
+  })
+
+  it('拖拽组件悬停在容器子元素上时应高亮该容器', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [
+            {
+              id: 'c1',
+              type: 'container',
+              props: {},
+              styles: {},
+              children: [{ id: 't1', type: 'text', props: { content: '子文本' }, styles: {} }]
+            }
+          ]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    const nodes = wrapper.findAllComponents(ComponentNode)
+    expect(nodes.length).toBe(2)
+    const containerNode = nodes[0]
+    const childNode = nodes[1]
+
+    const dataTransfer = {
+      types: ['componentType'],
+      getData: (key: string) => (key === 'componentType' ? 'text' : '')
+    }
+
+    await childNode.trigger('dragenter', { dataTransfer })
+    await wrapper.vm.$nextTick()
+
+    expect(containerNode.classes()).toContain('drop-inside')
+    expect(childNode.classes()).not.toContain('drop-inside')
+  })
+
+  it('拖拽组件悬停在嵌套容器上时应仅高亮最内层容器', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        config: {
+          title: '测试',
+          components: [
+            {
+              id: 'outer',
+              type: 'container',
+              props: {},
+              styles: {},
+              children: [{ id: 'inner', type: 'container', props: {}, styles: {}, children: [] }]
+            }
+          ]
+        }
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
+    })
+    await wrapper.vm.$nextTick()
+
+    const nodes = wrapper.findAllComponents(ComponentNode)
+    expect(nodes.length).toBe(2)
+    const outer = nodes[0]
+    const inner = nodes[1]
+
+    const dataTransfer = {
+      types: ['componentType'],
+      getData: (key: string) => (key === 'componentType' ? 'text' : '')
+    }
+
+    await inner.trigger('dragenter', { dataTransfer })
+    await wrapper.vm.$nextTick()
+
+    expect(inner.classes()).toContain('drop-inside')
+    expect(outer.classes()).not.toContain('drop-inside')
+  })
+
   it('应支持画布节点拖拽排序', async () => {
     const wrapper = mount(PageDesigner, {
       props: {
