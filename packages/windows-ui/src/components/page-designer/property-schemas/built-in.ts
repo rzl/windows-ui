@@ -84,6 +84,9 @@ export const builtInPropertySchemas: Record<string, PropertySchemaField[]> = {
     { type: 'items', key: 'props.tabs', label: '标签配置（JSON）', placeholder: '[{"label":"标签1","name":"tab1"}]', default: [] },
     { type: 'input', key: 'props.modelValue', label: '当前激活项', placeholder: '对应标签的 name' }
   ],
+  collapse: [
+    { type: 'switch', key: 'props.accordion', label: '手风琴模式', default: false }
+  ],
   text: [
     { type: 'textarea', key: 'props.content', label: '内容', rows: 3, default: '文本内容' },
     { type: 'select', key: 'props.tag', label: '标签', options: tagOptions, default: 'p' },

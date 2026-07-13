@@ -6,6 +6,7 @@ export const typeLabelMap: Record<string, string> = {
   row: '栅格',
   col: '列',
   tabs: '标签页',
+  collapse: '折叠面板',
   text: '文本',
   statistic: '统计卡片',
   chart: '图表',

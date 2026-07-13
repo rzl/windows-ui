@@ -178,11 +178,15 @@
         <component :is="datePickerTag" :model-value="node.props.modelValue" :placeholder="node.props.placeholder" disabled />
       </template>
 
-      <!-- 容器/卡片/栅格/标签页 -->
+      <!-- 容器/卡片/栅格/标签页/折叠面板 -->
       <template v-else-if="isContainer">
         <div v-if="node.type === 'card'" class="card-title">{{ node.props.title }}</div>
         <div v-if="node.type === 'tabs'" class="tabs-header">
           <span v-for="tab in node.props.tabs" :key="tab.name" class="tab-item">{{ tab.label || tab.title }}</span>
+        </div>
+        <div v-if="node.type === 'collapse'" class="collapse-header">
+          <span v-for="(child, idx) in node.children" :key="child.id" class="collapse-item-title">{{ child.props?.title || `面板${idx + 1}` }}</span>
+          <span v-if="!node.children?.length" class="collapse-item-title">折叠面板</span>
         </div>
         <div
           class="children-area"
@@ -263,7 +267,7 @@ const timelineTag = withPrefix('timeline')
 
 const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
-const isContainer = computed(() => ['container', 'card', 'row', 'col', 'tabs'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
+const isContainer = computed(() => ['container', 'card', 'row', 'col', 'tabs', 'collapse'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
 
 const typeLabel = computed(() => getTypeLabel(props.node.type) || pluginComponent.value?.label || props.node.type)
 
@@ -471,6 +475,9 @@ function handleDrop(event: DragEvent) {
 .card-title { font-weight: bold; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--w-border-color-light); }
 .tabs-header { display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--w-border-color); }
 .tab-item { padding: 4px 12px; background: var(--w-fill-color-light); border: 1px solid var(--w-border-color); border-bottom: none; }
+.collapse-header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; border: 1px solid var(--w-border-color); }
+.collapse-item-title { padding: 4px 12px; background: var(--w-fill-color-light); border-bottom: 1px solid var(--w-border-color-light); }
+.collapse-item-title:last-child { border-bottom: none; }
 .empty-children { color: var(--w-text-color-placeholder); font-size: 12px; text-align: center; padding: 12px; }
 .stat-preview { text-align: center; }
 .stat-title { color: var(--w-text-color-secondary); font-size: 12px; }

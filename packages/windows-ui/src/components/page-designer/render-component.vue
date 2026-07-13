@@ -285,6 +285,26 @@
       </component>
     </component>
 
+    <!-- 折叠面板 -->
+    <component
+      :is="collapseTag"
+      v-else-if="node.type === 'collapse'"
+      :accordion="node.props.accordion"
+    >
+      <component
+        :is="collapseItemTag"
+        v-for="(child, idx) in node.children"
+        :key="child.id || idx"
+        :name="child.id || idx"
+        :title="child.props?.title || `面板${idx + 1}`"
+      >
+        <render-component
+          :node="child"
+          :page-code="pageCode"
+        />
+      </component>
+    </component>
+
     <!-- 嵌入模型 -->
     <template v-else-if="node.type === 'model'">
       <iframe
@@ -364,6 +384,8 @@ const rowTag = withPrefix('row')
 const colTag = withPrefix('col')
 const tabsTag = withPrefix('tabs')
 const tabPaneTag = withPrefix('tab-pane')
+const collapseTag = withPrefix('collapse')
+const collapseItemTag = withPrefix('collapse-item')
 
 const pageContext = inject<PageContext | null>('pageContext', null)
 const activeTabName = ref<string | number>('')

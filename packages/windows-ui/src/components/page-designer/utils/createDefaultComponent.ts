@@ -39,6 +39,8 @@ export function createDefaultComponent(type: string): PageNode {
       return { ...base, props: { span: 12, offset: 0 }, children: [] }
     case 'tabs':
       return { ...base, props: { tabs: [{ label: '标签1', name: 'tab1' }], modelValue: 'tab1' }, children: [] }
+    case 'collapse':
+      return { ...base, props: { accordion: false }, children: [] }
     case 'text':
       return { ...base, props: { content: '这是一段文本', tag: 'p', align: 'left' } }
     case 'statistic':
