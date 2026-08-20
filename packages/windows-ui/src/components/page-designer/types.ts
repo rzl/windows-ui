@@ -19,6 +19,12 @@ export interface PropertySchemaOption {
   value: any
 }
 
+export interface PropertySchemaColumn {
+  key: string
+  label: string
+  type?: 'input' | 'number'
+}
+
 export interface PropertySchemaField {
   /** 字段类型 */
   type: PropertySchemaFieldType
@@ -42,6 +48,8 @@ export interface PropertySchemaField {
   rows?: number
   /** 分组标题 */
   group?: string
+  /** items 表格编辑列配置 */
+  columns?: PropertySchemaColumn[]
 }
 
 export interface PageNode {

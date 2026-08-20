@@ -182,7 +182,13 @@
       <template v-else-if="isContainer">
         <div v-if="node.type === 'card'" class="card-title">{{ node.props.title }}</div>
         <div v-if="node.type === 'tabs'" class="tabs-header">
-          <span v-for="tab in node.props.tabs" :key="tab.name" class="tab-item">{{ tab.label || tab.title }}</span>
+          <span
+            v-for="tab in node.props.tabs"
+            :key="tab.name"
+            class="tab-item"
+            :class="{ active: tab.name === activeTabName }"
+            @click.stop="switchTab(String(tab.name))"
+          >{{ tab.label || tab.title }}</span>
         </div>
         <div v-if="node.type === 'collapse'" class="collapse-header">
           <span v-for="(child, idx) in node.children" :key="child.id" class="collapse-item-title">{{ child.props?.title || `面板${idx + 1}` }}</span>
@@ -195,7 +201,7 @@
           :data-node-id="node.id"
         >
           <component-node
-            v-for="(child, index) in node.children"
+            v-for="(child, index) in visibleChildren"
             :key="child.id"
             :node="child"
             :index="index"
@@ -221,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { getComponent } from './plugin-manager'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import { createChildForContainer } from './utils/createDefaultComponent'
@@ -269,6 +275,42 @@ const isSelected = computed(() => props.node.id === props.selectedId)
 const pluginComponent = computed(() => getComponent(props.node.type))
 const isContainer = computed(() => ['container', 'card', 'row', 'col', 'tabs', 'collapse'].includes(props.node.type) || !!pluginComponent.value?.isContainer)
 
+const activeTabName = ref('')
+
+function resolveActiveTabName(): string {
+  const tabs = props.node.props?.tabs
+  if (!tabs?.length) return ''
+  const modelValue = props.node.props.modelValue
+  if (modelValue && tabs.some((tab: any) => tab.name === modelValue)) {
+    return String(modelValue)
+  }
+  return String(tabs[0].name)
+}
+
+activeTabName.value = resolveActiveTabName()
+
+watch(() => props.node.props?.tabs, (tabs) => {
+  if (!tabs?.length) {
+    activeTabName.value = ''
+    return
+  }
+  const exists = tabs.some((tab: any) => tab.name === activeTabName.value)
+  if (!exists) {
+    activeTabName.value = props.node.props.modelValue ? String(props.node.props.modelValue) : String(tabs[0].name)
+  }
+}, { deep: true })
+
+watch(() => props.node.props?.modelValue, (val) => {
+  if (val && val !== activeTabName.value) {
+    activeTabName.value = String(val)
+  }
+})
+
+const visibleChildren = computed(() => {
+  if (props.node.type !== 'tabs' || !props.node.children) return props.node.children || []
+  return props.node.children.filter((child) => child.tab === activeTabName.value)
+})
+
 const typeLabel = computed(() => getTypeLabel(props.node.type) || pluginComponent.value?.label || props.node.type)
 
 const nodeTouchReorder = useNodeTouchReorder({
@@ -280,6 +322,12 @@ const nodeTouchReorder = useNodeTouchReorder({
 
 function selectNode(id: string) {
   emit('select', id)
+}
+
+function switchTab(tabName: string) {
+  activeTabName.value = tabName
+  props.node.props.modelValue = tabName
+  emit('change')
 }
 
 function handleTouchStart() {
@@ -319,6 +367,9 @@ function moveDown() {
 function addChild() {
   if (!props.node.children) props.node.children = []
   const child = createChildForContainer('text', props.node.type)
+  if (props.node.type === 'tabs') {
+    child.tab = activeTabName.value
+  }
   props.node.children.push(child)
   emit('select', child.id)
   emit('change')
@@ -430,6 +481,9 @@ function handleDrop(event: DragEvent) {
   event.stopPropagation()
   if (!props.node.children) props.node.children = []
   const child = createChildForContainer(type, props.node.type)
+  if (props.node.type === 'tabs') {
+    child.tab = activeTabName.value
+  }
   props.node.children.push(child)
   emit('select', child.id)
   emit('change')
@@ -474,7 +528,8 @@ function handleDrop(event: DragEvent) {
 .layout-col { flex: 1 1 auto; min-width: 0; padding: 8px; border: 1px dashed var(--w-border-color-light); background: var(--w-fill-color-lighter); }
 .card-title { font-weight: bold; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--w-border-color-light); }
 .tabs-header { display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--w-border-color); }
-.tab-item { padding: 4px 12px; background: var(--w-fill-color-light); border: 1px solid var(--w-border-color); border-bottom: none; }
+.tab-item { padding: 4px 12px; background: var(--w-fill-color-light); border: 1px solid var(--w-border-color); border-bottom: none; cursor: pointer; user-select: none; }
+.tab-item.active { background: var(--w-bg-color); border-bottom: 1px solid var(--w-bg-color); font-weight: bold; }
 .collapse-header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; border: 1px solid var(--w-border-color); }
 .collapse-item-title { padding: 4px 12px; background: var(--w-fill-color-light); border-bottom: 1px solid var(--w-border-color-light); }
 .collapse-item-title:last-child { border-bottom: none; }

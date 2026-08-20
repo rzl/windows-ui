@@ -81,7 +81,16 @@ export const builtInPropertySchemas: Record<string, PropertySchemaField[]> = {
     { type: 'number', key: 'props.offset', label: '偏移列数', min: 0, max: 24, default: 0 }
   ],
   tabs: [
-    { type: 'items', key: 'props.tabs', label: '标签配置（JSON）', placeholder: '[{"label":"标签1","name":"tab1"}]', default: [] },
+    {
+      type: 'items',
+      key: 'props.tabs',
+      label: '标签配置',
+      default: [],
+      columns: [
+        { key: 'label', label: '标签名' },
+        { key: 'name', label: '标识' }
+      ]
+    },
     { type: 'input', key: 'props.modelValue', label: '当前激活项', placeholder: '对应标签的 name' }
   ],
   collapse: [

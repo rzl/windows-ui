@@ -93,6 +93,15 @@
               @update:model-value="(v: any) => setValue(field.key, v)"
             />
 
+            <!-- items 表格编辑 -->
+            <items-list-editor
+              v-else-if="field.type === 'items' && field.columns"
+              :model-value="getFieldValue(field) || []"
+              :columns="field.columns"
+              :size="controlSize"
+              @update:model-value="(v: any) => setValue(field.key, v)"
+            />
+
             <!-- JSON / 选项 / 数组 -->
             <component
               :is="inputTag"
@@ -131,6 +140,7 @@
 import { computed, reactive } from 'vue'
 import DataSourceEditor from './data-source-editor.vue'
 import EventEditor from './event-editor.vue'
+import ItemsListEditor from './items-list-editor.vue'
 import { usePrefix, useGlobalSize } from '../../utils/prefix'
 import type { PageNode, PropertySchemaField } from './types'
 
