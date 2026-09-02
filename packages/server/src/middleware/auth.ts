@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { config } from '../config'
-import { error } from '../utils/response'
+import { error, AppError } from '../utils/response'
 import { getProfile } from '../modules/auth/auth.service'
 
 // 内存 token 黑名单（生产环境建议 Redis）
@@ -53,7 +53,14 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
     }
     next()
   } catch (err) {
-    return res.status(200).json(error('令牌无效或已过期', 401))
+    // 仅 JWT 验证失败返回 401，业务错误（如用户不存在、数据库查询失败）透传给错误处理中间件
+    if (err instanceof jwt.JsonWebTokenError || err instanceof jwt.TokenExpiredError || err instanceof jwt.NotBeforeError) {
+      return res.status(200).json(error('令牌无效或已过期', 401))
+    }
+    if (err instanceof AppError) {
+      return next(err)
+    }
+    return next(err)
   }
 }
 

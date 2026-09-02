@@ -10,9 +10,13 @@ module.exports = {
   useNullAsDefault: true,
   migrations: {
     directory: path.resolve(__dirname, 'migrations'),
-    tableName: 'knex_migrations'
+    tableName: 'knex_migrations',
+    extension: 'ts',
+    loadExtensions: ['.ts']
   },
   seeds: {
-    directory: path.resolve(__dirname, 'seeds')
+    directory: path.resolve(__dirname, 'seeds'),
+    extension: 'ts',
+    loadExtensions: ['.ts']
   }
 }
