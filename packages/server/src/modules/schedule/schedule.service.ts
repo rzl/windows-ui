@@ -3,12 +3,13 @@ import type { AuthRequest } from '../../middleware/auth'
 import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import * as dashboardService from '../dashboard/dashboard.service'
+import { newId } from '../../utils/id'
 
 export async function getScheduledTasks(req: AuthRequest) {
   return db('scheduled_tasks').where(tenantWhere(req)).orderBy('id', 'desc')
 }
 
-export async function getScheduledTaskById(req: AuthRequest, id: number) {
+export async function getScheduledTaskById(req: AuthRequest, id: string) {
   const task = await db('scheduled_tasks').where({ id }).andWhere(tenantWhere(req)).first()
   if (!task) throw new AppError('任务不存在', 404)
   return task
@@ -36,7 +37,9 @@ export async function saveScheduledTask(req: AuthRequest, data: any) {
     return db('scheduled_tasks').where({ code }).andWhere(tenantWhere(req)).first()
   }
 
-  const [id] = await db('scheduled_tasks').insert(setTenantId({
+  const id = newId()
+  await db('scheduled_tasks').insert(setTenantId({
+    id,
     code,
     name: data.name,
     cron: data.cron,
@@ -47,14 +50,14 @@ export async function saveScheduledTask(req: AuthRequest, data: any) {
   return db('scheduled_tasks').where({ id }).andWhere(tenantWhere(req)).first()
 }
 
-export async function deleteScheduledTask(req: AuthRequest, id: number) {
+export async function deleteScheduledTask(req: AuthRequest, id: string) {
   const task = await getScheduledTaskById(req, id)
   await db('scheduled_tasks').where({ id: task.id }).andWhere(tenantWhere(req)).del()
   await db('scheduled_task_logs').where({ task_id: task.id }).del()
   return true
 }
 
-export async function getTaskLogs(req: AuthRequest, taskId: number) {
+export async function getTaskLogs(req: AuthRequest, taskId: string) {
   // 校验任务归属本租户
   await getScheduledTaskById(req, taskId)
   return db('scheduled_task_logs')
@@ -84,6 +87,7 @@ export async function executeTask(task: any) {
   }
 
   await db('scheduled_task_logs').insert({
+    id: newId(),
     task_id: task.id,
     status,
     result: typeof result === 'string' ? result : JSON.stringify(result)

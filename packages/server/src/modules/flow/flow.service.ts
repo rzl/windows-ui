@@ -3,6 +3,7 @@ import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 import * as monitorService from '../monitor/monitor.service'
+import { newId } from '../../utils/id'
 
 export interface FlowAssignee {
   type: 'role' | 'user' | 'dept'
@@ -119,9 +120,11 @@ export async function saveFlowDefinition(req: AuthRequest, data: any) {
 
   await db('flow_definitions').where({ code }).where(tenantWhere(req)).update({ is_latest: 0 })
 
-  const [id] = await db('flow_definitions').insert(
+  const id = newId()
+  await db('flow_definitions').insert(
     setTenantId(
       {
+        id,
         code,
         name: data.name,
         model_code: data.modelCode,
@@ -137,7 +140,7 @@ export async function saveFlowDefinition(req: AuthRequest, data: any) {
   return db('flow_definitions').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function deleteFlowDefinition(req: AuthRequest, id: number) {
+export async function deleteFlowDefinition(req: AuthRequest, id: string) {
   await db('flow_definitions').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -165,7 +168,7 @@ export async function rollbackFlowDefinition(req: AuthRequest, code: string, ver
 export async function startFlowInstance(
   req: AuthRequest,
   flowCode: string,
-  businessKey: number,
+  businessKey: string,
   businessData: any = {},
   starter?: any
 ) {
@@ -182,7 +185,9 @@ export async function startFlowInstance(
   if (!nextNode) throw new AppError('流转目标节点不存在', 400)
 
   const tenantFilter = tenantWhere(req)
-  const [instanceId] = await db('flow_instances').insert({
+  const instanceId = newId()
+  await db('flow_instances').insert({
+    id: instanceId,
     ...tenantFilter,
     flow_code: flowCode,
     business_key: businessKey,
@@ -199,7 +204,7 @@ export async function startFlowInstance(
   return { instanceId, currentNodeId: nextNode.id }
 }
 
-export async function getInstanceStatus(req: AuthRequest, businessKey: number) {
+export async function getInstanceStatus(req: AuthRequest, businessKey: string) {
   const instance = await db('flow_instances')
     .where(tenantWhere(req))
     .where({ business_key: businessKey })
@@ -219,7 +224,7 @@ export async function getInstanceStatus(req: AuthRequest, businessKey: number) {
   }
 }
 
-export async function getFlowTrace(req: AuthRequest, businessKey: number) {
+export async function getFlowTrace(req: AuthRequest, businessKey: string) {
   const instance = await db('flow_instances')
     .where(tenantWhere(req))
     .where({ business_key: businessKey })
@@ -322,7 +327,7 @@ async function queryPendingTasksByUser(req: AuthRequest, user: any) {
   return query.orderBy('flow_tasks.id', 'desc')
 }
 
-async function getActiveDelegations(req: AuthRequest, delegateeId?: number) {
+async function getActiveDelegations(req: AuthRequest, delegateeId?: string) {
   if (!delegateeId) return []
   const now = new Date().toISOString()
   const list = await db('flow_delegations')
@@ -336,15 +341,15 @@ async function getActiveDelegations(req: AuthRequest, delegateeId?: number) {
   return list
 }
 
-export async function approveTask(req: AuthRequest, taskId: number, comment: string, _operator?: any) {
+export async function approveTask(req: AuthRequest, taskId: string, comment: string, _operator?: any) {
   return handleTask(req, taskId, 'approve', comment, _operator)
 }
 
-export async function rejectTask(req: AuthRequest, taskId: number, comment: string, _operator?: any) {
+export async function rejectTask(req: AuthRequest, taskId: string, comment: string, _operator?: any) {
   return handleTask(req, taskId, 'reject', comment, _operator)
 }
 
-export async function transferTask(req: AuthRequest, taskId: number, targetUserId: number, operator?: any) {
+export async function transferTask(req: AuthRequest, taskId: string, targetUserId: string, operator?: any) {
   const task = await db('flow_tasks').where({ id: taskId }).where(tenantWhere(req)).first()
   if (!task) throw new AppError('任务不存在', 404)
   if (task.status !== 'pending') throw new AppError('任务已处理', 400)
@@ -373,7 +378,7 @@ export async function transferTask(req: AuthRequest, taskId: number, targetUserI
   return true
 }
 
-async function handleTask(req: AuthRequest, taskId: number, action: 'approve' | 'reject', comment: string, operator?: any) {
+async function handleTask(req: AuthRequest, taskId: string, action: 'approve' | 'reject', comment: string, operator?: any) {
   const task = await db('flow_tasks').where({ id: taskId }).where(tenantWhere(req)).first()
   if (!task) throw new AppError('任务不存在', 404)
   if (task.status !== 'pending') throw new AppError('任务已处理', 400)
@@ -441,26 +446,26 @@ function findMatchedTransition(config: FlowConfig, nodeId: string, action: strin
   return transitions.find((t) => evaluateCondition(t.condition, businessData))
 }
 
-async function getReceiverUserIds(req: AuthRequest, assigneeType?: string, assigneeValue?: string): Promise<number[]> {
+async function getReceiverUserIds(req: AuthRequest, assigneeType?: string, assigneeValue?: string): Promise<string[]> {
   if (!assigneeType || !assigneeValue) return []
   if (assigneeType === 'user') {
     const user = await db('users')
       .where(tenantWhere(req))
-      .where({ id: Number(assigneeValue), status: 1 })
+      .where({ id: assigneeValue, status: 1 })
       .first()
     return user ? [user.id] : []
   }
   if (assigneeType === 'role') {
     const users = await db('users')
       .where(tenantWhere(req))
-      .where({ role_id: Number(assigneeValue), status: 1 })
+      .where({ role_id: assigneeValue, status: 1 })
       .select('id')
     return users.map((u) => u.id)
   }
   if (assigneeType === 'dept') {
     const users = await db('users')
       .where(tenantWhere(req))
-      .where({ dept_id: Number(assigneeValue), status: 1 })
+      .where({ dept_id: assigneeValue, status: 1 })
       .select('id')
     return users.map((u) => u.id)
   }
@@ -469,10 +474,10 @@ async function getReceiverUserIds(req: AuthRequest, assigneeType?: string, assig
 
 async function sendFlowTaskMessage(
   req: AuthRequest,
-  instanceId: number,
-  taskId: number,
+  instanceId: string,
+  taskId: string,
   nodeName: string,
-  receiverId: number,
+  receiverId: string,
   flowName?: string
 ) {
   try {
@@ -519,7 +524,7 @@ async function sendFlowResultMessage(
   }
 }
 
-async function enterNode(req: AuthRequest, instanceId: number, node: FlowNode) {
+async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode) {
   const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: instanceId }).first()
   const flow = instance
     ? await db('flow_definitions')
@@ -533,7 +538,9 @@ async function enterNode(req: AuthRequest, instanceId: number, node: FlowNode) {
   const timeoutAction = node.timeoutAction || 'none'
 
   if (node.type === 'approve') {
-    const [taskId] = await db('flow_tasks').insert({
+    const taskId = newId()
+    await db('flow_tasks').insert({
+      id: taskId,
       ...tenantWhere(req),
       instance_id: instanceId,
       node_id: node.id,
@@ -556,6 +563,7 @@ async function enterNode(req: AuthRequest, instanceId: number, node: FlowNode) {
     if (!assignees.length) throw new AppError('会签节点未配置审批人', 400)
     await db('flow_tasks').insert(
       assignees.map((a) => ({
+        id: newId(),
         ...tenantWhere(req),
         instance_id: instanceId,
         node_id: node.id,
@@ -579,7 +587,9 @@ async function enterNode(req: AuthRequest, instanceId: number, node: FlowNode) {
       })
     )
   } else if (node.type === 'cc') {
-    const [taskId] = await db('flow_tasks').insert({
+    const taskId = newId()
+    await db('flow_tasks').insert({
+      id: taskId,
       ...tenantWhere(req),
       instance_id: instanceId,
       node_id: node.id,
@@ -613,7 +623,7 @@ async function enterNode(req: AuthRequest, instanceId: number, node: FlowNode) {
   }
 }
 
-async function autoMoveToNextNode(req: AuthRequest, instanceId: number, node: FlowNode, action: string) {
+async function autoMoveToNextNode(req: AuthRequest, instanceId: string, node: FlowNode, action: string) {
   const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: instanceId }).first()
   if (!instance) return
   const def = await getFlowDefinitionByCode(req, instance.flow_code)
@@ -642,7 +652,7 @@ async function autoMoveToNextNode(req: AuthRequest, instanceId: number, node: Fl
   }
 }
 
-async function checkSignComplete(req: AuthRequest, instanceId: number, node: FlowNode): Promise<boolean> {
+async function checkSignComplete(req: AuthRequest, instanceId: string, node: FlowNode): Promise<boolean> {
   const tasks = await db('flow_tasks')
     .where(tenantWhere(req))
     .where({ instance_id: instanceId, node_id: node.id })
@@ -687,9 +697,11 @@ export async function getFlowDelegations(req: AuthRequest, query: any = {}) {
 }
 
 export async function createFlowDelegation(req: AuthRequest, data: any) {
-  const [id] = await db('flow_delegations').insert(
+  const id = newId()
+  await db('flow_delegations').insert(
     setTenantId(
       {
+        id,
         delegator_id: data.delegatorId,
         delegatee_id: data.delegateeId,
         flow_code: data.flowCode || null,
@@ -705,7 +717,7 @@ export async function createFlowDelegation(req: AuthRequest, data: any) {
   return db('flow_delegations').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function updateFlowDelegation(req: AuthRequest, id: number, data: any) {
+export async function updateFlowDelegation(req: AuthRequest, id: string, data: any) {
   await db('flow_delegations')
     .where({ id })
     .where(tenantWhere(req))
@@ -721,7 +733,7 @@ export async function updateFlowDelegation(req: AuthRequest, id: number, data: a
   return db('flow_delegations').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function deleteFlowDelegation(req: AuthRequest, id: number) {
+export async function deleteFlowDelegation(req: AuthRequest, id: string) {
   await db('flow_delegations').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -897,7 +909,7 @@ export async function getFlowPerformanceByNode(req: AuthRequest, query: any = {}
 
 // ---------- 催办 ----------
 
-export async function urgeTask(req: AuthRequest, taskId: number, operator?: any) {
+export async function urgeTask(req: AuthRequest, taskId: string, operator?: any) {
   const task = await db('flow_tasks').where({ id: taskId }).where(tenantWhere(req)).first()
   if (!task) throw new AppError('任务不存在', 404)
   if (task.status !== 'pending') throw new AppError('任务已处理，无需催办', 400)
@@ -934,7 +946,7 @@ export async function urgeTask(req: AuthRequest, taskId: number, operator?: any)
   return true
 }
 
-export async function urgeInstance(req: AuthRequest, instanceId: number, operator?: any) {
+export async function urgeInstance(req: AuthRequest, instanceId: string, operator?: any) {
   const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: instanceId }).first()
   if (!instance) throw new AppError('流程实例不存在', 404)
   if (instance.status !== 'running') throw new AppError('流程实例非运行中', 400)
@@ -952,7 +964,7 @@ export async function urgeInstance(req: AuthRequest, instanceId: number, operato
 
 // ---------- 强制终止 ----------
 
-export async function terminateInstance(req: AuthRequest, instanceId: number, reason: string, operator?: any) {
+export async function terminateInstance(req: AuthRequest, instanceId: string, reason: string, operator?: any) {
   const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: instanceId }).first()
   if (!instance) throw new AppError('流程实例不存在', 404)
   if (instance.status !== 'running') throw new AppError('只能终止运行中的流程实例', 400)

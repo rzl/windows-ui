@@ -1,7 +1,8 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
-import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, GLOBAL_TENANT_ID } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 
 export interface AppItem {
   type: 'model' | 'report' | 'dashboard' | 'flow' | 'print' | 'datasource' | 'page'
@@ -11,7 +12,7 @@ export interface AppItem {
 }
 
 export interface AppForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   category?: string
@@ -54,7 +55,7 @@ export async function getAppByCode(req: AuthRequest, code: string) {
   return { ...app, items, portalConfig: parsePortalConfig(app.portal_config) }
 }
 
-export async function getAppById(req: AuthRequest, id: number) {
+export async function getAppById(req: AuthRequest, id: string) {
   const app = await db('lowcode_apps').where({ id }).where(tenantWhere(req)).first()
   if (!app) throw new AppError('应用不存在', 404)
   const items = await db('lowcode_app_items').where({ app_id: app.id }).where(tenantWhere(req)).orderBy('sort', 'asc')
@@ -68,7 +69,7 @@ export async function saveApp(req: AuthRequest, data: AppForm) {
   const items = data.items || []
   const exists = await db('lowcode_apps').where({ code }).where(tenantWhere(req)).first()
 
-  let appId: number
+  let appId: string
   const portalConfig = data.portalConfig
     ? (typeof data.portalConfig === 'string' ? data.portalConfig : JSON.stringify(data.portalConfig))
     : null
@@ -97,15 +98,16 @@ export async function saveApp(req: AuthRequest, data: AppForm) {
       is_market: data.isMarket ?? 1,
       portal_config: portalConfig
     }, req)
-    const [id] = await db('lowcode_apps').insert(insertData)
-    appId = id
+    appId = newId()
+    await db('lowcode_apps').insert({ id: appId, ...insertData })
   }
 
   if (items.length) {
     const app = await db('lowcode_apps').where({ id: appId }).first()
-    const tenantId = app?.tenant_id ?? 0
+    const tenantId = app?.tenant_id ?? GLOBAL_TENANT_ID
     await db('lowcode_app_items').insert(
       items.map((item, index) => ({
+        id: newId(),
         app_id: appId,
         type: item.type,
         ref_code: item.refCode,
@@ -119,14 +121,14 @@ export async function saveApp(req: AuthRequest, data: AppForm) {
   return getAppById(req, appId)
 }
 
-export async function deleteApp(req: AuthRequest, id: number) {
+export async function deleteApp(req: AuthRequest, id: string) {
   await db('lowcode_app_items').where({ app_id: id }).where(tenantWhere(req)).del()
   await db('lowcode_app_versions').where({ app_id: id }).where(tenantWhere(req)).del()
   await db('lowcode_apps').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
-export async function createSnapshot(req: AuthRequest, id: number, data: { version: string; description?: string }) {
+export async function createSnapshot(req: AuthRequest, id: string, data: { version: string; description?: string }) {
   const app = await getAppById(req, id)
   const version = data.version || `v${Date.now()}`
   const snapshot = JSON.stringify({
@@ -150,12 +152,13 @@ export async function createSnapshot(req: AuthRequest, id: number, data: { versi
     description: data.description || '',
     is_published: 0
   }, req)
-  const [versionId] = await db('lowcode_app_versions').insert(insertData)
+  const versionId = newId()
+  await db('lowcode_app_versions').insert({ id: versionId, ...insertData })
 
   return db('lowcode_app_versions').where({ id: versionId }).first()
 }
 
-export async function publishVersion(req: AuthRequest, id: number, versionId: number) {
+export async function publishVersion(req: AuthRequest, id: string, versionId: string) {
   const app = await getAppById(req, id)
   const version = await db('lowcode_app_versions').where({ id: versionId, app_id: id }).where(tenantWhere(req)).first()
   if (!version) throw new AppError('版本不存在', 404)
@@ -170,7 +173,7 @@ export async function publishVersion(req: AuthRequest, id: number, versionId: nu
   return getAppById(req, id)
 }
 
-export async function rollbackVersion(req: AuthRequest, id: number, versionId: number) {
+export async function rollbackVersion(req: AuthRequest, id: string, versionId: string) {
   const app = await getAppById(req, id)
   const version = await db('lowcode_app_versions').where({ id: versionId, app_id: id }).where(tenantWhere(req)).first()
   if (!version) throw new AppError('版本不存在', 404)
@@ -189,9 +192,10 @@ export async function rollbackVersion(req: AuthRequest, id: number, versionId: n
 
   await db('lowcode_app_items').where({ app_id: id }).where(tenantWhere(req)).del()
   if (snapshot.items?.length) {
-    const tenantId = app.tenant_id ?? 0
+    const tenantId = app.tenant_id ?? GLOBAL_TENANT_ID
     await db('lowcode_app_items').insert(
       snapshot.items.map((item: any, index: number) => ({
+        id: newId(),
         app_id: id,
         type: item.type,
         ref_code: item.refCode || item.ref_code,
@@ -206,11 +210,11 @@ export async function rollbackVersion(req: AuthRequest, id: number, versionId: n
   return getAppById(req, id)
 }
 
-export async function getAppVersions(req: AuthRequest, id: number) {
+export async function getAppVersions(req: AuthRequest, id: string) {
   return db('lowcode_app_versions').where({ app_id: id }).where(tenantWhere(req)).orderBy('id', 'desc')
 }
 
-export async function exportApp(req: AuthRequest, id: number) {
+export async function exportApp(req: AuthRequest, id: string) {
   const app = await getAppById(req, id)
   const version = await db('lowcode_app_versions')
     .where({ app_id: id, is_published: 1 })
@@ -254,10 +258,11 @@ export async function importApp(req: AuthRequest, data: any) {
   return saveApp(req, appData)
 }
 
-export async function grantAppToRole(req: AuthRequest, appId: number, roleId: number) {
+export async function grantAppToRole(req: AuthRequest, appId: string, roleId: string) {
   const exists = await db('role_apps').where({ app_id: appId, role_id: roleId }).where(tenantWhere(req)).first()
   if (exists) return
   const insertData = setTenantId({
+    id: newId(),
     app_id: appId,
     role_id: roleId,
     status: 1
@@ -274,16 +279,17 @@ export async function publishAppMenus(req: AuthRequest, app: any) {
   let appMenu = await db('menus').where({ path: appPath }).where(tenantWhere(req)).first()
   if (!appMenu) {
     const insertData = setTenantId({
-      parent_id: 0,
+      parent_id: null,
       name: `App_${app.code}`,
       path: appPath,
       title: app.name,
       icon: app.icon || 'app',
-      sort: 200 + app.id,
+      sort: 200,
       status: app.status,
       permission: `app:${app.code}`
     }, req)
-    const [appMenuId] = await db('menus').insert(insertData)
+    const appMenuId = newId()
+    await db('menus').insert({ id: appMenuId, ...insertData })
     appMenu = await db('menus').where({ id: appMenuId }).first()
   } else {
     await db('menus').where({ id: appMenu.id }).where(tenantWhere(req)).update({
@@ -316,11 +322,11 @@ export async function publishAppMenus(req: AuthRequest, app: any) {
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     const menuItem = await buildMenuItem(req, item, appMenu.id, i, pagePermissionMap)
-    if (menuItem) await db('menus').insert(menuItem)
+    if (menuItem) await db('menus').insert({ id: newId(), ...menuItem })
   }
 }
 
-async function buildMenuItem(req: AuthRequest, item: any, parentId: number, sort: number, pagePermissionMap: Record<string, string> = {}): Promise<any> {
+async function buildMenuItem(req: AuthRequest, item: any, parentId: string, sort: number, pagePermissionMap: Record<string, string> = {}): Promise<any> {
   const base = {
     parent_id: parentId,
     name: `${item.type}_${item.ref_code}`,

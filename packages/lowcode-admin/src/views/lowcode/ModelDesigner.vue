@@ -303,8 +303,8 @@ import LinkageRuleDialog from '@/components/model-designer/LinkageRuleDialog.vue
 
 const route = useRoute()
 const authStore = useAuthStore()
-const isAdmin = computed(() => authStore.userInfo?.roleId === 1 || authStore.permissions?.includes('*'))
-const modelId = Number(route.params.id)
+const isAdmin = computed(() => authStore.permissions?.includes('*'))
+const modelId = String(route.params.id)
 
 const activeTab = ref('fields')
 const model = reactive<any>({})
@@ -713,7 +713,7 @@ function saveOptionConfig() {
   if (optionForm.dependsOn) config.dependsOn = optionForm.dependsOn
   if (config.type === 'dict') config.dictCode = optionForm.dictCode || ''
   if (config.type === 'external') {
-    config.externalDataSourceId = optionForm.externalDataSourceId ? Number(optionForm.externalDataSourceId) : undefined
+    config.externalDataSourceId = optionForm.externalDataSourceId || undefined
     config.labelField = optionForm.labelField || 'label'
     config.valueField = optionForm.valueField || 'value'
     try {

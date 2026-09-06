@@ -19,7 +19,7 @@ export async function saveReport(req: AuthRequest, res: Response) {
 }
 
 export async function deleteReport(req: AuthRequest, res: Response) {
-  await reportService.deleteReport(req, Number(req.params.id))
+  await reportService.deleteReport(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 

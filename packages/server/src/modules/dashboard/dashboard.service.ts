@@ -5,6 +5,7 @@ import { config as appConfig } from '../../config'
 import { runScript, checkSafeSql } from '../../utils/script-runner'
 import type { AuthRequest } from '../../middleware/auth'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { newId } from '../../utils/id'
 
 // ---------- 首页配置 ----------
 
@@ -43,6 +44,7 @@ export async function saveHomepageConfig(req: AuthRequest, data: any) {
     await db('homepage_configs').insert(
       setTenantId(
         {
+          id: newId(),
           code,
           name: data.name || '默认首页',
           widgets: JSON.stringify(data.widgets || []),
@@ -140,9 +142,11 @@ export async function getDashboardByCode(req: AuthRequest, code: string) {
 }
 
 export async function createDashboard(req: AuthRequest, data: any) {
-  const [id] = await db('dashboards').insert(
+  const id = newId()
+  await db('dashboards').insert(
     setTenantId(
       {
+        id,
         code: data.code,
         name: data.name,
         config: JSON.stringify(data.config || {}),
@@ -154,7 +158,7 @@ export async function createDashboard(req: AuthRequest, data: any) {
   return db('dashboards').where(tenantWhere(req)).where({ id }).first()
 }
 
-export async function updateDashboard(req: AuthRequest, id: number, data: any) {
+export async function updateDashboard(req: AuthRequest, id: string, data: any) {
   await db('dashboards')
     .where(tenantWhere(req))
     .where({ id })
@@ -167,7 +171,7 @@ export async function updateDashboard(req: AuthRequest, id: number, data: any) {
   return db('dashboards').where(tenantWhere(req)).where({ id }).first()
 }
 
-export async function deleteDashboard(req: AuthRequest, id: number) {
+export async function deleteDashboard(req: AuthRequest, id: string) {
   await db('dashboards').where(tenantWhere(req)).where({ id }).del()
   return true
 }

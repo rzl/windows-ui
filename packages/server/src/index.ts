@@ -16,7 +16,7 @@ const server = http.createServer(app)
 wsManager.init(server)
 
 // 系统级后台任务使用的 req（超级管理员身份，跨租户）
-const systemReq = { user: { id: 0, username: 'system', roleId: 1, tenantId: 0 } } as AuthRequest
+const systemReq = { user: { id: '', username: 'system', roleId: '', tenantId: '' } } as unknown as AuthRequest
 
 server.listen(PORT, '127.0.0.1', () => {
   logger.info(`Server running on http://127.0.0.1:${PORT}`)

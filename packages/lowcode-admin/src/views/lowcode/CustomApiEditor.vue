@@ -32,7 +32,7 @@
 
     <custom-api-version-panel
       v-if="isEdit"
-      :api-id="Number(route.params.id)"
+      :api-id="String(route.params.id)"
       @rollback="reloadApi"
     />
 
@@ -192,7 +192,7 @@ onMounted(async () => {
 })
 
 async function reloadApi() {
-  const data = await customApiApi.getCustomApi(Number(route.params.id))
+  const data = await customApiApi.getCustomApi(String(route.params.id))
   form.code = data.code
   form.name = data.name
   form.method = data.method || 'ALL'
@@ -211,7 +211,7 @@ async function reloadApi() {
 
 async function loadLogs() {
   if (!isEdit.value) return
-  const result = await customApiApi.getCustomApiLogs(Number(route.params.id), {
+  const result = await customApiApi.getCustomApiLogs(String(route.params.id), {
     page: logQuery.page,
     pageSize: logQuery.pageSize
   })
@@ -249,7 +249,7 @@ async function handleSave() {
       logRetentionDays: Number(form.logRetentionDays) ?? 30
     }
     if (isEdit.value) {
-      await customApiApi.updateCustomApi(Number(route.params.id), data)
+      await customApiApi.updateCustomApi(String(route.params.id), data)
     } else {
       await customApiApi.createCustomApi(data)
     }
@@ -263,7 +263,7 @@ async function handleTest() {
   try {
     const query = JSON.parse(testParams.query || '{}')
     const body = JSON.parse(testParams.body || '{}')
-    let id = Number(route.params.id)
+    let id = String(route.params.id)
 
     // 新建时先临时保存以获取 id
     if (!isEdit.value) {

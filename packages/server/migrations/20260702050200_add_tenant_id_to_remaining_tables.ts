@@ -80,7 +80,7 @@ async function addTenantIdColumn(knex: Knex, tableName: string) {
   const exists = await knex.schema.hasColumn(tableName, 'tenant_id')
   if (!exists) {
     await knex.schema.table(tableName, (table) => {
-      table.integer('tenant_id').notNullable().defaultTo(1).comment('租户 ID')
+      table.string('tenant_id', 36).notNullable().defaultTo('01J0000000000000000000001').comment('租户 ID')
     })
   }
 }
@@ -157,7 +157,7 @@ async function addTenantIdToDynamicTables(knex: Knex) {
     if (!hasColumn) {
       try {
         await knex.schema.table(tableName, (table) => {
-          table.integer('tenant_id').notNullable().defaultTo(1)
+          table.string('tenant_id', 36).notNullable().defaultTo('01J0000000000000000000001')
         })
       } catch {
         // 动态表加列失败不阻塞整体迁移

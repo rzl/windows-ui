@@ -3,12 +3,13 @@ import bcrypt from 'bcryptjs'
 import { db } from '../../db'
 import { config } from '../../config'
 import { AppError } from '../../utils/response'
+import { SUPER_ADMIN_ROLE_ID, GLOBAL_TENANT_ID } from '../../utils/tenant'
 import { tokenBlacklist } from '../../middleware/auth'
 import type { AuthRequest } from '../../middleware/auth'
 import type { LoginDto, RefreshDto, UpdateProfileDto, ChangePasswordDto } from './auth.dto'
 import { getRoleDataPermissionIds } from '../lowcode/data-permission.service'
 
-function generateTokens(payload: { id: number; username: string; roleId: number; tenantId: number }) {
+function generateTokens(payload: { id: string; username: string; roleId: string; tenantId: string }) {
   const accessToken = jwt.sign(payload, config.jwt.secret as jwt.Secret, {
     expiresIn: config.jwt.accessExpires as jwt.SignOptions['expiresIn']
   })
@@ -47,7 +48,7 @@ export async function login(dto: LoginDto) {
     id: user.id,
     username: user.username,
     roleId: user.role_id,
-    tenantId: user.tenant_id ?? 0
+    tenantId: user.tenant_id ?? GLOBAL_TENANT_ID
   })
 
   return {
@@ -60,7 +61,7 @@ export async function login(dto: LoginDto) {
       phone: user.phone,
       avatar: user.avatar,
       roleId: user.role_id,
-      tenantId: user.tenant_id ?? 0,
+      tenantId: user.tenant_id ?? GLOBAL_TENANT_ID,
       deptId: user.dept_id
     }
   }
@@ -69,10 +70,10 @@ export async function login(dto: LoginDto) {
 export async function refresh(dto: RefreshDto) {
   try {
     const decoded = jwt.verify(dto.refreshToken, config.jwt.secret as jwt.Secret) as {
-      id: number
+      id: string
       username: string
-      roleId: number
-      tenantId: number
+      roleId: string
+      tenantId: string
     }
     return generateTokens({
       id: decoded.id,
@@ -90,7 +91,7 @@ export function logout(token: string) {
   return true
 }
 
-export async function getProfile(userId: number) {
+export async function getProfile(userId: string) {
   const user = await db('users')
     .where('users.id', userId)
     .leftJoin('roles', 'users.role_id', 'roles.id')
@@ -125,7 +126,7 @@ export async function getProfile(userId: number) {
   const dataPermissionIds = await getRoleDataPermissionIds(userReq, user.roleId)
 
   // 超级管理员直接返回，不额外聚合应用权限
-  if (permissions.includes('*') || user.roleId === 1) {
+  if (permissions.includes('*') || user.roleId === SUPER_ADMIN_ROLE_ID) {
     return {
       ...user,
       permissions,
@@ -148,7 +149,7 @@ export async function getProfile(userId: number) {
   }
 }
 
-export async function updateProfile(userId: number, dto: UpdateProfileDto) {
+export async function updateProfile(userId: string, dto: UpdateProfileDto) {
   const updateData: Record<string, any> = {}
   if (dto.nickname !== undefined) updateData.nickname = dto.nickname || null
   if (dto.email !== undefined) updateData.email = dto.email || null
@@ -160,7 +161,7 @@ export async function updateProfile(userId: number, dto: UpdateProfileDto) {
   return getProfile(userId)
 }
 
-export async function changePassword(userId: number, dto: ChangePasswordDto) {
+export async function changePassword(userId: string, dto: ChangePasswordDto) {
   const user = await db('users').where({ id: userId }).first()
   if (!user) {
     throw new AppError('用户不存在', 404)

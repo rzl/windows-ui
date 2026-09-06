@@ -16,7 +16,7 @@ function getWebSocketUrl(): string {
   return `${protocol}//${window.location.host}`
 }
 
-export function connectWebSocket(userId: number, username: string, cbs?: WebSocketCallbacks) {
+export function connectWebSocket(userId: string, username: string, cbs?: WebSocketCallbacks) {
   if (ws) {
     disconnectWebSocket()
   }
@@ -58,7 +58,7 @@ export function connectWebSocket(userId: number, username: string, cbs?: WebSock
   }
 }
 
-function scheduleReconnect(userId: number, username: string) {
+function scheduleReconnect(userId: string, username: string) {
   if (reconnectTimer) return
   if (retryCount >= MAX_RETRY) {
     console.warn('WebSocket 重连次数已达上限')
@@ -91,7 +91,7 @@ export function isWebSocketConnected(): boolean {
 }
 
 // 页面可见性变化时，若已断开则主动重连
-export function watchVisibilityForReconnect(userId: number, username: string) {
+export function watchVisibilityForReconnect(userId: string, username: string) {
   const handler = () => {
     if (document.visibilityState === 'visible' && !isWebSocketConnected() && userId) {
       retryCount = 0

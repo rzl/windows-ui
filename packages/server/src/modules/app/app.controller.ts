@@ -49,32 +49,32 @@ export async function saveApp(req: AuthRequest, res: Response) {
 }
 
 export async function deleteApp(req: AuthRequest, res: Response) {
-  await appService.deleteApp(req, Number(req.params.id))
+  await appService.deleteApp(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
 export async function createSnapshot(req: AuthRequest, res: Response) {
-  const result = await appService.createSnapshot(req, Number(req.params.id), req.body)
+  const result = await appService.createSnapshot(req, req.params.id, req.body)
   res.json(success(result, '快照已创建'))
 }
 
 export async function publishVersion(req: AuthRequest, res: Response) {
-  const result = await appService.publishVersion(req, Number(req.params.id), Number(req.body.versionId))
+  const result = await appService.publishVersion(req, req.params.id, req.body.versionId)
   res.json(success(result, '版本已发布'))
 }
 
 export async function rollbackVersion(req: AuthRequest, res: Response) {
-  const result = await appService.rollbackVersion(req, Number(req.params.id), Number(req.body.versionId))
+  const result = await appService.rollbackVersion(req, req.params.id, req.body.versionId)
   res.json(success(result, '已回滚到指定版本'))
 }
 
 export async function getAppVersions(req: AuthRequest, res: Response) {
-  const result = await appService.getAppVersions(req, Number(req.params.id))
+  const result = await appService.getAppVersions(req, req.params.id)
   res.json(success(result))
 }
 
 export async function exportApp(req: AuthRequest, res: Response) {
-  const result = await appService.exportApp(req, Number(req.params.id))
+  const result = await appService.exportApp(req, req.params.id)
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('Content-Disposition', `attachment; filename=${result.code}.json`)
   res.send(JSON.stringify(result, null, 2))

@@ -1,7 +1,7 @@
 import request from './request'
 
 export interface ReportForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   modelCode?: string
@@ -21,7 +21,7 @@ export function saveReport(data: ReportForm) {
   return request.post('/report/reports', data)
 }
 
-export function deleteReport(id: number) {
+export function deleteReport(id: string) {
   return request.delete(`/report/reports/${id}`)
 }
 

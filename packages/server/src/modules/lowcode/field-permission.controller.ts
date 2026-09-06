@@ -14,7 +14,7 @@ export async function getRules(req: AuthRequest, res: Response, next: NextFuncti
 
 export async function getRuleById(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const result = await service.getFieldPermissionRuleById(req, Number(req.params.id))
+    const result = await service.getFieldPermissionRuleById(req, req.params.id)
     res.json(success(result))
   } catch (err) {
     next(err)
@@ -32,7 +32,7 @@ export async function createRule(req: AuthRequest, res: Response, next: NextFunc
 
 export async function updateRule(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const result = await service.updateFieldPermissionRule(req, Number(req.params.id), req.body)
+    const result = await service.updateFieldPermissionRule(req, req.params.id, req.body)
     res.json(success(result))
   } catch (err) {
     next(err)
@@ -41,7 +41,7 @@ export async function updateRule(req: AuthRequest, res: Response, next: NextFunc
 
 export async function deleteRule(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    await service.deleteFieldPermissionRule(req, Number(req.params.id))
+    await service.deleteFieldPermissionRule(req, req.params.id)
     res.json(success(true))
   } catch (err) {
     next(err)

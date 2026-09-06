@@ -1,9 +1,10 @@
 import { db } from '../../db'
 import type { AuthRequest } from '../../middleware/auth'
-import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, SUPER_ADMIN_ROLE_ID } from '../../utils/tenant'
 import { AppError } from '../../utils/response'
 import { applyDataPermissionWhere } from './data-permission.service'
 import { getModelByCode } from './lowcode.service'
+import { newId } from '../../utils/id'
 
 export async function getRelations(req: AuthRequest, query: any = {}) {
   const builder = db('lowcode_model_relations')
@@ -21,7 +22,7 @@ export async function getRelations(req: AuthRequest, query: any = {}) {
   return builder
 }
 
-export async function getRelationById(req: AuthRequest, id: number) {
+export async function getRelationById(req: AuthRequest, id: string) {
   const relation = await db('lowcode_model_relations')
     .where(tenantWhere(req))
     .where({ id })
@@ -59,12 +60,13 @@ export async function createRelation(req: AuthRequest, data: any) {
     status: data.status ?? 1
   }, req)
 
-  const [id] = await db('lowcode_model_relations').insert(insertData)
+  const id = newId()
+  await db('lowcode_model_relations').insert({ id, ...insertData })
 
   return getRelationById(req, id)
 }
 
-export async function updateRelation(req: AuthRequest, id: number, data: any) {
+export async function updateRelation(req: AuthRequest, id: string, data: any) {
   const relation = await getRelationById(req, id)
   validateRelation({ ...relation, ...data })
 
@@ -86,7 +88,7 @@ export async function updateRelation(req: AuthRequest, id: number, data: any) {
   return getRelationById(req, id)
 }
 
-export async function deleteRelation(req: AuthRequest, id: number) {
+export async function deleteRelation(req: AuthRequest, id: string) {
   const relation = await getRelationById(req, id)
   // 检查是否有字段引用该关系
   const used = await db('lowcode_fields')
@@ -321,11 +323,11 @@ export async function getRelationOptions(req: AuthRequest, relationCode: string,
 }
 
 function normalizeUser(user?: any) {
-  if (!user) return { id: 0, roleId: 0 }
+  if (!user) return { id: '', roleId: '' }
   return {
     id: user.id,
     roleId: user.roleId,
     deptId: user.deptId,
-    isAdmin: user.roleId === 1 || user.permissions?.includes('*')
+    isAdmin: user.roleId === SUPER_ADMIN_ROLE_ID || user.permissions?.includes('*')
   }
 }

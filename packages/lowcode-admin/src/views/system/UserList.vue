@@ -106,7 +106,7 @@ const columns = [
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增用户')
 const formModel = reactive<any>({})
-const selectedIds = ref<number[]>([])
+const selectedIds = ref<string[]>([])
 
 function openDialog(row?: any) {
   dialogTitle.value = row ? '编辑用户' : '新增用户'

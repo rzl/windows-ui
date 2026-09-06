@@ -10,11 +10,11 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('custom_api_logs', (table) => {
-    table.increments('id').primary()
-    table.integer('api_id').notNullable()
+    table.string('id', 36).primary()
+    table.string('api_id', 36).notNullable()
     table.string('api_code', 50).notNullable()
     table.string('api_path', 255).nullable()
-    table.integer('user_id').nullable()
+    table.string('user_id', 36).nullable()
     table.string('username', 100).nullable()
     table.string('ip', 50).nullable()
     table.string('method', 10).nullable()

@@ -2,9 +2,9 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('lowcode_saved_queries', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('model_code', 100).notNullable()
-    table.integer('user_id').unsigned().notNullable()
+    table.string('user_id', 36).notNullable()
     table.string('name', 100).notNullable()
     table.text('config').notNullable()
     table.tinyint('is_default').notNullable().defaultTo(0)

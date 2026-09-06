@@ -8,7 +8,7 @@ export interface UserQuery {
 }
 
 export interface UserForm {
-  id?: number
+  id?: string
   username?: string
   password?: string
   nickname?: string
@@ -16,8 +16,8 @@ export interface UserForm {
   phone?: string
   avatar?: string
   status?: number
-  roleId?: number
-  deptId?: number
+  roleId?: string
+  deptId?: string
 }
 
 export function getUsers(params: UserQuery) {
@@ -28,10 +28,10 @@ export function createUser(data: UserForm) {
   return request.post('/rbac/users', data)
 }
 
-export function updateUser(id: number, data: UserForm) {
+export function updateUser(id: string, data: UserForm) {
   return request.put(`/rbac/users/${id}`, data)
 }
 
-export function deleteUsers(ids: number[]) {
+export function deleteUsers(ids: string[]) {
   return request.post('/rbac/users/delete', { ids })
 }

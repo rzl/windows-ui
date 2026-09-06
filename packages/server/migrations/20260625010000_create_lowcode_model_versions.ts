@@ -2,8 +2,8 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('lowcode_model_versions', (table) => {
-    table.increments('id').primary()
-    table.integer('model_id').unsigned().notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
+    table.string('id', 36).primary()
+    table.string('model_id', 36).notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
     table.string('version', 50).notNullable()
     table.string('description', 500)
     table.text('snapshot').notNullable()

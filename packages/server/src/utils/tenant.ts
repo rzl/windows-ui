@@ -1,7 +1,9 @@
 import type { AuthRequest } from '../middleware/auth'
+import { ADMIN_ROLE_ID, GLOBAL_TENANT_ID } from './id'
 
-export const SUPER_ADMIN_ROLE_ID = 1
-export const GLOBAL_TENANT_ID = 0
+// 保持原有 import 路径可用：超级管理员角色 ID / 全局租户 ID 为固定 ULID 常量
+export const SUPER_ADMIN_ROLE_ID = ADMIN_ROLE_ID
+export { GLOBAL_TENANT_ID }
 
 /**
  * 判断当前用户是否为超级管理员
@@ -15,7 +17,7 @@ export function isSuperAdmin(user?: AuthRequest['user']): boolean {
  * 获取当前请求应隔离的租户 ID。
  * 超级管理员返回 null，表示不过滤租户。
  */
-export function getTenantId(req: AuthRequest): number | null {
+export function getTenantId(req: AuthRequest): string | null {
   const user = req.user
   if (!user) return null
   if (isSuperAdmin(user)) return null
@@ -25,7 +27,7 @@ export function getTenantId(req: AuthRequest): number | null {
 /**
  * 生成租户过滤条件对象
  */
-export function tenantWhere(req: AuthRequest): { tenant_id: number } | Record<string, never> {
+export function tenantWhere(req: AuthRequest): { tenant_id: string } | Record<string, never> {
   const tenantId = getTenantId(req)
   if (tenantId === null) return {}
   return { tenant_id: tenantId }
@@ -43,7 +45,7 @@ export function setTenantId<T extends Record<string, any>>(data: T, req: AuthReq
 /**
  * 合并租户过滤条件到现有 where 对象
  */
-export function withTenantWhere<T extends Record<string, any>>(req: AuthRequest, where: T): T & { tenant_id?: number } {
+export function withTenantWhere<T extends Record<string, any>>(req: AuthRequest, where: T): T & { tenant_id?: string } {
   const tw = tenantWhere(req)
   return { ...where, ...tw }
 }

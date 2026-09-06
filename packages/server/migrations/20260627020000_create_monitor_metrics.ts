@@ -2,12 +2,12 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('api_metrics', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('method', 10).notNullable()
     table.string('path', 255).notNullable()
     table.integer('status_code').defaultTo(200)
     table.integer('duration').notNullable().comment('请求耗时，单位毫秒')
-    table.integer('user_id').nullable()
+    table.string('user_id', 36).nullable()
     table.string('username', 100).nullable()
     table.string('ip', 50).nullable()
     table.text('params').nullable().comment('请求参数 JSON')
@@ -19,7 +19,7 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('sql_metrics', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.text('sql').notNullable()
     table.text('bindings').nullable().comment('绑定参数 JSON')
     table.integer('duration').notNullable().comment('SQL 执行耗时，单位毫秒')
@@ -30,7 +30,7 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('alert_rules', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('name', 100).notNullable()
     table.string('type', 50).notNullable().comment('api_slow/sql_slow/error_rate/server_load')
     table.integer('threshold').notNullable().comment('阈值，毫秒或百分比')
@@ -43,8 +43,8 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('alert_records', (table) => {
-    table.increments('id').primary()
-    table.integer('rule_id').nullable()
+    table.string('id', 36).primary()
+    table.string('rule_id', 36).nullable()
     table.string('rule_name', 100).notNullable()
     table.string('type', 50).notNullable()
     table.text('message').notNullable()

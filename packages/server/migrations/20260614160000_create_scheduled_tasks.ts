@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('scheduled_tasks', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.string('cron', 50).notNullable()
@@ -16,8 +16,8 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('scheduled_task_logs', (table) => {
-    table.increments('id').primary()
-    table.integer('task_id').notNullable()
+    table.string('id', 36).primary()
+    table.string('task_id', 36).notNullable()
     table.string('status', 20).notNullable()
     table.text('result').nullable()
     table.timestamp('create_time').defaultTo(knex.fn.now())

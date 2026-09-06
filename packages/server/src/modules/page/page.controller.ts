@@ -19,7 +19,7 @@ export async function savePage(req: AuthRequest, res: Response) {
 }
 
 export async function deletePage(req: AuthRequest, res: Response) {
-  await pageService.deletePage(req, Number(req.params.id))
+  await pageService.deletePage(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 

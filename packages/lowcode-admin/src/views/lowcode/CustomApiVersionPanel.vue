@@ -50,7 +50,7 @@ import { reactive, ref, watch } from 'vue'
 import * as customApiVersionApi from '@/api/custom-api-version'
 
 const props = defineProps<{
-  apiId: number
+  apiId: string
 }>()
 
 const emit = defineEmits<{

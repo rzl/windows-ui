@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.table('flow_instances', (table) => {
-    table.integer('terminated_by').nullable().comment('强制终止人 ID')
+    table.string('terminated_by', 36).nullable().comment('强制终止人 ID')
     table.text('terminated_reason').nullable().comment('强制终止原因')
     table.timestamp('terminated_time').nullable().comment('强制终止时间')
   })

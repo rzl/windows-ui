@@ -3,7 +3,7 @@ import { db } from '../../db'
 import { logger } from '../../utils/logger'
 import * as scheduleService from './schedule.service'
 
-const jobs = new Map<number, ScheduledTask>()
+const jobs = new Map<string, ScheduledTask>()
 
 export async function startScheduler() {
   stopAllJobs()
@@ -33,7 +33,7 @@ export function stopAllJobs() {
   jobs.clear()
 }
 
-export async function reloadTask(taskId: number) {
+export async function reloadTask(taskId: string) {
   const existing = jobs.get(taskId)
   if (existing) {
     existing.stop()

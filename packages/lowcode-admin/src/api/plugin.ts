@@ -1,7 +1,7 @@
 import request from './request'
 
 export interface PluginForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   version?: string
@@ -24,7 +24,7 @@ export function getActivePlugins() {
   return request.get('/plugins/active')
 }
 
-export function getPlugin(id: number) {
+export function getPlugin(id: string) {
   return request.get(`/plugins/${id}`)
 }
 
@@ -32,18 +32,18 @@ export function createPlugin(data: PluginForm) {
   return request.post('/plugins', data)
 }
 
-export function updatePlugin(id: number, data: PluginForm) {
+export function updatePlugin(id: string, data: PluginForm) {
   return request.put(`/plugins/${id}`, data)
 }
 
-export function deletePlugin(id: number) {
+export function deletePlugin(id: string) {
   return request.delete(`/plugins/${id}`)
 }
 
-export function enablePlugin(id: number) {
+export function enablePlugin(id: string) {
   return request.post(`/plugins/${id}/enable`)
 }
 
-export function disablePlugin(id: number) {
+export function disablePlugin(id: string) {
   return request.post(`/plugins/${id}/disable`)
 }

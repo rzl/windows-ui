@@ -1,8 +1,8 @@
 import request from './request'
 
 export interface MenuForm {
-  id?: number
-  parentId?: number
+  id?: string
+  parentId?: string
   name?: string
   path?: string
   component?: string
@@ -25,10 +25,10 @@ export function createMenu(data: MenuForm) {
   return request.post('/rbac/menus', data)
 }
 
-export function updateMenu(id: number, data: MenuForm) {
+export function updateMenu(id: string, data: MenuForm) {
   return request.put(`/rbac/menus/${id}`, data)
 }
 
-export function deleteMenu(id: number) {
+export function deleteMenu(id: string) {
   return request.delete(`/rbac/menus/${id}`)
 }

@@ -113,8 +113,8 @@ function formatDateTimeLocal(iso: string) {
 
 async function handleSave() {
   const payload = {
-    delegatorId: Number(formModel.delegatorId),
-    delegateeId: Number(formModel.delegateeId),
+    delegatorId: formModel.delegatorId,
+    delegateeId: formModel.delegateeId,
     flowCode: formModel.flowCode || null,
     startTime: new Date(formModel.startTime).toISOString(),
     endTime: new Date(formModel.endTime).toISOString(),

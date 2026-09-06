@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('homepage_configs', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique().defaultTo('default')
     table.string('name', 50).notNullable().defaultTo('默认首页')
     table.text('widgets').notNullable()
@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('dashboards', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.text('config').notNullable()

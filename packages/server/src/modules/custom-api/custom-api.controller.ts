@@ -10,7 +10,7 @@ export async function getCustomApis(req: AuthRequest, res: Response) {
 }
 
 export async function getCustomApi(req: AuthRequest, res: Response) {
-  const result = await customApiService.getCustomApiById(req, Number(req.params.id))
+  const result = await customApiService.getCustomApiById(req, req.params.id)
   res.json(success(result))
 }
 
@@ -20,18 +20,18 @@ export async function createCustomApi(req: AuthRequest, res: Response) {
 }
 
 export async function updateCustomApi(req: AuthRequest, res: Response) {
-  const result = await customApiService.updateCustomApi(req, Number(req.params.id), req.body)
+  const result = await customApiService.updateCustomApi(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteCustomApi(req: AuthRequest, res: Response) {
-  await customApiService.deleteCustomApi(req, Number(req.params.id))
+  await customApiService.deleteCustomApi(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
 export async function testCustomApi(req: AuthRequest, res: Response) {
   const ctx = buildContext(req)
-  const result = await customApiService.executeApiById(req, Number(req.params.id), ctx)
+  const result = await customApiService.executeApiById(req, req.params.id, ctx)
   res.json(success(result))
 }
 

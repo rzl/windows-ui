@@ -1,16 +1,17 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import type { AuthRequest } from '../../middleware/auth'
-import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, SUPER_ADMIN_ROLE_ID } from '../../utils/tenant'
+import { newId } from '../../utils/id'
 
 export interface FieldPermissionRule {
-  id?: number
+  id?: string
   model_code: string
   field_code: string
   readable?: number
   editable?: number
   hidden?: number
-  role_ids?: number[]
+  role_ids?: string[]
   status?: number
 }
 
@@ -42,7 +43,7 @@ export async function getFieldPermissionRules(req: AuthRequest, query: any = {})
   return {
     list: list.map((item) => ({
       ...item,
-      role_ids: parseJson<number[]>(item.role_ids)
+      role_ids: parseJson<string[]>(item.role_ids)
     })),
     total: Number(total?.count || 0),
     page: Number(page),
@@ -50,12 +51,12 @@ export async function getFieldPermissionRules(req: AuthRequest, query: any = {})
   }
 }
 
-export async function getFieldPermissionRuleById(req: AuthRequest, id: number) {
+export async function getFieldPermissionRuleById(req: AuthRequest, id: string) {
   const rule = await db('lowcode_field_permission_rules').where({ id }).where(tenantWhere(req)).first()
   if (!rule) throw new AppError('字段权限规则不存在', 404)
   return {
     ...rule,
-    role_ids: parseJson<number[]>(rule.role_ids)
+    role_ids: parseJson<string[]>(rule.role_ids)
   }
 }
 
@@ -66,9 +67,11 @@ export async function createFieldPermissionRule(req: AuthRequest, data: FieldPer
     .first()
   if (exists) throw new AppError('该模型字段已存在规则', 400)
 
-  const [id] = await db('lowcode_field_permission_rules').insert(
+  const id = newId()
+  await db('lowcode_field_permission_rules').insert(
     setTenantId(
       {
+        id,
         model_code: data.model_code,
         field_code: data.field_code,
         readable: data.readable ?? 1,
@@ -83,7 +86,7 @@ export async function createFieldPermissionRule(req: AuthRequest, data: FieldPer
   return getFieldPermissionRuleById(req, id)
 }
 
-export async function updateFieldPermissionRule(req: AuthRequest, id: number, data: FieldPermissionRule) {
+export async function updateFieldPermissionRule(req: AuthRequest, id: string, data: FieldPermissionRule) {
   const rule = await db('lowcode_field_permission_rules').where({ id }).where(tenantWhere(req)).first()
   if (!rule) throw new AppError('字段权限规则不存在', 404)
 
@@ -106,7 +109,7 @@ export async function updateFieldPermissionRule(req: AuthRequest, id: number, da
   return getFieldPermissionRuleById(req, id)
 }
 
-export async function deleteFieldPermissionRule(req: AuthRequest, id: number) {
+export async function deleteFieldPermissionRule(req: AuthRequest, id: string) {
   const rule = await db('lowcode_field_permission_rules').where({ id }).where(tenantWhere(req)).first()
   if (!rule) throw new AppError('字段权限规则不存在', 404)
   await db('lowcode_field_permission_rules')
@@ -117,8 +120,8 @@ export async function deleteFieldPermissionRule(req: AuthRequest, id: number) {
 }
 
 // 获取某角色对某模型的字段权限映射
-export async function getFieldPermissionMap(req: AuthRequest, modelCode: string, roleId: number) {
-  if (roleId === 1) {
+export async function getFieldPermissionMap(req: AuthRequest, modelCode: string, roleId: string) {
+  if (roleId === SUPER_ADMIN_ROLE_ID) {
     return {}
   }
 
@@ -129,7 +132,7 @@ export async function getFieldPermissionMap(req: AuthRequest, modelCode: string,
 
   const result: Record<string, { readable: boolean; editable: boolean; hidden: boolean }> = {}
   for (const rule of rules) {
-    const roleIds = parseJson<number[]>(rule.role_ids)
+    const roleIds = parseJson<string[]>(rule.role_ids)
     // 若 role_ids 为空数组，则对所有角色生效；否则仅对指定角色生效
     if (roleIds.length && !roleIds.includes(roleId)) continue
 
@@ -147,9 +150,9 @@ export async function assertFieldWritable(
   req: AuthRequest,
   modelCode: string,
   data: Record<string, any>,
-  user: { id: number; roleId: number; isAdmin?: boolean }
+  user: { id: string; roleId: string; isAdmin?: boolean }
 ) {
-  if (user.isAdmin || user.roleId === 1) return
+  if (user.isAdmin || user.roleId === SUPER_ADMIN_ROLE_ID) return
 
   const fieldMap = await getFieldPermissionMap(req, modelCode, user.roleId)
   const forbiddenFields = Object.entries(fieldMap)
@@ -168,9 +171,9 @@ export async function filterHiddenFields(
   req: AuthRequest,
   modelCode: string,
   rows: any[],
-  user: { id: number; roleId: number; isAdmin?: boolean }
+  user: { id: string; roleId: string; isAdmin?: boolean }
 ) {
-  if (user.isAdmin || user.roleId === 1 || !rows.length) return rows
+  if (user.isAdmin || user.roleId === SUPER_ADMIN_ROLE_ID || !rows.length) return rows
 
   const fieldMap = await getFieldPermissionMap(req, modelCode, user.roleId)
   const hiddenFields = Object.entries(fieldMap)

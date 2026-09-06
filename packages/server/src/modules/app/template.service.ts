@@ -2,6 +2,7 @@ import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import * as fs from 'fs'
 import * as path from 'path'
+import { newId } from '../../utils/id'
 
 const TEMPLATES_DIR = path.join(__dirname, '..', '..', '..', 'templates', 'apps')
 
@@ -219,10 +220,10 @@ async function createPhysicalTable(trx: any, tableName: string) {
   if (exists) return
 
   await trx.schema.createTable(tableName, (table: any) => {
-    table.increments('id').primary()
-    table.integer('create_by').unsigned().nullable()
-    table.integer('update_by').unsigned().nullable()
-    table.integer('dept_id').unsigned().nullable()
+    table.string('id', 36).primary()
+    table.string('create_by', 36).nullable()
+    table.string('update_by', 36).nullable()
+    table.string('dept_id', 36).nullable()
     table.timestamp('create_time').defaultTo(trx.fn.now())
     table.timestamp('update_time').defaultTo(trx.fn.now())
   })
@@ -259,7 +260,7 @@ async function addPhysicalColumn(trx: any, tableName: string, columnName: string
       case 'ref':
       case 'upload':
       case 'cascader':
-        table.integer(columnName)
+        table.string(columnName, 36)
         break
       default:
         table.string(columnName, 255)
@@ -287,9 +288,9 @@ export async function installTemplate(req: any, templateCode: string, options: I
 
     // 2. 建立 code 映射表
     const codeMap: Record<string, string> = {}
-    const modelCodeMap: Record<string, number> = {}
-    const dictCodeMap: Record<string, number> = {}
-    const dataSourceIdMap: Record<number, number> = {}
+    const modelCodeMap: Record<string, string> = {}
+    const dictCodeMap: Record<string, string> = {}
+    const dataSourceIdMap: Record<string, string> = {}
     const codingRuleCodeMap: Record<string, string> = {}
     const validationRuleCodeMap: Record<string, string> = {}
 
@@ -299,7 +300,9 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const newCode = await uniqueDictCode(trx, dict.code)
       codeMap[dict.code] = newCode
 
-      const [dictId] = await trx('dicts').insert({
+      const dictId = newId()
+      await trx('dicts').insert({
+        id: dictId,
         name: dict.name,
         code: newCode,
         description: dict.description || '',
@@ -313,6 +316,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       if (dict.items?.length) {
         await trx('dict_items').insert(
           dict.items.map((item: any, index: number) => ({
+            id: newId(),
             dict_id: dictId,
             label: item.label,
             value: item.value,
@@ -332,6 +336,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       codingRuleCodeMap[rule.code] = newCode
 
       await trx('lowcode_coding_rules').insert({
+        id: newId(),
         code: newCode,
         name: rule.name,
         prefix: rule.prefix,
@@ -350,6 +355,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       validationRuleCodeMap[rule.code] = newCode
 
       await trx('lowcode_validation_rules').insert({
+        id: newId(),
         code: newCode,
         name: rule.name,
         pattern: rule.pattern,
@@ -378,7 +384,9 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const newCode = await uniqueDataSourceCode(trx, ds.code)
       codeMap[ds.code] = newCode
 
-      const [id] = await trx('external_data_sources').insert({
+      const id = newId()
+      await trx('external_data_sources').insert({
+        id,
         code: newCode,
         name: ds.name,
         type: ds.type,
@@ -395,7 +403,9 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const newCode = codeMap[model.code]
       const tableName = tableNameMap[model.code]
 
-      const [modelId] = await trx('lowcode_models').insert({
+      const modelId = newId()
+      await trx('lowcode_models').insert({
+        id: modelId,
         code: newCode,
         name: model.name,
         table_name: tableName,
@@ -414,7 +424,9 @@ export async function installTemplate(req: any, templateCode: string, options: I
         const fieldName = safeFieldName(field.fieldName)
         await addPhysicalColumn(trx, tableName, fieldName, field)
 
-        const [fieldId] = await trx('lowcode_fields').insert({
+        const fieldId = newId()
+        await trx('lowcode_fields').insert({
+          id: fieldId,
           model_id: modelId,
           field_name: fieldName,
           display_name: field.displayName,
@@ -438,6 +450,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       if (model.form) {
         const formConfig = rewriteConfigCodes(model.form.config, codeMap, dataSourceIdMap)
         await trx('lowcode_forms').insert({
+          id: newId(),
           model_id: modelId,
           name: model.form.name || '默认表单',
           config: stringifyJson(formConfig),
@@ -449,6 +462,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       if (model.table) {
         const tableConfig = rewriteConfigCodes(model.table.config, codeMap, dataSourceIdMap)
         await trx('lowcode_tables').insert({
+          id: newId(),
           model_id: modelId,
           name: model.table.name || '默认列表',
           config: stringifyJson(tableConfig),
@@ -467,6 +481,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const rewrittenConfig = rewriteFlowConfig(config, codeMap)
 
       await trx('flow_definitions').insert({
+        id: newId(),
         code: newCode,
         name: flow.name,
         model_code: flow.modelCode ? codeMap[flow.modelCode] || flow.modelCode : null,
@@ -485,6 +500,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const rewrittenConfig = rewriteReportConfig(config, codeMap, dataSourceIdMap)
 
       await trx('lowcode_reports').insert({
+        id: newId(),
         code: newCode,
         name: report.name,
         model_code: report.modelCode ? codeMap[report.modelCode] || report.modelCode : null,
@@ -503,6 +519,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const rewrittenConfig = rewriteDashboardConfig(config, codeMap, dataSourceIdMap)
 
       await trx('dashboards').insert({
+        id: newId(),
         code: newCode,
         name: dashboard.name,
         config: stringifyJson(rewrittenConfig),
@@ -520,6 +537,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const rewrittenConfig = rewritePrintConfig(config, codeMap)
 
       await trx('print_templates').insert({
+        id: newId(),
         code: newCode,
         name: print.name,
         model_code: print.modelCode ? codeMap[print.modelCode] || print.modelCode : null,
@@ -541,6 +559,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
       const rewrittenConfig = rewritePageConfig(config, codeMap, dataSourceIdMap)
 
       await trx('lowcode_pages').insert({
+        id: newId(),
         code: newCode,
         name: page.name,
         description: page.description || '',
@@ -554,7 +573,9 @@ export async function installTemplate(req: any, templateCode: string, options: I
     const portalConfig = template.portalConfig
       ? JSON.stringify(rewriteConfigCodes(template.portalConfig, codeMap, dataSourceIdMap))
       : null
-    const [appId] = await trx('lowcode_apps').insert({
+    const appId = newId()
+    await trx('lowcode_apps').insert({
+      id: appId,
       code: finalAppCode,
       name: finalAppName,
       category: template.app?.category || '',
@@ -571,6 +592,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
     if (items.length) {
       await trx('lowcode_app_items').insert(
         items.map((item: any, index: number) => ({
+          id: newId(),
           app_id: appId,
           type: item.type,
           ref_code: item.refCode ? codeMap[item.refCode] || item.refCode : item.refCode,
@@ -601,7 +623,9 @@ export async function installTemplate(req: any, templateCode: string, options: I
       }))
     })
 
-    const [versionId] = await trx('lowcode_app_versions').insert({
+    const versionId = newId()
+    await trx('lowcode_app_versions').insert({
+      id: versionId,
       app_id: appId,
       version: template.version || '1.0.0',
       snapshot,
@@ -629,7 +653,7 @@ export async function installTemplate(req: any, templateCode: string, options: I
 
 // ---------- 配置引用重写 ----------
 
-function rewriteConfigCodes(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<number, number>): any {
+function rewriteConfigCodes(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<string, string>): any {
   if (!config || typeof config !== 'object') return config
 
   if (Array.isArray(config)) {
@@ -664,7 +688,7 @@ function rewriteFlowConfig(config: any, codeMap: Record<string, string>): any {
   return rewriteConfigCodes(config, codeMap, {})
 }
 
-function rewriteReportConfig(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<number, number>): any {
+function rewriteReportConfig(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<string, string>): any {
   if (!config || typeof config !== 'object') return config
 
   const result = rewriteConfigCodes(config, codeMap, dataSourceIdMap)
@@ -680,7 +704,7 @@ function rewriteReportConfig(config: any, codeMap: Record<string, string>, dataS
   return result
 }
 
-function rewriteDashboardConfig(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<number, number>): any {
+function rewriteDashboardConfig(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<string, string>): any {
   if (!config || typeof config !== 'object') return config
 
   // 重写 SQL 中可能引用的物理表名（简单替换）
@@ -700,7 +724,7 @@ function rewriteDashboardConfig(config: any, codeMap: Record<string, string>, da
   return result
 }
 
-function rewritePageConfig(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<number, number>): any {
+function rewritePageConfig(config: any, codeMap: Record<string, string>, dataSourceIdMap: Record<string, string>): any {
   if (!config || typeof config !== 'object') return config
 
   const result = rewriteConfigCodes(config, codeMap, dataSourceIdMap)

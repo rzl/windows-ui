@@ -12,7 +12,7 @@ export function savePage(data: any) {
   return request.post('/pages/pages', data)
 }
 
-export function deletePage(id: number) {
+export function deletePage(id: string) {
   return request.delete(`/pages/pages/${id}`)
 }
 

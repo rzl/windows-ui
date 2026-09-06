@@ -3,16 +3,17 @@ import { wsManager } from '../../utils/websocket'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 import { createMessage } from './monitor.service'
+import { newId } from '../../utils/id'
 
 export interface AlertRule {
-  id?: number
+  id?: string
   name: string
   type: 'api_slow' | 'sql_slow' | 'error_rate' | 'server_load'
   threshold: number
   windowMinutes: number
   enabled?: number
   notifyChannel?: string
-  receiverIds?: number[]
+  receiverIds?: string[]
 }
 
 export async function getAlertRules(req: AuthRequest, query: any = {}) {
@@ -35,22 +36,23 @@ export async function getAlertRules(req: AuthRequest, query: any = {}) {
   }
 }
 
-export async function getAlertRule(req: AuthRequest, id: number) {
+export async function getAlertRule(req: AuthRequest, id: string) {
   const item = await db('alert_rules').where({ id }).where(tenantWhere(req)).first()
   return item ? parseRule(item) : null
 }
 
 export async function createAlertRule(req: AuthRequest, data: AlertRule) {
-  const [id] = await db('alert_rules').insert(setTenantId(formatRule(data), req))
+  const id = newId()
+  await db('alert_rules').insert(setTenantId({ id, ...formatRule(data) }, req))
   return getAlertRule(req, id)
 }
 
-export async function updateAlertRule(req: AuthRequest, id: number, data: AlertRule) {
+export async function updateAlertRule(req: AuthRequest, id: string, data: AlertRule) {
   await db('alert_rules').where({ id }).where(tenantWhere(req)).update(formatRule(data))
   return getAlertRule(req, id)
 }
 
-export async function deleteAlertRule(req: AuthRequest, id: number) {
+export async function deleteAlertRule(req: AuthRequest, id: string) {
   await db('alert_rules').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -79,16 +81,18 @@ export async function getAlertRecords(req: AuthRequest, query: any = {}) {
 export async function createAlertRecord(
   req: AuthRequest,
   data: {
-    ruleId?: number
+    ruleId?: string
     ruleName: string
     type: string
     message: string
     snapshot?: any
   }
 ) {
-  const [id] = await db('alert_records').insert(
+  const id = newId()
+  await db('alert_records').insert(
     setTenantId(
       {
+        id,
         rule_id: data.ruleId || null,
         rule_name: data.ruleName,
         type: data.type,
@@ -105,7 +109,7 @@ export async function createAlertRecord(
   return db('alert_records').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function markAlertRecordRead(req: AuthRequest, id: number) {
+export async function markAlertRecordRead(req: AuthRequest, id: string) {
   await db('alert_records')
     .where({ id })
     .where(tenantWhere(req))
@@ -113,7 +117,7 @@ export async function markAlertRecordRead(req: AuthRequest, id: number) {
   return db('alert_records').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function resolveAlertRecord(req: AuthRequest, id: number) {
+export async function resolveAlertRecord(req: AuthRequest, id: string) {
   await db('alert_records')
     .where({ id })
     .where(tenantWhere(req))
@@ -231,7 +235,7 @@ export async function checkAlerts(req: AuthRequest) {
 
 async function pushAlertNotification(req: AuthRequest, record: any) {
   const ruleId = record.rule_id
-  let receiverIds: number[] = []
+  let receiverIds: string[] = []
 
   if (ruleId) {
     const rule = await db('alert_rules').where({ id: ruleId }).where(tenantWhere(req)).first()

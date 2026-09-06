@@ -4,7 +4,7 @@ export async function up(knex: Knex): Promise<void> {
   const hasDataRules = await knex.schema.hasTable('lowcode_data_permission_rules')
   if (!hasDataRules) {
     await knex.schema.createTable('lowcode_data_permission_rules', (table) => {
-      table.increments('id').primary()
+      table.string('id', 36).primary()
       table.string('code', 100).notNullable().unique()
       table.string('name', 200).notNullable()
       table.string('model_code', 100).notNullable().comment('关联模型编码')
@@ -21,7 +21,7 @@ export async function up(knex: Knex): Promise<void> {
   const hasFieldRules = await knex.schema.hasTable('lowcode_field_permission_rules')
   if (!hasFieldRules) {
     await knex.schema.createTable('lowcode_field_permission_rules', (table) => {
-      table.increments('id').primary()
+      table.string('id', 36).primary()
       table.string('model_code', 100).notNullable().comment('关联模型编码')
       table.string('field_code', 100).notNullable().comment('字段编码')
       table.tinyint('readable').notNullable().defaultTo(1)
@@ -38,9 +38,9 @@ export async function up(knex: Knex): Promise<void> {
   const hasRoleDataPerms = await knex.schema.hasTable('role_data_permissions')
   if (!hasRoleDataPerms) {
     await knex.schema.createTable('role_data_permissions', (table) => {
-      table.increments('id').primary()
-      table.integer('role_id').unsigned().notNullable().comment('角色 ID')
-      table.integer('data_permission_id').unsigned().notNullable().comment('数据规则 ID')
+      table.string('id', 36).primary()
+      table.string('role_id', 36).notNullable().comment('角色 ID')
+      table.string('data_permission_id', 36).notNullable().comment('数据规则 ID')
       table.timestamp('create_time').defaultTo(knex.fn.now())
       table.unique(['role_id', 'data_permission_id'])
     })

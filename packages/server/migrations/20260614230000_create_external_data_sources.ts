@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
   if (hasTable) return
 
   await knex.schema.createTable('external_data_sources', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 100).notNullable().unique()
     table.string('name', 200).notNullable()
     table.string('type', 50).notNullable() // rest / mysql / postgresql

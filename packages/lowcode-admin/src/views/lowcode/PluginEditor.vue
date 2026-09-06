@@ -86,7 +86,7 @@ const typeOptions = [
 
 onMounted(async () => {
   if (isEdit.value) {
-    const data = await pluginApi.getPlugin(Number(route.params.id))
+    const data = await pluginApi.getPlugin(String(route.params.id))
     form.code = data.code
     form.name = data.name
     form.version = data.version || '1.0.0'
@@ -120,7 +120,7 @@ async function handleSave() {
       contributions
     }
     if (isEdit.value) {
-      await pluginApi.updatePlugin(Number(route.params.id), data)
+      await pluginApi.updatePlugin(String(route.params.id), data)
     } else {
       await pluginApi.createPlugin(data)
     }

@@ -1,4 +1,5 @@
 import type { Knex } from 'knex'
+import { newId } from '../src/utils/id.ts'
 
 export async function seed(knex: Knex): Promise<void> {
   const lowcode = await knex('menus').where({ name: 'Lowcode' }).first()
@@ -8,6 +9,7 @@ export async function seed(knex: Knex): Promise<void> {
   if (exists) return
 
   await knex('menus').insert({
+    id: newId(),
     parent_id: lowcode.id,
     name: 'PageList',
     path: '/lowcode/page',

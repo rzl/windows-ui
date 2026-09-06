@@ -5,11 +5,11 @@ export async function up(knex: Knex): Promise<void> {
   if (hasTable) return
 
   await knex.schema.createTable('data_audit_logs', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('model_code', 100).notNullable()
-    table.integer('record_id').notNullable()
+    table.string('record_id', 36).notNullable()
     table.string('action', 50).notNullable() // create / update / delete
-    table.integer('operator_id').nullable()
+    table.string('operator_id', 36).nullable()
     table.string('operator_name', 100).nullable()
     table.json('before').nullable()
     table.json('after').nullable()

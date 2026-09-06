@@ -20,7 +20,7 @@ export async function up(knex: Knex): Promise<void> {
     const hasColumn = await knex.schema.hasColumn(tableName, 'tenant_id')
     if (!hasColumn) {
       await knex.schema.table(tableName, (table) => {
-        table.integer('tenant_id').notNullable().defaultTo(0).comment('租户 ID，0 表示全局或超级管理员数据')
+        table.string('tenant_id', 36).notNullable().defaultTo('01J0000000000000000000001').comment('租户 ID，全局租户为固定 ULID')
       })
     }
   }

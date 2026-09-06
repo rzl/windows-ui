@@ -96,7 +96,7 @@ const parentTitleMap = computed(() => {
 
 const parentOptions = computed(() => {
   const result: any[] = [{ label: '根菜单', value: 0 }]
-  const excludeIds = new Set<number>()
+  const excludeIds = new Set<string>()
   if (formModel.id) {
     function collect(item: any) {
       excludeIds.add(item.id)
@@ -141,7 +141,7 @@ function openDialog(row?: any) {
     formModel.parentId = row.parent_id
     formModel.status = row.status === 1
   } else {
-    formModel.parentId = 0
+    formModel.parentId = ''
     formModel.status = true
     formModel.sort = 0
   }

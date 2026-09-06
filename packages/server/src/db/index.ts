@@ -22,6 +22,8 @@ export const db = knex({
 })
 
 // SQL 性能采集：记录执行耗时超过阈值的 SQL
+import { newId } from '../utils/id'
+
 const SQL_SLOW_THRESHOLD = 100
 const queryTimes = new Map<string, number>()
 const IGNORE_TABLES = ['sql_metrics', 'api_metrics', 'alert_rules', 'alert_records', 'knex_migrations']
@@ -40,6 +42,7 @@ db.on('query-response', (_response: any, querySpec: any) => {
   if (IGNORE_TABLES.some((t) => sql.includes(t))) return
   db('sql_metrics')
     .insert({
+      id: newId(),
       sql,
       bindings: querySpec.bindings ? JSON.stringify(querySpec.bindings) : null,
       duration,

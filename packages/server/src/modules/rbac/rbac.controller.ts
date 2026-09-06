@@ -10,7 +10,7 @@ export async function getUsers(req: AuthRequest, res: Response) {
 }
 
 export async function getUser(req: AuthRequest, res: Response) {
-  const result = await rbacService.getUserById(req, Number(req.params.id))
+  const result = await rbacService.getUserById(req, req.params.id)
   res.json(success(result))
 }
 
@@ -20,7 +20,7 @@ export async function createUser(req: AuthRequest, res: Response) {
 }
 
 export async function updateUser(req: AuthRequest, res: Response) {
-  const result = await rbacService.updateUser(req, Number(req.params.id), req.body)
+  const result = await rbacService.updateUser(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
@@ -37,7 +37,7 @@ export async function getRoles(req: AuthRequest, res: Response) {
 }
 
 export async function getRole(req: AuthRequest, res: Response) {
-  const result = await rbacService.getRoleById(req, Number(req.params.id))
+  const result = await rbacService.getRoleById(req, req.params.id)
   res.json(success(result))
 }
 
@@ -47,12 +47,12 @@ export async function createRole(req: AuthRequest, res: Response) {
 }
 
 export async function updateRole(req: AuthRequest, res: Response) {
-  const result = await rbacService.updateRole(req, Number(req.params.id), req.body)
+  const result = await rbacService.updateRole(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteRole(req: AuthRequest, res: Response) {
-  await rbacService.deleteRole(req, Number(req.params.id))
+  await rbacService.deleteRole(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -78,12 +78,12 @@ export async function createMenu(req: AuthRequest, res: Response) {
 }
 
 export async function updateMenu(req: AuthRequest, res: Response) {
-  const result = await rbacService.updateMenu(req, Number(req.params.id), req.body)
+  const result = await rbacService.updateMenu(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteMenu(req: AuthRequest, res: Response) {
-  await rbacService.deleteMenu(req, Number(req.params.id))
+  await rbacService.deleteMenu(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -99,11 +99,11 @@ export async function createDept(req: AuthRequest, res: Response) {
 }
 
 export async function updateDept(req: AuthRequest, res: Response) {
-  const result = await rbacService.updateDept(req, Number(req.params.id), req.body)
+  const result = await rbacService.updateDept(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteDept(req: AuthRequest, res: Response) {
-  await rbacService.deleteDept(req, Number(req.params.id))
+  await rbacService.deleteDept(req, req.params.id)
   res.json(success(null, '删除成功'))
 }

@@ -8,8 +8,8 @@ export async function up(knex: Knex): Promise<void> {
     const hasDeptId = await knex.schema.hasColumn(tableName, 'dept_id')
     if (!hasCreateBy || !hasDeptId) {
       await knex.schema.table(tableName, (table) => {
-        if (!hasCreateBy) table.integer('create_by').unsigned().nullable()
-        if (!hasDeptId) table.integer('dept_id').unsigned().nullable()
+        if (!hasCreateBy) table.string('create_by', 36).nullable()
+        if (!hasDeptId) table.string('dept_id', 36).nullable()
       })
     }
   }

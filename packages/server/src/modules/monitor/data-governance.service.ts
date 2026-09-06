@@ -4,7 +4,7 @@ import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 
 export interface RetentionPolicy {
-  id?: number
+  id?: string
   tableName: string
   retentionDays: number
   enabled?: number
@@ -25,12 +25,12 @@ export async function getRetentionPolicies(req: AuthRequest) {
   return list.map((item) => parsePolicy(item))
 }
 
-export async function getRetentionPolicy(req: AuthRequest, id: number) {
+export async function getRetentionPolicy(req: AuthRequest, id: string) {
   const item = await db('data_retention_policies').where({ id }).where(tenantWhere(req)).first()
   return item ? parsePolicy(item) : null
 }
 
-export async function updateRetentionPolicy(req: AuthRequest, id: number, data: Partial<RetentionPolicy>) {
+export async function updateRetentionPolicy(req: AuthRequest, id: string, data: Partial<RetentionPolicy>) {
   await db('data_retention_policies')
     .where({ id })
     .where(tenantWhere(req))

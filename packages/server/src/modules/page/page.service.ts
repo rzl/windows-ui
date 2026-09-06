@@ -2,10 +2,11 @@ import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 import { executeDataSource } from '../dashboard/dashboard.service'
 
 export interface PageForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   description?: string
@@ -37,7 +38,7 @@ export async function getPageByCode(req: AuthRequest, code: string) {
   return { ...page, config: parseConfig(page.config) }
 }
 
-export async function getPageById(req: AuthRequest, id: number) {
+export async function getPageById(req: AuthRequest, id: string) {
   const page = await db('lowcode_pages').where({ id }).where(tenantWhere(req)).first()
   if (!page) throw new AppError('页面不存在', 404)
   return { ...page, config: parseConfig(page.config) }
@@ -58,11 +59,12 @@ export async function createPage(req: AuthRequest, data: PageForm) {
     status: data.status ?? 1,
     permission: data.permission || null
   }, req)
-  const [id] = await db('lowcode_pages').insert(insertData)
+  const id = newId()
+  await db('lowcode_pages').insert({ id, ...insertData })
   return getPageById(req, id)
 }
 
-export async function updatePage(req: AuthRequest, id: number, data: PageForm) {
+export async function updatePage(req: AuthRequest, id: string, data: PageForm) {
   const page = await getPageById(req, id)
   await db('lowcode_pages').where({ id }).where(tenantWhere(req)).update({
     name: data.name ?? page.name,
@@ -82,7 +84,7 @@ export async function savePage(req: AuthRequest, data: PageForm) {
   return createPage(req, data)
 }
 
-export async function deletePage(req: AuthRequest, id: number) {
+export async function deletePage(req: AuthRequest, id: string) {
   await db('lowcode_pages').where({ id }).where(tenantWhere(req)).del()
   return true
 }

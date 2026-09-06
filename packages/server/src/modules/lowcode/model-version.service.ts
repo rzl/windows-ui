@@ -4,15 +4,16 @@ import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 import { getModelByCode, getModelById, createField, updateField, deleteField, updateModel } from './lowcode.service'
 import * as relationService from './relation.service'
+import { newId } from '../../utils/id'
 
-export async function getModelVersions(req: AuthRequest, modelId: number) {
+export async function getModelVersions(req: AuthRequest, modelId: string) {
   const model = await getModelById(req, modelId)
   return db('lowcode_model_versions')
     .where({ model_id: modelId, ...tenantWhere(req) })
     .orderBy('id', 'desc')
 }
 
-export async function createModelVersion(req: AuthRequest, modelId: number, data: any) {
+export async function createModelVersion(req: AuthRequest, modelId: string, data: any) {
   const model = await getModelById(req, modelId)
   const relations = await relationService.getRelations(req, {
     sourceModel: model.code,
@@ -73,8 +74,10 @@ export async function createModelVersion(req: AuthRequest, modelId: number, data
     .where({ model_id: modelId, ...tenantWhere(req) })
     .update({ is_published: 0 })
 
-  const [id] = await db('lowcode_model_versions').insert(
+  const id = newId()
+  await db('lowcode_model_versions').insert(
     setTenantId({
+      id,
       model_id: modelId,
       version: data.version || generateVersion(),
       description: data.description || '',
@@ -88,7 +91,7 @@ export async function createModelVersion(req: AuthRequest, modelId: number, data
     .first()
 }
 
-export async function deleteModelVersion(req: AuthRequest, modelId: number, versionId: number) {
+export async function deleteModelVersion(req: AuthRequest, modelId: string, versionId: string) {
   const version = await db('lowcode_model_versions')
     .where({ id: versionId, model_id: modelId, ...tenantWhere(req) })
     .first()
@@ -99,7 +102,7 @@ export async function deleteModelVersion(req: AuthRequest, modelId: number, vers
   return true
 }
 
-export async function rollbackModelVersion(req: AuthRequest, modelId: number, versionId: number) {
+export async function rollbackModelVersion(req: AuthRequest, modelId: string, versionId: string) {
   const version = await db('lowcode_model_versions')
     .where({ id: versionId, model_id: modelId, ...tenantWhere(req) })
     .first()
@@ -138,7 +141,7 @@ export async function rollbackModelVersion(req: AuthRequest, modelId: number, ve
   return getModelById(req, modelId)
 }
 
-async function rollbackFields(req: AuthRequest, modelId: number, snapshotFields: any[]) {
+async function rollbackFields(req: AuthRequest, modelId: string, snapshotFields: any[]) {
   const currentFields = await db('lowcode_fields').where({ model_id: modelId }).where(tenantWhere(req))
   const currentMap = new Map(currentFields.map((f) => [f.field_name, f]))
   const snapshotMap = new Map(snapshotFields.map((f) => [f.field_name, f]))
@@ -162,10 +165,11 @@ async function rollbackFields(req: AuthRequest, modelId: number, snapshotFields:
   }
 }
 
-async function rollbackForms(req: AuthRequest, modelId: number, snapshotForms: any[]) {
+async function rollbackForms(req: AuthRequest, modelId: string, snapshotForms: any[]) {
   await db('lowcode_forms').where({ model_id: modelId }).where(tenantWhere(req)).del()
   for (const form of snapshotForms) {
     await db('lowcode_forms').insert({
+      id: newId(),
       ...tenantWhere(req),
       model_id: modelId,
       name: form.name,
@@ -175,10 +179,11 @@ async function rollbackForms(req: AuthRequest, modelId: number, snapshotForms: a
   }
 }
 
-async function rollbackTables(req: AuthRequest, modelId: number, snapshotTables: any[]) {
+async function rollbackTables(req: AuthRequest, modelId: string, snapshotTables: any[]) {
   await db('lowcode_tables').where({ model_id: modelId }).where(tenantWhere(req)).del()
   for (const table of snapshotTables) {
     await db('lowcode_tables').insert({
+      id: newId(),
       ...tenantWhere(req),
       model_id: modelId,
       name: table.name,
@@ -218,7 +223,7 @@ async function rollbackRelations(req: AuthRequest, snapshotRelations: any[]) {
   }
 }
 
-function fieldSnapshotToInput(modelId: number, field: any) {
+function fieldSnapshotToInput(modelId: string, field: any) {
   return {
     modelId,
     fieldName: field.field_name,

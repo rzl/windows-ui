@@ -4,7 +4,7 @@ export async function up(knex: Knex): Promise<void> {
   const hasStarterId = await knex.schema.hasColumn('flow_instances', 'starter_id')
   if (!hasStarterId) {
     await knex.schema.table('flow_instances', (table) => {
-      table.integer('starter_id').unsigned().nullable()
+      table.string('starter_id', 36).nullable()
       table.string('starter_name', 50).nullable()
     })
   }
@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
   const hasOperatorId = await knex.schema.hasColumn('flow_tasks', 'operator_id')
   if (!hasOperatorId) {
     await knex.schema.table('flow_tasks', (table) => {
-      table.integer('operator_id').unsigned().nullable()
+      table.string('operator_id', 36).nullable()
       table.string('operator_name', 50).nullable()
     })
   }

@@ -2,14 +2,25 @@
 
 > 默认使用 SQLite，所有表结构使用 Knex 迁移管理。字段命名采用 snake_case，JavaScript 层使用 camelCase 转换。
 
+## 主键与 ID 约定
+
+- 所有表主键为 `string(36)`，存储 ULID（26 字符），由应用层通过 `packages/server/src/utils/id.ts` 的 `newId()` 生成，不依赖数据库自增。
+- 列长度声明为 36，未来切换 UUID 无需 DDL 变更；`newId()` 是唯一 ID 生成抽象点。
+- 外键与审计列（role_id、dept_id、parent_id、model_id、dict_id、tenant_id、create_by、update_by、business_key、instance_id 等）统一为 `string(36)`。
+- 所有 `.insert()` 显式传入 `id: newId()`，不再依赖自增返回值。
+- 导入/导出以 code 等稳定业务键关联，模型 JSON 导出/导入时 ID 重映射；动态表 Excel 导入时记录 ID 重新生成，保证 ID 稳定且全局唯一。
+- 树形结构根节点约定 `parent_id` 为 `NULL`（前端传来的空串由后端归一为 null）。
+- `tenant_id` 为 ULID 字符串，全局租户为固定常量 `GLOBAL_TENANT_ID`（`01J0000000000000000000001`），不再是数字 0。
+- 超级管理员角色为固定常量 `ADMIN_ROLE_ID`（`01J0000000000000000000000`），管理员判定为 role_id 与该常量比较（`utils/tenant.ts` re-export，原 import 路径不变）。
+
 ## 核心表
 
 ### users（用户表）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
 | username | string | 用户名（联合唯一：tenant_id + username） |
 | password | string | bcrypt 加密密码 |
 | nickname | string | 昵称 |
@@ -17,8 +28,8 @@
 | phone | string | 手机号 |
 | avatar | string | 头像 URL |
 | status | integer | 0 禁用 / 1 启用 |
-| dept_id | integer FK | 部门 ID |
-| role_id | integer FK | 默认角色 ID |
+| dept_id | string(36) FK | 部门 ID |
+| role_id | string(36) FK | 默认角色 ID |
 | create_time | datetime | 创建时间 |
 | update_time | datetime | 更新时间 |
 
@@ -26,8 +37,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
 | name | string | 角色名称 |
 | code | string | 角色编码（联合唯一：tenant_id + code） |
 | description | string | 描述 |
@@ -38,9 +49,9 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
-| parent_id | integer FK | 父菜单 ID，0 为根 |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
+| parent_id | string(36) FK | 父菜单 ID，NULL 为根 |
 | name | string | 路由名称 |
 | path | string | 路由路径 |
 | component | string | 组件路径 |
@@ -54,18 +65,18 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
-| role_id | integer FK | 角色 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
+| role_id | string(36) FK | 角色 ID |
 | permission | string | 权限码 |
 
 ### depts（部门表）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
-| parent_id | integer FK | 父部门 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
+| parent_id | string(36) FK | 父部门 ID，NULL 为根 |
 | name | string | 部门名称 |
 | code | string | 部门编码 |
 | sort | integer | 排序 |
@@ -75,8 +86,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
 | name | string | 字典名称 |
 | code | string | 字典编码（联合唯一：tenant_id + code） |
 | description | string | 描述 |
@@ -86,9 +97,9 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
-| dict_id | integer FK | 字典 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
+| dict_id | string(36) FK | 字典 ID |
 | label | string | 显示标签 |
 | value | string | 值 |
 | sort | integer | 排序 |
@@ -100,7 +111,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
+| id | string(36) PK | ULID，应用层生成 |
 | name | string | 租户名称 |
 | code | string UNIQUE | 租户编码 |
 | description | text | 描述 |
@@ -137,7 +148,7 @@
 - 异步导出：`export_tasks`
 - 动态物理表：所有由 `lowcode_models` 生成的业务表
 
-超级管理员（当前以 `role_id === 1` 判定）可跨租户访问，普通用户仅可访问 `tenant_id` 与本用户 `tenant_id` 一致的数据。
+超级管理员（以 `role_id` 等于固定常量 `ADMIN_ROLE_ID` 判定）可跨租户访问，普通用户仅可访问 `tenant_id` 与本用户 `tenant_id` 一致的数据。
 
 ## 后续扩展表
 
@@ -164,8 +175,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
 | code | string | 页面编码（联合唯一：tenant_id + code） |
 | name | string | 页面名称 |
 | description | text | 页面描述 |
@@ -183,12 +194,12 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
+| id | string(36) PK | ULID，应用层生成 |
 | method | string | 请求方法 |
 | path | string | 请求路径 |
 | status_code | integer | HTTP 状态码 |
 | duration | integer | 请求耗时 ms |
-| user_id | integer | 用户 ID |
+| user_id | string(36) | 用户 ID |
 | username | string | 用户名 |
 | ip | string | IP 地址 |
 | params | text | 请求参数 JSON |
@@ -198,7 +209,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
+| id | string(36) PK | ULID，应用层生成 |
 | sql | text | SQL 文本 |
 | bindings | text | 绑定参数 JSON |
 | duration | integer | 执行耗时 ms |
@@ -208,7 +219,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
+| id | string(36) PK | ULID，应用层生成 |
 | name | string | 规则名称 |
 | type | string | api_slow / sql_slow / error_rate / server_load |
 | threshold | integer | 阈值 |
@@ -223,8 +234,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| rule_id | integer | 规则 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| rule_id | string(36) | 规则 ID |
 | rule_name | string | 规则名称 |
 | type | string | 告警类型 |
 | message | text | 告警内容 |
@@ -238,7 +249,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
+| id | string(36) PK | ULID，应用层生成 |
 | table_name | string UNIQUE | 目标表名 |
 | retention_days | integer | 保留天数，0 表示不自动清理 |
 | enabled | integer | 是否启用 |
@@ -250,11 +261,11 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| api_id | integer | 接口 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| api_id | string(36) | 接口 ID |
 | api_code | string | 接口编码 |
 | api_path | string | 接口路径 |
-| user_id | integer | 用户 ID |
+| user_id | string(36) | 用户 ID |
 | username | string | 用户名 |
 | ip | string | IP 地址 |
 | method | string | 请求方法 |
@@ -269,8 +280,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
 | code | string | 接口编码（联合唯一：tenant_id + code） |
 | name | string | 接口名称 |
 | method | string | 请求方法 |
@@ -294,8 +305,8 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| tenant_id | integer FK | 租户 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| tenant_id | string(36) FK | 租户 ID |
 | code | string | 流程编码（联合唯一：tenant_id + code + version） |
 | name | string | 流程名称 |
 | model_code | string | 关联模型编码 |
@@ -311,16 +322,16 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
+| id | string(36) PK | ULID，应用层生成 |
 | flow_code | string | 流程编码 |
-| business_key | integer | 业务主键 |
+| business_key | string(36) | 业务主键 |
 | status | string | running / completed / rejected / terminated |
 | current_node_id | string | 当前节点 ID |
-| starter_id | integer | 发起人 ID |
+| starter_id | string(36) | 发起人 ID |
 | starter_name | string | 发起人姓名 |
 | business_data | text | 业务数据 JSON |
 | definition_version | integer | 启动时流程定义版本 |
-| terminated_by | integer | 强制终止人 ID |
+| terminated_by | string(36) | 强制终止人 ID |
 | terminated_reason | text | 强制终止原因 |
 | terminated_time | datetime | 强制终止时间 |
 | create_time | datetime | 创建时间 |
@@ -330,22 +341,22 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| instance_id | integer | 流程实例 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| instance_id | string(36) | 流程实例 ID |
 | node_id | string | 节点 ID |
 | node_name | string | 节点名称 |
 | assignee_type | string | role / user / dept |
 | assignee_value | string | 审批对象 ID |
 | status | string | pending / approved / rejected / cc / terminated |
 | comment | text | 审批意见 |
-| operator_id | integer | 实际处理人 ID |
+| operator_id | string(36) | 实际处理人 ID |
 | operator_name | string | 实际处理人姓名 |
 | timeout_hours | integer | 超时小时数 |
 | due_time | datetime | 截止时间 |
 | timeout_notified | integer | 是否已提醒 |
 | timeout_action | string | none / autoApprove / autoReject，超时后自动动作 |
-| transferred_from | integer | 转办来源用户 ID |
-| delegated_from | integer | 委托来源用户 ID |
+| transferred_from | string(36) | 转办来源用户 ID |
+| delegated_from | string(36) | 委托来源用户 ID |
 | urge_count | integer | 催办次数 |
 | last_urge_time | datetime | 上次催办时间 |
 | create_time | datetime | 创建时间 |
@@ -355,9 +366,9 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | integer PK | 自增主键 |
-| delegator_id | integer | 委托人 ID |
-| delegatee_id | integer | 受托人 ID |
+| id | string(36) PK | ULID，应用层生成 |
+| delegator_id | string(36) | 委托人 ID |
+| delegatee_id | string(36) | 受托人 ID |
 | flow_code | string | 限定流程编码，空表示全部 |
 | start_time | datetime | 委托开始时间 |
 | end_time | datetime | 委托结束时间 |

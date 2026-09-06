@@ -1,6 +1,7 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { newId } from '../../utils/id'
 import type { AuthRequest } from '../../middleware/auth'
 
 // 字典 CRUD
@@ -12,7 +13,7 @@ export async function getDicts(req: AuthRequest) {
     .orderBy('dicts.id', 'desc')
 }
 
-export async function getDictById(req: AuthRequest, id: number) {
+export async function getDictById(req: AuthRequest, id: string) {
   const dict = await db('dicts').where({ id }).where(tenantWhere(req)).first()
   if (!dict) throw new AppError('字典不存在', 404)
   const items = await db('dict_items')
@@ -45,11 +46,12 @@ export async function createDict(req: AuthRequest, data: any) {
     category_id: data.categoryId || null,
     status: data.status ?? 1
   }, req)
-  const [id] = await db('dicts').insert(insertData)
+  const id = newId()
+  await db('dicts').insert({ id, ...insertData })
   return db('dicts').where({ id }).first()
 }
 
-export async function updateDict(req: AuthRequest, id: number, data: any) {
+export async function updateDict(req: AuthRequest, id: string, data: any) {
   const dict = await db('dicts').where({ id }).where(tenantWhere(req)).first()
   if (!dict) throw new AppError('字典不存在', 404)
 
@@ -70,7 +72,7 @@ export async function updateDict(req: AuthRequest, id: number, data: any) {
   return db('dicts').where({ id }).first()
 }
 
-export async function deleteDict(req: AuthRequest, id: number) {
+export async function deleteDict(req: AuthRequest, id: string) {
   await db('dict_items').where({ dict_id: id }).where(tenantWhere(req)).del()
   await db('dicts').where({ id }).where(tenantWhere(req)).del()
   return true
@@ -88,11 +90,12 @@ export async function createDictItem(req: AuthRequest, data: any) {
     sort: data.sort ?? 0,
     status: data.status ?? 1
   }, req)
-  const [id] = await db('dict_items').insert(insertData)
+  const id = newId()
+  await db('dict_items').insert({ id, ...insertData })
   return db('dict_items').where({ id }).first()
 }
 
-export async function updateDictItem(req: AuthRequest, id: number, data: any) {
+export async function updateDictItem(req: AuthRequest, id: string, data: any) {
   const item = await db('dict_items').where({ id }).where(tenantWhere(req)).first()
   if (!item) throw new AppError('字典项不存在', 404)
 
@@ -105,7 +108,7 @@ export async function updateDictItem(req: AuthRequest, id: number, data: any) {
   return db('dict_items').where({ id }).first()
 }
 
-export async function deleteDictItem(req: AuthRequest, id: number) {
+export async function deleteDictItem(req: AuthRequest, id: string) {
   await db('dict_items').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -124,11 +127,12 @@ export async function createDictCategory(req: AuthRequest, data: any) {
     sort: data.sort ?? 0,
     status: data.status ?? 1
   }, req)
-  const [id] = await db('dict_categories').insert(insertData)
+  const id = newId()
+  await db('dict_categories').insert({ id, ...insertData })
   return db('dict_categories').where({ id }).first()
 }
 
-export async function updateDictCategory(req: AuthRequest, id: number, data: any) {
+export async function updateDictCategory(req: AuthRequest, id: string, data: any) {
   const category = await db('dict_categories').where({ id }).where(tenantWhere(req)).first()
   if (!category) throw new AppError('字典分类不存在', 404)
   await db('dict_categories').where({ id }).where(tenantWhere(req)).update({
@@ -140,7 +144,7 @@ export async function updateDictCategory(req: AuthRequest, id: number, data: any
   return db('dict_categories').where({ id }).first()
 }
 
-export async function deleteDictCategory(req: AuthRequest, id: number) {
+export async function deleteDictCategory(req: AuthRequest, id: string) {
   await db('dict_categories').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -159,11 +163,12 @@ export async function createNotice(req: AuthRequest, data: any) {
     sort: data.sort ?? 0,
     publish_time: data.publishTime || null
   }, req)
-  const [id] = await db('notices').insert(insertData)
+  const id = newId()
+  await db('notices').insert({ id, ...insertData })
   return db('notices').where({ id }).first()
 }
 
-export async function updateNotice(req: AuthRequest, id: number, data: any) {
+export async function updateNotice(req: AuthRequest, id: string, data: any) {
   const notice = await db('notices').where({ id }).where(tenantWhere(req)).first()
   if (!notice) throw new AppError('公告不存在', 404)
   await db('notices').where({ id }).where(tenantWhere(req)).update({
@@ -178,7 +183,7 @@ export async function updateNotice(req: AuthRequest, id: number, data: any) {
   return db('notices').where({ id }).first()
 }
 
-export async function deleteNotice(req: AuthRequest, id: number) {
+export async function deleteNotice(req: AuthRequest, id: string) {
   await db('notices').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -197,11 +202,12 @@ export async function createPosition(req: AuthRequest, data: any) {
     sort: data.sort ?? 0,
     status: data.status ?? 1
   }, req)
-  const [id] = await db('positions').insert(insertData)
+  const id = newId()
+  await db('positions').insert({ id, ...insertData })
   return db('positions').where({ id }).first()
 }
 
-export async function updatePosition(req: AuthRequest, id: number, data: any) {
+export async function updatePosition(req: AuthRequest, id: string, data: any) {
   const position = await db('positions').where({ id }).where(tenantWhere(req)).first()
   if (!position) throw new AppError('职务不存在', 404)
   await db('positions').where({ id }).where(tenantWhere(req)).update({
@@ -214,7 +220,7 @@ export async function updatePosition(req: AuthRequest, id: number, data: any) {
   return db('positions').where({ id }).first()
 }
 
-export async function deletePosition(req: AuthRequest, id: number) {
+export async function deletePosition(req: AuthRequest, id: string) {
   await db('positions').where({ id }).where(tenantWhere(req)).del()
   return true
 }

@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
   if (hasTable) return
 
   await knex.schema.createTable('print_templates', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 100).notNullable().unique()
     table.string('name', 200).notNullable()
     table.string('model_code', 100).notNullable()

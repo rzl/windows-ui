@@ -1,7 +1,8 @@
 import { db } from '../../db'
 import type { AuthRequest } from '../../middleware/auth'
 import { AppError } from '../../utils/response'
-import { tenantWhere, setTenantId, getTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, getTenantId, SUPER_ADMIN_ROLE_ID, GLOBAL_TENANT_ID } from '../../utils/tenant'
+import { newId } from '../../utils/id'
 import * as XLSX from 'xlsx'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -77,7 +78,7 @@ function buildColumn(table: any, columnName: string, dbType: string, length?: nu
 
 export async function getModels(req: AuthRequest) {
   const user = req.user
-  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
+  const isAdmin = user?.roleId === SUPER_ADMIN_ROLE_ID || user?.permissions?.includes('*')
   const builder = db('lowcode_models')
     .where(tenantWhere(req))
     .orderBy('id', 'desc')
@@ -87,7 +88,7 @@ export async function getModels(req: AuthRequest) {
   return builder
 }
 
-export async function getModelById(req: AuthRequest, id: number) {
+export async function getModelById(req: AuthRequest, id: string) {
   const model = await db('lowcode_models')
     .where({ id })
     .where(tenantWhere(req))
@@ -197,8 +198,9 @@ export async function createModel(req: AuthRequest, data: any) {
     .first()
   if (exists) throw new AppError('模型编码或表名已存在', 400)
 
-  const [id] = await db('lowcode_models').insert(
-    setTenantId({
+  const id = newId()
+  await db('lowcode_models').insert(
+    setTenantId({ id, ...{
       code,
       name: data.name,
       table_name: tableName,
@@ -206,7 +208,7 @@ export async function createModel(req: AuthRequest, data: any) {
       data_permission: data.dataPermission || 'all',
       status: data.status ?? 1,
       enable_audit: data.enableAudit ? 1 : 0
-    }, req)
+    } }, req)
   )
 
   // 自动创建物理表（仅 id + 时间戳 + tenant_id）
@@ -215,7 +217,7 @@ export async function createModel(req: AuthRequest, data: any) {
   return db('lowcode_models').where({ id }).first()
 }
 
-export async function updateModel(req: AuthRequest, id: number, data: any) {
+export async function updateModel(req: AuthRequest, id: string, data: any) {
   const model = await db('lowcode_models')
     .where({ id })
     .where(tenantWhere(req))
@@ -236,7 +238,7 @@ export async function updateModel(req: AuthRequest, id: number, data: any) {
   return db('lowcode_models').where({ id }).first()
 }
 
-export async function deleteModel(req: AuthRequest, id: number) {
+export async function deleteModel(req: AuthRequest, id: string) {
   const model = await db('lowcode_models')
     .where({ id })
     .where(tenantWhere(req))
@@ -271,8 +273,9 @@ export async function createField(req: AuthRequest, data: any) {
     .first()
   if (exists) throw new AppError('字段已存在', 400)
 
-  const [id] = await db('lowcode_fields').insert(
-    setTenantId({
+  const id = newId()
+  await db('lowcode_fields').insert(
+    setTenantId({ id, ...{
       model_id: data.modelId,
       field_name: fieldName,
       display_name: data.displayName,
@@ -291,7 +294,7 @@ export async function createField(req: AuthRequest, data: any) {
       ref_filter: data.refFilter ? JSON.stringify(data.refFilter) : null,
       sort: data.sort ?? 0,
       status: data.status ?? 1
-    }, req)
+    } }, req)
   )
 
   // 同步到物理表
@@ -300,7 +303,7 @@ export async function createField(req: AuthRequest, data: any) {
   return db('lowcode_fields').where({ id }).first()
 }
 
-export async function updateField(req: AuthRequest, id: number, data: any) {
+export async function updateField(req: AuthRequest, id: string, data: any) {
   const field = await db('lowcode_fields')
     .where({ id })
     .where(tenantWhere(req))
@@ -341,7 +344,7 @@ export async function updateField(req: AuthRequest, id: number, data: any) {
   return db('lowcode_fields').where({ id }).first()
 }
 
-export async function deleteField(req: AuthRequest, id: number) {
+export async function deleteField(req: AuthRequest, id: string) {
   const field = await db('lowcode_fields')
     .where({ id })
     .where(tenantWhere(req))
@@ -416,7 +419,7 @@ async function assertFieldNotReferencedByRelation(req: AuthRequest, modelCode: s
 
 // ---------- 表单/列表配置 ----------
 
-async function getFormConfig(req: AuthRequest, modelId: number) {
+async function getFormConfig(req: AuthRequest, modelId: string) {
   const form = await db('lowcode_forms')
     .where({ model_id: modelId })
     .where(tenantWhere(req))
@@ -429,7 +432,7 @@ async function getFormConfig(req: AuthRequest, modelId: number) {
   }
 }
 
-async function getTableConfig(req: AuthRequest, modelId: number) {
+async function getTableConfig(req: AuthRequest, modelId: string) {
   const table = await db('lowcode_tables')
     .where({ model_id: modelId })
     .where(tenantWhere(req))
@@ -450,7 +453,7 @@ async function checkButtonPermission(
   user?: any
 ) {
   if (!user) return
-  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
+  const isAdmin = user?.roleId === SUPER_ADMIN_ROLE_ID || user?.permissions?.includes('*')
   if (isAdmin) return
 
   const model = await getModelByCode(req, modelCode)
@@ -489,13 +492,14 @@ export async function saveForm(req: AuthRequest, data: any) {
     return db('lowcode_forms').where({ id: exists.id }).first()
   }
 
-  const [id] = await db('lowcode_forms').insert(
-    setTenantId({
+  const id = newId()
+  await db('lowcode_forms').insert(
+    setTenantId({ id, ...{
       model_id: data.modelId,
       name: data.name,
       config: JSON.stringify(data.config),
       status: data.status ?? 1
-    }, req)
+    } }, req)
   )
   return db('lowcode_forms').where({ id }).first()
 }
@@ -523,13 +527,14 @@ export async function saveTable(req: AuthRequest, data: any) {
     return db('lowcode_tables').where({ id: exists.id }).first()
   }
 
-  const [id] = await db('lowcode_tables').insert(
-    setTenantId({
+  const id = newId()
+  await db('lowcode_tables').insert(
+    setTenantId({ id, ...{
       model_id: data.modelId,
       name: data.name,
       config: JSON.stringify(data.config),
       status: data.status ?? 1
-    }, req)
+    } }, req)
   )
   return db('lowcode_tables').where({ id }).first()
 }
@@ -541,11 +546,11 @@ async function createPhysicalTable(tableName: string) {
   if (exists) return
 
   await db.schema.createTable(tableName, (table) => {
-    table.increments('id').primary()
-    table.integer('tenant_id').unsigned().nullable()
-    table.integer('create_by').unsigned().nullable()
-    table.integer('update_by').unsigned().nullable()
-    table.integer('dept_id').unsigned().nullable()
+    table.string('id', 36).primary()
+    table.string('tenant_id', 36).nullable()
+    table.string('create_by', 36).nullable()
+    table.string('update_by', 36).nullable()
+    table.string('dept_id', 36).nullable()
     table.timestamp('create_time').defaultTo(db.fn.now())
     table.timestamp('update_time').defaultTo(db.fn.now())
   })
@@ -588,7 +593,7 @@ async function addPhysicalColumn(tableName: string, columnName: string, fieldDat
       case 'ref':
       case 'upload':
       case 'cascader':
-        table.integer(columnName)
+        table.string(columnName, 36)
         break
       case 'rich-text':
         table.text(columnName)
@@ -783,7 +788,7 @@ export async function dynamicList(req: AuthRequest, modelCode: string, query: an
   }
 }
 
-export async function dynamicDetail(req: AuthRequest, modelCode: string, id: number, user?: any, query: any = {}) {
+export async function dynamicDetail(req: AuthRequest, modelCode: string, id: string, user?: any, query: any = {}) {
   const model = await getModelByCode(req, modelCode)
   const row = await db(model.table_name)
     .where(tenantWhere(req))
@@ -830,7 +835,7 @@ function setDynamicTenantId(req: AuthRequest, data: any) {
   if (tenantId !== null) {
     data.tenant_id = tenantId
   } else if (req.user) {
-    data.tenant_id = req.user.tenantId ?? 0
+    data.tenant_id = req.user.tenantId ?? GLOBAL_TENANT_ID
   }
   return data
 }
@@ -871,7 +876,8 @@ export async function dynamicCreate(req: AuthRequest, modelCode: string, data: a
     cleanData.dept_id = user.deptId || null
   }
   setDynamicTenantId(req, cleanData)
-  const [id] = await db(model.table_name).insert(cleanData)
+  const id = newId()
+  await db(model.table_name).insert({ id, ...cleanData })
 
   // 记录审计日志
   const createdRow = await db(model.table_name)
@@ -902,7 +908,7 @@ export async function dynamicCreate(req: AuthRequest, modelCode: string, data: a
     .first()
 }
 
-export async function dynamicUpdate(req: AuthRequest, modelCode: string, id: number, data: any, user?: any) {
+export async function dynamicUpdate(req: AuthRequest, modelCode: string, id: string, data: any, user?: any) {
   await checkButtonPermission(req, modelCode, 'edit', 'rowAction', user)
   const model = await getModelByCode(req, modelCode)
   const currentUser = normalizeUser(user || req.user)
@@ -941,7 +947,7 @@ export async function dynamicUpdate(req: AuthRequest, modelCode: string, id: num
   return afterRow
 }
 
-export async function dynamicDelete(req: AuthRequest, modelCode: string, id: number, user?: any) {
+export async function dynamicDelete(req: AuthRequest, modelCode: string, id: string, user?: any) {
   await checkButtonPermission(req, modelCode, 'delete', 'rowAction', user)
   const model = await getModelByCode(req, modelCode)
   const currentUser = normalizeUser(user || req.user)
@@ -974,7 +980,7 @@ export async function dynamicBatchDelete(req: AuthRequest, modelCode: string, id
   if (!ids || !ids.length) throw new AppError('未选择记录', 400)
   const currentUser = normalizeUser(user || req.user)
   for (const id of ids) {
-    await assertDataPermissionRow(req, modelCode, Number(id), currentUser)
+    await assertDataPermissionRow(req, modelCode, String(id), currentUser)
   }
   const rows = await db(model.table_name)
     .where(tenantWhere(req))
@@ -1008,6 +1014,7 @@ export async function dynamicImport(req: AuthRequest, modelCode: string, rows: a
   const pluginFieldMap = await getPluginFieldMap(req)
   const cleanRows = await Promise.all(rows.map((row) => sanitizeData(model.fields, row, pluginFieldMap)))
   for (const row of cleanRows) {
+    row.id = newId()
     setDynamicTenantId(req, row)
     if (user) {
       row.create_by = user.id
@@ -1015,7 +1022,8 @@ export async function dynamicImport(req: AuthRequest, modelCode: string, rows: a
       row.dept_id = user.deptId || null
     }
   }
-  const insertedIds = await db(model.table_name).insert(cleanRows)
+  const insertedIds = cleanRows.map((row) => row.id as string)
+  await db(model.table_name).insert(cleanRows)
 
   for (let i = 0; i < cleanRows.length; i++) {
     const recordId = insertedIds[i]
@@ -1061,7 +1069,7 @@ export async function exportDynamicExcel(req: AuthRequest, modelCode: string, op
   const currentUser = normalizeUser(user || req.user)
   if (options.ids && options.ids.length) {
     for (const id of options.ids) {
-      await assertDataPermissionRow(req, modelCode, Number(id), currentUser)
+      await assertDataPermissionRow(req, modelCode, String(id), currentUser)
     }
     list = await db(model.table_name)
       .where(tenantWhere(req))
@@ -1308,8 +1316,9 @@ export async function getCodingRules(req: AuthRequest) {
 }
 
 export async function createCodingRule(req: AuthRequest, data: any) {
-  const [id] = await db('lowcode_coding_rules').insert(
-    setTenantId({
+  const id = newId()
+  await db('lowcode_coding_rules').insert(
+    setTenantId({ id, ...{
       code: data.code,
       name: data.name,
       prefix: data.prefix,
@@ -1317,12 +1326,12 @@ export async function createCodingRule(req: AuthRequest, data: any) {
       seq_length: data.seqLength ?? 4,
       current_seq: 0,
       status: data.status ?? 1
-    }, req)
+    } }, req)
   )
   return db('lowcode_coding_rules').where({ id }).first()
 }
 
-export async function updateCodingRule(req: AuthRequest, id: number, data: any) {
+export async function updateCodingRule(req: AuthRequest, id: string, data: any) {
   const rule = await db('lowcode_coding_rules')
     .where({ id })
     .where(tenantWhere(req))
@@ -1343,7 +1352,7 @@ export async function updateCodingRule(req: AuthRequest, id: number, data: any) 
   return db('lowcode_coding_rules').where({ id }).first()
 }
 
-export async function deleteCodingRule(req: AuthRequest, id: number) {
+export async function deleteCodingRule(req: AuthRequest, id: string) {
   const rule = await db('lowcode_coding_rules')
     .where({ id })
     .where(tenantWhere(req))
@@ -1393,7 +1402,7 @@ export async function executeFieldOptions(req: AuthRequest, config: any, ctx: an
 
   if (type === 'external') {
     if (!config.externalDataSourceId) throw new AppError('外部数据源不能为空', 400)
-    const rows = await externalDatasourceService.executeExternalDataSource(req, Number(config.externalDataSourceId), { ...ctx, ...(config.params || {}) })
+    const rows = await externalDatasourceService.executeExternalDataSource(req, config.externalDataSourceId, { ...ctx, ...(config.params || {}) })
     return externalDatasourceService.formatOptions(rows, config.labelField, config.valueField)
   }
 
@@ -1424,19 +1433,19 @@ function normalizeOptions(data: any): { label: string; value: any }[] {
   return []
 }
 
-function normalizeUser(user?: any): { id: number; roleId: number; deptId?: number; isAdmin?: boolean } {
-  if (!user) return { id: 0, roleId: 0 }
+function normalizeUser(user?: any): { id: string; roleId: string; deptId?: string; isAdmin?: boolean } {
+  if (!user) return { id: '', roleId: '' }
   return {
     id: user.id,
     roleId: user.roleId,
     deptId: user.deptId,
-    isAdmin: user.roleId === 1 || user.permissions?.includes('*')
+    isAdmin: user.roleId === SUPER_ADMIN_ROLE_ID || user.permissions?.includes('*')
   }
 }
 
-async function getChildDeptIds(req: AuthRequest, parentId?: number): Promise<number[]> {
+async function getChildDeptIds(req: AuthRequest, parentId?: string): Promise<string[]> {
   if (!parentId) return []
-  const result = new Set<number>([parentId])
+  const result = new Set<string>([parentId])
   const queue = [parentId]
   while (queue.length) {
     const current = queue.shift()!
@@ -1476,19 +1485,20 @@ export async function getValidationRules(req: AuthRequest) {
 }
 
 export async function createValidationRule(req: AuthRequest, data: any) {
-  const [id] = await db('lowcode_validation_rules').insert(
-    setTenantId({
+  const id = newId()
+  await db('lowcode_validation_rules').insert(
+    setTenantId({ id, ...{
       code: data.code,
       name: data.name,
       pattern: data.pattern,
       message: data.message,
       status: data.status ?? 1
-    }, req)
+    } }, req)
   )
   return db('lowcode_validation_rules').where({ id }).first()
 }
 
-export async function updateValidationRule(req: AuthRequest, id: number, data: any) {
+export async function updateValidationRule(req: AuthRequest, id: string, data: any) {
   const rule = await db('lowcode_validation_rules')
     .where({ id })
     .where(tenantWhere(req))
@@ -1508,7 +1518,7 @@ export async function updateValidationRule(req: AuthRequest, id: number, data: a
   return db('lowcode_validation_rules').where({ id }).first()
 }
 
-export async function deleteValidationRule(req: AuthRequest, id: number) {
+export async function deleteValidationRule(req: AuthRequest, id: string) {
   const rule = await db('lowcode_validation_rules')
     .where({ id })
     .where(tenantWhere(req))
@@ -1567,11 +1577,12 @@ function ensureExportDir() {
 export async function createExportTask(req: AuthRequest, modelCode: string, options: { ids?: (string | number)[]; columns?: any[] }, user?: any) {
   await checkButtonPermission(req, modelCode, 'export', 'toolbar', user)
   ensureExportDir()
-  const [id] = await db('export_tasks').insert(
-    setTenantId({
+  const id = newId()
+  await db('export_tasks').insert(
+    setTenantId({ id, ...{
       model_code: modelCode,
       status: 'pending'
-    }, req)
+    } }, req)
   )
 
   // 异步处理导出任务
@@ -1584,7 +1595,7 @@ export async function createExportTask(req: AuthRequest, modelCode: string, opti
   return { id }
 }
 
-export async function getExportTask(req: AuthRequest, id: number) {
+export async function getExportTask(req: AuthRequest, id: string) {
   return db('export_tasks')
     .where({ id })
     .where(tenantWhere(req))
@@ -1593,7 +1604,7 @@ export async function getExportTask(req: AuthRequest, id: number) {
 
 async function processExportTask(
   req: AuthRequest,
-  id: number,
+  id: string,
   modelCode: string,
   options: { ids?: (string | number)[]; columns?: any[] },
   user?: any
@@ -1674,7 +1685,7 @@ async function processExportTask(
   }
 }
 
-export async function downloadExportFile(req: AuthRequest, id: number) {
+export async function downloadExportFile(req: AuthRequest, id: string) {
   const task = await db('export_tasks')
     .where({ id })
     .where(tenantWhere(req))

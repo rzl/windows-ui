@@ -3,7 +3,7 @@ import request from './request'
 export interface AuditLogQuery {
   modelCode?: string
   action?: string
-  recordId?: number
+  recordId?: string
   operatorName?: string
   startTime?: string
   endTime?: string
@@ -15,7 +15,7 @@ export function getAuditLogs(params: AuditLogQuery) {
   return request.get('/audit-logs', { params })
 }
 
-export function getAuditLogDetail(id: number) {
+export function getAuditLogDetail(id: string) {
   return request.get(`/audit-logs/${id}`)
 }
 

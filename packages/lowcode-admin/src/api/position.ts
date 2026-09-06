@@ -8,10 +8,10 @@ export function createPosition(data: any) {
   return request.post('/system/positions', data)
 }
 
-export function updatePosition(id: number, data: any) {
+export function updatePosition(id: string, data: any) {
   return request.put(`/system/positions/${id}`, data)
 }
 
-export function deletePosition(id: number) {
+export function deletePosition(id: string) {
   return request.delete(`/system/positions/${id}`)
 }

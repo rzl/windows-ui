@@ -3,11 +3,12 @@ import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 import { getModelById, createModel, createField } from './lowcode.service'
+import { newId } from '../../utils/id'
 import * as relationService from './relation.service'
 
 const EXPORT_VERSION = '1.0'
 
-export async function exportModel(req: AuthRequest, modelId: number) {
+export async function exportModel(req: AuthRequest, modelId: string) {
   const model = await getModelById(req, modelId)
   const relations = await relationService.getRelations(req, {
     sourceModel: model.code,
@@ -150,6 +151,7 @@ export async function importModel(req: AuthRequest, fileBuffer: Buffer, conflict
   // 创建表单配置
   for (const form of data.forms || []) {
     await db('lowcode_forms').insert(setTenantId({
+      id: newId(),
       model_id: model.id,
       name: form.name || '默认表单',
       config: form.config ? JSON.stringify(form.config) : '{}',
@@ -160,6 +162,7 @@ export async function importModel(req: AuthRequest, fileBuffer: Buffer, conflict
   // 创建列表配置
   for (const table of data.tables || []) {
     await db('lowcode_tables').insert(setTenantId({
+      id: newId(),
       model_id: model.id,
       name: table.name || '默认列表',
       config: table.config ? JSON.stringify(table.config) : '{}',

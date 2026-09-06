@@ -48,7 +48,7 @@ import * as modelVersionApi from '@/api/model-version'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps<{
-  modelId: number
+  modelId: string
 }>()
 
 const emit = defineEmits<{
@@ -56,7 +56,7 @@ const emit = defineEmits<{
 }>()
 
 const authStore = useAuthStore()
-const isAdmin = authStore.userInfo?.roleId === 1 || authStore.userInfo?.permissions?.includes('*')
+const isAdmin = authStore.userInfo?.permissions?.includes('*')
 
 const versions = ref<any[]>([])
 const createVisible = ref(false)

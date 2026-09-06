@@ -17,12 +17,12 @@ export async function createMessageTemplate(req: AuthRequest, res: Response) {
 }
 
 export async function updateMessageTemplate(req: AuthRequest, res: Response) {
-  const result = await monitorService.updateMessageTemplate(req, Number(req.params.id), req.body)
+  const result = await monitorService.updateMessageTemplate(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteMessageTemplate(req: AuthRequest, res: Response) {
-  await monitorService.deleteMessageTemplate(req, Number(req.params.id))
+  await monitorService.deleteMessageTemplate(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -38,12 +38,12 @@ export async function createMessage(req: AuthRequest, res: Response) {
 }
 
 export async function markMessageRead(req: AuthRequest, res: Response) {
-  const result = await monitorService.markMessageRead(req, Number(req.params.id))
+  const result = await monitorService.markMessageRead(req, req.params.id)
   res.json(success(result))
 }
 
 export async function readAllMessages(req: AuthRequest, res: Response) {
-  await monitorService.readAllMessages(req, Number(req.user?.id))
+  await monitorService.readAllMessages(req, req.user?.id || '')
   res.json(success(null, '全部已读'))
 }
 
@@ -52,18 +52,18 @@ export async function markMessageReadByBusinessKey(req: AuthRequest, res: Respon
     req,
     req.params.businessType,
     req.params.businessKey,
-    Number(req.user?.id)
+    req.user?.id || ''
   )
   res.json(success(null, '已标为已读'))
 }
 
 export async function deleteMessage(req: AuthRequest, res: Response) {
-  await monitorService.deleteMessage(req, Number(req.params.id))
+  await monitorService.deleteMessage(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
 export async function getUnreadCount(req: AuthRequest, res: Response) {
-  const result = await monitorService.getUnreadCount(req, Number(req.query.receiverId))
+  const result = await monitorService.getUnreadCount(req, String(req.query.receiverId || ''))
   res.json(success(result))
 }
 
@@ -130,12 +130,12 @@ export async function createAlertRule(req: AuthRequest, res: Response) {
 }
 
 export async function updateAlertRule(req: AuthRequest, res: Response) {
-  const result = await alertService.updateAlertRule(req, Number(req.params.id), req.body)
+  const result = await alertService.updateAlertRule(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteAlertRule(req: AuthRequest, res: Response) {
-  await alertService.deleteAlertRule(req, Number(req.params.id))
+  await alertService.deleteAlertRule(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -147,12 +147,12 @@ export async function getAlertRecords(req: AuthRequest, res: Response) {
 }
 
 export async function markAlertRecordRead(req: AuthRequest, res: Response) {
-  const result = await alertService.markAlertRecordRead(req, Number(req.params.id))
+  const result = await alertService.markAlertRecordRead(req, req.params.id)
   res.json(success(result))
 }
 
 export async function resolveAlertRecord(req: AuthRequest, res: Response) {
-  const result = await alertService.resolveAlertRecord(req, Number(req.params.id))
+  const result = await alertService.resolveAlertRecord(req, req.params.id)
   res.json(success(result))
 }
 
@@ -174,7 +174,7 @@ export async function getRetentionPolicies(req: AuthRequest, res: Response) {
 }
 
 export async function updateRetentionPolicy(req: AuthRequest, res: Response) {
-  const result = await dataGovernanceService.updateRetentionPolicy(req, Number(req.params.id), req.body)
+  const result = await dataGovernanceService.updateRetentionPolicy(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 

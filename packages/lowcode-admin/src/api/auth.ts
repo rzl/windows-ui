@@ -10,14 +10,14 @@ export interface LoginResult {
   accessToken: string
   refreshToken: string
   userInfo: {
-    id: number
+    id: string
     username: string
     nickname: string
     email: string
     phone: string
     avatar: string
-    roleId: number
-    deptId: number
+    roleId: string
+    deptId: string
   }
 }
 

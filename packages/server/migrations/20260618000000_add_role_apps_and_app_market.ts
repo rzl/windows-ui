@@ -13,9 +13,9 @@ export async function up(knex: Knex): Promise<void> {
   const hasRoleApps = await knex.schema.hasTable('role_apps')
   if (!hasRoleApps) {
     await knex.schema.createTable('role_apps', (table) => {
-      table.increments('id').primary()
-      table.integer('role_id').notNullable().comment('角色 ID')
-      table.integer('app_id').notNullable().comment('应用 ID')
+      table.string('id', 36).primary()
+      table.string('role_id', 36).notNullable().comment('角色 ID')
+      table.string('app_id', 36).notNullable().comment('应用 ID')
       table.tinyint('status').defaultTo(1).comment('状态：0 禁用 / 1 启用')
       table.timestamp('create_time').defaultTo(knex.fn.now())
       table.unique(['role_id', 'app_id'])

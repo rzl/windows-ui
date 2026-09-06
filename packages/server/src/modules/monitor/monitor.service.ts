@@ -4,6 +4,7 @@ import { wsManager } from '../../utils/websocket'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 import os from 'os'
+import { newId } from '../../utils/id'
 
 // ---------- 消息模板 ----------
 
@@ -12,23 +13,21 @@ export async function getMessageTemplates(req: AuthRequest) {
 }
 
 export async function createMessageTemplate(req: AuthRequest, data: any) {
-  const [id] = await db('message_templates').insert(
-    setTenantId(
-      {
+  const id = newId()
+  await db('message_templates').insert(
+    setTenantId({ id, ...{
         code: data.code,
         name: data.name,
         title: data.title,
         content: data.content,
         channel: data.channel || 'site',
         status: data.status ?? 1
-      },
-      req
-    )
+      } }, req)
   )
   return db('message_templates').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function updateMessageTemplate(req: AuthRequest, id: number, data: any) {
+export async function updateMessageTemplate(req: AuthRequest, id: string, data: any) {
   await db('message_templates')
     .where({ id })
     .where(tenantWhere(req))
@@ -42,7 +41,7 @@ export async function updateMessageTemplate(req: AuthRequest, id: number, data: 
   return db('message_templates').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function deleteMessageTemplate(req: AuthRequest, id: number) {
+export async function deleteMessageTemplate(req: AuthRequest, id: string) {
   await db('message_templates').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -72,9 +71,9 @@ export async function getMessages(req: AuthRequest, query: any) {
 }
 
 export async function createMessage(req: AuthRequest, data: any) {
-  const [id] = await db('messages').insert(
-    setTenantId(
-      {
+  const id = newId()
+  await db('messages').insert(
+    setTenantId({ id, ...{
         sender_id: data.senderId,
         receiver_id: data.receiverId,
         title: data.title,
@@ -87,9 +86,7 @@ export async function createMessage(req: AuthRequest, data: any) {
         sender_name: data.senderName || null,
         is_read: 0,
         status: 1
-      },
-      req
-    )
+      } }, req)
   )
   const message = await db('messages').where({ id }).where(tenantWhere(req)).first()
 
@@ -102,12 +99,12 @@ export async function createMessage(req: AuthRequest, data: any) {
   return message
 }
 
-export async function markMessageRead(req: AuthRequest, id: number) {
+export async function markMessageRead(req: AuthRequest, id: string) {
   await db('messages').where({ id }).where(tenantWhere(req)).update({ is_read: 1 })
   return db('messages').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function readAllMessages(req: AuthRequest, receiverId: number) {
+export async function readAllMessages(req: AuthRequest, receiverId: string) {
   await db('messages')
     .where(tenantWhere(req))
     .where({ receiver_id: receiverId, is_read: 0 })
@@ -119,7 +116,7 @@ export async function markMessageReadByBusinessKey(
   req: AuthRequest,
   businessType: string,
   businessKey: string,
-  receiverId: number
+  receiverId: string
 ) {
   await db('messages')
     .where(tenantWhere(req))
@@ -133,12 +130,12 @@ export async function markMessageReadByBusinessKey(
   return true
 }
 
-export async function deleteMessage(req: AuthRequest, id: number) {
+export async function deleteMessage(req: AuthRequest, id: string) {
   await db('messages').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
-export async function getUnreadCount(req: AuthRequest, receiverId: number) {
+export async function getUnreadCount(req: AuthRequest, receiverId: string) {
   const result = await db('messages')
     .where(tenantWhere(req))
     .where({ receiver_id: receiverId, is_read: 0, status: 1 })
@@ -175,9 +172,9 @@ export async function getOperationLogs(req: AuthRequest, query: any) {
 }
 
 export async function createOperationLog(req: AuthRequest, data: any) {
-  const [id] = await db('operation_logs').insert(
-    setTenantId(
-      {
+  const id = newId()
+  await db('operation_logs').insert(
+    setTenantId({ id, ...{
         user_id: data.userId,
         username: data.username,
         module: data.module,
@@ -188,9 +185,7 @@ export async function createOperationLog(req: AuthRequest, data: any) {
         ip: data.ip,
         duration: data.duration,
         status: data.status
-      },
-      req
-    )
+      } }, req)
   )
   return db('operation_logs').where({ id }).where(tenantWhere(req)).first()
 }
@@ -218,18 +213,16 @@ export async function getDataLogs(req: AuthRequest, query: any) {
 }
 
 export async function createDataLog(req: AuthRequest, data: any) {
-  const [id] = await db('data_logs').insert(
-    setTenantId(
-      {
+  const id = newId()
+  await db('data_logs').insert(
+    setTenantId({ id, ...{
         user_id: data.userId,
         model_code: data.modelCode,
         row_id: data.rowId,
         action: data.action,
         before_snapshot: data.beforeSnapshot ? JSON.stringify(data.beforeSnapshot) : null,
         after_snapshot: data.afterSnapshot ? JSON.stringify(data.afterSnapshot) : null
-      },
-      req
-    )
+      } }, req)
   )
   return db('data_logs').where({ id }).where(tenantWhere(req)).first()
 }
@@ -243,7 +236,7 @@ export async function createApiMetric(
     path: string
     statusCode: number
     duration: number
-    userId?: number
+    userId?: string
     username?: string
     ip?: string
     params?: any
@@ -252,6 +245,7 @@ export async function createApiMetric(
   return db('api_metrics').insert(
     setTenantId(
       {
+        id: newId(),
         method: data.method,
         path: data.path,
         status_code: data.statusCode,

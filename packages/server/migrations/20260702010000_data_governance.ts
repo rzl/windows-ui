@@ -3,7 +3,7 @@ import type { Knex } from 'knex'
 export async function up(knex: Knex): Promise<void> {
   // 数据保留策略配置表
   await knex.schema.createTable('data_retention_policies', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('table_name', 100).notNullable().unique().comment('目标表名')
     table.integer('retention_days').notNullable().defaultTo(30).comment('保留天数，0 表示不自动清理')
     table.tinyint('enabled').notNullable().defaultTo(1).comment('是否启用自动清理')

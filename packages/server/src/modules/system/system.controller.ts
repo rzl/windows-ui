@@ -10,7 +10,7 @@ export async function getDicts(req: AuthRequest, res: Response) {
 }
 
 export async function getDict(req: AuthRequest, res: Response) {
-  const result = await systemService.getDictById(req, Number(req.params.id))
+  const result = await systemService.getDictById(req, req.params.id)
   res.json(success(result))
 }
 
@@ -25,12 +25,12 @@ export async function createDict(req: AuthRequest, res: Response) {
 }
 
 export async function updateDict(req: AuthRequest, res: Response) {
-  const result = await systemService.updateDict(req, Number(req.params.id), req.body)
+  const result = await systemService.updateDict(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteDict(req: AuthRequest, res: Response) {
-  await systemService.deleteDict(req, Number(req.params.id))
+  await systemService.deleteDict(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -41,12 +41,12 @@ export async function createDictItem(req: AuthRequest, res: Response) {
 }
 
 export async function updateDictItem(req: AuthRequest, res: Response) {
-  const result = await systemService.updateDictItem(req, Number(req.params.id), req.body)
+  const result = await systemService.updateDictItem(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteDictItem(req: AuthRequest, res: Response) {
-  await systemService.deleteDictItem(req, Number(req.params.id))
+  await systemService.deleteDictItem(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -62,12 +62,12 @@ export async function createDictCategory(req: AuthRequest, res: Response) {
 }
 
 export async function updateDictCategory(req: AuthRequest, res: Response) {
-  const result = await systemService.updateDictCategory(req, Number(req.params.id), req.body)
+  const result = await systemService.updateDictCategory(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteDictCategory(req: AuthRequest, res: Response) {
-  await systemService.deleteDictCategory(req, Number(req.params.id))
+  await systemService.deleteDictCategory(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -83,12 +83,12 @@ export async function createNotice(req: AuthRequest, res: Response) {
 }
 
 export async function updateNotice(req: AuthRequest, res: Response) {
-  const result = await systemService.updateNotice(req, Number(req.params.id), req.body)
+  const result = await systemService.updateNotice(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteNotice(req: AuthRequest, res: Response) {
-  await systemService.deleteNotice(req, Number(req.params.id))
+  await systemService.deleteNotice(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -104,11 +104,11 @@ export async function createPosition(req: AuthRequest, res: Response) {
 }
 
 export async function updatePosition(req: AuthRequest, res: Response) {
-  const result = await systemService.updatePosition(req, Number(req.params.id), req.body)
+  const result = await systemService.updatePosition(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deletePosition(req: AuthRequest, res: Response) {
-  await systemService.deletePosition(req, Number(req.params.id))
+  await systemService.deletePosition(req, req.params.id)
   res.json(success(null, '删除成功'))
 }

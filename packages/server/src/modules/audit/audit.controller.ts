@@ -9,7 +9,7 @@ export async function getAuditLogs(req: AuthRequest, res: Response) {
 }
 
 export async function getAuditLogDetail(req: AuthRequest, res: Response) {
-  const result = await auditService.getAuditLogDetail(req, Number(req.params.id))
+  const result = await auditService.getAuditLogDetail(req, req.params.id)
   res.json(success(result))
 }
 

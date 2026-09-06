@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import * as menuApi from '@/api/menu'
 
 export interface MenuItem {
-  id: number
-  parent_id: number
+  id: string
+  parent_id: string
   name: string
   path: string
   component?: string

@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('lowcode_model_relations', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 100).notNullable()
     table.string('source_model', 100).notNullable()

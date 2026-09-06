@@ -100,7 +100,8 @@ async function getTableColumns(tableName: string) {
 
 function buildColumn(table: any, col: ColumnInfo) {
   if (col.pk) {
-    table.increments(col.name).primary()
+    // 主键为应用层生成的 ULID 字符串，重建时原样保留
+    table.string(col.name, 36).primary()
     return
   }
 

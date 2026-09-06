@@ -19,7 +19,7 @@ export async function savePrintTemplate(req: AuthRequest, res: Response) {
 }
 
 export async function deletePrintTemplate(req: AuthRequest, res: Response) {
-  await printService.deletePrintTemplate(req, Number(req.params.id))
+  await printService.deletePrintTemplate(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 

@@ -24,15 +24,15 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('timeout_hours').nullable().defaultTo(0).comment('节点超时小时数，0 表示不超时')
     table.timestamp('due_time').nullable().comment('任务截止时间')
     table.tinyint('timeout_notified').notNullable().defaultTo(0).comment('是否已触发超时提醒')
-    table.integer('transferred_from').nullable().comment('转办来源用户 ID')
-    table.integer('delegated_from').nullable().comment('委托来源用户 ID')
+    table.string('transferred_from', 36).nullable().comment('转办来源用户 ID')
+    table.string('delegated_from', 36).nullable().comment('委托来源用户 ID')
   })
 
   // 流程委托表
   await knex.schema.createTable('flow_delegations', (table) => {
-    table.increments('id').primary()
-    table.integer('delegator_id').notNullable().comment('委托人 ID')
-    table.integer('delegatee_id').notNullable().comment('受托人 ID')
+    table.string('id', 36).primary()
+    table.string('delegator_id', 36).notNullable().comment('委托人 ID')
+    table.string('delegatee_id', 36).notNullable().comment('受托人 ID')
     table.string('flow_code', 50).nullable().comment('限定流程编码，空表示全部流程')
     table.timestamp('start_time').notNullable().comment('委托开始时间')
     table.timestamp('end_time').notNullable().comment('委托结束时间')

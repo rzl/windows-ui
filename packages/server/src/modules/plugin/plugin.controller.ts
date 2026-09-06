@@ -14,7 +14,7 @@ export async function getActivePlugins(req: AuthRequest, res: Response) {
 }
 
 export async function getPlugin(req: AuthRequest, res: Response) {
-  const result = await pluginService.getPluginById(req, Number(req.params.id))
+  const result = await pluginService.getPluginById(req, req.params.id)
   res.json(success(result))
 }
 
@@ -24,21 +24,21 @@ export async function createPlugin(req: AuthRequest, res: Response) {
 }
 
 export async function updatePlugin(req: AuthRequest, res: Response) {
-  const result = await pluginService.updatePlugin(req, Number(req.params.id), req.body)
+  const result = await pluginService.updatePlugin(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deletePlugin(req: AuthRequest, res: Response) {
-  await pluginService.deletePlugin(req, Number(req.params.id))
+  await pluginService.deletePlugin(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
 export async function enablePlugin(req: AuthRequest, res: Response) {
-  const result = await pluginService.setPluginStatus(req, Number(req.params.id), 1)
+  const result = await pluginService.setPluginStatus(req, req.params.id, 1)
   res.json(success(result, '已启用'))
 }
 
 export async function disablePlugin(req: AuthRequest, res: Response) {
-  const result = await pluginService.setPluginStatus(req, Number(req.params.id), 0)
+  const result = await pluginService.setPluginStatus(req, req.params.id, 0)
   res.json(success(result, '已禁用'))
 }

@@ -1,10 +1,11 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId, GLOBAL_TENANT_ID } from '../../utils/tenant'
+import { newId } from '../../utils/id'
 import type { AuthRequest } from '../../middleware/auth'
 
 export interface PluginForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   version?: string
@@ -43,7 +44,7 @@ export async function getActivePlugins(req: AuthRequest) {
   return db('lowcode_plugins').where({ status: 1 }).where(tenantWhere(req)).orderBy('id', 'asc')
 }
 
-export async function getPluginById(req: AuthRequest, id: number) {
+export async function getPluginById(req: AuthRequest, id: string) {
   const plugin = await db('lowcode_plugins').where({ id }).where(tenantWhere(req)).first()
   if (!plugin) throw new AppError('插件不存在', 404)
   return plugin
@@ -56,8 +57,10 @@ export async function createPlugin(req: AuthRequest, data: PluginForm) {
   const exists = await db('lowcode_plugins').where({ code }).where(tenantWhere(req)).first()
   if (exists) throw new AppError('插件编码已存在', 400)
 
-  const [id] = await db('lowcode_plugins').insert(
+  const id = newId()
+  await db('lowcode_plugins').insert(
     setTenantId({
+      id,
       code,
       name: data.name || code,
       version: data.version || '1.0.0',
@@ -77,7 +80,7 @@ export async function createPlugin(req: AuthRequest, data: PluginForm) {
   return getPluginById(req, id)
 }
 
-export async function updatePlugin(req: AuthRequest, id: number, data: PluginForm) {
+export async function updatePlugin(req: AuthRequest, id: string, data: PluginForm) {
   const plugin = await getPluginById(req, id)
 
   await db('lowcode_plugins').where({ id }).where(tenantWhere(req)).update(
@@ -99,13 +102,13 @@ export async function updatePlugin(req: AuthRequest, id: number, data: PluginFor
   return getPluginById(req, id)
 }
 
-export async function deletePlugin(req: AuthRequest, id: number) {
+export async function deletePlugin(req: AuthRequest, id: string) {
   const plugin = await getPluginById(req, id)
   await db('lowcode_plugins').where({ id }).where(tenantWhere(req)).del()
   return plugin
 }
 
-export async function setPluginStatus(req: AuthRequest, id: number, status: number) {
+export async function setPluginStatus(req: AuthRequest, id: string, status: number) {
   const plugin = await getPluginById(req, id)
   await db('lowcode_plugins').where({ id }).where(tenantWhere(req)).update({ status, update_time: db.fn.now() })
   return getPluginById(req, id)

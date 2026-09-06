@@ -96,7 +96,7 @@ import FlowDesigner from '@/components/flow-designer/FlowDesigner.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const isAdmin = computed(() => authStore.userInfo?.roleId === 1 || authStore.permissions?.includes('*'))
+const isAdmin = computed(() => authStore.permissions?.includes('*'))
 const models = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})

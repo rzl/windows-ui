@@ -29,7 +29,7 @@ export const useUserStore = defineStore('user', () => {
     await loadData()
   }
 
-  async function remove(ids: number[]) {
+  async function remove(ids: string[]) {
     await userApi.deleteUsers(ids)
     await loadData()
   }

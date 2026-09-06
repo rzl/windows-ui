@@ -8,10 +8,10 @@ export function createNotice(data: any) {
   return request.post('/system/notices', data)
 }
 
-export function updateNotice(id: number, data: any) {
+export function updateNotice(id: string, data: any) {
   return request.put(`/system/notices/${id}`, data)
 }
 
-export function deleteNotice(id: number) {
+export function deleteNotice(id: string) {
   return request.delete(`/system/notices/${id}`)
 }

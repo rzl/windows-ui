@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('export_tasks', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('model_code', 50).notNullable()
     table.string('status', 20).notNullable().defaultTo('pending')
     table.string('file_path', 255).nullable()

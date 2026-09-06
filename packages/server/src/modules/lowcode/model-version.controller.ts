@@ -5,7 +5,7 @@ import * as service from './model-version.service'
 
 export async function getVersions(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const result = await service.getModelVersions(req, Number(req.params.id))
+    const result = await service.getModelVersions(req, req.params.id)
     res.json(success(result))
   } catch (error) {
     next(error)
@@ -14,7 +14,7 @@ export async function getVersions(req: AuthRequest, res: Response, next: NextFun
 
 export async function createVersion(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const result = await service.createModelVersion(req, Number(req.params.id), req.body)
+    const result = await service.createModelVersion(req, req.params.id, req.body)
     res.json(success(result, '快照创建成功'))
   } catch (error) {
     next(error)
@@ -23,7 +23,7 @@ export async function createVersion(req: AuthRequest, res: Response, next: NextF
 
 export async function rollbackVersion(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const result = await service.rollbackModelVersion(req, Number(req.params.id), Number(req.params.versionId))
+    const result = await service.rollbackModelVersion(req, req.params.id, req.params.versionId)
     res.json(success(result, '回滚成功'))
   } catch (error) {
     next(error)
@@ -32,7 +32,7 @@ export async function rollbackVersion(req: AuthRequest, res: Response, next: Nex
 
 export async function deleteVersion(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    await service.deleteModelVersion(req, Number(req.params.id), Number(req.params.versionId))
+    await service.deleteModelVersion(req, req.params.id, req.params.versionId)
     res.json(success(null, '删除成功'))
   } catch (error) {
     next(error)

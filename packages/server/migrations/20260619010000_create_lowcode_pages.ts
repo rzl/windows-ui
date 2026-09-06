@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex) {
   await knex.schema.createTable('lowcode_pages', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 100).notNullable().unique()
     table.string('name', 200).notNullable()
     table.text('description').nullable()

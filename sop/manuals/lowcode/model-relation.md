@@ -76,10 +76,10 @@ GET /api/lowcode/order?expand=customer_id
 {
   "list": [
     {
-      "id": 1,
+      "id": "01JCM0000000000000000A001",
       "customer_id_display": "ABC 公司",
       "customer_id": {
-        "id": 5,
+        "id": "01JCM0000000000000000A002",
         "name": "ABC 公司"
       }
     }

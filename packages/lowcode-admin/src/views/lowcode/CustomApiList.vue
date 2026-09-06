@@ -49,7 +49,7 @@ const apis = ref<any[]>([])
 const testVisible = ref(false)
 const testResult = ref<any>(null)
 const versionVisible = ref(false)
-const versionApiId = ref<number>(0)
+const versionApiId = ref<string>('')
 
 const columns = [
   { prop: 'code', label: '编码' },

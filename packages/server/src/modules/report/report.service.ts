@@ -3,8 +3,9 @@ import { AppError } from '../../utils/response'
 import * as XLSX from 'xlsx'
 import { getModelByCode } from '../lowcode/lowcode.service'
 import * as externalDatasourceService from '../external-datasource/external-datasource.service'
-import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, SUPER_ADMIN_ROLE_ID } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 
 export interface ReportColumn {
   field: string
@@ -42,7 +43,7 @@ export interface ReportConfig {
   filters?: ReportFilter[]
   joins?: ReportJoin[]
   params?: ReportParam[]
-  externalDataSourceId?: number
+  externalDataSourceId?: string
 }
 
 function safeCode(name: string) {
@@ -92,9 +93,11 @@ export async function saveReport(req: AuthRequest, data: any) {
     return db('lowcode_reports').where({ code }).andWhere(tenantWhere(req)).first()
   }
 
-  const [id] = await db('lowcode_reports').insert(
+  const id = newId()
+  await db('lowcode_reports').insert(
     setTenantId(
       {
+        id,
         code,
         name: data.name,
         model_code: data.modelCode,
@@ -107,7 +110,7 @@ export async function saveReport(req: AuthRequest, data: any) {
   return db('lowcode_reports').where({ id }).andWhere(tenantWhere(req)).first()
 }
 
-export async function deleteReport(req: AuthRequest, id: number) {
+export async function deleteReport(req: AuthRequest, id: string) {
   await db('lowcode_reports').where({ id }).andWhere(tenantWhere(req)).del()
   return true
 }
@@ -241,7 +244,7 @@ function applyFilters(builder: any, filters: ReportFilter[], tableName: string, 
 
 async function applyDataPermission(req: AuthRequest, builder: any, model: any, user?: any) {
   if (!user || !model.data_permission) return
-  const isAdmin = user?.roleId === 1 || user?.permissions?.includes('*')
+  const isAdmin = user?.roleId === SUPER_ADMIN_ROLE_ID || user?.permissions?.includes('*')
   if (isAdmin) return
 
   const permission = model.data_permission
@@ -257,9 +260,9 @@ async function applyDataPermission(req: AuthRequest, builder: any, model: any, u
   }
 }
 
-async function getChildDeptIds(req: AuthRequest, parentId?: number): Promise<number[]> {
+async function getChildDeptIds(req: AuthRequest, parentId?: string): Promise<string[]> {
   if (!parentId) return []
-  const result = new Set<number>([parentId])
+  const result = new Set<string>([parentId])
   const queue = [parentId]
   while (queue.length) {
     const current = queue.shift()!

@@ -24,23 +24,23 @@ export async function saveFlowDefinition(req: AuthRequest, res: Response) {
 }
 
 export async function deleteFlowDefinition(req: AuthRequest, res: Response) {
-  await flowService.deleteFlowDefinition(req, Number(req.params.id))
+  await flowService.deleteFlowDefinition(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
 export async function startFlowInstance(req: AuthRequest, res: Response) {
   const { flowCode, businessKey, businessData } = req.body
-  const result = await flowService.startFlowInstance(req, flowCode, Number(businessKey), businessData || {}, req.user)
+  const result = await flowService.startFlowInstance(req, flowCode, String(businessKey ?? ''), businessData || {}, req.user)
   res.json(success(result, '流程已启动'))
 }
 
 export async function getInstanceStatus(req: AuthRequest, res: Response) {
-  const result = await flowService.getInstanceStatus(req, Number(req.params.businessKey))
+  const result = await flowService.getInstanceStatus(req, req.params.businessKey)
   res.json(success(result))
 }
 
 export async function getFlowTrace(req: AuthRequest, res: Response) {
-  const result = await flowService.getFlowTrace(req, Number(req.params.businessKey))
+  const result = await flowService.getFlowTrace(req, req.params.businessKey)
   res.json(success(result))
 }
 
@@ -51,19 +51,19 @@ export async function getPendingTasks(req: AuthRequest, res: Response) {
 
 export async function approveTask(req: AuthRequest, res: Response) {
   const { comment } = req.body
-  await flowService.approveTask(req, Number(req.params.id), comment || '', req.user)
+  await flowService.approveTask(req, req.params.id, comment || '', req.user)
   res.json(success(null, '审批通过'))
 }
 
 export async function rejectTask(req: AuthRequest, res: Response) {
   const { comment } = req.body
-  await flowService.rejectTask(req, Number(req.params.id), comment || '', req.user)
+  await flowService.rejectTask(req, req.params.id, comment || '', req.user)
   res.json(success(null, '审批已驳回'))
 }
 
 export async function transferTask(req: AuthRequest, res: Response) {
   const { targetUserId } = req.body
-  await flowService.transferTask(req, Number(req.params.id), Number(targetUserId), req.user)
+  await flowService.transferTask(req, req.params.id, targetUserId, req.user)
   res.json(success(null, '转办成功'))
 }
 
@@ -89,12 +89,12 @@ export async function createFlowDelegation(req: AuthRequest, res: Response) {
 }
 
 export async function updateFlowDelegation(req: AuthRequest, res: Response) {
-  const result = await flowService.updateFlowDelegation(req, Number(req.params.id), req.body)
+  const result = await flowService.updateFlowDelegation(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteFlowDelegation(req: AuthRequest, res: Response) {
-  await flowService.deleteFlowDelegation(req, Number(req.params.id))
+  await flowService.deleteFlowDelegation(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -114,17 +114,17 @@ export async function getFlowPerformanceByNode(req: AuthRequest, res: Response) 
 }
 
 export async function urgeTask(req: AuthRequest, res: Response) {
-  await flowService.urgeTask(req, Number(req.params.id), req.user)
+  await flowService.urgeTask(req, req.params.id, req.user)
   res.json(success(null, '催办成功'))
 }
 
 export async function urgeInstance(req: AuthRequest, res: Response) {
-  const count = await flowService.urgeInstance(req, Number(req.params.id), req.user)
+  const count = await flowService.urgeInstance(req, req.params.id, req.user)
   res.json(success({ count }, '催办成功'))
 }
 
 export async function terminateInstance(req: AuthRequest, res: Response) {
   const { reason } = req.body
-  await flowService.terminateInstance(req, Number(req.params.id), reason || '', req.user)
+  await flowService.terminateInstance(req, req.params.id, reason || '', req.user)
   res.json(success(null, '流程已强制终止'))
 }

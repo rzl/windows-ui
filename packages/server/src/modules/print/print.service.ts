@@ -1,6 +1,7 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import { getModelByCode } from '../lowcode/lowcode.service'
 
@@ -97,7 +98,9 @@ export async function savePrintTemplate(req: AuthRequest, data: any) {
     return db('print_templates').where(tenantWhere(req)).andWhere({ code }).first()
   }
 
-  const [id] = await db('print_templates').insert(setTenantId({
+  const id = newId()
+  await db('print_templates').insert(setTenantId({
+    id,
     code,
     name: data.name,
     model_code: data.modelCode,
@@ -110,12 +113,12 @@ export async function savePrintTemplate(req: AuthRequest, data: any) {
   return db('print_templates').where(tenantWhere(req)).andWhere({ id }).first()
 }
 
-export async function deletePrintTemplate(req: AuthRequest, id: number) {
+export async function deletePrintTemplate(req: AuthRequest, id: string) {
   await db('print_templates').where(tenantWhere(req)).andWhere({ id }).del()
   return true
 }
 
-export async function renderPrintTemplate(req: AuthRequest, code: string, options: { recordId?: number; recordIds?: number[]; filters?: any }, user?: any) {
+export async function renderPrintTemplate(req: AuthRequest, code: string, options: { recordId?: string; recordIds?: string[]; filters?: any }, user?: any) {
   const template = await getPrintTemplateByCode(req, code)
   const config = template.config as PrintTemplateConfig
   const model = await getModelByCode(req, template.model_code)

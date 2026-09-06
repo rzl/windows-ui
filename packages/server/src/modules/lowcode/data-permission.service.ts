@@ -1,16 +1,17 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
-import { tenantWhere, setTenantId, getTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, getTenantId, SUPER_ADMIN_ROLE_ID } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 
 export interface DataPermissionRule {
-  id?: number
+  id?: string
   code: string
   name: string
   model_code: string
   scope: 'all' | 'dept' | 'dept_and_sub' | 'self' | 'roles' | 'users'
-  role_ids?: number[]
-  user_ids?: number[]
+  role_ids?: string[]
+  user_ids?: string[]
   custom_filter?: any[]
   status?: number
 }
@@ -49,8 +50,8 @@ export async function getDataPermissionRules(req: AuthRequest, query: any = {}) 
   return {
     list: list.map((item) => ({
       ...item,
-      role_ids: parseJson<number[]>(item.role_ids),
-      user_ids: parseJson<number[]>(item.user_ids),
+      role_ids: parseJson<string[]>(item.role_ids),
+      user_ids: parseJson<string[]>(item.user_ids),
       custom_filter: parseJson<any[]>(item.custom_filter)
     })),
     total: Number(total?.count || 0),
@@ -59,13 +60,13 @@ export async function getDataPermissionRules(req: AuthRequest, query: any = {}) 
   }
 }
 
-export async function getDataPermissionRuleById(req: AuthRequest, id: number) {
+export async function getDataPermissionRuleById(req: AuthRequest, id: string) {
   const rule = await db('lowcode_data_permission_rules').where({ id }).where(tenantWhere(req)).first()
   if (!rule) throw new AppError('数据权限规则不存在', 404)
   return {
     ...rule,
-    role_ids: parseJson<number[]>(rule.role_ids),
-    user_ids: parseJson<number[]>(rule.user_ids),
+    role_ids: parseJson<string[]>(rule.role_ids),
+    user_ids: parseJson<string[]>(rule.user_ids),
     custom_filter: parseJson<any[]>(rule.custom_filter)
   }
 }
@@ -77,9 +78,11 @@ export async function createDataPermissionRule(req: AuthRequest, data: DataPermi
     .first()
   if (exists) throw new AppError('规则编码已存在', 400)
 
-  const [id] = await db('lowcode_data_permission_rules').insert(
+  const id = newId()
+  await db('lowcode_data_permission_rules').insert(
     setTenantId(
       {
+        id,
         code: data.code,
         name: data.name,
         model_code: data.model_code,
@@ -95,7 +98,7 @@ export async function createDataPermissionRule(req: AuthRequest, data: DataPermi
   return getDataPermissionRuleById(req, id)
 }
 
-export async function updateDataPermissionRule(req: AuthRequest, id: number, data: DataPermissionRule) {
+export async function updateDataPermissionRule(req: AuthRequest, id: string, data: DataPermissionRule) {
   const rule = await db('lowcode_data_permission_rules').where({ id }).where(tenantWhere(req)).first()
   if (!rule) throw new AppError('数据权限规则不存在', 404)
 
@@ -123,7 +126,7 @@ export async function updateDataPermissionRule(req: AuthRequest, id: number, dat
   return getDataPermissionRuleById(req, id)
 }
 
-export async function deleteDataPermissionRule(req: AuthRequest, id: number) {
+export async function deleteDataPermissionRule(req: AuthRequest, id: string) {
   const rule = await db('lowcode_data_permission_rules').where({ id }).where(tenantWhere(req)).first()
   if (!rule) throw new AppError('数据权限规则不存在', 404)
   await db('lowcode_data_permission_rules')
@@ -134,7 +137,7 @@ export async function deleteDataPermissionRule(req: AuthRequest, id: number) {
 }
 
 // 根据角色 ID 获取绑定的数据规则
-export async function getRoleDataPermissionIds(req: AuthRequest, roleId: number) {
+export async function getRoleDataPermissionIds(req: AuthRequest, roleId: string) {
   const tenantId = getTenantId(req)
   const builder = db('role_data_permissions')
     .where({ role_id: roleId })
@@ -148,7 +151,7 @@ export async function getRoleDataPermissionIds(req: AuthRequest, roleId: number)
   return rows.map((row) => row.id)
 }
 
-export async function getRoleDataPermissionRules(req: AuthRequest, roleId: number) {
+export async function getRoleDataPermissionRules(req: AuthRequest, roleId: string) {
   const tenantId = getTenantId(req)
   const builder = db('role_data_permissions')
     .where({ role_id: roleId })
@@ -162,21 +165,22 @@ export async function getRoleDataPermissionRules(req: AuthRequest, roleId: numbe
 
   return rows.map((item) => ({
     ...item,
-    role_ids: parseJson<number[]>(item.role_ids),
-    user_ids: parseJson<number[]>(item.user_ids),
+    role_ids: parseJson<string[]>(item.role_ids),
+    user_ids: parseJson<string[]>(item.user_ids),
     custom_filter: parseJson<any[]>(item.custom_filter)
   }))
 }
 
-export async function saveRoleDataPermissions(req: AuthRequest, roleId: number, dataPermissionIds: number[]) {
+export async function saveRoleDataPermissions(req: AuthRequest, roleId: string, dataPermissionIds: (string | number)[]) {
   await db('role_data_permissions')
     .where(tenantWhere(req))
     .where({ role_id: roleId })
     .del()
-  const validIds = (dataPermissionIds || []).filter((id) => Number(id) > 0)
+  const validIds = (dataPermissionIds || []).filter((id) => id !== undefined && id !== null && id !== '')
   if (validIds.length) {
     await db('role_data_permissions').insert(
       validIds.map((dataPermissionId) => ({
+        id: newId(),
         ...tenantWhere(req),
         role_id: roleId,
         data_permission_id: dataPermissionId
@@ -186,8 +190,8 @@ export async function saveRoleDataPermissions(req: AuthRequest, roleId: number, 
 }
 
 // 获取部门及其所有子部门 ID
-async function getSubDeptIds(req: AuthRequest, deptId: number): Promise<number[]> {
-  const result = new Set<number>([deptId])
+async function getSubDeptIds(req: AuthRequest, deptId: string): Promise<string[]> {
+  const result = new Set<string>([deptId])
   const queue = [deptId]
   while (queue.length) {
     const parentId = queue.shift()!
@@ -207,9 +211,9 @@ export async function applyDataPermissionWhere(
   req: AuthRequest,
   builder: any,
   modelCode: string,
-  user: { id: number; roleId: number; deptId?: number; isAdmin?: boolean }
+  user: { id: string; roleId: string; deptId?: string; isAdmin?: boolean }
 ) {
-  if (user.isAdmin || user.roleId === 1) return
+  if (user.isAdmin || user.roleId === SUPER_ADMIN_ROLE_ID) return
 
   const rules = await getRoleDataPermissionRules(req, user.roleId)
   const modelRules = rules.filter((rule) => rule.model_code === modelCode)
@@ -236,7 +240,7 @@ async function applyLegacyDataPermission(
   req: AuthRequest,
   builder: any,
   scope: string,
-  user: { id: number; deptId?: number }
+  user: { id: string; deptId?: string }
 ) {
   switch (scope) {
     case 'self':
@@ -261,7 +265,7 @@ async function applyRuleScope(
   req: AuthRequest,
   builder: any,
   rule: any,
-  user: { id: number; roleId: number; deptId?: number }
+  user: { id: string; roleId: string; deptId?: string }
 ) {
   switch (rule.scope) {
     case 'self':
@@ -343,10 +347,10 @@ function applyCustomFilter(builder: any, filter: any) {
 export async function assertRowPermission(
   req: AuthRequest,
   modelCode: string,
-  rowId: number,
-  user: { id: number; roleId: number; deptId?: number; isAdmin?: boolean }
+  rowId: string,
+  user: { id: string; roleId: string; deptId?: string; isAdmin?: boolean }
 ) {
-  if (user.isAdmin || user.roleId === 1) return
+  if (user.isAdmin || user.roleId === SUPER_ADMIN_ROLE_ID) return
 
   const model = await db('lowcode_models').where(tenantWhere(req)).where({ code: modelCode }).first()
   if (!model) throw new AppError('模型不存在', 404)

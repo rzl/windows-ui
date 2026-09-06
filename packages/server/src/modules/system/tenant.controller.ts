@@ -10,7 +10,7 @@ export async function getTenants(_req: AuthRequest, res: Response) {
 }
 
 export async function getTenant(req: AuthRequest, res: Response) {
-  const result = await tenantService.getTenantById(Number(req.params.id))
+  const result = await tenantService.getTenantById(req.params.id)
   res.json(success(result))
 }
 
@@ -26,7 +26,7 @@ export async function updateTenant(req: AuthRequest, res: Response) {
   if (!isSuperAdmin(req.user)) {
     return res.status(200).json(error('仅超级管理员可编辑租户', 403))
   }
-  const result = await tenantService.updateTenant(Number(req.params.id), req.body)
+  const result = await tenantService.updateTenant(req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
@@ -34,6 +34,6 @@ export async function deleteTenant(req: AuthRequest, res: Response) {
   if (!isSuperAdmin(req.user)) {
     return res.status(200).json(error('仅超级管理员可删除租户', 403))
   }
-  await tenantService.deleteTenant(Number(req.params.id))
+  await tenantService.deleteTenant(req.params.id)
   res.json(success(null, '删除成功'))
 }

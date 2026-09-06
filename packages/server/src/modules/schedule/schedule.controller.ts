@@ -10,7 +10,7 @@ export async function getScheduledTasks(req: AuthRequest, res: Response) {
 }
 
 export async function getScheduledTask(req: AuthRequest, res: Response) {
-  const result = await scheduleService.getScheduledTaskById(req, Number(req.params.id))
+  const result = await scheduleService.getScheduledTaskById(req, req.params.id)
   res.json(success(result))
 }
 
@@ -23,19 +23,19 @@ export async function saveScheduledTask(req: AuthRequest, res: Response) {
 }
 
 export async function deleteScheduledTask(req: AuthRequest, res: Response) {
-  const id = Number(req.params.id)
+  const id = req.params.id
   await scheduleService.deleteScheduledTask(req, id)
   await scheduler.reloadTask(id)
   res.json(success(null, '删除成功'))
 }
 
 export async function getTaskLogs(req: AuthRequest, res: Response) {
-  const result = await scheduleService.getTaskLogs(req, Number(req.params.id))
+  const result = await scheduleService.getTaskLogs(req, req.params.id)
   res.json(success(result))
 }
 
 export async function runTask(req: AuthRequest, res: Response) {
-  const task = await scheduleService.getScheduledTaskById(req, Number(req.params.id))
+  const task = await scheduleService.getScheduledTaskById(req, req.params.id)
   const result = await scheduleService.executeTask(task)
   res.json(success(result, '执行完成'))
 }

@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('flow_definitions', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.string('model_code', 50).notNullable()
@@ -13,9 +13,9 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('flow_instances', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('flow_code', 50).notNullable()
-    table.integer('business_key').notNullable()
+    table.string('business_key', 36).notNullable()
     table.string('status', 20).notNullable().defaultTo('running')
     table.string('current_node_id', 50).nullable()
     table.timestamp('create_time').defaultTo(knex.fn.now())
@@ -23,8 +23,8 @@ export async function up(knex: Knex): Promise<void> {
   })
 
   await knex.schema.createTable('flow_tasks', (table) => {
-    table.increments('id').primary()
-    table.integer('instance_id').notNullable()
+    table.string('id', 36).primary()
+    table.string('instance_id', 36).notNullable()
     table.string('node_id', 50).notNullable()
     table.string('node_name', 50).notNullable()
     table.string('assignee_type', 20).nullable()

@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('dict_categories', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.integer('sort').notNullable().defaultTo(0)
@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
   const hasColumn = await knex.schema.hasColumn('dicts', 'category_id')
   if (!hasColumn) {
     await knex.schema.table('dicts', (table) => {
-      table.integer('category_id').unsigned().nullable().references('id').inTable('dict_categories').onDelete('SET NULL')
+      table.string('category_id', 36).nullable().references('id').inTable('dict_categories').onDelete('SET NULL')
     })
   }
 }

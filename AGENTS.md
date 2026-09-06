@@ -248,6 +248,7 @@ windows-ui/
 - 前端开发服务器默认端口 `5174`，并通过 `proxy` 将 `/api` 转发到后端 `http://localhost:3001`。
 - 后端默认监听 `127.0.0.1:3001`，默认使用 SQLite（`packages/server/data/lowcode.sqlite`）。
 - 后端数据库迁移位于 `packages/server/migrations/`，种子位于 `packages/server/seeds/`。
+- 所有表主键为 ULID 字符串（`utils/id.ts` 的 `newId()` 生成，列长 36 可平滑切换 UUID），根节点 `parent_id` 为 NULL，全局租户与管理员角色分别为固定 ULID 常量 `GLOBAL_TENANT_ID` / `ADMIN_ROLE_ID`。
 - 低代码核心能力：数据模型设计 → 字段管理 → 表单/列表配置 → 自动创建物理表 → 通过 `/:modelCode` 动态 CRUD 接口运行。
 - 自定义接口：通过 Monaco 编辑器在线编写脚本，发布为 `/api/custom/*` 接口，支持多层路径与公开/登录访问控制。
 - 插件扩展：通过「插件市场」安装插件，动态注册自定义字段类型、自定义图表类型、自定义页面组件。

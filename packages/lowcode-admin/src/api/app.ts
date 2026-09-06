@@ -1,7 +1,7 @@
 import request from './request'
 
 export interface AppForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   category?: string
@@ -36,27 +36,27 @@ export function saveApp(data: AppForm) {
   return request.post('/apps', data)
 }
 
-export function deleteApp(id: number) {
+export function deleteApp(id: string) {
   return request.delete(`/apps/${id}`)
 }
 
-export function createSnapshot(id: number, data: { version: string; description?: string }) {
+export function createSnapshot(id: string, data: { version: string; description?: string }) {
   return request.post(`/apps/${id}/snapshot`, data)
 }
 
-export function publishVersion(id: number, versionId: number) {
+export function publishVersion(id: string, versionId: string) {
   return request.post(`/apps/${id}/publish`, { versionId })
 }
 
-export function rollbackVersion(id: number, versionId: number) {
+export function rollbackVersion(id: string, versionId: string) {
   return request.post(`/apps/${id}/rollback`, { versionId })
 }
 
-export function getAppVersions(id: number) {
+export function getAppVersions(id: string) {
   return request.get(`/apps/${id}/versions`)
 }
 
-export function exportApp(id: number) {
+export function exportApp(id: string) {
   return request.get(`/apps/${id}/export`, { responseType: 'blob' })
 }
 

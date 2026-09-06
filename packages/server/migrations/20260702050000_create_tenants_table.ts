@@ -2,7 +2,7 @@ import type { Knex } from 'knex'
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('tenants', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('name', 100).notNullable().comment('租户名称')
     table.string('code', 50).notNullable().unique().comment('租户编码')
     table.string('description', 500).comment('租户描述')

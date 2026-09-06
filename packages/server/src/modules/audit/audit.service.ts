@@ -1,13 +1,14 @@
 import { db } from '../../db'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 
 export interface AuditLog {
-  id?: number
+  id?: string
   model_code: string
-  record_id: number
+  record_id: string
   action: 'create' | 'update' | 'delete'
-  operator_id?: number | null
+  operator_id?: string | null
   operator_name?: string | null
   before?: string | null
   after?: string | null
@@ -18,7 +19,7 @@ export interface AuditLog {
 
 export interface AuditContext {
   modelCode: string
-  recordId: number
+  recordId: string
   action: 'create' | 'update' | 'delete'
   before?: any
   after?: any
@@ -69,6 +70,7 @@ export async function logAudit(req: AuthRequest, ctx: AuditContext) {
     await db('data_audit_logs').insert(
       setTenantId(
         {
+          id: newId(),
           model_code: ctx.modelCode,
           record_id: ctx.recordId,
           action: ctx.action,
@@ -94,7 +96,7 @@ export async function getAuditLogs(
   query: {
     modelCode?: string
     action?: string
-    recordId?: number
+    recordId?: string
     operatorName?: string
     startTime?: string
     endTime?: string
@@ -138,7 +140,7 @@ export async function getAuditLogs(
   }
 }
 
-export async function getAuditLogDetail(req: AuthRequest, id: number) {
+export async function getAuditLogDetail(req: AuthRequest, id: string) {
   return db('data_audit_logs').where({ id }).andWhere(tenantWhere(req)).first()
 }
 

@@ -11,7 +11,7 @@ export async function getModels(req: AuthRequest, res: Response) {
 }
 
 export async function getModel(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.getModelById(req, Number(req.params.id))
+  const result = await lowcodeService.getModelById(req, req.params.id)
   res.json(success(result))
 }
 
@@ -31,17 +31,17 @@ export async function createModel(req: AuthRequest, res: Response) {
 }
 
 export async function updateModel(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.updateModel(req, Number(req.params.id), req.body)
+  const result = await lowcodeService.updateModel(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteModel(req: AuthRequest, res: Response) {
-  await lowcodeService.deleteModel(req, Number(req.params.id))
+  await lowcodeService.deleteModel(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
 export async function exportModel(req: AuthRequest, res: Response) {
-  const data = await importExportService.exportModel(req, Number(req.params.id))
+  const data = await importExportService.exportModel(req, req.params.id)
   const fileName = `model_${data.model.code}_${Date.now()}.json`
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('Content-Disposition', `attachment; filename=${fileName}`)
@@ -65,12 +65,12 @@ export async function createField(req: AuthRequest, res: Response) {
 }
 
 export async function updateField(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.updateField(req, Number(req.params.id), req.body)
+  const result = await lowcodeService.updateField(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteField(req: AuthRequest, res: Response) {
-  await lowcodeService.deleteField(req, Number(req.params.id))
+  await lowcodeService.deleteField(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -97,7 +97,7 @@ export async function dynamicList(req: AuthRequest, res: Response) {
 }
 
 export async function dynamicDetail(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.dynamicDetail(req, req.params.modelCode, Number(req.params.id), req.user, req.query)
+  const result = await lowcodeService.dynamicDetail(req, req.params.modelCode, req.params.id, req.user, req.query)
   res.json(success(result))
 }
 
@@ -107,12 +107,12 @@ export async function dynamicCreate(req: AuthRequest, res: Response) {
 }
 
 export async function dynamicUpdate(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.dynamicUpdate(req, req.params.modelCode, Number(req.params.id), req.body, req.user)
+  const result = await lowcodeService.dynamicUpdate(req, req.params.modelCode, req.params.id, req.body, req.user)
   res.json(success(result, '更新成功'))
 }
 
 export async function dynamicDelete(req: AuthRequest, res: Response) {
-  await lowcodeService.dynamicDelete(req, req.params.modelCode, Number(req.params.id), req.user)
+  await lowcodeService.dynamicDelete(req, req.params.modelCode, req.params.id, req.user)
   res.json(success(null, '删除成功'))
 }
 
@@ -157,12 +157,12 @@ export async function createExportTask(req: AuthRequest, res: Response) {
 }
 
 export async function getExportTask(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.getExportTask(req, Number(req.params.id))
+  const result = await lowcodeService.getExportTask(req, req.params.id)
   res.json(success(result))
 }
 
 export async function downloadExportFile(req: AuthRequest, res: Response) {
-  const { filePath, fileName } = await lowcodeService.downloadExportFile(req, Number(req.params.id))
+  const { filePath, fileName } = await lowcodeService.downloadExportFile(req, req.params.id)
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   res.setHeader('Content-Disposition', `attachment; filename=${fileName}`)
   res.sendFile(filePath)
@@ -180,12 +180,12 @@ export async function createCodingRule(req: AuthRequest, res: Response) {
 }
 
 export async function updateCodingRule(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.updateCodingRule(req, Number(req.params.id), req.body)
+  const result = await lowcodeService.updateCodingRule(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteCodingRule(req: AuthRequest, res: Response) {
-  await lowcodeService.deleteCodingRule(req, Number(req.params.id))
+  await lowcodeService.deleteCodingRule(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 
@@ -206,12 +206,12 @@ export async function createValidationRule(req: AuthRequest, res: Response) {
 }
 
 export async function updateValidationRule(req: AuthRequest, res: Response) {
-  const result = await lowcodeService.updateValidationRule(req, Number(req.params.id), req.body)
+  const result = await lowcodeService.updateValidationRule(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteValidationRule(req: AuthRequest, res: Response) {
-  await lowcodeService.deleteValidationRule(req, Number(req.params.id))
+  await lowcodeService.deleteValidationRule(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 

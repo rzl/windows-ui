@@ -3,10 +3,11 @@ import { AppError } from '../../utils/response'
 import { runScript } from '../../utils/script-runner'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 import * as securityService from './custom-api-security.service'
 
 export interface CustomApiForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   method?: string
@@ -31,7 +32,7 @@ export async function getCustomApis(req: AuthRequest) {
   return db('lowcode_custom_apis').where(tenantWhere(req)).orderBy('id', 'desc')
 }
 
-export async function getCustomApiById(req: AuthRequest, id: number) {
+export async function getCustomApiById(req: AuthRequest, id: string) {
   const api = await db('lowcode_custom_apis').where({ id }).where(tenantWhere(req)).first()
   if (!api) throw new AppError('接口不存在', 404)
   return api
@@ -50,9 +51,11 @@ export async function createCustomApi(req: AuthRequest, data: CustomApiForm) {
 
   const path = data.path ? data.path.trim() : code
 
-  const [id] = await db('lowcode_custom_apis').insert(
+  const id = newId()
+  await db('lowcode_custom_apis').insert(
     setTenantId(
       {
+        id,
         code,
         name: data.name || code,
         method: (data.method || 'ALL').toUpperCase(),
@@ -74,7 +77,7 @@ export async function createCustomApi(req: AuthRequest, data: CustomApiForm) {
   return getCustomApiById(req, id)
 }
 
-export async function updateCustomApi(req: AuthRequest, id: number, data: CustomApiForm) {
+export async function updateCustomApi(req: AuthRequest, id: string, data: CustomApiForm) {
   const api = await getCustomApiById(req, id)
   const path = data.path ? data.path.trim() : api.path
 
@@ -104,13 +107,13 @@ export async function updateCustomApi(req: AuthRequest, id: number, data: Custom
   return getCustomApiById(req, id)
 }
 
-export async function deleteCustomApi(req: AuthRequest, id: number) {
+export async function deleteCustomApi(req: AuthRequest, id: string) {
   const api = await getCustomApiById(req, id)
   await db('lowcode_custom_apis').where({ id }).where(tenantWhere(req)).del()
   return api
 }
 
-export async function executeApiById(req: AuthRequest, id: number, ctx: any = {}) {
+export async function executeApiById(req: AuthRequest, id: string, ctx: any = {}) {
   const api = await getCustomApiById(req, id)
   if (api.status !== 1) throw new AppError('接口已禁用', 403)
   const timeout = api.timeout ?? 5000

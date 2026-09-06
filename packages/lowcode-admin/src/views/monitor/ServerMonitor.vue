@@ -404,20 +404,20 @@ async function handleSaveAlertRule() {
   await loadAlertRules()
 }
 
-async function handleDeleteAlertRule(id: number) {
+async function handleDeleteAlertRule(id: string) {
   if (!confirm('确定删除该告警规则吗？')) return
   await monitorApi.deleteAlertRule(id)
   await loadAlertRules()
 }
 
-async function handleReadAlertRecord(id: number) {
+async function handleReadAlertRecord(id: string) {
   await monitorApi.markAlertRecordRead(id)
   await loadAlertRecords()
   const unread = await monitorApi.getUnreadAlertCount()
   unreadAlertCount.value = unread
 }
 
-async function handleResolveAlertRecord(id: number) {
+async function handleResolveAlertRecord(id: string) {
   await monitorApi.resolveAlertRecord(id)
   await loadAlertRecords()
 }

@@ -2,6 +2,8 @@
 
 > 低代码平台根据数据模型配置自动生成 RESTful API，无需手写每个业务模块的接口。
 
+动态物理表主键 `id` 为 `string(36)` ULID（应用层 `newId()` 生成，非自增数字）；`ref` / `upload` / `cascader` 引用列同为 `string(36)`。
+
 ## 基础路径
 
 ```
@@ -82,10 +84,10 @@ GET /api/lowcode/:modelCode?expand=fieldName1,fieldName2
 
 ```json
 {
-  "id": 1,
+  "id": "01JCM0000000000000000A001",
   "customer_id_display": "张三",
   "customer_id": {
-    "id": 5,
+    "id": "01JCM0000000000000000A002",
     "name": "张三",
     "phone": "13800000000"
   }
@@ -257,7 +259,7 @@ GET /api/audit-logs
 |------|------|------|
 | modelCode | string | 模型编码 |
 | action | string | 操作类型：`create` / `update` / `delete` |
-| recordId | number | 记录 ID |
+| recordId | string | 记录 ID（ULID） |
 | operatorName | string | 操作人姓名/用户名，模糊匹配 |
 | startTime | string | 开始时间，格式 `YYYY-MM-DD HH:mm:ss` |
 | endTime | string | 结束时间，格式 `YYYY-MM-DD HH:mm:ss` |
@@ -272,9 +274,9 @@ GET /api/audit-logs
   "data": {
     "list": [
       {
-        "id": 1,
+        "id": "01JCM0000000000000000B001",
         "model_code": "customer",
-        "record_id": 12,
+        "record_id": "01JCM0000000000000000B002",
         "action": "update",
         "operator_name": "管理员",
         "ip": "127.0.0.1",

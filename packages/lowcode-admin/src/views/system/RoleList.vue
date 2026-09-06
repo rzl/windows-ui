@@ -109,8 +109,8 @@ const dataPermissionList = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 const selectedPermissions = ref<string[]>([])
-const selectedApps = ref<number[]>([])
-const selectedDataPermissions = ref<number[]>([])
+const selectedApps = ref<string[]>([])
+const selectedDataPermissions = ref<string[]>([])
 const permissionTab = ref(0)
 
 const columns = [

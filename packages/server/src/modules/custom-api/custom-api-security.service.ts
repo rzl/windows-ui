@@ -2,6 +2,7 @@ import { db } from '../../db'
 import { createRateLimitStore, type RateLimitStore } from '../../utils/rate-limit-store'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 
 export interface SecurityConfig {
   rateLimit?: number
@@ -27,7 +28,7 @@ async function getRateLimitStore(): Promise<RateLimitStore> {
   return rateLimitStore
 }
 
-export async function checkRateLimit(apiId: number, identifier: string, limit: number, window: string): Promise<boolean> {
+export async function checkRateLimit(apiId: string, identifier: string, limit: number, window: string): Promise<boolean> {
   if (!limit || limit <= 0) return true
 
   const store = await getRateLimitStore()
@@ -107,10 +108,10 @@ export function parseIpList(text?: string | string[] | null): string[] {
 export async function logExecution(
   req: AuthRequest,
   data: {
-    apiId: number
+    apiId: string
     apiCode: string
     apiPath?: string
-    userId?: number
+    userId?: string
     username?: string
     ip?: string
     method?: string
@@ -125,6 +126,7 @@ export async function logExecution(
   return db('custom_api_logs').insert(
     setTenantId(
       {
+        id: newId(),
         api_id: data.apiId,
         api_code: data.apiCode,
         api_path: data.apiPath || data.apiCode,

@@ -8,11 +8,11 @@ export function createMessageTemplate(data: any) {
   return request.post('/monitor/message-templates', data)
 }
 
-export function updateMessageTemplate(id: number, data: any) {
+export function updateMessageTemplate(id: string, data: any) {
   return request.put(`/monitor/message-templates/${id}`, data)
 }
 
-export function deleteMessageTemplate(id: number) {
+export function deleteMessageTemplate(id: string) {
   return request.delete(`/monitor/message-templates/${id}`)
 }
 
@@ -24,7 +24,7 @@ export function sendMessage(data: any) {
   return request.post('/monitor/messages', data)
 }
 
-export function markMessageRead(id: number) {
+export function markMessageRead(id: string) {
   return request.put(`/monitor/messages/${id}/read`)
 }
 
@@ -36,11 +36,11 @@ export function markMessageReadByBusinessKey(businessType: string, businessKey: 
   return request.put(`/monitor/messages/${businessType}/${businessKey}/read`)
 }
 
-export function deleteMessage(id: number) {
+export function deleteMessage(id: string) {
   return request.delete(`/monitor/messages/${id}`)
 }
 
-export function getUnreadCount(receiverId: number) {
+export function getUnreadCount(receiverId: string) {
   return request.get('/monitor/messages/unread-count', { params: { receiverId } })
 }
 
@@ -91,11 +91,11 @@ export function createAlertRule(data: any) {
   return request.post('/monitor/alert-rules', data)
 }
 
-export function updateAlertRule(id: number, data: any) {
+export function updateAlertRule(id: string, data: any) {
   return request.put(`/monitor/alert-rules/${id}`, data)
 }
 
-export function deleteAlertRule(id: number) {
+export function deleteAlertRule(id: string) {
   return request.delete(`/monitor/alert-rules/${id}`)
 }
 
@@ -108,11 +108,11 @@ export function getUnreadAlertCount() {
   return request.get('/monitor/alert-records/unread-count')
 }
 
-export function markAlertRecordRead(id: number) {
+export function markAlertRecordRead(id: string) {
   return request.put(`/monitor/alert-records/${id}/read`)
 }
 
-export function resolveAlertRecord(id: number) {
+export function resolveAlertRecord(id: string) {
   return request.put(`/monitor/alert-records/${id}/resolve`)
 }
 
@@ -125,7 +125,7 @@ export function getRetentionPolicies() {
   return request.get('/monitor/retention-policies')
 }
 
-export function updateRetentionPolicy(id: number, data: any) {
+export function updateRetentionPolicy(id: string, data: any) {
   return request.put(`/monitor/retention-policies/${id}`, data)
 }
 

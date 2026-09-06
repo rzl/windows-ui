@@ -3,7 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws'
 
 export interface WSClient {
   ws: WebSocket
-  userId?: number
+  userId?: string
   username?: string
 }
 
@@ -49,7 +49,7 @@ class WebSocketManager {
     })
   }
 
-  sendToUser(userId: number, message: any) {
+  sendToUser(userId: string, message: any) {
     const data = JSON.stringify(message)
     this.clients.forEach((client) => {
       if (client.userId === userId && client.ws.readyState === WebSocket.OPEN) {

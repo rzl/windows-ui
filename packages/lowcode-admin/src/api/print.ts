@@ -1,7 +1,7 @@
 import request from './request'
 
 export interface PrintTemplateForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   modelCode?: string
@@ -24,14 +24,14 @@ export function savePrintTemplate(data: PrintTemplateForm) {
   return request.post('/print/templates', data)
 }
 
-export function deletePrintTemplate(id: number) {
+export function deletePrintTemplate(id: string) {
   return request.delete(`/print/templates/${id}`)
 }
 
-export function previewPrintTemplate(code: string, data: { recordId?: number; recordIds?: number[] }) {
+export function previewPrintTemplate(code: string, data: { recordId?: string; recordIds?: string[] }) {
   return request.post(`/print/templates/${code}/preview`, data)
 }
 
-export function exportPrintTemplatePdf(code: string, data: { recordId?: number; recordIds?: number[] }) {
+export function exportPrintTemplatePdf(code: string, data: { recordId?: string; recordIds?: string[] }) {
   return request.post(`/print/templates/${code}/pdf`, data)
 }

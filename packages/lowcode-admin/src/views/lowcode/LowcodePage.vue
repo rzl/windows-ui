@@ -183,7 +183,7 @@ const previewHtml = ref('')
 const advancedQuery = reactive<any>({ logic: 'and', conditions: [] })
 const advancedQueryRef = ref<any>(null)
 const savedQueries = ref<any[]>([])
-const selectedSavedQuery = ref<number | undefined>(undefined)
+const selectedSavedQuery = ref<string | undefined>(undefined)
 const saveQueryDialogVisible = ref(false)
 const saveQueryForm = reactive({ name: '', isDefault: false })
 
@@ -581,7 +581,7 @@ async function handleSaveQuery() {
   }
 }
 
-async function handleDeleteSavedQuery(id: number) {
+async function handleDeleteSavedQuery(id: string) {
   if (!confirm('确定删除该常用查询吗？')) return
   try {
     await lowcodeApi.deleteSavedQuery(modelCode.value, id)
@@ -592,7 +592,7 @@ async function handleDeleteSavedQuery(id: number) {
   }
 }
 
-async function handleSetDefaultSavedQuery(id: number) {
+async function handleSetDefaultSavedQuery(id: string) {
   try {
     await lowcodeApi.setDefaultSavedQuery(modelCode.value, id)
     await loadSavedQueries()

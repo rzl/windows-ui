@@ -26,11 +26,11 @@ export function createDashboard(data: any) {
   return request.post('/dashboard/dashboards', data)
 }
 
-export function updateDashboard(id: number, data: any) {
+export function updateDashboard(id: string, data: any) {
   return request.put(`/dashboard/dashboards/${id}`, data)
 }
 
-export function deleteDashboard(id: number) {
+export function deleteDashboard(id: string) {
   return request.delete(`/dashboard/dashboards/${id}`)
 }
 

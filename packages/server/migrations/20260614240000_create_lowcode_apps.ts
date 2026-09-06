@@ -4,14 +4,14 @@ export async function up(knex: Knex): Promise<void> {
   const hasApps = await knex.schema.hasTable('lowcode_apps')
   if (!hasApps) {
     await knex.schema.createTable('lowcode_apps', (table) => {
-      table.increments('id').primary()
+      table.string('id', 36).primary()
       table.string('code', 100).notNullable().unique()
       table.string('name', 200).notNullable()
       table.string('category', 100).nullable()
       table.string('icon', 100).nullable()
       table.text('description').nullable()
       table.tinyint('status').defaultTo(1)
-      table.integer('published_version_id').nullable()
+      table.string('published_version_id', 36).nullable()
       table.timestamp('create_time').defaultTo(knex.fn.now())
       table.timestamp('update_time').defaultTo(knex.fn.now())
     })
@@ -20,8 +20,8 @@ export async function up(knex: Knex): Promise<void> {
   const hasItems = await knex.schema.hasTable('lowcode_app_items')
   if (!hasItems) {
     await knex.schema.createTable('lowcode_app_items', (table) => {
-      table.increments('id').primary()
-      table.integer('app_id').notNullable()
+      table.string('id', 36).primary()
+      table.string('app_id', 36).notNullable()
       table.string('type', 50).notNullable() // model / report / dashboard / flow / print / datasource / page
       table.string('ref_code', 100).notNullable()
       table.string('ref_name', 200).nullable()
@@ -33,8 +33,8 @@ export async function up(knex: Knex): Promise<void> {
   const hasVersions = await knex.schema.hasTable('lowcode_app_versions')
   if (!hasVersions) {
     await knex.schema.createTable('lowcode_app_versions', (table) => {
-      table.increments('id').primary()
-      table.integer('app_id').notNullable()
+      table.string('id', 36).primary()
+      table.string('app_id', 36).notNullable()
       table.string('version', 50).notNullable()
       table.text('snapshot').notNullable()
       table.text('description').nullable()

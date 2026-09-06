@@ -1,6 +1,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
-export function useWebSocket(userId?: number, username?: string) {
+export function useWebSocket(userId?: string, username?: string) {
   const ws = ref<WebSocket | null>(null)
   const connected = ref(false)
   const messages = ref<any[]>([])

@@ -209,7 +209,7 @@ async function loadData() {
   params.value = config.params || []
 
   if (report.externalDataSourceId) {
-    await loadExternalFields(Number(report.externalDataSourceId), config.columns)
+    await loadExternalFields(report.externalDataSourceId, config.columns)
   } else if (reportData.model_code) {
     const modelData = await lowcodeApi.getModelByCode(reportData.model_code)
     Object.assign(model, modelData)
@@ -229,7 +229,7 @@ async function loadData() {
   }
 }
 
-async function loadExternalFields(id: number, savedColumns?: any[]) {
+async function loadExternalFields(id: string, savedColumns?: any[]) {
   try {
     const result = await externalDatasourceApi.testExternalDataSource(id)
     const sample = result.sample?.[0] || {}
@@ -261,7 +261,7 @@ async function handleExternalChange(val: any) {
     return
   }
   report.modelCode = ''
-  await loadExternalFields(Number(val))
+  await loadExternalFields(val)
 }
 
 function syncColumnMap() {
@@ -311,7 +311,7 @@ async function handleSave() {
     params: params.value.filter((p: any) => p.name)
   }
   if (report.externalDataSourceId) {
-    config.externalDataSourceId = Number(report.externalDataSourceId)
+    config.externalDataSourceId = report.externalDataSourceId
   }
 
   await reportApi.saveReport({

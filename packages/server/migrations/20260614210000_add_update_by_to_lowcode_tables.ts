@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<void> {
     const hasUpdateBy = await knex.schema.hasColumn(tableName, 'update_by')
     if (!hasUpdateBy) {
       await knex.schema.table(tableName, (table) => {
-        table.integer('update_by').unsigned().nullable()
+        table.string('update_by', 36).nullable()
       })
     }
   }

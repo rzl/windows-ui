@@ -3,7 +3,7 @@ import type { Knex } from 'knex'
 export async function up(knex: Knex): Promise<void> {
   // 消息模板
   await knex.schema.createTable('message_templates', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.string('title', 100)
@@ -15,9 +15,9 @@ export async function up(knex: Knex): Promise<void> {
 
   // 消息记录
   await knex.schema.createTable('messages', (table) => {
-    table.increments('id').primary()
-    table.integer('sender_id').unsigned()
-    table.integer('receiver_id').unsigned().notNullable()
+    table.string('id', 36).primary()
+    table.string('sender_id', 36)
+    table.string('receiver_id', 36).notNullable()
     table.string('title', 100)
     table.text('content')
     table.string('channel', 20).notNullable().defaultTo('site')
@@ -28,8 +28,8 @@ export async function up(knex: Knex): Promise<void> {
 
   // 操作日志
   await knex.schema.createTable('operation_logs', (table) => {
-    table.increments('id').primary()
-    table.integer('user_id').unsigned()
+    table.string('id', 36).primary()
+    table.string('user_id', 36)
     table.string('username', 50)
     table.string('module', 50)
     table.string('action', 50)
@@ -44,10 +44,10 @@ export async function up(knex: Knex): Promise<void> {
 
   // 数据日志（数据快照）
   await knex.schema.createTable('data_logs', (table) => {
-    table.increments('id').primary()
-    table.integer('user_id').unsigned()
+    table.string('id', 36).primary()
+    table.string('user_id', 36)
     table.string('model_code', 50)
-    table.integer('row_id')
+    table.string('row_id', 36)
     table.string('action', 20)
     table.text('before_snapshot')
     table.text('after_snapshot')

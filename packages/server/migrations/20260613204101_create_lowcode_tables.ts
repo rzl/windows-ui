@@ -3,7 +3,7 @@ import type { Knex } from 'knex'
 export async function up(knex: Knex): Promise<void> {
   // 数据模型
   await knex.schema.createTable('lowcode_models', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.string('table_name', 50).notNullable().unique()
@@ -16,8 +16,8 @@ export async function up(knex: Knex): Promise<void> {
 
   // 模型字段
   await knex.schema.createTable('lowcode_fields', (table) => {
-    table.increments('id').primary()
-    table.integer('model_id').unsigned().notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
+    table.string('id', 36).primary()
+    table.string('model_id', 36).notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
     table.string('field_name', 50).notNullable()
     table.string('display_name', 50).notNullable()
     table.string('type', 30).notNullable().defaultTo('string')
@@ -32,8 +32,8 @@ export async function up(knex: Knex): Promise<void> {
 
   // 表单配置
   await knex.schema.createTable('lowcode_forms', (table) => {
-    table.increments('id').primary()
-    table.integer('model_id').unsigned().notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
+    table.string('id', 36).primary()
+    table.string('model_id', 36).notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
     table.string('name', 50).notNullable()
     table.text('config').notNullable()
     table.tinyint('status').notNullable().defaultTo(1)
@@ -42,8 +42,8 @@ export async function up(knex: Knex): Promise<void> {
 
   // 列表配置
   await knex.schema.createTable('lowcode_tables', (table) => {
-    table.increments('id').primary()
-    table.integer('model_id').unsigned().notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
+    table.string('id', 36).primary()
+    table.string('model_id', 36).notNullable().references('id').inTable('lowcode_models').onDelete('CASCADE')
     table.string('name', 50).notNullable()
     table.text('config').notNullable()
     table.tinyint('status').notNullable().defaultTo(1)
@@ -52,7 +52,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // 编码规则
   await knex.schema.createTable('lowcode_coding_rules', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.string('prefix', 50)
@@ -65,7 +65,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // 校验规则
   await knex.schema.createTable('lowcode_validation_rules', (table) => {
-    table.increments('id').primary()
+    table.string('id', 36).primary()
     table.string('code', 50).notNullable().unique()
     table.string('name', 50).notNullable()
     table.string('pattern', 255).notNullable()

@@ -2,9 +2,10 @@ import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
+import { newId } from '../../utils/id'
 import { getCustomApiById, updateCustomApi } from './custom-api.service'
 
-export async function getCustomApiVersions(req: AuthRequest, apiId: number) {
+export async function getCustomApiVersions(req: AuthRequest, apiId: string) {
   await getCustomApiById(req, apiId)
   return db('lowcode_custom_api_versions')
     .where({ api_id: apiId })
@@ -12,7 +13,7 @@ export async function getCustomApiVersions(req: AuthRequest, apiId: number) {
     .orderBy('id', 'desc')
 }
 
-export async function createCustomApiVersion(req: AuthRequest, apiId: number, data: any) {
+export async function createCustomApiVersion(req: AuthRequest, apiId: string, data: any) {
   const api = await getCustomApiById(req, apiId)
 
   const snapshot = {
@@ -30,9 +31,11 @@ export async function createCustomApiVersion(req: AuthRequest, apiId: number, da
     .where(tenantWhere(req))
     .update({ is_published: 0 })
 
-  const [id] = await db('lowcode_custom_api_versions').insert(
+  const id = newId()
+  await db('lowcode_custom_api_versions').insert(
     setTenantId(
       {
+        id,
         api_id: apiId,
         version: data.version || generateVersion(),
         description: data.description || '',
@@ -46,7 +49,7 @@ export async function createCustomApiVersion(req: AuthRequest, apiId: number, da
   return db('lowcode_custom_api_versions').where({ id }).where(tenantWhere(req)).first()
 }
 
-export async function deleteCustomApiVersion(req: AuthRequest, apiId: number, versionId: number) {
+export async function deleteCustomApiVersion(req: AuthRequest, apiId: string, versionId: string) {
   const version = await db('lowcode_custom_api_versions')
     .where({ id: versionId, api_id: apiId })
     .where(tenantWhere(req))
@@ -56,7 +59,7 @@ export async function deleteCustomApiVersion(req: AuthRequest, apiId: number, ve
   return true
 }
 
-export async function rollbackCustomApiVersion(req: AuthRequest, apiId: number, versionId: number) {
+export async function rollbackCustomApiVersion(req: AuthRequest, apiId: string, versionId: string) {
   const version = await db('lowcode_custom_api_versions')
     .where({ id: versionId, api_id: apiId })
     .where(tenantWhere(req))

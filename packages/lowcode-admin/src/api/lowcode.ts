@@ -1,7 +1,7 @@
 import request from './request'
 
 export interface ModelForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   tableName?: string
@@ -12,8 +12,8 @@ export interface ModelForm {
 }
 
 export interface FieldForm {
-  id?: number
-  modelId?: number
+  id?: string
+  modelId?: string
   fieldName?: string
   displayName?: string
   type?: string
@@ -34,21 +34,21 @@ export interface FieldForm {
 }
 
 export interface FormConfigData {
-  modelId?: number
+  modelId?: string
   name?: string
   config?: any
   status?: number
 }
 
 export interface TableConfigData {
-  modelId?: number
+  modelId?: string
   name?: string
   config?: any
   status?: number
 }
 
 export interface CodingRuleForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   prefix?: string
@@ -58,7 +58,7 @@ export interface CodingRuleForm {
 }
 
 export interface ValidationRuleForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   pattern?: string
@@ -71,7 +71,7 @@ export function getModels() {
   return request.get('/lowcode/models')
 }
 
-export function getModel(id: number) {
+export function getModel(id: string) {
   return request.get(`/lowcode/models/${id}`)
 }
 
@@ -87,15 +87,15 @@ export function createModel(data: ModelForm) {
   return request.post('/lowcode/models', data)
 }
 
-export function updateModel(id: number, data: ModelForm) {
+export function updateModel(id: string, data: ModelForm) {
   return request.put(`/lowcode/models/${id}`, data)
 }
 
-export function deleteModel(id: number) {
+export function deleteModel(id: string) {
   return request.delete(`/lowcode/models/${id}`)
 }
 
-export function exportModel(id: number) {
+export function exportModel(id: string) {
   return request.get(`/lowcode/models/${id}/export`, { responseType: 'blob' })
 }
 
@@ -112,15 +112,15 @@ export function createField(data: FieldForm) {
   return request.post('/lowcode/fields', data)
 }
 
-export function updateField(id: number, data: FieldForm) {
+export function updateField(id: string, data: FieldForm) {
   return request.put(`/lowcode/fields/${id}`, data)
 }
 
-export function deleteField(id: number) {
+export function deleteField(id: string) {
   return request.delete(`/lowcode/fields/${id}`)
 }
 
-export function batchDeleteFields(ids: number[]) {
+export function batchDeleteFields(ids: string[]) {
   return request.post('/lowcode/fields/batch-delete', { ids })
 }
 
@@ -138,7 +138,7 @@ export function getDynamicList(modelCode: string, params: any) {
   return request.get(`/lowcode/${modelCode}`, { params })
 }
 
-export function getDynamicDetail(modelCode: string, id: number, params?: any) {
+export function getDynamicDetail(modelCode: string, id: string, params?: any) {
   return request.get(`/lowcode/${modelCode}/${id}`, { params })
 }
 
@@ -146,11 +146,11 @@ export function createDynamic(modelCode: string, data: any) {
   return request.post(`/lowcode/${modelCode}`, data)
 }
 
-export function updateDynamic(modelCode: string, id: number, data: any) {
+export function updateDynamic(modelCode: string, id: string, data: any) {
   return request.put(`/lowcode/${modelCode}/${id}`, data)
 }
 
-export function deleteDynamic(modelCode: string, id: number) {
+export function deleteDynamic(modelCode: string, id: string) {
   return request.delete(`/lowcode/${modelCode}/${id}`)
 }
 
@@ -182,11 +182,11 @@ export function createExportTask(modelCode: string, data: { ids?: (string | numb
   return request.post(`/lowcode/${modelCode}/export-task`, data)
 }
 
-export function getExportTask(modelCode: string, id: number) {
+export function getExportTask(modelCode: string, id: string) {
   return request.get(`/lowcode/${modelCode}/export-task/${id}`)
 }
 
-export function downloadExportFile(modelCode: string, id: number) {
+export function downloadExportFile(modelCode: string, id: string) {
   return request.get(`/lowcode/${modelCode}/export-task/${id}/download`, { responseType: 'blob' })
 }
 
@@ -199,11 +199,11 @@ export function createCodingRule(data: CodingRuleForm) {
   return request.post('/lowcode/coding-rules', data)
 }
 
-export function updateCodingRule(id: number, data: CodingRuleForm) {
+export function updateCodingRule(id: string, data: CodingRuleForm) {
   return request.put(`/lowcode/coding-rules/${id}`, data)
 }
 
-export function deleteCodingRule(id: number) {
+export function deleteCodingRule(id: string) {
   return request.delete(`/lowcode/coding-rules/${id}`)
 }
 
@@ -220,11 +220,11 @@ export function createValidationRule(data: ValidationRuleForm) {
   return request.post('/lowcode/validation-rules', data)
 }
 
-export function updateValidationRule(id: number, data: ValidationRuleForm) {
+export function updateValidationRule(id: string, data: ValidationRuleForm) {
   return request.put(`/lowcode/validation-rules/${id}`, data)
 }
 
-export function deleteValidationRule(id: number) {
+export function deleteValidationRule(id: string) {
   return request.delete(`/lowcode/validation-rules/${id}`)
 }
 
@@ -238,7 +238,7 @@ export function executeFieldOptions(config: any, ctx?: any) {
 
 // 常用查询
 export interface SavedQuery {
-  id?: number
+  id?: string
   name: string
   modelCode?: string
   filters: any
@@ -253,14 +253,14 @@ export function createSavedQuery(modelCode: string, data: SavedQuery) {
   return request.post(`/lowcode/${modelCode}/saved-queries`, data)
 }
 
-export function updateSavedQuery(modelCode: string, id: number, data: SavedQuery) {
+export function updateSavedQuery(modelCode: string, id: string, data: SavedQuery) {
   return request.put(`/lowcode/${modelCode}/saved-queries/${id}`, data)
 }
 
-export function deleteSavedQuery(modelCode: string, id: number) {
+export function deleteSavedQuery(modelCode: string, id: string) {
   return request.delete(`/lowcode/${modelCode}/saved-queries/${id}`)
 }
 
-export function setDefaultSavedQuery(modelCode: string, id: number) {
+export function setDefaultSavedQuery(modelCode: string, id: string) {
   return request.post(`/lowcode/${modelCode}/saved-queries/${id}/default`)
 }

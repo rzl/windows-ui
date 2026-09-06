@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs'
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
-import { tenantWhere, setTenantId, withTenantWhere } from '../../utils/tenant'
+import { tenantWhere, setTenantId, withTenantWhere, SUPER_ADMIN_ROLE_ID, GLOBAL_TENANT_ID } from '../../utils/tenant'
+import { newId } from '../../utils/id'
 import type { AuthRequest } from '../../middleware/auth'
 import { getRoleDataPermissionIds as getRoleDataPermissionIdsFromService, saveRoleDataPermissions as saveRoleDataPermissionsToService } from '../lowcode/data-permission.service'
 
@@ -55,7 +56,7 @@ export async function getUsers(req: AuthRequest, query: any) {
   }
 }
 
-export async function getUserById(req: AuthRequest, id: number) {
+export async function getUserById(req: AuthRequest, id: string) {
   const user = await db('users').where({ id }).where(tenantWhere(req)).first()
   if (!user) throw new AppError('用户不存在', 404)
   return user
@@ -77,11 +78,12 @@ export async function createUser(req: AuthRequest, data: any) {
     dept_id: data.deptId,
     role_id: data.roleId
   }, req)
-  const [id] = await db('users').insert(insertData)
+  const id = newId()
+  await db('users').insert({ id, ...insertData })
   return getUserById(req, id)
 }
 
-export async function updateUser(req: AuthRequest, id: number, data: any) {
+export async function updateUser(req: AuthRequest, id: string, data: any) {
   const user = await db('users').where({ id }).where(tenantWhere(req)).first()
   if (!user) throw new AppError('用户不存在', 404)
 
@@ -104,7 +106,7 @@ export async function updateUser(req: AuthRequest, id: number, data: any) {
   return getUserById(req, id)
 }
 
-export async function deleteUsers(req: AuthRequest, ids: number[]) {
+export async function deleteUsers(req: AuthRequest, ids: string[]) {
   if (!ids.length) throw new AppError('请选择要删除的用户', 400)
   await db('users').whereIn('id', ids).where(tenantWhere(req)).del()
   return true
@@ -122,12 +124,13 @@ export async function createRole(req: AuthRequest, data: any) {
     description: data.description,
     status: data.status ?? 1
   }, req)
-  const [id] = await db('roles').insert(insertData)
-  const roleTenantId = (insertData as any).tenant_id ?? 0
+  const id = newId()
+  await db('roles').insert({ id, ...insertData })
+  const roleTenantId = (insertData as any).tenant_id ?? GLOBAL_TENANT_ID
 
   if (data.permissions?.length) {
     await db('role_permissions').insert(
-      data.permissions.map((p: string) => ({ role_id: id, permission: p, tenant_id: roleTenantId }))
+      data.permissions.map((p: string) => ({ id: newId(), role_id: id, permission: p, tenant_id: roleTenantId }))
     )
   }
 
@@ -137,7 +140,7 @@ export async function createRole(req: AuthRequest, data: any) {
   return getRoleById(req, id)
 }
 
-export async function updateRole(req: AuthRequest, id: number, data: any) {
+export async function updateRole(req: AuthRequest, id: string, data: any) {
   const role = await db('roles').where({ id }).where(tenantWhere(req)).first()
   if (!role) throw new AppError('角色不存在', 404)
 
@@ -149,11 +152,11 @@ export async function updateRole(req: AuthRequest, id: number, data: any) {
     update_time: db.fn.now()
   })
 
-  const tenantId = role.tenant_id ?? 0
+  const tenantId = role.tenant_id ?? GLOBAL_TENANT_ID
   await db('role_permissions').where({ role_id: id }).where(tenantWhere(req)).del()
   if (data.permissions?.length) {
     await db('role_permissions').insert(
-      data.permissions.map((p: string) => ({ role_id: id, permission: p, tenant_id: tenantId }))
+      data.permissions.map((p: string) => ({ id: newId(), role_id: id, permission: p, tenant_id: tenantId }))
     )
   }
 
@@ -163,12 +166,12 @@ export async function updateRole(req: AuthRequest, id: number, data: any) {
   return getRoleById(req, id)
 }
 
-export async function deleteRole(req: AuthRequest, id: number) {
+export async function deleteRole(req: AuthRequest, id: string) {
   await db('roles').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
-export async function getRoleById(req: AuthRequest, id: number) {
+export async function getRoleById(req: AuthRequest, id: string) {
   const role = await db('roles').where({ id }).where(tenantWhere(req)).first()
   if (!role) throw new AppError('角色不存在', 404)
   const permissions = await db('role_permissions')
@@ -181,7 +184,7 @@ export async function getRoleById(req: AuthRequest, id: number) {
 }
 
 // 角色应用授权
-export async function getRoleApps(req: AuthRequest, roleId: number) {
+export async function getRoleApps(req: AuthRequest, roleId: string) {
   const rows = await db('role_apps')
     .where({ role_id: roleId, status: 1 })
     .where(tenantWhere(req))
@@ -189,44 +192,44 @@ export async function getRoleApps(req: AuthRequest, roleId: number) {
   return rows.map((row) => row.app_id)
 }
 
-async function saveRoleApps(req: AuthRequest, roleId: number, appIds: number[]) {
+async function saveRoleApps(req: AuthRequest, roleId: string, appIds: (string | number)[]) {
   await db('role_apps').where({ role_id: roleId }).where(tenantWhere(req)).del()
-  const validAppIds = (appIds || []).filter((id) => Number(id) > 0)
+  const validAppIds = (appIds || []).filter((id) => id !== undefined && id !== null && id !== '')
   if (validAppIds.length) {
     const tenantId = getTenantIdForRole(req, roleId)
     await db('role_apps').insert(
-      validAppIds.map((appId) => ({ role_id: roleId, app_id: appId, status: 1, tenant_id: tenantId }))
+      validAppIds.map((appId) => ({ id: newId(), role_id: roleId, app_id: appId, status: 1, tenant_id: tenantId }))
     )
   }
 }
 
-async function getTenantIdForRole(req: AuthRequest, roleId: number): Promise<number> {
+async function getTenantIdForRole(req: AuthRequest, roleId: string): Promise<string> {
   const role = await db('roles').where({ id: roleId }).where(tenantWhere(req)).first()
-  return role?.tenant_id ?? 0
+  return role?.tenant_id ?? GLOBAL_TENANT_ID
 }
 
-async function saveRoleDataPermissions(req: AuthRequest, roleId: number, dataPermissionIds: number[]) {
+async function saveRoleDataPermissions(req: AuthRequest, roleId: string, dataPermissionIds: (string | number)[]) {
   await saveRoleDataPermissionsToService(req, roleId, dataPermissionIds)
 }
 
-async function getRoleDataPermissionIds(req: AuthRequest, roleId: number) {
+async function getRoleDataPermissionIds(req: AuthRequest, roleId: string) {
   return getRoleDataPermissionIdsFromService(req, roleId)
 }
 
 // 菜单
 export async function getMenuTree(req: AuthRequest) {
   const menus = await db('menus').where(tenantWhere(req)).orderBy('sort', 'asc')
-  return buildTree(menus, 0)
+  return buildTree(menus, null)
 }
 
 // 按角色过滤后的菜单树（过滤无权限的应用菜单）
-export async function getRoleMenuTree(req: AuthRequest, roleId: number) {
+export async function getRoleMenuTree(req: AuthRequest, roleId: string) {
   const allMenus = await db('menus').where(tenantWhere(req)).orderBy('sort', 'asc')
   const role = await db('roles').where({ id: roleId }).where(tenantWhere(req)).first()
 
   // 超级管理员不过滤
-  if (role?.id === 1) {
-    return buildTree(allMenus, 0)
+  if (role?.id === SUPER_ADMIN_ROLE_ID) {
+    return buildTree(allMenus, null)
   }
 
   const permissions = await db('role_permissions')
@@ -234,7 +237,7 @@ export async function getRoleMenuTree(req: AuthRequest, roleId: number) {
     .where(tenantWhere(req))
     .pluck('permission')
   if (permissions.includes('*')) {
-    return buildTree(allMenus, 0)
+    return buildTree(allMenus, null)
   }
 
   // 获取角色授权的应用编码
@@ -247,8 +250,8 @@ export async function getRoleMenuTree(req: AuthRequest, roleId: number) {
   const allowedAppCodes = new Set(appRows.map((row) => row.code))
 
   // 过滤菜单：只移除应用根菜单及其子菜单；保留系统固定菜单
-  const allowedMenuIds = new Set<number>()
-  const menuMap = new Map<number, any>()
+  const allowedMenuIds = new Set<string>()
+  const menuMap = new Map<string, any>()
   allMenus.forEach((menu) => menuMap.set(menu.id, menu))
 
   for (const menu of allMenus) {
@@ -269,7 +272,7 @@ export async function getRoleMenuTree(req: AuthRequest, roleId: number) {
   }
 
   const filteredMenus = allMenus.filter((menu) => allowedMenuIds.has(menu.id))
-  return buildTree(filteredMenus, 0)
+  return buildTree(filteredMenus, null)
 }
 
 export async function getMenus(req: AuthRequest) {
@@ -278,7 +281,8 @@ export async function getMenus(req: AuthRequest) {
 
 export async function createMenu(req: AuthRequest, data: any) {
   const insertData = setTenantId({
-    parent_id: data.parentId ?? 0,
+    // 前端以空串表示根节点，统一归一为 null
+    parent_id: data.parentId || null,
     name: data.name,
     path: data.path,
     component: data.component,
@@ -288,15 +292,16 @@ export async function createMenu(req: AuthRequest, data: any) {
     status: data.status ?? 1,
     permission: data.permission
   }, req)
-  const [id] = await db('menus').insert(insertData)
+  const id = newId()
+  await db('menus').insert({ id, ...insertData })
   return db('menus').where({ id }).first()
 }
 
-export async function updateMenu(req: AuthRequest, id: number, data: any) {
+export async function updateMenu(req: AuthRequest, id: string, data: any) {
   const menu = await db('menus').where({ id }).where(tenantWhere(req)).first()
   if (!menu) throw new AppError('菜单不存在', 404)
   await db('menus').where({ id }).where(tenantWhere(req)).update({
-    parent_id: data.parentId,
+    parent_id: data.parentId || null,
     name: data.name,
     path: data.path,
     component: data.component,
@@ -309,7 +314,7 @@ export async function updateMenu(req: AuthRequest, id: number, data: any) {
   return db('menus').where({ id }).first()
 }
 
-export async function deleteMenu(req: AuthRequest, id: number) {
+export async function deleteMenu(req: AuthRequest, id: string) {
   await db('menus').where({ id }).where(tenantWhere(req)).del()
   return true
 }
@@ -317,26 +322,28 @@ export async function deleteMenu(req: AuthRequest, id: number) {
 // 部门
 export async function getDeptTree(req: AuthRequest) {
   const depts = await db('depts').where(tenantWhere(req)).orderBy('sort', 'asc')
-  return buildTree(depts, 0)
+  return buildTree(depts, null)
 }
 
 export async function createDept(req: AuthRequest, data: any) {
   const insertData = setTenantId({
-    parent_id: data.parentId ?? 0,
+    // 前端以空串表示根节点，统一归一为 null
+    parent_id: data.parentId || null,
     name: data.name,
     code: data.code,
     sort: data.sort ?? 0,
     status: data.status ?? 1
   }, req)
-  const [id] = await db('depts').insert(insertData)
+  const id = newId()
+  await db('depts').insert({ id, ...insertData })
   return db('depts').where({ id }).first()
 }
 
-export async function updateDept(req: AuthRequest, id: number, data: any) {
+export async function updateDept(req: AuthRequest, id: string, data: any) {
   const dept = await db('depts').where({ id }).where(tenantWhere(req)).first()
   if (!dept) throw new AppError('部门不存在', 404)
   await db('depts').where({ id }).where(tenantWhere(req)).update({
-    parent_id: data.parentId,
+    parent_id: data.parentId || null,
     name: data.name,
     code: data.code,
     sort: data.sort,
@@ -345,13 +352,13 @@ export async function updateDept(req: AuthRequest, id: number, data: any) {
   return db('depts').where({ id }).first()
 }
 
-export async function deleteDept(req: AuthRequest, id: number) {
+export async function deleteDept(req: AuthRequest, id: string) {
   await db('depts').where({ id }).where(tenantWhere(req)).del()
   return true
 }
 
-// 工具函数：构建树
-function buildTree(items: any[], parentId: number): any[] {
+// 工具函数：构建树（根节点 parent_id 为 null）
+function buildTree(items: any[], parentId: string | null): any[] {
   return items
     .filter((item) => item.parent_id === parentId)
     .map((item) => ({

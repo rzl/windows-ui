@@ -35,12 +35,12 @@ export async function createDashboard(req: AuthRequest, res: Response) {
 }
 
 export async function updateDashboard(req: AuthRequest, res: Response) {
-  const result = await dashboardService.updateDashboard(req, Number(req.params.id), req.body)
+  const result = await dashboardService.updateDashboard(req, req.params.id, req.body)
   res.json(success(result, '更新成功'))
 }
 
 export async function deleteDashboard(req: AuthRequest, res: Response) {
-  await dashboardService.deleteDashboard(req, Number(req.params.id))
+  await dashboardService.deleteDashboard(req, req.params.id)
   res.json(success(null, '删除成功'))
 }
 

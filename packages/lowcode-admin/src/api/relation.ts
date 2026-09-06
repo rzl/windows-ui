@@ -1,7 +1,7 @@
 import request from './request'
 
 export interface RelationForm {
-  id?: number
+  id?: string
   code?: string
   name?: string
   sourceModel?: string
@@ -17,7 +17,7 @@ export function getRelations(params?: any) {
   return request.get('/lowcode/relations', { params })
 }
 
-export function getRelation(id: number) {
+export function getRelation(id: string) {
   return request.get(`/lowcode/relations/${id}`)
 }
 
@@ -25,11 +25,11 @@ export function createRelation(data: RelationForm) {
   return request.post('/lowcode/relations', data)
 }
 
-export function updateRelation(id: number, data: RelationForm) {
+export function updateRelation(id: string, data: RelationForm) {
   return request.put(`/lowcode/relations/${id}`, data)
 }
 
-export function deleteRelation(id: number) {
+export function deleteRelation(id: string) {
   return request.delete(`/lowcode/relations/${id}`)
 }
 

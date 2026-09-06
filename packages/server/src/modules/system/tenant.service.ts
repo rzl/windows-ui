@@ -1,8 +1,10 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
+import { GLOBAL_TENANT_ID } from '../../utils/tenant'
+import { newId } from '../../utils/id'
 
 export interface TenantForm {
-  id?: number
+  id?: string
   name?: string
   code?: string
   description?: string
@@ -17,7 +19,7 @@ export async function getTenants() {
   return db('tenants').orderBy('id', 'desc')
 }
 
-export async function getTenantById(id: number) {
+export async function getTenantById(id: string) {
   const tenant = await db('tenants').where({ id }).first()
   if (!tenant) throw new AppError('租户不存在', 404)
   return tenant
@@ -30,7 +32,9 @@ export async function createTenant(data: TenantForm) {
   const exists = await db('tenants').where({ code }).first()
   if (exists) throw new AppError('租户编码已存在', 400)
 
-  const [id] = await db('tenants').insert({
+  const id = newId()
+  await db('tenants').insert({
+    id,
     name: data.name,
     code,
     description: data.description,
@@ -39,7 +43,7 @@ export async function createTenant(data: TenantForm) {
   return getTenantById(id)
 }
 
-export async function updateTenant(id: number, data: TenantForm) {
+export async function updateTenant(id: string, data: TenantForm) {
   const tenant = await getTenantById(id)
 
   const exists = await db('tenants')
@@ -58,8 +62,8 @@ export async function updateTenant(id: number, data: TenantForm) {
   return getTenantById(id)
 }
 
-export async function deleteTenant(id: number) {
-  if (id === 1) {
+export async function deleteTenant(id: string) {
+  if (id === GLOBAL_TENANT_ID) {
     throw new AppError('默认租户不可删除', 400)
   }
   await db('tenants').where({ id }).del()
