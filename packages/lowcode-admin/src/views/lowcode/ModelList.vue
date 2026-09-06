@@ -107,7 +107,6 @@ const flowDialogVisible = ref(false)
 const flowForm = reactive<any>({})
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'code', label: '模型编码' },
   { prop: 'name', label: '模型名称', width: 180 },
   { prop: 'table_name', label: '表名' },

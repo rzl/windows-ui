@@ -109,7 +109,6 @@ const current = ref<any>(null)
 const actionOptions = ref<{ label: string; value: string }[]>([])
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 70 },
   { prop: 'model_code', label: '模型编码' },
   { prop: 'record_id', label: '记录 ID', width: 90 },
   { prop: 'action', label: '操作类型', width: 100, slot: 'action_type' },

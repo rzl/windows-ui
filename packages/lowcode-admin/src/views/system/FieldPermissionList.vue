@@ -88,7 +88,6 @@ const permissionType = ref('readwrite')
 const query = reactive({ page: 1, pageSize: 10 })
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'model_code', label: '关联模型' },
   { prop: 'field_code', label: '字段' },
   { prop: 'permission', label: '权限' },

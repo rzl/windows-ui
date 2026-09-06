@@ -48,7 +48,6 @@ const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'code', label: '编码' },
   { prop: 'name', label: '名称' },
   { prop: 'description', label: '描述' },

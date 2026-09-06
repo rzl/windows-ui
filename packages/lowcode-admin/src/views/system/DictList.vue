@@ -105,7 +105,6 @@ const currentDict = ref<any>({})
 const currentItems = ref<any[]>([])
 
 const dictColumns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'name', label: '字典名称', width: 180 },
   { prop: 'code', label: '字典编码' },
   { prop: 'category_name', label: '分类' },
@@ -115,7 +114,6 @@ const dictColumns = [
 ]
 
 const itemColumns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'label', label: '标签', width: 140 },
   { prop: 'value', label: '值' },
   { prop: 'sort', label: '排序', width: 70 },

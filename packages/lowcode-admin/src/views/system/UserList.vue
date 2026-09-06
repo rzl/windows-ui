@@ -91,7 +91,6 @@ const statusOptions = [
 
 const columns = [
   { type: 'selection', width: 48 },
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'username', label: '用户名' },
   { prop: 'nickname', label: '昵称' },
   { prop: 'email', label: '邮箱' },

@@ -85,7 +85,6 @@ const detailVisible = ref(false)
 const currentMessage = reactive<any>({})
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'title', label: '标题' },
   { prop: 'type', label: '类型', width: 90 },
   { prop: 'business_type', label: '业务类型', width: 100 },

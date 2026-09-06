@@ -99,7 +99,6 @@ const formModel = reactive<any>({})
 const query = reactive({ page: 1, pageSize: 10 })
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'code', label: '编码' },
   { prop: 'name', label: '名称' },
   { prop: 'model_code', label: '关联模型' },

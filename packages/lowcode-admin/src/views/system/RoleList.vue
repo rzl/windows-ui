@@ -114,7 +114,6 @@ const selectedDataPermissions = ref<string[]>([])
 const permissionTab = ref(0)
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'name', label: '角色名称' },
   { prop: 'code', label: '角色编码' },
   { prop: 'description', label: '描述' },

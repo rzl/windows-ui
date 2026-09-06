@@ -32,7 +32,6 @@ const total = ref(0)
 const query = reactive({ keyword: '', page: 1, pageSize: 10 })
 
 const columns = [
-  { prop: 'id', label: 'ID', width: 60 },
   { prop: 'username', label: '用户' },
   { prop: 'module', label: '模块' },
   { prop: 'action', label: '操作' },
