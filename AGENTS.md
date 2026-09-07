@@ -328,7 +328,7 @@ pnpm --filter @windows-ui/core test
 ```
 
 - 配置位于 `packages/windows-ui/vitest.config.ts`：`environment: 'jsdom'`，`globals: true`。
-- 当前共有 **37 个 `.spec.ts` 测试文件**、**203 个测试用例**，全部通过。
+- 当前共有 **53 个 `.spec.ts` 测试文件**、**322 个测试用例**，全部通过。
 
 **测试范围**：
 - 组件以单元测试为主：验证 Props 渲染、事件触发、CSS 类名切换。
@@ -410,6 +410,6 @@ pnpm --filter @windows-ui/core test
 | 怎么写文档？ | 在 `docs/`、`designs/`、`develops/` 下各建 `<name>/<file>.md` |
 | 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `WConfigProvider` 传 `theme` 对象 |
 | 多语言怎么配？ | `app.use(WindowsUI, { locale: 'en-US' })` 或 `<w-config-provider locale="en-US">`，也支持传入自定义单层语言对象 |
-| 怎么跑测试？ | `pnpm --filter @windows-ui/core test`（当前 37 个 spec 文件、203 个用例全部通过） |
+| 怎么跑测试？ | `pnpm --filter @windows-ui/core test`（当前 53 个 spec 文件、322 个用例全部通过） |
 | Admin 后台在哪？ | playground 内的多入口子应用：`packages/playground/src/admin/`（访问 `/admin.html`） |
 | 低代码平台在哪？ | `packages/lowcode-admin/` + `packages/server/` |

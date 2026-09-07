@@ -61,6 +61,29 @@ const crudRef = ref(null)
 </script>
 ```
 
+## 工具栏与列设置
+
+工具栏采用左右结构：左侧通过 `toolbar` 插槽放置业务操作按钮，右侧默认提供列设置入口（齿轮图标）。
+点击后从右侧打开列设置抽屉（WDrawer），抽屉内为带表头的配置表格，列包括：显示（勾选控制字段显隐）、字段名称、冻结（下拉选择 不冻结 / 冻结至左侧 / 冻结至右侧）、操作（上移/下移按钮调整字段顺序），抽屉顶部提供一键重置。
+固定列（`fixed`）、勾选列（`type="selection"`）、展开列（`type="expand"`）不参与列设置。
+配置在传入 `storage-key` 时持久化到 localStorage，刷新后自动恢复。
+
+通过 `column-setting` 属性可关闭列设置入口。
+
+```vue
+<template>
+  <w-crud-table
+    :data="list"
+    :columns="columns"
+    storage-key="user-list"
+  >
+    <template #toolbar>
+      <w-button type="primary">新增</w-button>
+    </template>
+  </w-crud-table>
+</template>
+```
+
 ## Props
 
 | 属性 | 类型 | 默认值 | 说明 |
@@ -112,8 +135,9 @@ const crudRef = ref(null)
 | border | 是否纵向边框 | boolean | true |
 | highlightCurrentRow | 是否高亮当前行 | boolean | true |
 | size | 尺寸 | string | default（继承全局 size） |
-| storageKey | - | string |  |
-| columnDraggable | - | boolean | - |
+| storageKey | string |  | 列宽/列顺序/列设置持久化的本地存储键 |
+| columnDraggable | boolean | - | 是否允许表头拖拽排序 |
+| columnSetting | boolean | true | 是否在工具栏右侧显示列设置入口 |
 
 ### Events
 
