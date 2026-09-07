@@ -1,11 +1,22 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button v-if="auth.hasPermission('dict:create')" type="primary" @click="openDictDialog()">+ 新增字典</w-button>
-      <w-button @click="goCategory">分类管理</w-button>
-    </div>
-
-    <w-table :data="dicts" :columns="dictColumns" stripe border>
+    <w-crud-table
+      :data="pagedDicts"
+      :columns="dictColumns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="system-dict-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button v-if="auth.hasPermission('dict:create')" type="primary" @click="openDictDialog()">+ 新增字典</w-button>
+        <w-button @click="goCategory">分类管理</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -16,7 +27,7 @@
           <w-button size="small" @click="openItemDialog(row)">字典项</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <!-- 字典表单 -->
     <w-dialog v-model="dictDialogVisible" title="字典" width="480">
@@ -86,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import * as dictApi from '@/api/dict'
@@ -94,6 +105,12 @@ import * as dictApi from '@/api/dict'
 const auth = useAuthStore()
 const router = useRouter()
 const dicts = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
+// 后端接口暂不支持分页，这里在前端做分页切片
+const pagedDicts = computed(() =>
+  dicts.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 const categories = ref<any[]>([])
 const categoryOptions = ref<any[]>([])
 const dictDialogVisible = ref(false)
@@ -129,8 +146,19 @@ async function loadData() {
     dictApi.getDictCategories()
   ])
   dicts.value = dictData
+  total.value = dictData.length
   categories.value = categoryData
   categoryOptions.value = [{ label: '无', value: null }, ...categoryData.map((c: any) => ({ label: c.name, value: c.id }))]
+}
+
+function handlePageChange(page: number) {
+  // 纯前端分页，无需重新请求
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDictDialog(row?: any) {

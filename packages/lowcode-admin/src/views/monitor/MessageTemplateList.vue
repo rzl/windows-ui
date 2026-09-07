@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增模板</w-button>
-    </div>
-    <w-table :data="list" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="monitor-message-template-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增模板</w-button>
+      </template>
       <template #channel="{ row }">
         <w-tag>{{ channelLabel(row.channel) }}</w-tag>
       </template>
@@ -16,7 +28,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="消息模板" width="480">
       <w-form :model="formModel">
@@ -48,12 +60,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import * as monitorApi from '@/api/monitor'
 
 const list = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
+
+// 后端接口暂不支持分页，这里在前端对全量数据做分页切片
+const pagedList = computed(() =>
+  list.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 
 const columns = [
   { prop: 'code', label: '模板编码' },
@@ -75,6 +94,17 @@ onMounted(() => loadData())
 
 async function loadData() {
   list.value = await monitorApi.getMessageTemplates()
+  total.value = list.value.length
+}
+
+// 纯前端分页，翻页无需重新请求
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function channelLabel(channel: string) {
@@ -119,5 +149,4 @@ async function handleDelete(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

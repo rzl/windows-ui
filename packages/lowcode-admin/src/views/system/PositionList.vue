@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增职务</w-button>
-    </div>
-    <w-table :data="positions" :columns="columns" stripe border>
+    <w-crud-table
+      :data="positions"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="system-position-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增职务</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -13,7 +25,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="职务" width="400">
       <w-form :model="formModel">
@@ -43,6 +55,8 @@ import { onMounted, reactive, ref } from 'vue'
 import * as positionApi from '@/api/position'
 
 const positions = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 
@@ -57,7 +71,22 @@ const columns = [
 onMounted(() => loadData())
 
 async function loadData() {
-  positions.value = await positionApi.getPositions()
+  // 接口返回全量职务数据，这里在前端做分页切片
+  const all = await positionApi.getPositions()
+  total.value = all.length
+  const start = (query.page - 1) * query.pageSize
+  positions.value = all.slice(start, start + query.pageSize)
+}
+
+function handlePageChange(page: number) {
+  query.page = page
+  loadData()
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
+  loadData()
 }
 
 function openDialog(row?: any) {
@@ -98,5 +127,4 @@ async function handleDelete(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

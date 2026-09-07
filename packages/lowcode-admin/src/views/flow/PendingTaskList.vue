@@ -1,6 +1,18 @@
 <template>
   <div class="list-page">
-    <w-table :data="tasks" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedTasks"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="flow-pending-task-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
       <template #action="{ row }">
         <w-space>
           <w-button size="small" @click="openDetail(row)">详情</w-button>
@@ -10,7 +22,7 @@
           <w-button size="small" @click="handleUrge(row)">催办</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="detailVisible" title="审批详情" width="700">
       <w-tabs v-model="activeTab">
@@ -79,6 +91,8 @@ import * as monitorApi from '@/api/monitor'
 import * as userApi from '@/api/user'
 
 const tasks = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
 const transferDialogVisible = ref(false)
@@ -146,7 +160,23 @@ onMounted(async () => {
 })
 
 async function loadData() {
+  // 后端接口暂不支持分页，一次性返回全量数据，这里在前端做分页切片
   tasks.value = await flowApi.getPendingTasks()
+  total.value = tasks.value.length
+}
+
+// 前端分页切片，纯前端分页无需重新请求
+const pagedTasks = computed(() =>
+  tasks.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 async function loadUsers() {

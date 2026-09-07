@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增分类</w-button>
-    </div>
-    <w-table :data="categories" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="system-dict-category-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增分类</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -13,7 +25,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="字典分类" width="400">
       <w-form :model="formModel">
@@ -39,10 +51,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import * as dictApi from '@/api/dict'
 
 const categories = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 
@@ -56,8 +70,23 @@ const columns = [
 
 onMounted(() => loadData())
 
+// 前端分页切片：后端接口暂不支持分页，一次性返回全量数据
+const pagedList = computed(() =>
+  categories.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
+
 async function loadData() {
   categories.value = await dictApi.getDictCategories()
+  total.value = categories.value.length
+}
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDialog(row?: any) {
@@ -98,5 +127,4 @@ async function handleDelete(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

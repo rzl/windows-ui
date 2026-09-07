@@ -1,10 +1,22 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="router.push('/lowcode/plugin/edit')">+ 新增插件</w-button>
-      <w-button @click="installDialogVisible = true">安装示例插件</w-button>
-    </div>
-    <w-table :data="plugins" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="lowcode-plugin-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="router.push('/lowcode/plugin/edit')">+ 新增插件</w-button>
+        <w-button @click="installDialogVisible = true">安装示例插件</w-button>
+      </template>
       <template #type="{ row }">
         <w-tag>{{ row.type || 'mixed' }}</w-tag>
       </template>
@@ -19,7 +31,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="installDialogVisible" title="安装插件" width="620">
       <w-form label-width="100px">
@@ -39,16 +51,23 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as pluginApi from '@/api/plugin'
 import { initPlugins } from '@/utils/pluginManager'
 
 const router = useRouter()
 const plugins = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const installDialogVisible = ref(false)
 const installText = ref('')
 const selectedExample = ref('')
+
+// 后端暂不支持分页，接口一次性返回全量插件，这里在前端做分页切片
+const pagedList = computed(() =>
+  plugins.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 
 const columns = [
   { prop: 'code', label: '编码' },
@@ -157,6 +176,16 @@ onMounted(() => loadData())
 
 async function loadData() {
   plugins.value = await pluginApi.getPlugins()
+  total.value = plugins.value.length
+}
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function handleExampleChange(value: string) {
@@ -206,5 +235,4 @@ async function handleDelete(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

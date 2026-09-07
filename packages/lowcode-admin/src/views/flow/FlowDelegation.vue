@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增委托</w-button>
-    </div>
-    <w-table :data="delegations" :columns="columns" stripe border>
+    <w-crud-table
+      :data="delegations"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="flow-delegation"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增委托</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -16,7 +28,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="流程委托" width="520">
       <w-form :model="formModel">
@@ -53,6 +65,8 @@ import * as flowApi from '@/api/flow'
 import * as userApi from '@/api/user'
 
 const delegations = ref<any[]>([])
+const total = ref(0)
+const query = reactive<any>({ page: 1, pageSize: 10 })
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 const userOptions = ref<any[]>([])
@@ -71,11 +85,12 @@ onMounted(() => loadData())
 
 async function loadData() {
   const [delegationData, userData, flowData] = await Promise.all([
-    flowApi.getFlowDelegations(),
+    flowApi.getFlowDelegations({ page: query.page, pageSize: query.pageSize }),
     userApi.getUsers({ page: 1, pageSize: 1000, status: 1 }),
     flowApi.getFlowDefinitions()
   ])
   delegations.value = delegationData.list
+  total.value = delegationData.total
   userOptions.value = userData.list.map((u: any) => ({ label: u.username, value: u.id }))
   flowOptions.value = flowData.map((f: any) => ({ label: f.name, value: f.code }))
 }
@@ -135,9 +150,19 @@ async function handleDelete(row: any) {
     await loadData()
   }
 }
+
+async function handlePageChange(page: number) {
+  query.page = page
+  await loadData()
+}
+
+async function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
+  await loadData()
+}
 </script>
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

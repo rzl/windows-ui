@@ -73,16 +73,21 @@
         <w-input-number v-model="slowSqlQuery.minDuration" placeholder="最小耗时 ms" />
         <w-button type="primary" @click="loadSlowSqls">查询</w-button>
       </w-space>
-      <w-table :data="slowSqlList" :columns="slowSqlColumns" stripe border>
-        <template #sql="{ row }">{{ row.sql?.slice(0, 120) }}{{ row.sql?.length > 120 ? '...' : '' }}</template>
-      </w-table>
-      <w-pagination
-        v-model:current-page="slowSqlQuery.page"
-        :page-size="slowSqlQuery.pageSize"
+      <w-crud-table
+        :data="slowSqlList"
+        :columns="slowSqlColumns"
+        :query="slowSqlQuery"
         :total="slowSqlTotal"
-        layout="prev, pager, next"
-        @change="loadSlowSqls"
-      />
+        :current-page="slowSqlQuery.page"
+        :page-size="slowSqlQuery.pageSize"
+        :searchable="false"
+        storage-key="monitor-server-monitor-slow-sql"
+        column-draggable
+        @page-change="handleSlowSqlPageChange"
+        @size-change="handleSlowSqlSizeChange"
+      >
+        <template #sql="{ row }">{{ row.sql?.slice(0, 120) }}{{ row.sql?.length > 120 ? '...' : '' }}</template>
+      </w-crud-table>
     </w-card>
 
     <w-card header="告警规则" style="margin-top: 16px;">
@@ -101,7 +106,19 @@
     </w-card>
 
     <w-card header="告警记录" style="margin-top: 16px;">
-      <w-table :data="alertRecords" :columns="alertRecordColumns" stripe border>
+      <w-crud-table
+        :data="alertRecords"
+        :columns="alertRecordColumns"
+        :query="alertRecordQuery"
+        :total="alertRecordTotal"
+        :current-page="alertRecordQuery.page"
+        :page-size="alertRecordQuery.pageSize"
+        :searchable="false"
+        storage-key="monitor-server-monitor-alert-record"
+        column-draggable
+        @page-change="handleAlertRecordPageChange"
+        @size-change="handleAlertRecordSizeChange"
+      >
         <template #type="{ row }">{{ formatAlertType(row.type) }}</template>
         <template #status="{ row }">{{ row.status === 'resolved' ? '已解决' : '待处理' }}</template>
         <template #is_read="{ row }">{{ row.is_read ? '是' : '否' }}</template>
@@ -109,14 +126,7 @@
           <w-button size="small" @click="handleReadAlertRecord(row.id)">标为已读</w-button>
           <w-button v-if="row.status !== 'resolved'" type="primary" size="small" @click="handleResolveAlertRecord(row.id)">解决</w-button>
         </template>
-      </w-table>
-      <w-pagination
-        v-model:current-page="alertRecordQuery.page"
-        :page-size="alertRecordQuery.pageSize"
-        :total="alertRecordTotal"
-        layout="prev, pager, next"
-        @change="loadAlertRecords"
-      />
+      </w-crud-table>
     </w-card>
 
     <w-card header="数据治理" style="margin-top: 16px;">
@@ -338,6 +348,17 @@ async function loadSlowSqls() {
   slowSqlTotal.value = result.total
 }
 
+function handleSlowSqlPageChange(page: number) {
+  slowSqlQuery.page = page
+  loadSlowSqls()
+}
+
+function handleSlowSqlSizeChange(size: number) {
+  slowSqlQuery.pageSize = size
+  slowSqlQuery.page = 1
+  loadSlowSqls()
+}
+
 async function loadAlertRules() {
   const result = await monitorApi.getAlertRules()
   alertRules.value = result.list
@@ -350,6 +371,17 @@ async function loadAlertRecords() {
   })
   alertRecords.value = result.list
   alertRecordTotal.value = result.total
+}
+
+function handleAlertRecordPageChange(page: number) {
+  alertRecordQuery.page = page
+  loadAlertRecords()
+}
+
+function handleAlertRecordSizeChange(size: number) {
+  alertRecordQuery.pageSize = size
+  alertRecordQuery.page = 1
+  loadAlertRecords()
 }
 
 function getTrendHeight(count: number) {

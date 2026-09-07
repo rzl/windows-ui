@@ -253,6 +253,7 @@ windows-ui/
 - 自定义接口：通过 Monaco 编辑器在线编写脚本，发布为 `/api/custom/*` 接口，支持多层路径与公开/登录访问控制。
 - 插件扩展：通过「插件市场」安装插件，动态注册自定义字段类型、自定义图表类型、自定义页面组件。
 - 低代码前端 additionally 包含基于 `@vue-flow` 的流程设计器与审批待办页面。
+- 列表页统一使用 `w-crud-table` 组件（`#search` 放筛选表单项、`#toolbar` 放操作按钮，`storage-key` 按页面路径 kebab-case 命名并开启 `column-draggable`）；后端已分页的接口直接绑定 `total`/`page-change`，后端不分页的接口采用前端切片分页（全量 ref + `pagedList` computed）。树形表格（菜单/部门）、设计器内嵌表格与统计表仍用 `w-table`。
 
 ---
 

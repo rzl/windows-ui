@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增仪表盘</w-button>
-    </div>
-    <w-table :data="list" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="dashboard-dashboard-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增仪表盘</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -14,7 +26,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="仪表盘" width="480">
       <w-form :model="formModel">
@@ -37,12 +49,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as dashboardApi from '@/api/dashboard'
 
 const router = useRouter()
 const list = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 
@@ -53,10 +67,26 @@ const columns = [
   { prop: 'action', label: '操作', width: 200, fixed: 'right' }
 ]
 
+// 后端接口暂不支持分页，一次性返回全量数据，这里在前端做分页切片
+const pagedList = computed(() =>
+  list.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
+
 onMounted(() => loadData())
 
 async function loadData() {
+  // 后端接口暂不支持分页，返回全量数组，total 取全量长度，由前端切片分页
   list.value = await dashboardApi.getDashboards()
+  total.value = list.value.length
+}
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDialog(row?: any) {
@@ -100,5 +130,4 @@ function goDesign(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

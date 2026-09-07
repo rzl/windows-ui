@@ -1,10 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button v-if="auth.hasPermission('role:create')" type="primary" @click="openDialog()">+ 新增</w-button>
-    </div>
-
-    <w-table :data="list" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="system-role-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button v-if="auth.hasPermission('role:create')" type="primary" @click="openDialog()">+ 新增</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -14,7 +25,7 @@
           <w-button v-if="auth.hasPermission('role:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="角色" width="560">
       <w-form :model="formModel">
@@ -94,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import * as roleApi from '@/api/role'
 import * as menuApi from '@/api/menu'
@@ -103,6 +114,8 @@ import * as dataPermissionApi from '@/api/dataPermission'
 
 const auth = useAuthStore()
 const list = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const menuTree = ref<any[]>([])
 const appList = ref<any[]>([])
 const dataPermissionList = ref<any[]>([])
@@ -130,6 +143,22 @@ onMounted(() => {
 
 async function loadData() {
   list.value = await roleApi.getRoles()
+  // 接口返回全量角色数据，后端暂不支持分页，这里在前端做分页切片
+  total.value = list.value.length
+}
+
+// 前端客户端分页：仅对全量列表做切片，无需重新请求
+const pagedList = computed(() =>
+  list.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 async function loadMenus() {
@@ -192,7 +221,6 @@ async function handleDelete(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 .permission-tree { max-height: 300px; overflow-y: auto; border: 1px solid #d4d0c8; padding: 8px; }
 .permission-group { margin-bottom: 8px; }
 .permission-children { padding-left: 20px; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }

@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增</w-button>
-    </div>
-    <w-table :data="list" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="lowcode-coding-rule-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -14,7 +26,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="编码规则" width="480">
       <w-form :model="formModel">
@@ -46,12 +58,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import * as lowcodeApi from '@/api/lowcode'
 
 const list = ref<any[]>([])
+const total = ref(0)
+const query = reactive<any>({ page: 1, pageSize: 10 })
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
+
+// 后端暂不支持分页，一次性返回全量数组，这里在前端做分页切片
+const pagedList = computed(() =>
+  list.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 
 const columns = [
   { prop: 'code', label: '规则编码' },
@@ -68,6 +87,17 @@ onMounted(() => loadData())
 
 async function loadData() {
   list.value = await lowcodeApi.getCodingRules()
+  // 后端暂不支持分页，total 取全量条数
+  total.value = list.value.length
+}
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDialog(row?: any) {
@@ -114,5 +144,4 @@ async function testGenerate(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

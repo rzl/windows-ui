@@ -25,7 +25,19 @@
       </w-form-item>
     </w-form>
 
-    <w-table :data="list" :columns="columns" stripe border>
+    <w-crud-table
+      :data="list"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="lowcode-audit-log-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
       <template #action_type="{ row }">
         <w-tag :type="actionTagType(row.action)">{{ actionText(row.action) }}</w-tag>
       </template>
@@ -35,14 +47,7 @@
       <template #action="{ row }">
         <w-button size="small" @click="openDetail(row)">详情</w-button>
       </template>
-    </w-table>
-
-    <w-pagination
-      :current-page="query.page"
-      :page-size="query.pageSize"
-      :total="total"
-      @update:current-page="handlePageChange"
-    />
+    </w-crud-table>
 
     <w-dialog v-model="detailVisible" title="审计详情" width="720">
       <div v-if="current" class="audit-detail">
@@ -166,6 +171,12 @@ function handleReset() {
 
 function handlePageChange(page: number) {
   query.page = page
+  loadData()
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
   loadData()
 }
 

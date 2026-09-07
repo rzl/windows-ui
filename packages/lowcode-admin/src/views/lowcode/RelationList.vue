@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openEditor()">+ 新增关系</w-button>
-    </div>
-    <w-table :data="relations" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="lowcode-relation-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openEditor()">+ 新增关系</w-button>
+      </template>
       <template #relation_type="{ row }">
         <w-tag :type="relationTypeType(row.relation_type)">{{ relationTypeText(row.relation_type) }}</w-tag>
       </template>
@@ -16,20 +28,27 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <relation-editor v-model="editorVisible" :data="currentRow" @saved="loadData" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import * as relationApi from '@/api/relation'
 import RelationEditor from './RelationEditor.vue'
 
 const relations = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
 const editorVisible = ref(false)
 const currentRow = ref<any>(null)
+
+// 后端接口暂不支持分页，一次性返回全量数据，这里在前端做分页切片
+const pagedList = computed(() =>
+  relations.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 
 const columns = [
   { prop: 'code', label: '编码' },
@@ -61,6 +80,17 @@ onMounted(() => loadData())
 
 async function loadData() {
   relations.value = await relationApi.getRelations()
+  total.value = relations.value.length
+}
+
+// 纯前端分页，翻页无需重新请求
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openEditor(row?: any) {
@@ -78,5 +108,4 @@ async function handleDelete(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

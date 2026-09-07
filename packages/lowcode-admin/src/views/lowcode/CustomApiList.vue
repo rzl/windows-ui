@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="router.push('/lowcode/custom-api/edit')">+ 新增接口</w-button>
-    </div>
-    <w-table :data="apis" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="lowcode-custom-api-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="router.push('/lowcode/custom-api/edit')">+ 新增接口</w-button>
+      </template>
       <template #method="{ row }">
         <w-tag :type="methodType(row.method)">{{ row.method || 'ALL' }}</w-tag>
       </template>
@@ -21,7 +33,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-drawer v-model="versionVisible" title="接口版本管理" size="680">
       <custom-api-version-panel :api-id="versionApiId" @rollback="loadData" />
@@ -39,13 +51,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as customApiApi from '@/api/customApi'
 import CustomApiVersionPanel from './CustomApiVersionPanel.vue'
 
 const router = useRouter()
 const apis = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
+// 后端接口暂不支持分页，返回全量数据，这里在前端做分页切片
+const pagedList = computed(() =>
+  apis.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 const testVisible = ref(false)
 const testResult = ref<any>(null)
 const versionVisible = ref(false)
@@ -77,6 +95,16 @@ onMounted(() => loadData())
 
 async function loadData() {
   apis.value = await customApiApi.getCustomApis()
+  total.value = apis.value.length
+}
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 async function handleTest(row: any) {
@@ -107,6 +135,5 @@ function openVersionDrawer(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 .test-sample { margin-top: 12px; padding: 8px; background: #f5f5f5; border: 1px solid #ddd; max-height: 400px; overflow: auto; font-size: 12px; }
 </style>

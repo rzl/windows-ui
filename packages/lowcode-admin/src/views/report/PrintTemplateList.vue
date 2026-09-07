@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增模板</w-button>
-    </div>
-    <w-table :data="templates" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="report-print-template-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增模板</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -14,7 +26,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="打印模板" width="520">
       <w-form :model="formModel">
@@ -46,13 +58,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as printApi from '@/api/print'
 import * as lowcodeApi from '@/api/lowcode'
 
 const router = useRouter()
 const templates = ref<any[]>([])
+const total = ref(0)
+const query = reactive<any>({ page: 1, pageSize: 10 })
 const models = ref<any[]>([])
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
@@ -67,6 +81,10 @@ const columns = [
 ]
 
 const modelOptions = ref<any[]>([])
+// 后端接口一次性返回全量模板，这里在前端做分页切片
+const pagedList = computed(() =>
+  templates.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 const paperOptions = [
   { label: 'A4', value: 'A4' },
   { label: 'A5', value: 'A5' },
@@ -88,6 +106,17 @@ async function loadData() {
   templates.value = templateData
   models.value = modelData
   modelOptions.value = modelData.map((m: any) => ({ label: m.name, value: m.code }))
+  // 后端暂不支持分页，total 取全量条数
+  total.value = templateData.length
+}
+
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDialog(row?: any) {
@@ -142,5 +171,4 @@ function goPreview(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

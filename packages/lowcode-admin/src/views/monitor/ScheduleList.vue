@@ -1,9 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增任务</w-button>
-    </div>
-    <w-table :data="tasks" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="monitor-schedule-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增任务</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -15,7 +27,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="定时任务" width="520">
       <w-form :model="formModel">
@@ -59,10 +71,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import * as scheduleApi from '@/api/schedule'
 
 const tasks = ref<any[]>([])
+const total = ref(0)
+const query = reactive({ page: 1, pageSize: 10 })
+// 后端接口暂不支持分页，一次性返回全量数组，这里在前端做分页切片
+const pagedList = computed(() =>
+  tasks.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 const logs = ref<any[]>([])
 const dialogVisible = ref(false)
 const logDialogVisible = ref(false)
@@ -97,6 +115,18 @@ onMounted(() => loadData())
 
 async function loadData() {
   tasks.value = await scheduleApi.getScheduledTasks()
+  // 后端接口暂不支持分页，total 取全量数组长度
+  total.value = tasks.value.length
+}
+
+function handlePageChange(page: number) {
+  // 纯前端分页，无需重新请求
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDialog(row?: any) {
@@ -159,7 +189,6 @@ async function openLog(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 .log-table-wrapper { max-height: 55vh; overflow: auto; }
 :deep(.log-result-cell) { word-break: break-all; white-space: normal !important; }
 :deep(.log-result-cell .w-table__cell-content) { white-space: normal !important; }

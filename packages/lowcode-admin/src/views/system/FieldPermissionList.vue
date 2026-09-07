@@ -1,10 +1,21 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button v-if="auth.hasPermission('field-permission:create')" type="primary" @click="openDialog()">+ 新增</w-button>
-    </div>
-
-    <w-table :data="list" :columns="columns" stripe border>
+    <w-crud-table
+      :data="list"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="system-field-permission-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button v-if="auth.hasPermission('field-permission:create')" type="primary" @click="openDialog()">+ 新增</w-button>
+      </template>
       <template #permission="{ row }">
         {{ row.hidden ? '隐藏' : (row.editable ? '可读可写' : '只读') }}
       </template>
@@ -17,15 +28,7 @@
           <w-button v-if="auth.hasPermission('field-permission:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
-
-    <w-pagination
-      v-model:current-page="query.page"
-      v-model:page-size="query.pageSize"
-      :total="total"
-      layout="prev, pager, next"
-      @change="loadData"
-    />
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="字段权限规则" width="560">
       <w-form :model="formModel">
@@ -188,11 +191,21 @@ async function handleDelete(row: any) {
     await loadData()
   }
 }
+
+async function handlePageChange(page: number) {
+  query.page = page
+  await loadData()
+}
+
+async function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
+  await loadData()
+}
 </script>
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; }
 .empty-tip { color: #999; }
 </style>

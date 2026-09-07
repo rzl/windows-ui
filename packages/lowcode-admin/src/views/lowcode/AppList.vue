@@ -1,11 +1,23 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button type="primary" @click="openDialog()">+ 新增应用</w-button>
-      <w-button @click="importVisible = true">导入应用</w-button>
-      <w-button @click="openTemplateDialog()">从模板创建</w-button>
-    </div>
-    <w-table :data="apps" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="lowcode-app-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button type="primary" @click="openDialog()">+ 新增应用</w-button>
+        <w-button @click="importVisible = true">导入应用</w-button>
+        <w-button @click="openTemplateDialog()">从模板创建</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -22,7 +34,7 @@
           <w-button size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="应用" width="520">
       <w-form :model="formModel">
@@ -98,12 +110,18 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as appApi from '@/api/app'
 
 const router = useRouter()
 const apps = ref<any[]>([])
+const total = ref(0)
+// 后端接口暂不支持分页，这里采用前端分页：全量加载后在前端切片
+const query = reactive({ page: 1, pageSize: 10 })
+const pagedList = computed(() =>
+  apps.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 const dialogVisible = ref(false)
 const importVisible = ref(false)
 const importText = ref('')
@@ -131,6 +149,17 @@ onMounted(() => loadData())
 
 async function loadData() {
   apps.value = await appApi.getApps()
+  total.value = apps.value.length
+}
+
+function handlePageChange(page: number) {
+  // 纯前端分页，无需重新请求
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDialog(row?: any) {
@@ -252,7 +281,6 @@ function goDesign(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 .empty-tip { padding: 20px 0; }
 .template-list {
   display: flex;

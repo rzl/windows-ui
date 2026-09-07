@@ -1,27 +1,32 @@
 <template>
   <div class="list-page">
-    <w-search-form :model="query" @search="handleSearch" @reset="handleReset">
-      <w-form-item label="关键词">
-        <w-input v-model="query.keyword" placeholder="用户名/昵称/邮箱" />
-      </w-form-item>
-      <w-form-item label="状态">
-        <w-select v-model="query.status" :options="statusOptions" placeholder="请选择" clearable style="width: 120px" />
-      </w-form-item>
-    </w-search-form>
-
-    <div class="toolbar">
-      <w-button v-if="auth.hasPermission('user:create')" type="primary" @click="openDialog()">+ 新增</w-button>
-      <w-button v-if="auth.hasPermission('user:delete')" type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">批量删除</w-button>
-    </div>
-
-    <w-table
+    <w-crud-table
       :data="store.list"
       :columns="columns"
-      stripe
-      border
-      highlight-current-row
+      :query="query"
+      :total="store.total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      storage-key="system-user-list"
+      column-draggable
+      @search="handleSearch"
+      @reset="handleReset"
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
       @selection-change="handleSelectionChange"
     >
+      <template #search>
+        <w-form-item label="关键词">
+          <w-input v-model="query.keyword" placeholder="用户名/昵称/邮箱" />
+        </w-form-item>
+        <w-form-item label="状态">
+          <w-select v-model="query.status" :options="statusOptions" placeholder="请选择" clearable style="width: 120px" />
+        </w-form-item>
+      </template>
+      <template #toolbar>
+        <w-button v-if="auth.hasPermission('user:create')" type="primary" @click="openDialog()">+ 新增</w-button>
+        <w-button v-if="auth.hasPermission('user:delete')" type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">批量删除</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -31,14 +36,7 @@
           <w-button v-if="auth.hasPermission('user:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
-
-    <w-pagination
-      :current-page="query.page"
-      :page-size="query.pageSize"
-      :total="store.total"
-      @update:current-page="handlePageChange"
-    />
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" :title="dialogTitle" width="520">
       <w-form :model="formModel">
@@ -169,6 +167,12 @@ async function handlePageChange(page: number) {
   await loadData()
 }
 
+async function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
+  await loadData()
+}
+
 async function loadData() {
   Object.assign(store.query, query)
   await store.loadData()
@@ -179,7 +183,6 @@ loadData()
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
 
 @media (max-width: 768px) {
   .list-page { padding: 6px; }

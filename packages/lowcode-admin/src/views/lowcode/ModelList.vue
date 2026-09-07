@@ -1,11 +1,22 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button v-if="isAdmin" type="primary" @click="openDialog()">+ 新增模型</w-button>
-      <w-button v-if="isAdmin" @click="openImportDialog">导入模型</w-button>
-    </div>
-
-    <w-table :data="models" :columns="columns" stripe border>
+    <w-crud-table
+      :data="pagedList"
+      :columns="columns"
+      :query="query"
+      :total="total"
+      :current-page="query.page"
+      :page-size="query.pageSize"
+      :searchable="false"
+      storage-key="lowcode-model-list"
+      column-draggable
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
+    >
+      <template #toolbar>
+        <w-button v-if="isAdmin" type="primary" @click="openDialog()">+ 新增模型</w-button>
+        <w-button v-if="isAdmin" @click="openImportDialog">导入模型</w-button>
+      </template>
       <template #status="{ row }">
         <w-tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '禁用' }}</w-tag>
       </template>
@@ -19,7 +30,7 @@
           <w-button v-if="isAdmin" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="数据模型" width="480">
       <w-form :model="formModel">
@@ -98,6 +109,13 @@ const router = useRouter()
 const authStore = useAuthStore()
 const isAdmin = computed(() => authStore.permissions?.includes('*'))
 const models = ref<any[]>([])
+const total = ref(0)
+// 后端暂不支持分页，一次性返回全量数据，采用前端客户端分页
+const query = reactive({ page: 1, pageSize: 10 })
+// 当前页切片数据（纯前端分页）
+const pagedList = computed(() =>
+  models.value.slice((query.page - 1) * query.pageSize, query.page * query.pageSize)
+)
 const dialogVisible = ref(false)
 const formModel = reactive<any>({})
 const importDialogVisible = ref(false)
@@ -132,6 +150,18 @@ onMounted(() => loadData())
 
 async function loadData() {
   models.value = await lowcodeApi.getModels()
+  // 后端暂不支持分页，total 取全量长度，由前端切片分页
+  total.value = models.value.length
+}
+
+// 纯前端分页，切页无需重新请求
+function handlePageChange(page: number) {
+  query.page = page
+}
+
+function handleSizeChange(size: number) {
+  query.pageSize = size
+  query.page = 1
 }
 
 function openDialog(row?: any) {
@@ -265,5 +295,4 @@ async function handleSaveFlow() {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>
