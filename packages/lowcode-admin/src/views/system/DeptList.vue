@@ -1,10 +1,18 @@
 <template>
   <div class="list-page">
-    <div class="toolbar">
-      <w-button v-if="auth.hasPermission('dept:create')" type="primary" @click="openDialog()">+ 新增</w-button>
-    </div>
-
-    <w-table :data="depts" :columns="columns" stripe border row-key="id" default-expand-all>
+    <w-crud-table
+      :data="depts"
+      :columns="columns"
+      :searchable="false"
+      :pagination="false"
+      storage-key="system-dept-list"
+      column-draggable
+      row-key="id"
+      default-expand-all
+    >
+      <template #toolbar>
+        <w-button v-if="auth.hasPermission('dept:create')" type="primary" @click="openDialog()">+ 新增</w-button>
+      </template>
       <template #parentName="{ row }">
         {{ row.parent_id ? parentNameMap.get(row.parent_id) || '-' : '根部门' }}
       </template>
@@ -17,7 +25,7 @@
           <w-button v-if="auth.hasPermission('dept:delete')" size="small" type="danger" @click="handleDelete(row)">删除</w-button>
         </w-space>
       </template>
-    </w-table>
+    </w-crud-table>
 
     <w-dialog v-model="dialogVisible" title="部门" width="480">
       <w-form :model="formModel">
@@ -158,5 +166,4 @@ async function handleDelete(row: any) {
 
 <style scoped>
 .list-page { padding: 8px; }
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; }
 </style>

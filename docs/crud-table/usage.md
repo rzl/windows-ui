@@ -98,6 +98,10 @@ const crudRef = ref(null)
 | searchCollapsible | boolean | false | 查询区域是否可折叠 |
 | stripe | boolean | true | 是否斑马纹 |
 | border | boolean | true | 是否边框 |
+| pagination | boolean | true | 是否显示分页区 |
+| rowKey | string / Function | 'id' | 行唯一标识（树形数据透传） |
+| treeProps | object | { children: 'children', hasChildren: 'hasChildren' } | 树形子节点字段配置 |
+| defaultExpandAll | boolean | false | 是否默认展开全部树节点 |
 
 ## Events
 
@@ -138,6 +142,33 @@ const crudRef = ref(null)
 | storageKey | string |  | 列宽/列顺序/列设置持久化的本地存储键 |
 | columnDraggable | boolean | - | 是否允许表头拖拽排序 |
 | columnSetting | boolean | true | 是否在工具栏右侧显示列设置入口 |
+| pagination | boolean | true | 是否显示分页区，树形/全量数据场景可关闭 |
+| rowKey | string / (row) => string \| number | 'id' | 行唯一标识，树形数据必填，透传 WTable |
+| treeProps | { children?: string; hasChildren?: string } | { children: 'children', hasChildren: 'hasChildren' } | 树形数据子节点字段配置，透传 WTable |
+| defaultExpandAll | boolean | false | 是否默认展开全部树节点，透传 WTable |
+
+## 树形数据用法
+
+树形数据（如菜单、部门）可配合 `:pagination="false"` 关闭分页区，并通过 `rowKey` / `defaultExpandAll` 控制树行为：
+
+```vue
+<template>
+  <w-crud-table
+    :data="treeData"
+    :columns="columns"
+    :searchable="false"
+    :pagination="false"
+    storage-key="system-menu-list"
+    column-draggable
+    row-key="id"
+    default-expand-all
+  >
+    <template #toolbar>
+      <w-button type="primary">新增</w-button>
+    </template>
+  </w-crud-table>
+</template>
+```
 
 ### Events
 

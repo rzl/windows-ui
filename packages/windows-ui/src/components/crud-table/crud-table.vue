@@ -35,6 +35,9 @@
       :highlight-current-row="highlightCurrentRow"
       :storage-key="storageKey"
       :column-draggable="columnDraggable"
+      :row-key="rowKey"
+      :tree-props="treeProps"
+      :default-expand-all="defaultExpandAll"
       @selection-change="handleSelectionChange"
       @row-click="(...args: any[]) => $emit('row-click', ...args)"
       @sort-change="(...args: any[]) => $emit('sort-change', ...args)"
@@ -45,7 +48,7 @@
       </template>
     </w-table>
 
-    <div class="w-crud-table__pagination">
+    <div v-if="pagination" class="w-crud-table__pagination">
       <w-pagination
         :current-page="currentPage"
         :page-size="pageSize"
@@ -111,6 +114,7 @@
 
 <script setup lang="ts">
 import { computed, ref, useSlots, watch } from 'vue'
+import type { PropType } from 'vue'
 import WSearchForm from '../search-form/search-form.vue'
 import WTable from '../table/table.vue'
 import WPagination from '../pagination/pagination.vue'
@@ -146,7 +150,16 @@ const props = defineProps({
   size: { type: String as () => 'large' | 'default' | 'small', default: undefined },
   storageKey: { type: String, default: '' },
   columnDraggable: Boolean,
-  columnSetting: { type: Boolean, default: true }
+  columnSetting: { type: Boolean, default: true },
+  // 树形数据支持：与 w-table 的对应 props 一致，透传给内部表格
+  rowKey: { type: [String, Function] as PropType<string | ((row: any) => string | number)>, default: 'id' },
+  treeProps: {
+    type: Object as () => { children?: string; hasChildren?: string },
+    default: () => ({ children: 'children', hasChildren: 'hasChildren' })
+  },
+  defaultExpandAll: Boolean,
+  // 树形 / 全量数据可关闭分页区
+  pagination: { type: Boolean, default: true }
 })
 
 const emit = defineEmits([

@@ -24,7 +24,8 @@ Others / 管理后台通用组件
 
 - 点击"查询"触发 search 事件
 - 点击"重置"清空查询条件并触发 reset 事件
-- 分页切换触发 page-change / size-change 事件
+- 分页切换触发 page-change / size-change 事件（`pagination` 为 false 时不渲染分页区）
+- 树形数据通过 rowKey / treeProps / defaultExpandAll 透传 WTable 的树形能力，与分页区互斥使用（树形场景应关闭 pagination）
 - 表格选择变化通过 selection-change 抛出
 - 点击工具栏右侧齿轮图标从右侧打开列设置抽屉（WDrawer，宽 420px）：勾选控制字段显隐，下拉选择字段冻结方向（不冻结 / 冻结至左侧 / 冻结至右侧），上移/下移按钮调整字段顺序，点击"重置"恢复默认状态
 - 冻结列横向滚动时固定在表格左/右两侧，继承 WTable 固定列样式
