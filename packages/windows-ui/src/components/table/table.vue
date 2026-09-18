@@ -210,6 +210,8 @@
               :class="[cellClass(col), stickyClass(col)]"
               :style="[cellStyle(col, ci), stickyStyle(col)]"
               @click="handleCellClick(item.row, col, virtualStartIndex + ri)"
+              @mouseenter="handleCellMouseEnter($event, col)"
+              @mouseleave="handleCellMouseLeave"
             >
               <template v-if="!col.__isPadding">
                 <template v-if="col.type === 'selection'">
@@ -228,7 +230,7 @@
                   </span>
                 </template>
                 <template v-else>
-                  <div class="w-table__cell-content">
+                  <div class="w-table__cell-content" :class="{ 'is-ellipsis': isEllipsisColumn(col) }">
                     <template v-if="ci === firstDataColumnIndex && isTreeTable">
                       <span
                         v-for="n in item.level"
@@ -247,7 +249,12 @@
                       </span>
                       <span v-else class="w-table__tree-expand-icon is-leaf" />
                     </template>
-                    <slot :name="col.prop" :row="item.row" :$index="virtualStartIndex + ri">
+                    <span v-if="isEllipsisColumn(col)" class="w-table__cell-text">
+                      <slot :name="col.prop" :row="item.row" :$index="virtualStartIndex + ri">
+                        {{ col.prop !== undefined ? item.row[col.prop] : '' }}
+                      </slot>
+                    </span>
+                    <slot v-else :name="col.prop" :row="item.row" :$index="virtualStartIndex + ri">
                       {{ col.prop !== undefined ? item.row[col.prop] : '' }}
                     </slot>
                   </div>
@@ -283,6 +290,27 @@
         </tr>
       </tbody>
     </table>
+    <Teleport to="body">
+      <div
+        v-if="cellTooltip.visible"
+        class="w-table__cell-tooltip"
+        :class="{ 'is-below': cellTooltip.below }"
+        :style="{ left: `${cellTooltip.left}px`, top: `${cellTooltip.top}px` }"
+        @mouseenter="cancelTooltipHide"
+        @mouseleave="scheduleTooltipHide"
+      >
+        <span class="w-table__cell-tooltip-content">{{ cellTooltip.content }}</span>
+        <button
+          type="button"
+          class="w-table__cell-tooltip-copy"
+          :class="{ 'is-copied': copied }"
+          :title="copied ? t('已复制') : t('复制')"
+          @click="copyTooltipContent"
+        >
+          <w-icon :name="copied ? 'check' : 'copy'" :size="size" />
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -310,6 +338,7 @@ export interface ColumnItem {
   type?: 'selection' | 'expand' | 'default'
   fixed?: 'left' | 'right'
   children?: ColumnItem[]
+  showOverflowTooltip?: boolean
 }
 
 interface HeaderNode extends ColumnItem {
@@ -354,7 +383,8 @@ const props = defineProps({
   virtualX: Boolean,
   storageKey: { type: String, default: '' },
   columnDraggable: Boolean,
-  rowDraggable: Boolean
+  rowDraggable: Boolean,
+  showOverflowTooltip: Boolean
 })
 const globalSize = useGlobalSize()
 const { t } = useLocale()
@@ -1281,6 +1311,84 @@ const handleCellClick = (row: any, col: ColumnItem, index: number) => {
   emit('cell-click', row, col, col.prop !== undefined ? row[col.prop] : undefined, index)
 }
 
+// ----- 溢出悬浮提示（省略号 + 悬浮查看 + 复制） -----
+const cellTooltip = ref({ visible: false, content: '', left: 0, top: 0, below: false })
+const copied = ref(false)
+let tooltipHideTimer: ReturnType<typeof setTimeout> | null = null
+let copiedTimer: ReturnType<typeof setTimeout> | null = null
+
+const isEllipsisColumn = (col: any) => {
+  if (!col || col.__isPadding) return false
+  if (col.type === 'selection' || col.type === 'expand') return false
+  return col.showOverflowTooltip !== undefined ? col.showOverflowTooltip : props.showOverflowTooltip
+}
+
+const handleCellMouseEnter = (e: MouseEvent, col: any) => {
+  if (!isEllipsisColumn(col)) return
+  const td = e.currentTarget as HTMLElement
+  const textEl = td.querySelector('.w-table__cell-text') as HTMLElement | null
+  if (!textEl) return
+  const content = (textEl.textContent || '').trim()
+  if (!content) return
+  // 仅在内容确实被截断时显示悬浮提示
+  if (textEl.scrollWidth <= textEl.clientWidth + 1) return
+  cancelTooltipHide()
+  const rect = textEl.getBoundingClientRect()
+  const below = rect.top < 80
+  copied.value = false
+  cellTooltip.value = {
+    visible: true,
+    content,
+    left: Math.max(4, rect.left),
+    top: below ? rect.bottom : rect.top,
+    below
+  }
+}
+
+const handleCellMouseLeave = () => {
+  scheduleTooltipHide()
+}
+
+const scheduleTooltipHide = () => {
+  if (tooltipHideTimer) clearTimeout(tooltipHideTimer)
+  tooltipHideTimer = setTimeout(() => { cellTooltip.value.visible = false }, 200)
+}
+
+const cancelTooltipHide = () => {
+  if (tooltipHideTimer) {
+    clearTimeout(tooltipHideTimer)
+    tooltipHideTimer = null
+  }
+}
+
+const copyTooltipContent = async () => {
+  const text = cellTooltip.value.content
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    copied.value = true
+    if (copiedTimer) clearTimeout(copiedTimer)
+    copiedTimer = setTimeout(() => { copied.value = false }, 1500)
+  } catch {
+    // 复制失败时静默处理
+  }
+}
+
+onBeforeUnmount(() => {
+  if (tooltipHideTimer) clearTimeout(tooltipHideTimer)
+  if (copiedTimer) clearTimeout(copiedTimer)
+})
+
 // ----- 行样式 -----
 const rowClass = (row: any, index: number) => {
   const classes: string[] = []
@@ -1450,6 +1558,33 @@ defineExpose({ resetColumnWidths })
 
 /* cell content wrapper */
 .w-table__cell-content { display: inline-flex; align-items: center; gap: 4px; position: relative; }
+
+/* 溢出省略 */
+.w-table__cell-content.is-ellipsis { display: flex; width: 100%; }
+.w-table__cell-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 溢出悬浮提示 */
+.w-table__cell-tooltip {
+  position: fixed; z-index: var(--w-index-popper, 2000);
+  transform: translateY(-100%); margin-top: -4px;
+  display: flex; align-items: flex-start; gap: 8px;
+  max-width: 480px; max-height: 240px; overflow-y: auto;
+  background: #ffffe1; border: 1px solid #000; padding: 4px 8px;
+  font-size: var(--w-font-size-small); color: var(--w-text-color-primary, #000);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2); box-sizing: border-box;
+  font-family: var(--w-font-family);
+}
+.w-table__cell-tooltip.is-below { transform: none; margin-top: 4px; }
+.w-table__cell-tooltip-content { white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+.w-table__cell-tooltip-copy {
+  flex-shrink: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; padding: 0;
+  color: var(--w-text-color-primary, #000);
+  background: linear-gradient(180deg, #ffffff 0%, #ece9d8 45%, #d6d2c0 100%);
+  border: 1px solid #716f64; border-radius: 3px;
+}
+.w-table__cell-tooltip-copy:hover { border-color: var(--w-color-primary); color: var(--w-color-primary); }
+.w-table__cell-tooltip-copy.is-copied { color: #3a9e3a; }
 
 /* sort */
 .w-table__sort { display: inline-flex; flex-direction: column; align-items: center; cursor: pointer; margin-left: 2px; line-height: 1; }

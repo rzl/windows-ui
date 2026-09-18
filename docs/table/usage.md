@@ -855,6 +855,7 @@ const onRowOrderChange = (newData) => {
 | storageKey | - | string |  |
 | columnDraggable | - | boolean | - |
 | rowDraggable | - | boolean | - |
+| showOverflowTooltip | 单元格内容超出时省略显示，悬浮可查看完整内容并一键复制（列配置中可通过同名属性单独覆盖） | boolean | false |
 
 ### Events
 

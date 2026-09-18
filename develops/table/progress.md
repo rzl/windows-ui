@@ -34,6 +34,7 @@
 - [x] 移动端响应式适配（≤768px 横向滚动 + 单元格内容不换行）
 - [x] 行拖拽排序
 - [x] empty-text 国际化
+- [x] 溢出省略悬浮提示（showOverflowTooltip + 悬浮查看完整内容 + 复制按钮）
 ## 待优化项（Phase 3）
 - [x] 树形数据（tree-props + lazy + default-expand-all + 父子多选联动）
 - [x] 多级表头（children 嵌套列 + rowspan/colspan）
@@ -55,3 +56,4 @@
 - 2026-06-24: 新增移动端响应式适配（≤768px 横向滚动，单元格内容不换行，避免列宽被压缩）
 - 2026-06-25: 新增列宽记忆（storageKey）与列排序拖拽（columnDraggable），支持 localStorage 持久化及 resetColumnWidths 重置
 - 2026-06-29: 新增行拖拽排序（rowDraggable）与 empty-text 国际化支持；暴露 resetColumnWidths 方法
+- 2026-11-13: 新增 showOverflowTooltip：单元格内容超出列宽时省略显示，悬浮弹出完整内容并附带复制按钮（复制成功反馈"已复制"），列配置可通过同名属性单独覆盖；补充 5 个单元测试

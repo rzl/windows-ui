@@ -33,6 +33,7 @@
       :border="border"
       :size="size"
       :highlight-current-row="highlightCurrentRow"
+      :show-overflow-tooltip="showOverflowTooltip"
       :storage-key="storageKey"
       :column-draggable="columnDraggable"
       :row-key="rowKey"
@@ -158,6 +159,8 @@ const props = defineProps({
     default: () => ({ children: 'children', hasChildren: 'hasChildren' })
   },
   defaultExpandAll: Boolean,
+  // 单元格内容超出时省略显示，悬浮可查看完整内容并复制（透传给 w-table）
+  showOverflowTooltip: { type: Boolean, default: true },
   // 树形 / 全量数据可关闭分页区
   pagination: { type: Boolean, default: true }
 })

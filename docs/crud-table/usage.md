@@ -146,6 +146,7 @@ const crudRef = ref(null)
 | rowKey | string / (row) => string \| number | 'id' | 行唯一标识，树形数据必填，透传 WTable |
 | treeProps | { children?: string; hasChildren?: string } | { children: 'children', hasChildren: 'hasChildren' } | 树形数据子节点字段配置，透传 WTable |
 | defaultExpandAll | boolean | false | 是否默认展开全部树节点，透传 WTable |
+| showOverflowTooltip | boolean | true | 单元格内容超出时省略显示，悬浮可查看完整内容并一键复制，透传 WTable |
 
 ## 树形数据用法
 

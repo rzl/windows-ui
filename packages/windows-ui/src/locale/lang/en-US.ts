@@ -4,6 +4,8 @@ export default {
   关闭: 'Close',
   加载中: 'Loading',
   暂无数据: 'No Data',
+  复制: 'Copy',
+  已复制: 'Copied',
   全选: 'Select All',
   清空: 'Clear',
   搜索: 'Search',
