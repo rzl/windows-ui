@@ -102,14 +102,14 @@ windows-ui/
 │   │   │   ├── composables/     # useWebSocket 等
 │   │   │   └── types/           # 类型定义
 │   │   ├── index.html
-│   │   ├── vite.config.ts       # 端口 5174，代理 /api 到 http://localhost:3001
+│   │   ├── vite.config.ts       # 端口 9001，代理 /api 到 http://localhost:9002
 │   │   └── package.json
 │   │
 │   ├── server/                  # 🔧 低代码管理平台后端（@windows-ui/server）
 │   │   ├── src/
 │   │   │   ├── index.ts         # 服务启动入口（http + WebSocket）
 │   │   │   ├── app.ts           # Express 应用配置
-│   │   │   ├── config/index.ts  # 环境变量与配置读取（PORT 默认 3001）
+│   │   │   ├── config/index.ts  # 环境变量与配置读取（PORT 默认 9002）
 │   │   │   ├── db/index.ts      # Knex + SQLite 数据库实例
 │   │   │   ├── routes/index.ts  # API 路由总线
 │   │   │   ├── modules/         # 业务模块
@@ -127,7 +127,7 @@ windows-ui/
 │   │   ├── migrations/          # Knex 迁移文件
 │   │   ├── seeds/               # Knex 种子数据
 │   │   ├── data/lowcode.sqlite  # SQLite 数据文件（开发默认）
-│   │   ├── .env.example         # 环境变量示例（PORT=3000，JWT 配置等）
+│   │   ├── .env.example         # 环境变量示例（PORT=9002，JWT 配置等）
 │   │   ├── knexfile.js
 │   │   └── package.json
 │   │
@@ -201,10 +201,10 @@ windows-ui/
 
 | 命令 | 作用 |
 |------|------|
-| `pnpm dev` | 启动 playground 开发服务器（同时承载组件文档站点与 Admin 后台） |
+| `pnpm dev` | 启动 playground 开发服务器（默认端口 `9000`，同时承载组件文档站点与 Admin 后台） |
 | `pnpm dev:admin` | 当前等价于 `pnpm dev`（Admin 与 playground 共享同一 Vite 服务，访问 `/admin.html`） |
-| `pnpm dev:lowcode` | 启动低代码管理平台前端（默认端口 `5174`，代理 `/api` 到 `localhost:3001`） |
-| `pnpm dev:server` | 启动后端服务（默认监听 `127.0.0.1:3001`，热重载；`.env.example` 中 PORT=3000，若复制为 `.env` 会覆盖该端口） |
+| `pnpm dev:lowcode` | 启动低代码管理平台前端（默认端口 `9001`，代理 `/api` 到 `localhost:9002`） |
+| `pnpm dev:server` | 启动后端服务（默认监听 `127.0.0.1:9002`，热重载；`.env.example` 中 PORT=9002，若复制为 `.env` 会覆盖该端口） |
 | `pnpm build` | 构建 UI 库（ES + UMD + d.ts），输出到 `packages/windows-ui/dist/` |
 | `pnpm build:playground` | 构建 playground 生产包（含 `index.html` 与 `admin.html` 双入口） |
 | `pnpm build:admin` | 当前等价于 `pnpm build:playground` |
@@ -245,8 +245,8 @@ windows-ui/
 ### 低代码平台开发细节
 
 - 前端入口 `packages/lowcode-admin/src/main.ts`；后端入口 `packages/server/src/index.ts`。
-- 前端开发服务器默认端口 `5174`，并通过 `proxy` 将 `/api` 转发到后端 `http://localhost:3001`。
-- 后端默认监听 `127.0.0.1:3001`，默认使用 SQLite（`packages/server/data/lowcode.sqlite`）。
+- 前端开发服务器默认端口 `9001`，并通过 `proxy` 将 `/api` 转发到后端 `http://localhost:9002`。
+- 后端默认监听 `127.0.0.1:9002`，默认使用 SQLite（`packages/server/data/lowcode.sqlite`）。
 - 后端数据库迁移位于 `packages/server/migrations/`，种子位于 `packages/server/seeds/`。
 - 所有表主键为 ULID 字符串（`utils/id.ts` 的 `newId()` 生成，列长 36 可平滑切换 UUID），根节点 `parent_id` 为 NULL，全局租户与管理员角色分别为固定 ULID 常量 `GLOBAL_TENANT_ID` / `ADMIN_ROLE_ID`。
 - 低代码核心能力：数据模型设计 → 字段管理 → 表单/列表配置 → 自动创建物理表 → 通过 `/:modelCode` 动态 CRUD 接口运行。

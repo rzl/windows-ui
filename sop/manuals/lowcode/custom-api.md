@@ -64,7 +64,7 @@ GET /api/custom/user/stats
 
 ```bash
 curl -H "Authorization: Bearer <token>" \
-  "http://localhost:3001/api/custom/user/stats?department=sales"
+  "http://localhost:9002/api/custom/user/stats?department=sales"
 ```
 
 ### 响应示例
@@ -134,7 +134,7 @@ curl -H "Authorization: Bearer <token>" \
 若接口开启「公开访问」，则无需登录即可调用：
 
 ```bash
-curl "http://localhost:3001/api/custom/public/hello"
+curl "http://localhost:9002/api/custom/public/hello"
 ```
 
 > **注意**：公开接口会暴露服务能力，建议同时配置 IP 白名单或频率限制以降低风险。

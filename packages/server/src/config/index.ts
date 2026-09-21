@@ -4,7 +4,7 @@ import path from 'path'
 dotenv.config({ path: path.resolve(__dirname, '../../.env') })
 
 export const config = {
-  port: Number(process.env.PORT || 3001),
+  port: Number(process.env.PORT || 9002),
   nodeEnv: process.env.NODE_ENV || 'development',
   jwt: {
     secret: process.env.JWT_SECRET || 'windows-ui-lowcode-secret-key',
