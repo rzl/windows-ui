@@ -23,5 +23,8 @@ export default {
   取消: 'Cancel',
   退出: 'Logout',
   首页: 'Home',
-  仪表盘: 'Dashboard'
+  仪表盘: 'Dashboard',
+  关闭当前: 'Close Current',
+  关闭其他: 'Close Others',
+  关闭全部: 'Close All'
 } as Record<string, string>

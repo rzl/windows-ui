@@ -59,6 +59,7 @@
           :key="tab.path"
           :class="['tab-item', { active: route.path === tab.path }]"
           @click="router.push(tab.path)"
+          @contextmenu.prevent="openTabMenu($event, tab)"
         >
           <span>{{ tab.title }}</span>
           <w-icon
@@ -74,6 +75,35 @@
       <main class="admin-content">
         <router-view />
       </main>
+    </div>
+
+    <div
+      v-if="tabMenu.visible"
+      class="tab-menu-overlay"
+      @click="closeTabMenu"
+      @contextmenu.prevent="closeTabMenu"
+      @scroll="closeTabMenu"
+    >
+      <div class="tab-menu" :style="{ left: tabMenu.x + 'px', top: tabMenu.y + 'px' }">
+        <div
+          :class="['tab-menu-item', { disabled: tabMenu.tab?.path === '/dashboard' }]"
+          @click.stop="handleTabMenuCommand('close')"
+        >
+          {{ t('关闭当前') }}
+        </div>
+        <div
+          :class="['tab-menu-item', { disabled: closeOthersDisabled }]"
+          @click.stop="handleTabMenuCommand('others')"
+        >
+          {{ t('关闭其他') }}
+        </div>
+        <div
+          :class="['tab-menu-item', { disabled: closeAllDisabled }]"
+          @click.stop="handleTabMenuCommand('all')"
+        >
+          {{ t('关闭全部') }}
+        </div>
+      </div>
     </div>
   </div>
 
@@ -306,6 +336,56 @@ function closeTab(tab: any) {
     if (next) router.push(next.path)
   }
 }
+
+const tabMenu = reactive({
+  visible: false,
+  x: 0,
+  y: 0,
+  tab: null as { name: string; path: string; title: string } | null
+})
+
+const closableTabs = computed(() => app.visitedViews.filter((v) => v.path !== '/dashboard'))
+
+const closeOthersDisabled = computed(() => {
+  if (!tabMenu.tab) return true
+  return !closableTabs.value.some((v) => v.path !== tabMenu.tab!.path)
+})
+
+const closeAllDisabled = computed(() => closableTabs.value.length === 0)
+
+function openTabMenu(e: MouseEvent, tab: any) {
+  tabMenu.tab = tab
+  tabMenu.visible = true
+  // 防止菜单超出视口
+  const menuWidth = 140
+  const menuHeight = 110
+  tabMenu.x = Math.max(0, Math.min(e.clientX, window.innerWidth - menuWidth))
+  tabMenu.y = Math.max(0, Math.min(e.clientY, window.innerHeight - menuHeight))
+}
+
+function closeTabMenu() {
+  tabMenu.visible = false
+}
+
+function handleTabMenuCommand(command: 'close' | 'others' | 'all') {
+  const tab = tabMenu.tab
+  closeTabMenu()
+  if (!tab) return
+  if (command === 'close') {
+    if (tab.path === '/dashboard') return
+    closeTab(tab)
+  } else if (command === 'others') {
+    if (closeOthersDisabled.value) return
+    app.removeOthers(tab.path)
+    if (route.path !== tab.path) router.push(tab.path)
+  } else {
+    if (closeAllDisabled.value) return
+    app.removeAll()
+    if (route.path !== '/dashboard') router.push('/dashboard')
+  }
+}
+
+watch(() => route.path, closeTabMenu)
 </script>
 
 <style scoped>
@@ -406,6 +486,39 @@ function closeTab(tab: any) {
   opacity: 0.7;
 }
 .tab-close:hover { opacity: 1; }
+
+.tab-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+.tab-menu {
+  position: fixed;
+  min-width: 120px;
+  padding: 4px 0;
+  background: var(--w-bg-color);
+  border: 1px solid var(--w-border-color-dark);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+}
+.tab-menu-item {
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--w-text-color-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab-menu-item:hover {
+  background: var(--w-color-primary);
+  color: var(--w-text-color-inverse);
+}
+.tab-menu-item.disabled {
+  color: var(--w-text-color-disabled);
+  cursor: not-allowed;
+}
+.tab-menu-item.disabled:hover {
+  background: transparent;
+  color: var(--w-text-color-disabled);
+}
 
 .admin-content {
   flex: 1;
