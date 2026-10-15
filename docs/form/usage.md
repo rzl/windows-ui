@@ -83,6 +83,17 @@ const resetForm = () => formRef.value.resetFields()
 | resetFields | 组件暴露的方法 |
 | clearValidate | 组件暴露的方法 |
 
+## 样式说明
+
+表单容器默认只有顶部与左侧 2px 白色凸起边，**没有右边框和底边框**，适合直接嵌入 `w-dialog`、页签等容器中。如需完整边框，可覆盖样式：
+
+```css
+.w-form {
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+}
+```
+
 ## 主题定制
 
 可通过 CSS 变量自定义主题色：

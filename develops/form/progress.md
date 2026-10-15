@@ -28,3 +28,4 @@
 - 2026-06-24: 新增移动端响应式适配，≤768px 时表单项 label 与内容区纵向堆叠，label 宽度自适应
 - 2026-06-29: 新增异步验证支持：rules 中 validator 可返回 Promise
 - 2026-06-29: 补齐文档中已声明但缺失的 Props/API（如 size、border、contentPosition、preview-src-list、row/col 等）
+- 2026-10-15: 表单容器默认去掉右边框与底边框，仅保留顶部/左侧 2px 白色凸起边，便于嵌入对话框等容器

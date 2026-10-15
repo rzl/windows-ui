@@ -115,5 +115,5 @@ defineExpose({ validate, resetFields, clearValidate })
 </script>
 
 <style scoped>
-.w-form { padding: 8px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; }
+.w-form { padding: 8px; background: var(--w-bg-color); border: solid #fff; border-width: 2px 0 0 2px; }
 </style>
