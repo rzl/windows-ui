@@ -409,6 +409,16 @@ watch(() => route.path, closeTabMenu)
 .admin-sidebar.collapsed {
   width: 64px;
 }
+/* 收起时菜单撑满侧边栏，消除 w-menu 固定 48px 宽与侧边栏之间的空隙 */
+.admin-sidebar.collapsed .sidebar-menu :deep(.w-menu--collapsed) {
+  width: 100%;
+  border-left: none;
+  border-right: none;
+}
+.admin-sidebar.collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 12px 0;
+}
 .sidebar-logo {
   display: flex;
   align-items: center;
