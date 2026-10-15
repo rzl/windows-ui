@@ -78,3 +78,94 @@ describe('Menu', () => {
     expect(wrapper.emitted('select')![0]).toEqual(['user'])
   })
 })
+
+// 三级菜单与 default-active 路径解析
+const nestedItems = [
+  {
+    label: '系统管理',
+    value: '/system',
+    children: [
+      {
+        label: '组织管理',
+        value: '/system/org',
+        children: [
+          { label: '用户管理', value: '/system/user' },
+          { label: '部门管理', value: '/system/dept' }
+        ]
+      },
+      {
+        label: '权限管理',
+        value: '/system/auth',
+        children: [{ label: '角色管理', value: '/system/role' }]
+      }
+    ]
+  }
+]
+
+describe('Menu 三级嵌套与 default-active 路径解析', () => {
+  it('三级菜单应支持逐级点击展开', async () => {
+    const wrapper = mount(Menu, {
+      props: { items: nestedItems },
+      global: { stubs: ['WIcon'] }
+    })
+    expect(wrapper.text()).not.toContain('组织管理')
+    await wrapper.findAll('.w-menu__title')[0].trigger('click')
+    expect(wrapper.text()).toContain('组织管理')
+    expect(wrapper.text()).not.toContain('用户管理')
+    await wrapper.find('.w-menu__sub-title').trigger('click')
+    expect(wrapper.text()).toContain('用户管理')
+  })
+
+  it('default-active 传路径时应自动逐级展开并高亮叶子', () => {
+    const wrapper = mount(Menu, {
+      props: { items: nestedItems, defaultActive: '/system/user' },
+      global: { stubs: ['WIcon'] }
+    })
+    // 未点击任何分组，三级内容应已展开
+    expect(wrapper.text()).toContain('组织管理')
+    expect(wrapper.text()).toContain('用户管理')
+    const activeTitles = wrapper.findAll('.is-active .w-menu__sub-title')
+    expect(activeTitles.some((t) => t.text() === '用户管理')).toBe(true)
+  })
+
+  it('default-active 命中时应高亮叶子而非整条分组链', () => {
+    const wrapper = mount(Menu, {
+      props: { items: nestedItems, defaultActive: '/system/user' },
+      global: { stubs: ['WIcon'] }
+    })
+    const activeTexts = wrapper.findAll('.is-active').map((node) => node.text())
+    expect(activeTexts).toContain('用户管理')
+    // 中间分组「组织管理」不应高亮（仅自动展开）
+    expect(activeTexts).not.toContain('组织管理')
+  })
+
+  it('items 异步加载后应能解析 default-active 路径', async () => {
+    const wrapper = mount(Menu, {
+      props: { items: [], defaultActive: '/system/user' },
+      global: { stubs: ['WIcon'] }
+    })
+    expect(wrapper.text()).not.toContain('用户管理')
+    await wrapper.setProps({ items: nestedItems })
+    expect(wrapper.text()).toContain('用户管理')
+  })
+
+  it('default-active 为顶层叶子路径时应高亮顶层项', () => {
+    const wrapper = mount(Menu, {
+      props: {
+        items: [{ label: '首页', value: '/home' }, ...nestedItems],
+        defaultActive: '/home'
+      },
+      global: { stubs: ['WIcon'] }
+    })
+    expect(wrapper.findAll('.w-menu__item')[0].classes()).toContain('is-active')
+  })
+
+  it('default-active 未命中任何菜单项时保持无高亮', () => {
+    const wrapper = mount(Menu, {
+      props: { items: nestedItems, defaultActive: '/not-exists' },
+      global: { stubs: ['WIcon'] }
+    })
+    expect(wrapper.findAll('.is-active').length).toBe(0)
+    expect(wrapper.text()).not.toContain('用户管理')
+  })
+})

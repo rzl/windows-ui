@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, provide } from 'vue'
+import { ref, computed, provide, watch } from 'vue'
 import WIcon from '../icon/icon.vue'
 import SubMenu from './sub-menu.vue'
 import { useGlobalSize } from '../../utils/prefix'
@@ -62,6 +62,39 @@ const activeIndex = ref<number | null>(defaultIndex)
 const subActive = ref<string | undefined>(defaultSub)
 const openSet = ref(new Set<number>())
 const hoverIndex = ref<number | null>(null)
+
+// default-active 为菜单 value（如路由路径）时，在树中递归查找并解析为索引链，
+// 用于初始进入/刷新页面时自动高亮叶子并逐级展开所在分组
+function findActiveChain(items: any[], value: string, prefix = ''): string | null {
+  for (let i = 0; i < items.length; i++) {
+    const path = prefix ? `${prefix}-${i}` : `${i}`
+    const item = items[i]
+    if ((item.value ?? item.label) === value) return path
+    if (item.children?.length) {
+      const found = findActiveChain(item.children, value, path)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+function syncDefaultActive() {
+  const v = props.defaultActive
+  // 数字与索引链形式沿用初始化行为；仅处理路径等普通字符串
+  if (typeof v !== 'string' || !v || v.includes('-') || !isNaN(Number(v))) return
+  const chain = findActiveChain(props.items, v)
+  if (!chain) return
+  if (chain.includes('-')) {
+    activeIndex.value = null
+    subActive.value = chain
+    openSet.value.add(Number(chain.split('-')[0]))
+  } else {
+    activeIndex.value = Number(chain)
+    subActive.value = undefined
+  }
+}
+
+watch([() => props.defaultActive, () => props.items], syncDefaultActive, { immediate: true })
 
 const isSubmenuVisible = (i: number) => {
   if (props.collapse) return hoverIndex.value === i

@@ -83,15 +83,14 @@ const isPopup = computed(() => props.mode === 'horizontal' || props.collapse)
 
 const isOpen = (i: number) => {
   if (isPopup.value) return hoverIndex.value === i
-  return openSet.value.has(i)
+  // 激活项位于该子菜单内时自动展开（配合 default-active 路径解析实现刷新后逐级展开）
+  return openSet.value.has(i) || (props.activePath.startsWith(`${props.parentPath}-${i}-`))
 }
 
 const isSubmenuVisible = (i: number) => isOpen(i)
 
-const isActive = (i: number) => {
-  const currentPath = `${props.parentPath}-${i}`
-  return props.activePath === currentPath || (props.activePath && props.activePath.startsWith(`${currentPath}-`))
-}
+// 仅精确高亮激活的叶子项，避免多级分组整条链高亮
+const isActive = (i: number) => props.activePath === `${props.parentPath}-${i}`
 
 const handleMouseEnter = (i: number) => {
   if (isPopup.value) hoverIndex.value = i
