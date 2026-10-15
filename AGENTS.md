@@ -201,7 +201,7 @@ windows-ui/
 
 | 命令 | 作用 |
 |------|------|
-| `pnpm dev` | 启动 playground 开发服务器（默认端口 `9000`，同时承载组件文档站点与 Admin 后台） |
+| `pnpm dev` | 启动 playground 开发服务器（默认端口 `9003`，同时承载组件文档站点与 Admin 后台；原 9000 与本机 php-fpm 服务冲突） |
 | `pnpm dev:admin` | 当前等价于 `pnpm dev`（Admin 与 playground 共享同一 Vite 服务，访问 `/admin.html`） |
 | `pnpm dev:lowcode` | 启动低代码管理平台前端（默认端口 `9001`，代理 `/api` 到 `localhost:9002`） |
 | `pnpm dev:server` | 启动后端服务（默认监听 `127.0.0.1:9002`，热重载；`.env.example` 中 PORT=9002，若复制为 `.env` 会覆盖该端口） |

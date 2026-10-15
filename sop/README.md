@@ -66,7 +66,7 @@ pnpm install
 # 开发模式
 pnpm dev:server       # 启动后端服务（默认 http://127.0.0.1:9002）
 pnpm dev:lowcode      # 启动低代码平台前端（默认 http://localhost:9001）
-pnpm dev              # 启动原 playground + Admin 模板（默认 http://localhost:9000）
+pnpm dev              # 启动原 playground + Admin 模板（默认 http://localhost:9003）
 
 # 数据库
 pnpm db:migrate       # 执行数据库迁移

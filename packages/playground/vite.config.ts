@@ -50,7 +50,8 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 9000
+    // 9000 与本机小皮面板（xp.cn）的 php-fpm 服务冲突，固定使用 9003
+    port: 9003
   },
   build: {
     rollupOptions: {
