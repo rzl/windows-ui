@@ -383,7 +383,7 @@ const displayColumns = computed<ColumnItem[]>(() => {
 .w-crud-table__column-setting-table :deep(.w-checkbox__label) { display: none; }
 .w-crud-table__column-setting-fixed {
   font-family: inherit; font-size: var(--w-font-size-small); color: var(--w-text-color-regular);
-  background: var(--w-bg-color); border: 1px solid #d4d0c8; padding: 1px 2px; cursor: pointer;
+  background: var(--w-bg-color); border: 1px solid var(--w-fill-color-darker); padding: 1px 2px; cursor: pointer;
 }
 .w-crud-table__column-setting-move { display: inline-flex; gap: 2px; }
 .w-crud-table__column-setting-move-btn {
@@ -391,7 +391,7 @@ const displayColumns = computed<ColumnItem[]>(() => {
   font-size: var(--w-font-size-small); color: var(--w-text-color-regular); line-height: 1.6;
   font-family: inherit;
 }
-.w-crud-table__column-setting-move-btn:hover:not(:disabled) { border-color: #d4d0c8; background: var(--w-bg-color); }
+.w-crud-table__column-setting-move-btn:hover:not(:disabled) { border-color: var(--w-fill-color-darker); background: var(--w-bg-color); }
 .w-crud-table__column-setting-move-btn:disabled { color: #b0b0b0; cursor: not-allowed; }
 
 @media (max-width: 768px) {

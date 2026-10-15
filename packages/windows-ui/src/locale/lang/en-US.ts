@@ -52,5 +52,10 @@ export default {
   上传失败: 'Upload failed',
   选填: 'Optional',
   必填: 'Required',
-  消息框标题: 'Message'
+  消息框标题: 'Message',
+  字段不能为空: '{field} is required',
+  字段格式不正确: '{field} format is invalid',
+  字段最少字符: 'At least {min} characters',
+  字段最多字符: 'At most {max} characters',
+  字段验证失败: '{field} is invalid'
 } as Record<string, string>

@@ -37,7 +37,7 @@ const colWidthStyle = (width?: number | string) => {
 
 <style scoped>
 .w-virtualized-table { border: 1px solid #919b9c; }
-.w-virtualized-table__header { display: flex; background: linear-gradient(180deg, #f8f8f8, #e0e0e0); border-bottom: 1px solid #d4d0c8; }
+.w-virtualized-table__header { display: flex; background: linear-gradient(180deg, var(--w-xp-face-start), var(--w-fill-color-dark)); border-bottom: 1px solid var(--w-fill-color-darker); }
 .w-virtualized-table__th { flex: 1; padding: 6px 10px; font-weight: bold; font-size: var(--w-font-size-base); }
 .w-virtualized-table__viewport { overflow-y: auto; position: relative; }
 .w-virtualized-table__body { position: relative; }

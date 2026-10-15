@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
+import { reactive, h } from 'vue'
 import Form from './form.vue'
 import FormItem from './form-item.vue'
+import WInput from '../input/input.vue'
 
 describe('Form', () => {
   it('默认渲染 form 元素', () => {
@@ -73,14 +75,35 @@ describe('Form', () => {
     expect(wrapper.emitted('validate')![0]).toEqual([false, { age: '年龄必须大于18岁' }])
   })
 
-  it('resetFields 应清空 model', () => {
+  it('resetFields 应恢复 model 初始值', () => {
     const model = { name: 'Tom', age: 20 }
     const wrapper = mount(Form, {
       props: { model }
     })
+    model.name = 'Jerry'
     ;(wrapper.vm as any).resetFields()
-    expect(model.name).toBeUndefined()
-    expect(model.age).toBeUndefined()
+    expect(model.name).toBe('Tom')
+    expect(model.age).toBe(20)
+  })
+
+  it('resetFields 后不应对必填字段立即报错', async () => {
+    const model: Record<string, any> = { name: 'Tom' }
+    const wrapper = mount(Form, {
+      props: {
+        model,
+        rules: { name: [{ required: true, message: '请输入姓名' }] }
+      },
+      slots: {
+        default: '<form-item label="姓名" prop="name"><input /></form-item>'
+      },
+      global: { components: { FormItem } }
+    })
+    model.name = ''
+    await (wrapper.vm as any).resetFields()
+    await wrapper.vm.$nextTick()
+    expect(model.name).toBe('Tom')
+    const item = wrapper.findComponent(FormItem)
+    expect(item.find('.w-form-item__error').exists()).toBe(false)
   })
 
   it('clearValidate 应清空 errors', async () => {
@@ -123,5 +146,64 @@ describe('FormItem', () => {
     await (wrapper.vm as any).validate()
     const item = wrapper.findComponent(FormItem)
     expect(item.find('.w-form-item__error').text()).toBe('姓名必填')
+  })
+
+  it('model 值变化时应自动触发 change 校验', async () => {
+    const model = reactive<Record<string, any>>({ name: '' })
+    const wrapper = mount(Form, {
+      props: {
+        model,
+        rules: { name: [{ required: true, message: '姓名必填' }] }
+      },
+      slots: {
+        default: () => h(FormItem, { label: '姓名', prop: 'name' }, { default: () => h('input') })
+      }
+    })
+    // 挂载后未改动不应报错
+    expect(wrapper.find('.w-form-item__error').exists()).toBe(false)
+    // 用户输入合法值后错误清除
+    model.name = '张三'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.w-form-item__error').exists()).toBe(false)
+    // 清空后立即提示必填
+    model.name = ''
+    await flushPromises()
+    expect(wrapper.find('.w-form-item__error').text()).toBe('姓名必填')
+  })
+
+  it('blur 触发：input 失焦时触发校验', async () => {
+    const model = reactive<Record<string, any>>({ name: '' })
+    const wrapper = mount(Form, {
+      props: {
+        model,
+        rules: { name: [{ required: true, trigger: 'blur', message: '请输入姓名' }] }
+      },
+      slots: {
+        default: () => h(FormItem, { label: '姓名', prop: 'name' }, { default: () => h(WInput, {
+          modelValue: model.name,
+          'onUpdate:modelValue': (v: string) => { model.name = v }
+        }) })
+      }
+    })
+    expect(wrapper.find('.w-form-item__error').exists()).toBe(false)
+    await wrapper.find('input').trigger('blur')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.w-form-item__error').text()).toBe('请输入姓名')
+  })
+
+  it('rule.trigger 为 blur 时不响应 change 校验', async () => {
+    const model = reactive<Record<string, any>>({ name: '' })
+    const wrapper = mount(Form, {
+      props: {
+        model,
+        rules: { name: [{ required: true, trigger: 'blur', message: '请输入姓名' }] }
+      },
+      slots: {
+        default: () => h(FormItem, { label: '姓名', prop: 'name' }, { default: () => h('input') })
+      }
+    })
+    model.name = ''
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.w-form-item__error').exists()).toBe(false)
   })
 })

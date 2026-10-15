@@ -34,7 +34,7 @@ let timer: any = null
 const total = computed(() => props.items.length || undefined)
 const carouselStyle = computed(() => {
   const h = typeof props.height === 'number' ? `${props.height}px` : props.height
-  return { position: 'relative' as const, width: '100%', height: h, overflow: 'hidden', border: '2px solid', borderColor: '#fff #808080 #808080 #fff', background: '#000' }
+  return { position: 'relative' as const, width: '100%', height: h, overflow: 'hidden', border: '2px solid', borderColor: 'var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light)', background: '#000' }
 })
 const containerStyle = computed(() => ({ height: '100%', position: 'relative' as const, overflow: 'hidden' }))
 const itemStyle = (i: number) => ({ position: 'absolute' as const, top: 0, left: 0, width: '100%', height: '100%', opacity: i === activeIndex.value ? 1 : 0, transition: 'opacity 0.5s' })

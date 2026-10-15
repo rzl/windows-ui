@@ -1,7 +1,7 @@
 <template>
   <div :class="['w-cascader', `w-cascader--${size}`]" v-click-outside="close">
     <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
-    <div v-show="open" class="w-cascader__dropdown">
+    <div v-show="open" class="w-cascader__dropdown" :style="{ zIndex }">
       <div v-for="(menu, level) in menus" :key="level" class="w-cascader__menu">
         <div
           v-for="opt in menu"
@@ -21,6 +21,8 @@
 import { ref, computed, watch } from 'vue'
 import WInput from '../input/input.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { vClickOutside } from '../../directives/click-outside'
+import { nextZIndex } from '../../hooks'
 
 defineOptions({ name: 'WCascader' })
 const props = defineProps({
@@ -34,6 +36,9 @@ const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(2000)
+watch(open, (v) => { if (v) zIndex.value = nextZIndex() })
 const selected = ref<string[]>(props.modelValue || [])
 
 watch(() => props.modelValue, (v) => { selected.value = v || [] })
@@ -79,13 +84,12 @@ const select = (opt: any, level: number) => {
 }
 const handleClear = () => { selected.value = []; emit('update:modelValue', []); emit('change', []); emit('clear') }
 const close = () => { open.value = false }
-const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>
 
 <style scoped>
 .w-cascader { position: relative; display: inline-block; }
 .w-cascader__dropdown { position: absolute; top: 100%; left: 0; z-index: var(--w-index-popper); display: flex; background: var(--w-bg-color); border: 1px solid #808080; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-.w-cascader__menu { min-width: 140px; border-right: 1px solid #d4d0c8; max-height: 200px; overflow-y: auto; }
+.w-cascader__menu { min-width: 140px; border-right: 1px solid var(--w-fill-color-darker); max-height: 200px; overflow-y: auto; }
 .w-cascader__menu:last-child { border-right: none; }
 .w-cascader__item { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); line-height: 1.5; display: flex; justify-content: space-between; }
 .w-cascader--small .w-cascader__item { padding: 2px 6px; font-size: var(--w-font-size-small); }

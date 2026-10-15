@@ -77,6 +77,7 @@ import WDropdown from '../dropdown/dropdown.vue'
 import WDropdownMenu from '../dropdown/dropdown-menu.vue'
 import WDropdownItem from '../dropdown/dropdown-item.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { useEventListener } from '../../hooks'
 
 defineOptions({ name: 'WAdminLayout' })
 const props = defineProps({
@@ -126,10 +127,8 @@ const handleUserCommand = (command: string) => {
   if (command === 'logout') emit('logout')
 }
 
-if (typeof window !== 'undefined') {
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-}
+checkMobile()
+useEventListener(window, 'resize', checkMobile)
 </script>
 
 <style scoped>
@@ -138,14 +137,14 @@ if (typeof window !== 'undefined') {
 .w-admin-layout__sidebar.collapsed { width: 64px; }
 .w-admin-layout__sidebar--drawer { position: fixed; left: 0; top: 0; bottom: 0; box-shadow: 2px 0 8px rgba(0,0,0,0.2); }
 .w-admin-layout__sidebar--drawer.collapsed { transform: translateX(-100%); }
-.w-admin-layout__logo { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid #d4d0c8; font-weight: bold; color: var(--w-color-primary); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
-.w-admin-layout__menu-search { padding: 8px; border-bottom: 1px solid #d4d0c8; }
+.w-admin-layout__logo { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid var(--w-fill-color-darker); font-weight: bold; color: var(--w-color-primary); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
+.w-admin-layout__menu-search { padding: 8px; border-bottom: 1px solid var(--w-fill-color-darker); }
 .w-admin-layout__menu { padding: 4px; flex: 1; min-height: 0; overflow-y: auto; }
 .w-admin-layout__main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-.w-admin-layout__header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--w-bg-color); border-bottom: 2px solid; border-color: #fff #808080 #808080 #fff; flex-shrink: 0; }
+.w-admin-layout__header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--w-bg-color); border-bottom: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); flex-shrink: 0; }
 .w-admin-layout__header-left, .w-admin-layout__header-right { display: flex; align-items: center; gap: 8px; }
-.w-admin-layout__tabs { display: flex; gap: 4px; padding: 6px 12px; background: var(--w-bg-color); border-bottom: 1px solid #d4d0c8; flex-shrink: 0; }
-.w-admin-layout__tab { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; cursor: pointer; border: 1px solid #d4d0c8; background: #f0f0f0; font-size: var(--w-font-size-base); }
+.w-admin-layout__tabs { display: flex; gap: 4px; padding: 6px 12px; background: var(--w-bg-color); border-bottom: 1px solid var(--w-fill-color-darker); flex-shrink: 0; }
+.w-admin-layout__tab { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; cursor: pointer; border: 1px solid var(--w-fill-color-darker); background: var(--w-fill-color-light); font-size: var(--w-font-size-base); }
 .w-admin-layout__tab.is-active { background: var(--w-color-primary); color: #fff; border-color: var(--w-color-primary); }
 .w-admin-layout__content { flex: 1; padding: 16px; overflow: auto; }
 .w-admin-layout__mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }

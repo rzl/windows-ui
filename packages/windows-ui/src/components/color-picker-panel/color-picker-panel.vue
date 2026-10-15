@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 
 defineOptions({ name: 'WColorPickerPanel' })
 const props = defineProps({ modelValue: String })
@@ -95,6 +95,8 @@ const hsvToRgb = (h: number, s: number, v: number) => {
 
 const emitValue = () => { emit('update:modelValue', color.value); emit('change', color.value) }
 
+let stopPick: (() => void) | null = null
+
 const startPick = (e: MouseEvent) => {
   const el = e.currentTarget as HTMLElement
   const rect = el.getBoundingClientRect()
@@ -103,10 +105,15 @@ const startPick = (e: MouseEvent) => {
     value.value = Math.max(0, Math.min(100, (1 - (ev.clientY - rect.top) / rect.height) * 100))
     emitValue()
   }
+  const up = () => {
+    window.removeEventListener('mousemove', update)
+    window.removeEventListener('mouseup', up)
+    stopPick = null
+  }
   update(e)
-  const up = () => { window.removeEventListener('mousemove', update); window.removeEventListener('mouseup', up) }
   window.addEventListener('mousemove', update)
   window.addEventListener('mouseup', up)
+  stopPick = up
 }
 
 const startHue = (e: MouseEvent) => {
@@ -116,11 +123,18 @@ const startHue = (e: MouseEvent) => {
     hue.value = Math.max(0, Math.min(360, ((ev.clientX - rect.left) / rect.width) * 360))
     emitValue()
   }
+  const up = () => {
+    window.removeEventListener('mousemove', update)
+    window.removeEventListener('mouseup', up)
+    stopPick = null
+  }
   update(e)
-  const up = () => { window.removeEventListener('mousemove', update); window.removeEventListener('mouseup', up) }
   window.addEventListener('mousemove', update)
   window.addEventListener('mouseup', up)
+  stopPick = up
 }
+
+onUnmounted(() => { stopPick?.() })
 </script>
 
 <style scoped>
@@ -134,5 +148,5 @@ const startHue = (e: MouseEvent) => {
 .w-color-picker-panel__hue-cursor { position: absolute; top: -2px; width: 4px; height: 16px; background: #fff; border: 1px solid #000; transform: translateX(-50%); pointer-events: none; }
 .w-color-picker-panel__preview { display: flex; align-items: center; gap: 8px; }
 .w-color-picker-panel__color { width: 32px; height: 20px; border: 1px solid #808080; }
-.w-color-picker-panel__preview input { flex: 1; border: 1px solid #7f9db9; padding: 2px 4px; font-family: var(--w-font-family); font-size: var(--w-font-size-small); }
+.w-color-picker-panel__preview input { flex: 1; border: 1px solid var(--w-xp-input-border); padding: 2px 4px; font-family: var(--w-font-family); font-size: var(--w-font-size-small); }
 </style>

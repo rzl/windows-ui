@@ -1,7 +1,7 @@
 <template>
   <div :class="['w-popconfirm', `w-popconfirm--${size}`]" v-click-outside="close">
     <div @click="open = true"><slot /></div>
-    <div v-show="open" class="w-popconfirm__popper" :style="popperStyle">
+    <div v-show="open" class="w-popconfirm__popper" :style="[popperStyle, { zIndex }]">
       <div class="w-popconfirm__content">
         <slot name="title">
           <w-icon :name="type === 'warning' ? 'warning' : 'info'" />
@@ -19,10 +19,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { vClickOutside } from '../../directives/click-outside'
+import { nextZIndex } from '../../hooks'
 
 defineOptions({ name: 'WPopconfirm' })
 const props = defineProps({
@@ -38,6 +40,9 @@ const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['confirm', 'cancel'])
 
 const open = ref(false)
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(2000)
+watch(open, (v) => { if (v) zIndex.value = nextZIndex() })
 const confirm = () => { emit('confirm'); open.value = false }
 const cancel = () => { emit('cancel'); open.value = false }
 const close = () => { open.value = false }
@@ -53,10 +58,6 @@ const popperStyle = computed(() => {
   return style
 })
 
-const vClickOutside = {
-  mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) },
-  unmounted(el: any) { document.removeEventListener('click', el._clickOutside) }
-}
 </script>
 
 <style scoped>

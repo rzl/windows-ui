@@ -8,7 +8,7 @@
         <w-icon name="arrowDown" :size="size" />
       </div>
     </div>
-    <div v-show="open" class="w-virtualized-select__dropdown">
+    <div v-show="open" class="w-virtualized-select__dropdown" :style="{ zIndex }">
       <div class="w-virtualized-select__viewport" :style="{ height: `${realItemHeight * Math.min(visibleCount, totalItems)}px` }" @scroll="handleScroll">
         <div class="w-virtualized-select__list" :style="{ height: `${totalItems * realItemHeight}px`, transform: `translateY(${startIndex * realItemHeight}px)` }">
           <div v-for="opt in visibleOptions" :key="opt.value" :class="['w-virtualized-select__option', { 'is-selected': modelValue === opt.value }]" :style="{ height: `${realItemHeight}px`, lineHeight: `${realItemHeight}px` }" @click="select(opt)">{{ opt.label }}</div>
@@ -19,9 +19,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { vClickOutside } from '../../directives/click-outside'
+import { nextZIndex } from '../../hooks'
 
 defineOptions({ name: 'WVirtualizedSelect' })
 const props = defineProps({
@@ -38,6 +40,9 @@ const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 
 const open = ref(false)
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(2000)
+watch(open, (v) => { if (v) zIndex.value = nextZIndex() })
 const scrollTop = ref(0)
 const selectedLabel = computed(() => props.options.find(o => o.value === props.modelValue)?.label)
 const totalItems = computed(() => props.options.length)
@@ -51,15 +56,11 @@ const close = () => { open.value = false }
 const handleClear = () => { emit('update:modelValue', undefined); emit('change', undefined); emit('clear') }
 const handleScroll = (e: Event) => { scrollTop.value = (e.target as HTMLDivElement).scrollTop }
 
-const vClickOutside = {
-  mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) },
-  unmounted(el: any) { document.removeEventListener('click', el._clickOutside) }
-}
 </script>
 
 <style scoped>
 .w-virtualized-select { position: relative; display: inline-block; min-width: 120px; }
-.w-virtualized-select__trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; box-sizing: border-box; padding: 2px 4px; border: 1px solid #7f9db9; background: #fff; cursor: pointer; font-family: var(--w-font-family); font-size: var(--w-font-size-base); height: var(--w-component-size); }
+.w-virtualized-select__trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; box-sizing: border-box; padding: 2px 4px; border: 1px solid var(--w-xp-input-border); background: var(--w-bg-color); cursor: pointer; font-family: var(--w-font-family); font-size: var(--w-font-size-base); height: var(--w-component-size); }
 .w-virtualized-select--small .w-virtualized-select__trigger { padding: 1px 2px; height: var(--w-component-size-small); font-size: var(--w-font-size-small); }
 .w-virtualized-select--large .w-virtualized-select__trigger { padding: 4px 6px; height: var(--w-component-size-large); font-size: var(--w-font-size-medium); }
 .w-virtualized-select__placeholder { color: var(--w-text-color-placeholder); }

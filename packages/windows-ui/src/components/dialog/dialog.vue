@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <transition name="w-dialog-fade">
-      <div v-if="modelValue" class="w-dialog__wrapper" @click.self="handleWrapperClick">
+      <div v-if="modelValue" class="w-dialog__wrapper" :style="{ zIndex }" @click.self="handleWrapperClick">
         <div
           ref="dialogRef"
           :class="['w-dialog', `w-dialog--${size}`, { 'is-dragging': isDragging, 'is-fullscreen': isFullscreen }]"
@@ -46,6 +46,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { nextZIndex, useScrollLock } from '../../hooks'
 
 defineOptions({ name: 'WDialog' })
 
@@ -73,6 +74,13 @@ const screenWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200
 const isMobile = computed(() => screenWidth.value <= 768)
 const prevFullscreenState = ref(false)
 const mobileFullscreenForced = ref(false)
+
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(0)
+watch(() => props.modelValue, (val) => {
+  if (val) zIndex.value = nextZIndex()
+})
+useScrollLock(computed(() => props.modelValue))
 
 const updateScreenWidth = () => {
   screenWidth.value = window.innerWidth
@@ -146,9 +154,12 @@ const moveDrag = (clientX: number, clientY: number) => {
   }
 }
 
+let dragMovedTimer: ReturnType<typeof setTimeout> | null = null
+
 const endDrag = () => {
   isDragging.value = false
-  setTimeout(() => { dragMoved.value = false }, 100)
+  if (dragMovedTimer) clearTimeout(dragMovedTimer)
+  dragMovedTimer = setTimeout(() => { dragMoved.value = false; dragMovedTimer = null }, 100)
 }
 
 const handleMouseDown = (e: MouseEvent) => {
@@ -188,6 +199,18 @@ const handleTouchEnd = () => {
   window.removeEventListener('touchend', handleTouchEnd)
 }
 
+onBeforeUnmount(() => {
+  // 拖拽中途组件被卸载时兜底移除窗口级监听与残留定时器
+  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('mouseup', handleMouseUp)
+  window.removeEventListener('touchmove', handleTouchMove)
+  window.removeEventListener('touchend', handleTouchEnd)
+  if (dragMovedTimer) {
+    clearTimeout(dragMovedTimer)
+    dragMovedTimer = null
+  }
+})
+
 function applyMobileFullscreen() {
   if (isMobile.value && !mobileFullscreenForced.value) {
     prevFullscreenState.value = isFullscreen.value
@@ -220,7 +243,6 @@ watch(isMobile, (val, oldVal) => {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,7 +324,7 @@ watch(isMobile, (val, oldVal) => {
   justify-content: flex-end;
   gap: 8px;
   padding: 10px 16px;
-  border-top: 1px solid #d4d0c8;
+  border-top: 1px solid var(--w-fill-color-darker);
 }
 
 .w-dialog-fade-enter-active,

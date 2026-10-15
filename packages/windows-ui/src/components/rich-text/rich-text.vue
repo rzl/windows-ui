@@ -105,8 +105,8 @@ watch(() => props.modelValue, (v) => {
 </script>
 
 <style scoped>
-.w-rich-text { border: 2px solid; border-color: #808080 #fff #fff #808080; background: #fff; }
-.w-rich-text__toolbar { display: flex; gap: 4px; padding: 4px; background: var(--w-bg-color); border-bottom: 1px solid #d4d0c8; flex-wrap: wrap; }
+.w-rich-text { border: 2px solid; border-color: var(--w-xp-bevel-dark) var(--w-xp-bevel-light) var(--w-xp-bevel-light) var(--w-xp-bevel-dark); background: var(--w-bg-color); }
+.w-rich-text__toolbar { display: flex; gap: 4px; padding: 4px; background: var(--w-bg-color); border-bottom: 1px solid var(--w-fill-color-darker); flex-wrap: wrap; }
 .w-rich-text__editor { min-height: 120px; padding: 8px; outline: none; font-size: var(--w-font-size-base); line-height: 1.5; }
 .w-rich-text__editor:empty:before { content: attr(placeholder); color: #999; }
 .w-rich-text--small .w-rich-text__editor { font-size: var(--w-font-size-small); min-height: 80px; }

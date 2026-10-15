@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 defineOptions({ name: 'WSlider' })
 const props = defineProps({ modelValue: { type: Number, default: 0 }, min: { type: Number, default: 0 }, max: { type: Number, default: 100 }, step: { type: Number, default: 1 }, rangeMin: { type: Number, default: undefined }, rangeMax: { type: Number, default: undefined }, showStops: Boolean, showMinMax: Boolean, disabled: Boolean, size: { type: String, default: undefined } })
@@ -54,8 +54,10 @@ const rangePercent = computed(() => {
 })
 const stops = computed(() => { const count = (props.max - props.min) / props.step; const arr: { percent: number; value: number }[] = []; for (let i = 1; i < count; i++) arr.push({ percent: (i / count) * 100, value: props.min + i * props.step }); return arr })
 const updateValue = (clientX: number) => { if (!trackRef.value || props.disabled) return; const rect = trackRef.value.getBoundingClientRect(); let p = (clientX - rect.left) / rect.width; p = Math.max(0, Math.min(1, p)); let val = props.min + p * (props.max - props.min); val = props.min + Math.round((val - props.min) / props.step) * props.step; const rMin = props.rangeMin !== undefined ? props.rangeMin : props.min; const rMax = props.rangeMax !== undefined ? props.rangeMax : props.max; val = Math.max(rMin, Math.min(rMax, val)); emit('update:modelValue', val); emit('change', val) }
-const startDrag = (e: MouseEvent) => { e.preventDefault(); e.stopPropagation(); dragging.value = true; const move = (ev: MouseEvent) => updateValue(ev.clientX); const up = () => { dragging.value = false; window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up) }; window.addEventListener('mousemove', move); window.addEventListener('mouseup', up) }
-const startTouchDrag = (_e: TouchEvent) => { dragging.value = true; const move = (ev: TouchEvent) => { const t = ev.touches[0]; if (t) updateValue(t.clientX) }; const up = () => { dragging.value = false; window.removeEventListener('touchmove', move); window.removeEventListener('touchend', up); window.removeEventListener('touchcancel', up) }; window.addEventListener('touchmove', move); window.addEventListener('touchend', up); window.addEventListener('touchcancel', up) }
+let stopDrag: (() => void) | null = null
+const startDrag = (e: MouseEvent) => { e.preventDefault(); e.stopPropagation(); dragging.value = true; const move = (ev: MouseEvent) => updateValue(ev.clientX); const up = () => { dragging.value = false; window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); stopDrag = null }; window.addEventListener('mousemove', move); window.addEventListener('mouseup', up); stopDrag = up }
+const startTouchDrag = (_e: TouchEvent) => { dragging.value = true; const move = (ev: TouchEvent) => { const t = ev.touches[0]; if (t) updateValue(t.clientX) }; const up = () => { dragging.value = false; window.removeEventListener('touchmove', move); window.removeEventListener('touchend', up); window.removeEventListener('touchcancel', up); stopDrag = null }; window.addEventListener('touchmove', move); window.addEventListener('touchend', up); window.addEventListener('touchcancel', up); stopDrag = up }
+onUnmounted(() => { stopDrag?.() })
 const handleTrackClick = (e: MouseEvent) => updateValue(e.clientX)
 </script>
 

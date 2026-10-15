@@ -1,18 +1,23 @@
 <template>
   <div :class="['w-tooltip', `w-tooltip--${size}`]" v-click-outside="close">
     <div @mouseenter="open = true" @mouseleave="open = false" @click="open = !open"><slot /></div>
-    <div v-show="open" class="w-tooltip__popper" :style="popperStyle">{{ content }}</div>
+    <div v-show="open" class="w-tooltip__popper" :style="[popperStyle, { zIndex }]">{{ content }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { vClickOutside } from '../../directives/click-outside'
+import { nextZIndex } from '../../hooks'
 defineOptions({ name: 'WTooltip' })
 const props = defineProps({ content: String, placement: { type: String, default: 'top' }, size: { type: String, default: undefined } })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const open = ref(false)
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(2000)
+watch(open, (v) => { if (v) zIndex.value = nextZIndex() })
 const close = () => { open.value = false }
 const popperStyle = computed(() => {
   const style: Record<string, string> = { position: 'absolute', zIndex: 'var(--w-index-popper)' }
@@ -24,7 +29,6 @@ const popperStyle = computed(() => {
   }
   return style
 })
-const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>
 
 <style scoped>

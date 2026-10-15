@@ -29,7 +29,7 @@
         <w-icon name="arrowDown" :size="size" @click.stop="toggleOpen" />
       </div>
     </div>
-    <div v-show="open" class="w-select__dropdown">
+    <div v-show="open" class="w-select__dropdown" :style="{ zIndex }">
       <div class="w-select__options">
         <div
           v-for="opt in displayOptions"
@@ -44,9 +44,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, type PropType } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted, type PropType } from 'vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { vClickOutside } from '../../directives/click-outside'
+import { nextZIndex } from '../../hooks'
 
 defineOptions({ name: 'WSelect' })
 
@@ -69,6 +71,9 @@ const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 
 const open = ref(false)
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(2000)
+watch(open, (v) => { if (v) zIndex.value = nextZIndex() })
 const query = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 
@@ -100,8 +105,15 @@ let remoteTimer: any = null
 const triggerRemote = (q: string) => {
   if (!props.remote || !props.remoteMethod) return
   if (remoteTimer) clearTimeout(remoteTimer)
-  remoteTimer = setTimeout(() => props.remoteMethod!(q), 200)
+  remoteTimer = setTimeout(() => {
+    remoteTimer = null
+    props.remoteMethod!(q)
+  }, 200)
 }
+
+onUnmounted(() => {
+  if (remoteTimer) clearTimeout(remoteTimer)
+})
 
 const handleTriggerClick = () => {
   if (props.filterable) {
@@ -156,19 +168,11 @@ const handleClear = () => {
   emit('clear')
   query.value = ''
 }
-
-const vClickOutside = {
-  mounted(el: any, binding: any) {
-    el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }
-    document.addEventListener('click', el._clickOutside)
-  },
-  unmounted(el: any) { document.removeEventListener('click', el._clickOutside) }
-}
 </script>
 
 <style scoped>
 .w-select { position: relative; display: inline-block; min-width: 120px; }
-.w-select__trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; box-sizing: border-box; padding: 2px 4px; border: 1px solid #7f9db9; background: #fff; cursor: pointer; font-family: var(--w-font-family); font-size: var(--w-font-size-base); height: var(--w-component-size); }
+.w-select__trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; box-sizing: border-box; padding: 2px 4px; border: 1px solid var(--w-xp-input-border); background: var(--w-bg-color); cursor: pointer; font-family: var(--w-font-family); font-size: var(--w-font-size-base); height: var(--w-component-size); }
 .w-select--small .w-select__trigger { padding: 1px 2px; height: var(--w-component-size-small); font-size: var(--w-font-size-small); }
 .w-select--large .w-select__trigger { padding: 4px 6px; height: var(--w-component-size-large); font-size: var(--w-font-size-medium); }
 .w-select__placeholder { color: var(--w-text-color-placeholder); }

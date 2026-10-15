@@ -73,14 +73,14 @@ const rows = computed(() => {
 </script>
 
 <style scoped>
-.w-descriptions { background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; padding: 8px; }
+.w-descriptions { background: var(--w-bg-color); border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); padding: 8px; }
 .w-descriptions__title { font-weight: bold; font-size: var(--w-font-size-medium); margin-bottom: 8px; color: var(--w-color-primary); }
 .w-descriptions__table { width: 100%; border-collapse: collapse; }
-.w-descriptions__cell { padding: 6px 8px; border: 1px solid #d4d0c8; }
+.w-descriptions__cell { padding: 6px 8px; border: 1px solid var(--w-fill-color-darker); }
 .w-descriptions__label { color: var(--w-text-color-secondary); font-size: var(--w-font-size-small); display: block; margin-bottom: 2px; }
 .w-descriptions__value { color: var(--w-text-color-primary); font-size: var(--w-font-size-base); }
-.w-descriptions--border .w-descriptions__table--border { border: 1px solid #d4d0c8; }
-.w-descriptions--border .w-descriptions__cell { border: 1px solid #d4d0c8; }
+.w-descriptions--border .w-descriptions__table--border { border: 1px solid var(--w-fill-color-darker); }
+.w-descriptions--border .w-descriptions__cell { border: 1px solid var(--w-fill-color-darker); }
 .w-descriptions--small .w-descriptions__title { font-size: var(--w-font-size-small); }
 .w-descriptions--small .w-descriptions__label { font-size: var(--w-font-size-extra-small); }
 .w-descriptions--small .w-descriptions__value { font-size: var(--w-font-size-small); }

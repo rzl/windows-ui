@@ -389,7 +389,16 @@ export type { AdvancedQueryField, AdvancedCondition, AdvancedConditionGroup, Adv
 export type { LinkageRule, LinkageCondition, LinkageAction } from './components/dynamic-form/dynamic-form.vue'
 export { vLoading, vInfiniteScroll, vPermission }
 export { setPermissionChecker, clearPermissionChecker } from './directives/permission'
+export { vClickOutside } from './directives/click-outside'
 export type { LoadingBindingValue } from './directives/loading'
+export {
+  useEventListener,
+  useZIndex,
+  nextZIndex,
+  getInitialZIndex,
+  setDefaultZIndex,
+  useScrollLock
+} from './hooks'
 export {
   useLocale,
   setGlobalLocale,

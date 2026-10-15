@@ -27,7 +27,7 @@ const size = computed(() => props.size || globalSize.value)
 .w-timeline { padding-left: 8px; }
 .w-timeline__item { position: relative; padding-left: 20px; padding-bottom: 16px; }
 .w-timeline__node { position: absolute; left: 0; top: 4px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 2px rgba(0,0,0,0.3); }
-.w-timeline__item:not(.is-last)::before { content: ''; position: absolute; left: 4px; top: 14px; bottom: 0; width: 2px; background: #d4d0c8; }
+.w-timeline__item:not(.is-last)::before { content: ''; position: absolute; left: 4px; top: 14px; bottom: 0; width: 2px; background: var(--w-fill-color-darker); }
 .w-timeline__time { font-size: var(--w-font-size-small); color: var(--w-text-color-secondary); }
 .w-timeline__title { font-size: var(--w-font-size-base); font-weight: bold; color: var(--w-text-color-primary); margin-top: 2px; }
 .w-timeline__text { font-size: var(--w-font-size-base); color: var(--w-text-color-secondary); margin-top: 2px; }

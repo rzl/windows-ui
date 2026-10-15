@@ -11,8 +11,8 @@ defineProps({ type: { type: String, default: 'raised' } })
 
 <style scoped>
 .w-border { padding: 4px; }
-.w-border--raised { border: 2px solid; border-color: #fff #808080 #808080 #fff; }
-.w-border--sunken { border: 2px solid; border-color: #808080 #fff #fff #808080; background: #fff; }
-.w-border--field { border: 1px solid #7f9db9; }
+.w-border--raised { border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); }
+.w-border--sunken { border: 2px solid; border-color: var(--w-xp-bevel-dark) var(--w-xp-bevel-light) var(--w-xp-bevel-light) var(--w-xp-bevel-dark); background: var(--w-bg-color); }
+.w-border--field { border: 1px solid var(--w-xp-input-border); }
 .w-border--none { border: none; }
 </style>

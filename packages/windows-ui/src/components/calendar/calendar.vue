@@ -82,7 +82,7 @@ const nextMonth = () => { if (currentMonth.value === 11) { currentMonth.value = 
 </script>
 
 <style scoped>
-.w-calendar { background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; padding: 8px; }
+.w-calendar { background: var(--w-bg-color); border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); padding: 8px; }
 .w-calendar__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .w-calendar__title { font-weight: bold; font-size: var(--w-font-size-medium); }
 .w-calendar__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: var(--w-font-size-small); color: #666; margin-bottom: 4px; }
@@ -91,7 +91,7 @@ const nextMonth = () => { if (currentMonth.value === 11) { currentMonth.value = 
 .w-calendar__day:hover { background: var(--w-xp-blue-light); color: #fff; }
 .w-calendar__day.is-today { font-weight: bold; color: var(--w-color-primary); border-color: var(--w-color-primary); }
 .w-calendar__day.is-selected { background: var(--w-color-primary); color: #fff; }
-.w-calendar__day:not(.is-current) { color: #a0a0a0; background: #f0f0f0; }
+.w-calendar__day:not(.is-current) { color: #a0a0a0; background: var(--w-fill-color-light); }
 .w-calendar__events { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; width: 100%; }
 .w-calendar__event-title { font-size: 10px; color: var(--w-color-danger); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; padding: 0 2px; }
 .w-calendar__day.is-selected .w-calendar__event-title { color: #fff; }

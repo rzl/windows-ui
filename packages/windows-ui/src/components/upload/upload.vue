@@ -132,7 +132,7 @@ const formatSize = (size?: number) => {
 
 <style scoped>
 .w-upload__list { margin-top: 6px; }
-.w-upload__item { display: flex; align-items: center; gap: 4px; padding: 4px; background: #f8f8f8; border: 1px solid #d4d0c8; margin-bottom: 2px; font-size: var(--w-font-size-base); }
+.w-upload__item { display: flex; align-items: center; gap: 4px; padding: 4px; background: var(--w-xp-face-start); border: 1px solid var(--w-fill-color-darker); margin-bottom: 2px; font-size: var(--w-font-size-base); }
 .w-upload--small .w-upload__item { padding: 2px; font-size: var(--w-font-size-small); }
 .w-upload--large .w-upload__item { padding: 6px; font-size: var(--w-font-size-medium); }
 .w-upload__name { flex: 1; color: var(--w-color-primary); text-decoration: underline; cursor: pointer; }

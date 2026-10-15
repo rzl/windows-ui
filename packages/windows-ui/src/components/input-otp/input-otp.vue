@@ -69,7 +69,7 @@ const handleClear = () => {
 
 <style scoped>
 .w-input-otp { display: inline-flex; align-items: center; gap: 6px; }
-.w-input-otp__digit { width: 32px; height: 36px; border: 1px solid #7f9db9; text-align: center; font-size: 18px; font-family: var(--w-font-family); background: #fff; }
+.w-input-otp__digit { width: 32px; height: 36px; border: 1px solid var(--w-xp-input-border); text-align: center; font-size: 18px; font-family: var(--w-font-family); background: var(--w-bg-color); }
 .w-input-otp__digit:focus { border-color: var(--w-color-primary); outline: 1px solid #a5c2e8; outline-offset: -2px; }
 .w-input-otp__clear { cursor: pointer; margin-left: 4px; }
 .w-input-otp--small .w-input-otp__digit { width: 28px; height: 30px; font-size: 14px; }

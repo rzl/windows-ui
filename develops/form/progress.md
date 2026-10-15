@@ -29,3 +29,4 @@
 - 2026-06-29: 新增异步验证支持：rules 中 validator 可返回 Promise
 - 2026-06-29: 补齐文档中已声明但缺失的 Props/API（如 size、border、contentPosition、preview-src-list、row/col 等）
 - 2026-10-15: 表单容器默认去掉右边框与底边框，仅保留顶部/左侧 2px 白色凸起边，便于嵌入对话框等容器
+- 2026-10-15: 校验体系重写：新增 change 触发（form-item 监听 model 自动校验）与 blur 触发（w-input 内置），rules 支持 trigger 字段过滤；新增 validateField / clearValidate(fields) 方法；resetFields 改为恢复挂载时初始值（原实现会把字段清成 undefined）；移除未使用的 fieldRefs 注册死代码；默认错误文案接入 i18n

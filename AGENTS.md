@@ -48,7 +48,7 @@ windows-ui/
 │   │   │   ├── utils/
 │   │   │   │   ├── prefix.ts        # 组件前缀注入 / usePrefix() / useGlobalSize()
 │   │   │   │   └── types.ts         # 公共类型（ComponentSize、ConfigProviderContext）
-│   │   │   ├── hooks/               # 组合式函数目录（当前为空，预留）
+│   │   │   ├── hooks/               # 组合式函数：useEventListener / useZIndex / useScrollLock
 │   │   │   ├── locale/              # 国际化：语言包 / useLocale() / setGlobalLocale() / registerLocale()
 │   │   │   │   ├── lang/            # 内置语言文件（单层键值对）
 │   │   │   │   └── index.ts         # locale 上下文注入与 API 导出
@@ -216,15 +216,23 @@ windows-ui/
 
 ### 库构建细节
 
-- **入口**：`packages/windows-ui/src/index.ts`
+- **入口**：`packages/windows-ui/src/index.ts`（UMD 用单入口；ES 构建额外为每个组件目录生成独立入口）
 - **产物**：
-  - `dist/windows-ui.es.js`（ES Module）
-  - `dist/windows-ui.umd.js`（UMD）
+  - `dist/index.js` + `dist/index.d.ts`（ES Module 根入口与类型声明）
+  - `dist/<component>/<name>.js`（每个组件的独立 ES 入口，支持 `import { WButton } from '@windows-ui/core/button/button'` 按需引入）
+  - `dist/windows-ui.umd.js`（UMD 全量包，`vite build --mode umd` 生成）
   - `dist/windows-ui.css`（合并后的样式，`cssCodeSplit: false`）
-  - `dist/index.d.ts`（类型声明，由 `vite-plugin-dts` 生成）
-- **外部依赖**：`vue`（不会打包进库）
-- **构建前置检查**：`vue-tsc --noEmit` 类型检查通过后才会执行 Vite 构建
+- **构建脚本**：`vue-tsc --noEmit && vite build && vite build --mode umd`（类型检查 → ES 多入口 → UMD 追加）
+- **外部依赖**：`vue`（不会打包进库）；package.json 已声明 `exports` 与 `sideEffects: ["*.css", "**/*.css"]`
 - **tsconfig 关键选项**：`strict: true`、`noUnusedLocals: true`、`noUnusedParameters: true`、`moduleResolution: bundler`
+
+### 组件公共机制约定（新增/修改组件必读）
+
+- **弹层层级**：弹层类组件打开时必须通过 `useZIndex()` / `nextZIndex()`（`src/hooks/useZIndex.ts`）取递增 z-index，禁止硬编码 9999/10000；全局基准值来自 `WConfigProvider` 的 `zIndex`。
+- **滚动锁定**：模态类弹层（dialog/drawer/message-box/image 预览/tour）用 `useScrollLock(visible)`（引用计数，叠加弹层自动处理）。
+- **点击外部关闭**：使用共享指令 `import { vClickOutside } from '../../directives/click-outside'`，不要在组件内重复定义本地指令。
+- **事件监听**：`window/document` 级监听优先用 `useEventListener()`（作用域销毁自动移除）；拖拽类成对监听需提供 `onUnmounted` 兜底。
+- **表单校验**：`w-form-item` 会 watch model 自动触发 change 校验（model 需为 reactive 对象）；`w-input` 已内置 blur 触发；rules 支持 `trigger: 'blur' | 'change'` 字段过滤。默认错误文案走 `useLocale()` 的 i18n 键（`字段不能为空` 等）。
 
 ### Playground 开发细节
 
@@ -329,7 +337,7 @@ pnpm --filter @windows-ui/core test
 ```
 
 - 配置位于 `packages/windows-ui/vitest.config.ts`：`environment: 'jsdom'`，`globals: true`。
-- 当前共有 **53 个 `.spec.ts` 测试文件**、**322 个测试用例**，全部通过。
+- 当前共有 **54 个 `.spec.ts` 测试文件**、**346 个测试用例**，全部通过。
 
 **测试范围**：
 - 组件以单元测试为主：验证 Props 渲染、事件触发、CSS 类名切换。
@@ -411,6 +419,6 @@ pnpm --filter @windows-ui/core test
 | 怎么写文档？ | 在 `docs/`、`designs/`、`develops/` 下各建 `<name>/<file>.md` |
 | 主题怎么改？ | 覆盖 `:root` 中的 `--w-*` CSS 变量，或通过 `WConfigProvider` 传 `theme` 对象 |
 | 多语言怎么配？ | `app.use(WindowsUI, { locale: 'en-US' })` 或 `<w-config-provider locale="en-US">`，也支持传入自定义单层语言对象 |
-| 怎么跑测试？ | `pnpm --filter @windows-ui/core test`（当前 53 个 spec 文件、322 个用例全部通过） |
+| 怎么跑测试？ | `pnpm --filter @windows-ui/core test`（当前 54 个 spec 文件、346 个用例全部通过） |
 | Admin 后台在哪？ | playground 内的多入口子应用：`packages/playground/src/admin/`（访问 `/admin.html`） |
 | 低代码平台在哪？ | `packages/lowcode-admin/` + `packages/server/` |

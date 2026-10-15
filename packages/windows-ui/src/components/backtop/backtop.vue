@@ -23,7 +23,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 </script>
 
 <style scoped>
-.w-backtop { position: fixed; right: 40px; bottom: 40px; width: 36px; height: 36px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: var(--w-index-top); box-shadow: var(--w-box-shadow); }
+.w-backtop { position: fixed; right: 40px; bottom: 40px; width: 36px; height: 36px; background: var(--w-bg-color); border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: var(--w-index-top); box-shadow: var(--w-box-shadow); }
 .w-backtop:hover { background: #f0f8ff; }
 .w-backtop-fade-enter-active, .w-backtop-fade-leave-active { transition: opacity 0.3s; }
 .w-backtop-fade-enter-from, .w-backtop-fade-leave-to { opacity: 0; }

@@ -36,7 +36,7 @@ const statusColor = computed(() => {
 
 <style scoped>
 .w-progress { display: inline-flex; align-items: center; gap: 8px; }
-.w-progress__bar { height: 16px; background: #f0f0f0; border: 1px solid #c0c0c0; border-radius: 8px; overflow: hidden; }
+.w-progress__bar { height: 16px; background: var(--w-fill-color-light); border: 1px solid #c0c0c0; border-radius: 8px; overflow: hidden; }
 .w-progress__inner { height: 100%; display: flex; align-items: center; justify-content: center; transition: width 0.3s; }
 .w-progress__text { color: #fff; font-size: 10px; font-weight: bold; }
 .w-progress__text-out { font-size: var(--w-font-size-small); color: var(--w-text-color-secondary); }

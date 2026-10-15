@@ -40,7 +40,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 </script>
 
 <style scoped>
-.w-anchor { width: 160px; border-left: 2px solid #d4d0c8; }
+.w-anchor { width: 160px; border-left: 2px solid var(--w-fill-color-darker); }
 .w-anchor__link { padding: 4px 8px; cursor: pointer; font-size: var(--w-font-size-base); color: var(--w-text-color-secondary); }
 .w-anchor__link:hover { color: var(--w-color-primary); }
 .w-anchor__link.is-active { color: var(--w-color-primary); font-weight: bold; border-left: 2px solid var(--w-color-primary); margin-left: -2px; background: #f0f8ff; }

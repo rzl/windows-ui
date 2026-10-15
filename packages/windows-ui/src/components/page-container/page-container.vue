@@ -48,9 +48,9 @@ const selectTab = (name: string) => {
 .w-page-container__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
 .w-page-container__title h2 { margin: 0 0 4px; font-size: 18px; color: var(--w-color-primary); }
 .w-page-container__extra { display: flex; gap: 8px; }
-.w-page-container__body { background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; padding: 12px; }
+.w-page-container__body { background: var(--w-bg-color); border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); padding: 12px; }
 .w-page-container__tabs { display: flex; gap: 4px; }
-.w-page-container__tab { padding: 4px 12px; cursor: pointer; border: 1px solid #d4d0c8; background: #f0f0f0; font-size: var(--w-font-size-base); }
+.w-page-container__tab { padding: 4px 12px; cursor: pointer; border: 1px solid var(--w-fill-color-darker); background: var(--w-fill-color-light); font-size: var(--w-font-size-base); }
 .w-page-container__tab.is-active { background: var(--w-color-primary); color: #fff; border-color: var(--w-color-primary); }
 
 @media (max-width: 768px) {

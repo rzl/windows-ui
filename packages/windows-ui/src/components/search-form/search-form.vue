@@ -86,7 +86,7 @@ const handleAdvancedReset = () => {
 </script>
 
 <style scoped>
-.w-search-form { padding: 12px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; margin-bottom: 12px; }
+.w-search-form { padding: 12px; background: var(--w-bg-color); border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); margin-bottom: 12px; }
 .w-search-form__fields { display: flex; flex-wrap: wrap; gap: 12px; }
 .w-search-form__fields.collapsed { max-height: 44px; overflow: hidden; }
 .w-search-form__actions { display: flex; gap: 8px; margin-top: 12px; }

@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <transition name="w-drawer-fade">
-      <div v-if="modelValue" class="w-drawer__wrapper" @click.self="closeOnClickModal && close()">
+      <div v-if="modelValue" class="w-drawer__wrapper" :style="{ zIndex }" @click.self="closeOnClickModal && close()">
         <div :class="['w-drawer', `w-drawer--${direction}`, `w-drawer--${size}`]" :style="drawerStyle">
           <div class="w-drawer__header">
             <slot name="header">
@@ -22,9 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { nextZIndex, useScrollLock } from '../../hooks'
 
 const SIZE_VALUES = ['small', 'default', 'large']
 
@@ -42,6 +43,13 @@ const drawerSize = computed(() => isGlobalSize.value ? '300px' : (typeof props.s
 const size = computed(() => isGlobalSize.value ? props.size as string : globalSize.value)
 const emit = defineEmits(['update:modelValue', 'close'])
 
+// 弹层层级：每次打开时取全局递增 z-index；打开时锁定 body 滚动
+const zIndex = ref(0)
+watch(() => props.modelValue, (val) => {
+  if (val) zIndex.value = nextZIndex()
+})
+useScrollLock(computed(() => props.modelValue))
+
 const drawerStyle = computed(() => {
   const s = drawerSize.value
   if (props.direction === 'left' || props.direction === 'right') return { width: s, height: '100%' }
@@ -52,13 +60,13 @@ const close = () => { emit('update:modelValue', false); emit('close') }
 </script>
 
 <style scoped>
-.w-drawer__wrapper { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; }
+.w-drawer__wrapper { position: fixed; inset: 0; background: rgba(0,0,0,0.5); }
 .w-drawer { position: absolute; background: var(--w-bg-color); box-shadow: var(--w-box-shadow-dark); font-family: var(--w-font-family); display: flex; flex-direction: column; }
 .w-drawer--left { left: 0; top: 0; bottom: 0; }
 .w-drawer--right { right: 0; top: 0; bottom: 0; }
 .w-drawer--top { top: 0; left: 0; right: 0; }
 .w-drawer--bottom { bottom: 0; left: 0; right: 0; }
-.w-drawer__header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #d4d0c8; font-weight: bold; font-size: var(--w-font-size-medium); background: var(--w-xp-title-bar); color: #fff; }
+.w-drawer__header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--w-fill-color-darker); font-weight: bold; font-size: var(--w-font-size-medium); background: var(--w-xp-title-bar); color: #fff; }
 .w-drawer__actions { display: flex; align-items: center; gap: 8px; }
 .w-drawer__close { cursor: pointer; }
 .w-drawer__body { flex: 1; padding: 16px; overflow: auto; }

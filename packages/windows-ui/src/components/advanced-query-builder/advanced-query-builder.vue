@@ -227,7 +227,7 @@ function removeGroup(parent: AdvancedConditionGroup, group: AdvancedConditionGro
 </script>
 
 <style scoped>
-.w-advanced-query-builder { padding: 12px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; margin-bottom: 12px; }
+.w-advanced-query-builder { padding: 12px; background: var(--w-bg-color); border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); margin-bottom: 12px; }
 .w-advanced-query-builder__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
 .w-advanced-query-builder__title { font-weight: bold; color: var(--w-text-color-primary); }
 

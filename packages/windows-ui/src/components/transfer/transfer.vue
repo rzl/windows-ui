@@ -40,7 +40,7 @@ const toLeft = () => { const val = props.modelValue.filter(v => !rightChecked.va
 <style scoped>
 .w-transfer { display: flex; align-items: center; gap: 8px; }
 .w-transfer__panel { width: 180px; border: 1px solid #808080; background: var(--w-bg-color); }
-.w-transfer__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-bottom: 1px solid #d4d0c8; background: linear-gradient(180deg, #f8f8f8, #e0e0e0); font-size: var(--w-font-size-base); }
+.w-transfer__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-bottom: 1px solid var(--w-fill-color-darker); background: linear-gradient(180deg, var(--w-xp-face-start), var(--w-fill-color-dark)); font-size: var(--w-font-size-base); }
 .w-transfer__body { height: 200px; overflow-y: auto; padding: 4px 8px; }
 .w-transfer__body .w-checkbox { display: block; margin: 2px 0; }
 .w-transfer__buttons { display: flex; flex-direction: column; gap: 4px; }

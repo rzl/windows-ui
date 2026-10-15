@@ -60,6 +60,11 @@ html.dark .w-input.w-input.is-disabled input,
 html.dark .w-input-number.w-input-number.is-disabled input {
   color: var(--w-text-color-disabled);
 }
+html.dark .w-input-number.w-input-number button {
+  background: var(--w-fill-color-dark);
+  border-color: var(--w-border-color);
+  color: var(--w-text-color-primary);
+}
 
 /* -------- Checkbox / Radio / Switch -------- */
 html.dark .w-checkbox__inner.w-checkbox__inner,
@@ -268,8 +273,7 @@ html.dark .w-segmented.w-segmented,
 html.dark .w-timeline__item:not(.is-last):before,
 html.dark .w-tree__node:hover,
 html.dark .w-image__placeholder,
-html.dark .w-skeleton__item,
-html.dark .w-calendar__day.is-other-month {
+html.dark .w-skeleton__item {
   background: var(--w-fill-color);
 }
 html.dark .w-upload__file-item,
@@ -336,8 +340,7 @@ html.dark .w-tag.w-tag--danger {
 html.dark .w-popover__popper.w-popover__popper,
 html.dark .w-popconfirm__popper.w-popconfirm__popper,
 html.dark .w-notification.w-notification,
-html.dark .w-message.w-message,
-html.dark .w-message-box__wrapper.w-message-box__wrapper {
+html.dark .w-message.w-message {
   background: var(--w-bg-color);
   border-color: var(--w-border-color-dark);
 }

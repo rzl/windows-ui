@@ -14,5 +14,5 @@ defineOptions({ name: 'WTypography' })
 .w-typography :deep(p) { margin: 6px 0; }
 .w-typography :deep(strong) { font-weight: bold; }
 .w-typography :deep(em) { font-style: italic; }
-.w-typography :deep(code) { background: #f0f0f0; padding: 1px 4px; border: 1px solid #c0c0c0; font-family: monospace; font-size: var(--w-font-size-small); }
+.w-typography :deep(code) { background: var(--w-fill-color-light); padding: 1px 4px; border: 1px solid #c0c0c0; font-family: monospace; font-size: var(--w-font-size-small); }
 </style>

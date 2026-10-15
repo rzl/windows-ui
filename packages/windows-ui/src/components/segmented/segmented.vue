@@ -31,10 +31,10 @@ const select = (opt: any) => { if (opt.disabled) return; emit('update:modelValue
 </script>
 
 <style scoped>
-.w-segmented { display: inline-flex; border: 1px solid #919b9c; background: #f0f0f0; border-radius: var(--w-border-radius-base); overflow: hidden; }
-.w-segmented__item { display: flex; align-items: center; gap: 4px; padding: 4px 12px; cursor: pointer; font-size: var(--w-font-size-base); border-right: 1px solid #d4d0c8; box-sizing: border-box; height: var(--w-component-size); }
+.w-segmented { display: inline-flex; border: 1px solid #919b9c; background: var(--w-fill-color-light); border-radius: var(--w-border-radius-base); overflow: hidden; }
+.w-segmented__item { display: flex; align-items: center; gap: 4px; padding: 4px 12px; cursor: pointer; font-size: var(--w-font-size-base); border-right: 1px solid var(--w-fill-color-darker); box-sizing: border-box; height: var(--w-component-size); }
 .w-segmented__item:last-child { border-right: none; }
-.w-segmented__item:hover { background: #e0e0e0; }
+.w-segmented__item:hover { background: var(--w-fill-color-dark); }
 .w-segmented__item.is-active { background: var(--w-color-primary); color: #fff; }
 .w-segmented__item.is-disabled { opacity: 0.5; cursor: not-allowed; }
 .w-segmented--small .w-segmented__item { padding: 2px 8px; height: var(--w-component-size-small); font-size: var(--w-font-size-small); }

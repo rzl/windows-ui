@@ -51,9 +51,9 @@ const handleClear = () => { emit('update:modelValue', undefined); emit('clear') 
 </script>
 
 <style scoped>
-.w-input-number { display: inline-flex; align-items: center; box-sizing: border-box; border: 1px solid #7f9db9; background: #fff; height: var(--w-component-size); }
+.w-input-number { display: inline-flex; align-items: center; box-sizing: border-box; border: 1px solid var(--w-xp-input-border); background: var(--w-bg-color); height: var(--w-component-size); }
 .w-input-number input { border: none; outline: none; width: 60px; height: 100%; text-align: center; font-family: var(--w-font-family); font-size: var(--w-font-size-base); background: transparent; }
-.w-input-number button { width: 22px; height: 100%; border: 1px solid #7f9db9; background: linear-gradient(180deg, #fff, #ecebe5); cursor: pointer; font-family: var(--w-font-family); }
+.w-input-number button { width: 22px; height: 100%; border: 1px solid var(--w-xp-input-border); background: linear-gradient(180deg, #fff, #ecebe5); cursor: pointer; font-family: var(--w-font-family); }
 .w-input-number button:hover { background: linear-gradient(180deg, #fff, #f0f8ff); }
 .w-input-number button:disabled { opacity: 0.5; cursor: not-allowed; }
 .w-input-number__decrease { border-right: none; }

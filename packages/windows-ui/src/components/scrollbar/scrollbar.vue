@@ -160,19 +160,22 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (ro && viewRef.value) ro.unobserve(viewRef.value)
+  // 滚动条拖拽中途组件被卸载时兜底移除 document 级监听
+  stopVerticalDrag()
+  stopHorizontalDrag()
 })
 </script>
 
 <style scoped>
-.w-scrollbar { position: relative; overflow: hidden; background: #fff; border: 1px solid #7f9db9; }
+.w-scrollbar { position: relative; overflow: hidden; background: var(--w-bg-color); border: 1px solid var(--w-xp-input-border); }
 .w-scrollbar--native { overflow: auto; }
 .w-scrollbar__view { box-sizing: border-box; max-height: 100%; max-width: 100%; }
 .w-scrollbar--native .w-scrollbar__view { overflow: auto; margin: 0; }
 .w-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
-.w-scrollbar__bar { position: absolute; background: #f0f0f0; border: 1px solid #d4d0c8; box-sizing: border-box; }
+.w-scrollbar__bar { position: absolute; background: var(--w-fill-color-light); border: 1px solid var(--w-fill-color-darker); box-sizing: border-box; }
 .w-scrollbar__bar--vertical { top: 0; right: 0; bottom: 0; }
 .w-scrollbar__bar--horizontal { left: 0; right: 0; bottom: 0; }
-.w-scrollbar__thumb { background: linear-gradient(180deg, #e8e8e8 0%, #d4d0c8 50%, #c0c0c0 100%); border: 1px solid #808080; border-radius: 4px; cursor: pointer; box-sizing: border-box; }
-.w-scrollbar__bar--horizontal .w-scrollbar__thumb { background: linear-gradient(90deg, #e8e8e8 0%, #d4d0c8 50%, #c0c0c0 100%); }
-.w-scrollbar__thumb:hover { background: linear-gradient(180deg, #d4d0c8 0%, #c0c0c0 50%, #a0a0a0 100%); }
+.w-scrollbar__thumb { background: linear-gradient(180deg, #e8e8e8 0%, var(--w-fill-color-darker) 50%, #c0c0c0 100%); border: 1px solid #808080; border-radius: 4px; cursor: pointer; box-sizing: border-box; }
+.w-scrollbar__bar--horizontal .w-scrollbar__thumb { background: linear-gradient(90deg, #e8e8e8 0%, var(--w-fill-color-darker) 50%, #c0c0c0 100%); }
+.w-scrollbar__thumb:hover { background: linear-gradient(180deg, var(--w-fill-color-darker) 0%, #c0c0c0 50%, #a0a0a0 100%); }
 </style>

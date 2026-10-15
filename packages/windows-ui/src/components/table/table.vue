@@ -1387,6 +1387,8 @@ const copyTooltipContent = async () => {
 onBeforeUnmount(() => {
   if (tooltipHideTimer) clearTimeout(tooltipHideTimer)
   if (copiedTimer) clearTimeout(copiedTimer)
+  // 列宽拖拽中途组件被卸载时兜底移除 document 级监听并恢复 body 样式
+  if (resizingCol.value) stopResize()
 })
 
 // ----- 行样式 -----
@@ -1527,7 +1529,7 @@ defineExpose({ resetColumnWidths })
 .w-table { border: 1px solid #919b9c; background: #fff; font-family: var(--w-font-family); overflow-x: auto; box-sizing: border-box; }
 .w-table table { width: auto; border-collapse: separate; border-spacing: 0; font-size: var(--w-font-size-base); }
 
-.w-table th { background: linear-gradient(180deg, #f8f8f8, #e0e0e0); padding: 6px 10px; text-align: left; border-bottom: 1px solid #d4d0c8; font-weight: bold; }
+.w-table th { background: linear-gradient(180deg, var(--w-xp-face-start), var(--w-fill-color-dark)); padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--w-fill-color-darker); font-weight: bold; }
 .w-table td { padding: 6px 10px; border-bottom: 1px solid #e8e8e8; }
 .w-table tr:hover td { background: #f0f8ff; }
 
@@ -1541,7 +1543,7 @@ defineExpose({ resetColumnWidths })
 
 /* border */
 .w-table.is-border { border: 2px solid #919b9c; }
-.w-table.is-border th, .w-table.is-border td { border: 1px solid #d4d0c8; }
+.w-table.is-border th, .w-table.is-border td { border: 1px solid var(--w-fill-color-darker); }
 
 /* stripe */
 .w-table.is-stripe tr.is-striped td { background: #faf9f6; }
@@ -1570,7 +1572,7 @@ defineExpose({ resetColumnWidths })
   display: flex; align-items: flex-start; gap: 8px;
   max-width: 480px; max-height: 240px; overflow-y: auto;
   background: #ffffe1; border: 1px solid #000; padding: 4px 8px;
-  font-size: var(--w-font-size-small); color: var(--w-text-color-primary, #000);
+  font-size: var(--w-font-size-small); color: #000;
   box-shadow: 2px 2px 4px rgba(0,0,0,0.2); box-sizing: border-box;
   font-family: var(--w-font-family);
 }
@@ -1604,7 +1606,7 @@ defineExpose({ resetColumnWidths })
 /* expand */
 .w-table__expand-icon { cursor: pointer; font-size: 10px; color: #666; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; }
 .w-table__expand-icon:hover { color: var(--w-color-primary); }
-.w-table__expanded-row td { background: #f5f5f5; border-bottom: 1px solid #e0e0e0; padding: 12px 16px; }
+.w-table__expanded-row td { background: #f5f5f5; border-bottom: 1px solid var(--w-fill-color-dark); padding: 12px 16px; }
 .w-table__expanded-cell { padding: 4px 8px; }
 
 /* tree */
@@ -1621,7 +1623,7 @@ defineExpose({ resetColumnWidths })
 .w-table td.is-fixed-right { position: sticky; z-index: 2; background: #fff; }
 
 .w-table th.is-fixed-left,
-.w-table th.is-fixed-right { z-index: 3; background: linear-gradient(180deg, #f8f8f8, #e0e0e0); }
+.w-table th.is-fixed-right { z-index: 3; background: linear-gradient(180deg, var(--w-xp-face-start), var(--w-fill-color-dark)); }
 
 /* fixed + hover */
 .w-table tr:hover td.is-fixed-left,

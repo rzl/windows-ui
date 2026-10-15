@@ -25,7 +25,7 @@ defineEmits(['back'])
 </script>
 
 <style scoped>
-.w-page-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: linear-gradient(180deg, #f8f8f8, #e0e0e0); border-bottom: 1px solid #d4d0c8; }
+.w-page-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: linear-gradient(180deg, var(--w-xp-face-start), var(--w-fill-color-dark)); border-bottom: 1px solid var(--w-fill-color-darker); }
 .w-page-header__left { display: flex; align-items: center; gap: 12px; }
 .w-page-header__back { color: var(--w-color-primary); cursor: pointer; font-size: var(--w-font-size-base); }
 .w-page-header__back:hover { text-decoration: underline; }

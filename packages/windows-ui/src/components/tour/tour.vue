@@ -22,9 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watchEffect, onMounted, onUpdated } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted, onUpdated } from 'vue'
 import WIcon from '../icon/icon.vue'
 import WButton from '../button/button.vue'
+import { nextZIndex, useScrollLock } from '../../hooks'
 
 defineOptions({ name: 'WTour' })
 const props = defineProps({
@@ -35,6 +36,11 @@ const emit = defineEmits(['update:visible', 'finish'])
 
 const current = ref(0)
 const targetRect = ref<DOMRect | null>(null)
+
+// 引导层层级：打开时取全局递增 z-index（高亮层用同值，内容层 +1）；打开时锁定 body 滚动
+const zIndex = ref(0)
+watch(() => props.visible, (val) => { if (val) zIndex.value = nextZIndex() })
+useScrollLock(computed(() => props.visible))
 
 const currentStep = computed(() => props.steps[current.value])
 
@@ -64,7 +70,7 @@ const highlightStyle = computed(() => {
     height: `${r.height + 8}px`,
     boxShadow: '0 0 0 9999px rgba(0,0,0,0.5)',
     borderRadius: '4px',
-    zIndex: 9999,
+    zIndex: zIndex.value,
     pointerEvents: 'none' as const
   }
 })
@@ -76,7 +82,7 @@ const contentStyle = computed(() => {
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
-      zIndex: 10000
+      zIndex: zIndex.value + 1
     }
   }
   const r = targetRect.value
@@ -84,7 +90,7 @@ const contentStyle = computed(() => {
     position: 'fixed' as const,
     top: `${r.bottom + 12}px`,
     left: `${Math.max(8, Math.min(window.innerWidth - 328, r.left))}px`,
-    zIndex: 10000
+    zIndex: zIndex.value + 1
   }
 })
 
@@ -97,11 +103,11 @@ const close = () => { emit('update:visible', false); current.value = 0 }
 </script>
 
 <style scoped>
-.w-tour__mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; }
-.w-tour__content { width: 320px; background: var(--w-bg-color); border: 2px solid; border-color: #fff #808080 #808080 #fff; box-shadow: var(--w-box-shadow-dark); z-index: 10000; }
+.w-tour__mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); }
+.w-tour__content { width: 320px; background: var(--w-bg-color); border: 2px solid; border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light); box-shadow: var(--w-box-shadow-dark); }
 .w-tour__header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--w-xp-title-bar); color: #fff; font-weight: bold; font-size: var(--w-font-size-medium); }
 .w-tour__actions { display: flex; align-items: center; gap: 8px; }
 .w-tour__close { cursor: pointer; }
 .w-tour__body { padding: 12px; font-size: var(--w-font-size-base); }
-.w-tour__footer { display: flex; justify-content: flex-end; gap: 6px; padding: 8px; border-top: 1px solid #d4d0c8; }
+.w-tour__footer { display: flex; justify-content: flex-end; gap: 6px; padding: 8px; border-top: 1px solid var(--w-fill-color-darker); }
 </style>

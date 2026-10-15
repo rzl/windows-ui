@@ -1,7 +1,7 @@
 <template>
   <div :class="['w-popover', `w-popover--${size}`]" v-click-outside="close">
     <div @mouseenter="trigger === 'hover' && (open = true)" @mouseleave="trigger === 'hover' && (open = false)" @click="trigger === 'click' && (open = !open)"><slot /></div>
-    <div v-show="open" class="w-popover__popper" :style="popperStyle">
+    <div v-show="open" class="w-popover__popper" :style="[popperStyle, { zIndex }]">
       <div class="w-popover__header" v-if="title || $slots.header || $slots.action">
         <div class="w-popover__header-content">
           <slot name="header">
@@ -18,13 +18,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { vClickOutside } from '../../directives/click-outside'
+import { nextZIndex } from '../../hooks'
 defineOptions({ name: 'WPopover' })
 const props = defineProps({ title: String, content: String, placement: { type: String, default: 'bottom' }, trigger: { type: String, default: 'click' }, width: { type: [String, Number], default: '' }, size: { type: String, default: undefined } })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const open = ref(false)
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(2000)
+watch(open, (v) => { if (v) zIndex.value = nextZIndex() })
 const popperStyle = computed(() => {
   const style: Record<string, string> = { position: 'absolute' }
   if (props.width) style.width = typeof props.width === 'number' ? `${props.width}px` : props.width
@@ -37,13 +42,12 @@ const popperStyle = computed(() => {
   return style
 })
 const close = () => { open.value = false }
-const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>
 
 <style scoped>
 .w-popover { position: relative; display: inline-block; }
 .w-popover__popper { position: absolute; z-index: var(--w-index-popper); background: var(--w-bg-color); border: 1px solid #808080; box-shadow: var(--w-box-shadow); padding: 10px; min-width: 150px; }
-.w-popover__header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 6px; font-size: var(--w-font-size-base); border-bottom: 1px solid #d4d0c8; padding-bottom: 4px; }
+.w-popover__header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 6px; font-size: var(--w-font-size-base); border-bottom: 1px solid var(--w-fill-color-darker); padding-bottom: 4px; }
 .w-popover__header-content { flex: 1; }
 .w-popover__actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; }
 .w-popover__title { font-weight: bold; }

@@ -8,6 +8,7 @@
 import { provide, ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { configProviderContextKey } from '../../utils/prefix'
 import { localeContextKey, getLocaleMessages, type LocaleType, type LocaleMessages } from '../../locale'
+import { setDefaultZIndex } from '../../hooks'
 
 defineOptions({ name: 'WConfigProvider' })
 
@@ -25,6 +26,9 @@ watch(() => [props.prefix, props.size, props.zIndex, props.locale, props.mode], 
   config.value = { prefix: p as string, size: s as string, zIndex: z as number, locale: l as string | LocaleMessages, mode: m as 'light' | 'dark' | 'auto' }
 }, { immediate: true })
 provide(configProviderContextKey, config)
+
+// zIndex 配置作为全局弹层层级的基准值
+watch(() => props.zIndex, (z) => setDefaultZIndex(z), { immediate: true })
 
 const localeKey = computed<LocaleType>(() => {
   if (typeof props.locale === 'string') return props.locale as LocaleType

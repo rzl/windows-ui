@@ -1,7 +1,7 @@
 <template>
   <div class="w-date-time-picker" v-click-outside="close">
     <w-input :model-value="displayValue" readonly :placeholder="placeholder" :clearable="clearable" :size="size" @click="open = !open" @clear="handleClear" />
-    <div v-show="open" class="w-date-time-picker__popper">
+    <div v-show="open" class="w-date-time-picker__popper" :style="{ zIndex }">
       <w-date-picker-panel v-model="dateValue" :size="size" @change="handleDateChange" />
       <div class="w-date-time-picker__time">
         <w-input-number v-model="hour" :min="0" :max="23" :size="size" />
@@ -22,12 +22,17 @@ import WDatePickerPanel from '../date-picker-panel/date-picker-panel.vue'
 import WInputNumber from '../input-number/input-number.vue'
 import WButton from '../button/button.vue'
 import { useGlobalSize } from '../../utils/prefix'
+import { vClickOutside } from '../../directives/click-outside'
+import { nextZIndex } from '../../hooks'
 defineOptions({ name: 'WDateTimePicker' })
 const props = defineProps({ modelValue: String, placeholder: { type: String, default: '选择日期时间' }, clearable: { type: Boolean, default: true }, size: { type: String, default: undefined } })
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const open = ref(false)
+// 弹层层级：每次打开时取全局递增 z-index，保证后打开的弹层在上
+const zIndex = ref(2000)
+watch(open, (v) => { if (v) zIndex.value = nextZIndex() })
 const now = new Date()
 const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 const dateValue = ref(props.modelValue ? props.modelValue.split(' ')[0] : todayStr)
@@ -48,7 +53,6 @@ const handleDateChange = (v: string) => { dateValue.value = v }
 const confirm = () => { const time = `${String(hour.value).padStart(2, '0')}:${String(minute.value).padStart(2, '0')}:${String(second.value).padStart(2, '0')}`; const val = `${dateValue.value} ${time}`; emit('update:modelValue', val); emit('change', val); open.value = false }
 const handleClear = () => { emit('update:modelValue', ''); emit('change', ''); emit('clear') }
 const close = () => { open.value = false }
-const vClickOutside = { mounted(el: any, binding: any) { el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value() }; document.addEventListener('click', el._clickOutside) }, unmounted(el: any) { document.removeEventListener('click', el._clickOutside) } }
 </script>
 
 <style scoped>

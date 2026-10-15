@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import WIcon from '../icon/icon.vue'
 
 defineOptions({ name: 'WMonacoEditor' })
@@ -119,26 +119,34 @@ watch(() => props.options, (options) => {
   }
 }, { deep: true })
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('message', (e) => {
-    if (e.source !== iframeRef.value?.contentWindow) return
-    const data = e.data || {}
-    if (data.type === 'ready') {
-      isReady.value = true
-      sendInit()
-    } else if (data.type === 'change') {
-      emit('update:modelValue', data.value)
-      emit('change', data.value)
-    } else if (data.type === 'error') {
-      console.error('[MonacoEditor]', data.message)
-      hasError.value = true
-    }
-  })
+function handleIframeMessage(e: MessageEvent) {
+  if (e.source !== iframeRef.value?.contentWindow) return
+  const data = e.data || {}
+  if (data.type === 'ready') {
+    isReady.value = true
+    sendInit()
+  } else if (data.type === 'change') {
+    emit('update:modelValue', data.value)
+    emit('change', data.value)
+  } else if (data.type === 'error') {
+    console.error('[MonacoEditor]', data.message)
+    hasError.value = true
+  }
 }
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('message', handleIframeMessage)
+}
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('message', handleIframeMessage)
+  }
+})
 </script>
 
 <style scoped>
-.w-monaco-editor { position: relative; border: 1px solid #7f9db9; background: #fff; }
+.w-monaco-editor { position: relative; border: 1px solid var(--w-xp-input-border); background: var(--w-bg-color); }
 .w-monaco-editor__iframe { width: 100%; height: 100%; display: block; }
 .w-monaco-editor__fallback { width: 100%; height: 100%; display: block; border: none; padding: 8px; font-family: monospace; font-size: 13px; resize: none; outline: none; }
 .w-monaco-editor__loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.8); color: var(--w-text-color-secondary); font-size: var(--w-font-size-base); z-index: 1; }

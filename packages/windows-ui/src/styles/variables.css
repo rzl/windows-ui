@@ -20,6 +20,12 @@
   --w-xp-silver-light: #e8e8e8;
   --w-xp-silver-dark: #a0a0a0;
 
+  /* XP 3D 边框与控件表面（暗色模式下自动翻转） */
+  --w-xp-input-border: #7f9db9;
+  --w-xp-bevel-light: #ffffff;
+  --w-xp-bevel-dark: #808080;
+  --w-xp-face-start: #f8f8f8;
+
   /* Classic Colors */
   --w-color-primary: #245edb;
   --w-color-primary-lighter: #9ebaf5;
@@ -128,6 +134,12 @@ html.dark {
   --w-fill-color-lighter: #262626;
   --w-fill-color-dark: #3a3a3a;
   --w-fill-color-darker: #444444;
+
+  /* XP 3D 边框与控件表面 */
+  --w-xp-input-border: #4e6a85;
+  --w-xp-bevel-light: #454545;
+  --w-xp-bevel-dark: #212121;
+  --w-xp-face-start: #3a3a3a;
 
   /* Border Colors */
   --w-border-color: #555555;

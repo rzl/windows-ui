@@ -9,7 +9,7 @@
       :readonly="readonly"
       @input="handleInput"
       @focus="$emit('focus', $event)"
-      @blur="$emit('blur', $event)"
+      @blur="handleBlur"
     />
     <w-icon v-if="suffixIcon" :name="suffixIcon" :size="size" class="w-input__suffix" />
     <w-icon v-if="clearable && modelValue" name="close" :size="size" class="w-input__clear" @click="handleClear" />
@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import WIcon from '../icon/icon.vue'
 import { useGlobalSize } from '../../utils/prefix'
 
@@ -37,16 +37,23 @@ const emit = defineEmits(['update:modelValue', 'input', 'focus', 'blur', 'clear'
 const globalSize = useGlobalSize()
 const size = computed(() => props.size || globalSize.value)
 
+// 处于 w-form-item 内时，blur 触发表单校验
+const formItemContext = inject<any>('wFormItemContext', null)
+
 const handleInput = (e: Event) => {
   const val = (e.target as HTMLInputElement).value
   emit('update:modelValue', val)
   emit('input', val)
 }
+const handleBlur = (e: FocusEvent) => {
+  emit('blur', e)
+  formItemContext?.triggerValidate?.('blur')
+}
 const handleClear = () => { emit('update:modelValue', ''); emit('clear') }
 </script>
 
 <style scoped>
-.w-input { display: inline-flex; align-items: center; box-sizing: border-box; border: 1px solid #7f9db9; background: #fff; padding: 2px 4px; height: var(--w-component-size); }
+.w-input { display: inline-flex; align-items: center; box-sizing: border-box; border: 1px solid var(--w-xp-input-border); background: var(--w-bg-color); padding: 2px 4px; height: var(--w-component-size); }
 .w-input input { border: none; outline: none; flex: 1; font-family: var(--w-font-family); font-size: var(--w-font-size-base); background: transparent; }
 .w-input--small { padding: 1px 2px; height: var(--w-component-size-small); }
 .w-input--small input { font-size: var(--w-font-size-small); }

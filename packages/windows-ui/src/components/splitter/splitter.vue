@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 
 defineOptions({ name: 'WSplitter' })
 
@@ -18,6 +18,7 @@ const props = defineProps({
 
 const splitPercent = ref(props.split)
 const isDragging = ref(false)
+let stopDrag: (() => void) | null = null
 
 const isHorizontal = computed(() => props.direction === 'horizontal')
 
@@ -45,9 +46,11 @@ const startDrag = (e: MouseEvent) => {
     isDragging.value = false
     window.removeEventListener('mousemove', onMove)
     window.removeEventListener('mouseup', onUp)
+    stopDrag = null
   }
   window.addEventListener('mousemove', onMove)
   window.addEventListener('mouseup', onUp)
+  stopDrag = onUp
 }
 
 const startTouchDrag = (e: TouchEvent) => {
@@ -70,11 +73,15 @@ const startTouchDrag = (e: TouchEvent) => {
     window.removeEventListener('touchmove', onMove)
     window.removeEventListener('touchend', onEnd)
     window.removeEventListener('touchcancel', onEnd)
+    stopDrag = null
   }
   window.addEventListener('touchmove', onMove, { passive: false })
   window.addEventListener('touchend', onEnd)
   window.addEventListener('touchcancel', onEnd)
+  stopDrag = onEnd
 }
+
+onUnmounted(() => { stopDrag?.() })
 </script>
 
 <style scoped>
@@ -82,7 +89,7 @@ const startTouchDrag = (e: TouchEvent) => {
   display: flex;
   height: 100%;
   border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
+  border-color: var(--w-xp-bevel-light) var(--w-xp-bevel-dark) var(--w-xp-bevel-dark) var(--w-xp-bevel-light);
   background: var(--w-bg-color);
 }
 
@@ -100,7 +107,7 @@ const startTouchDrag = (e: TouchEvent) => {
 
 .w-splitter__bar {
   flex: 0 0 6px;
-  background: linear-gradient(90deg, #e0e0e0, #c0c0c0, #e0e0e0);
+  background: linear-gradient(90deg, var(--w-fill-color-dark), #c0c0c0, var(--w-fill-color-dark));
   cursor: col-resize;
   border-left: 1px solid #fff;
   border-right: 1px solid #808080;
@@ -108,7 +115,7 @@ const startTouchDrag = (e: TouchEvent) => {
 }
 
 .w-splitter.is-vertical > .w-splitter__bar {
-  background: linear-gradient(180deg, #e0e0e0, #c0c0c0, #e0e0e0);
+  background: linear-gradient(180deg, var(--w-fill-color-dark), #c0c0c0, var(--w-fill-color-dark));
   cursor: row-resize;
   border-left: none;
   border-right: none;

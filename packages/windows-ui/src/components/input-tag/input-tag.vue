@@ -61,7 +61,7 @@ const handleClear = () => { emit('update:modelValue', []); emit('clear') }
 </script>
 
 <style scoped>
-.w-input-tag { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; box-sizing: border-box; border: 1px solid #7f9db9; background: #fff; padding: 2px 4px; min-height: var(--w-component-size); cursor: text; }
+.w-input-tag { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; box-sizing: border-box; border: 1px solid var(--w-xp-input-border); background: var(--w-bg-color); padding: 2px 4px; min-height: var(--w-component-size); cursor: text; }
 .w-input-tag input { border: none; outline: none; flex: 1; min-width: 60px; font-family: var(--w-font-family); font-size: var(--w-font-size-base); background: transparent; }
 .w-input-tag--small { min-height: var(--w-component-size-small); padding: 1px 2px; }
 .w-input-tag--small input { font-size: var(--w-font-size-small); }

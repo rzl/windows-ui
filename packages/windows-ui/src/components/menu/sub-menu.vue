@@ -119,7 +119,7 @@ const handleClick = (item: any, i: number) => {
 </script>
 
 <style scoped>
-.w-menu__submenu { list-style: none; padding: 0; margin: 0; background: #f0f0f0; }
+.w-menu__submenu { list-style: none; padding: 0; margin: 0; background: var(--w-fill-color-light); }
 .w-menu__subitem { cursor: pointer; position: relative; }
 .w-menu__sub-title { display: flex; align-items: center; gap: 6px; padding: 4px 8px 4px 28px; }
 .w-menu__sub-title:hover { background: var(--w-xp-blue-light); color: #fff; }
@@ -138,6 +138,6 @@ const handleClick = (item: any, i: number) => {
 
 /* 不同层级背景色区分 */
 .w-menu__submenu--level-1 { background: #e8e8e8; }
-.w-menu__submenu--level-2 { background: #e0e0e0; }
+.w-menu__submenu--level-2 { background: var(--w-fill-color-dark); }
 .w-menu__submenu--level-3 { background: #d8d8d8; }
 </style>

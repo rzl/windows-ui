@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, computed, onMounted, ref, type Ref } from 'vue'
+import { inject, computed, provide, ref, watch, type Ref } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WFormItem' })
@@ -28,41 +28,29 @@ const labelWidth = computed(() => {
 })
 
 const errors = inject<Ref<Record<string, string>>>('formErrors', ref({}))
-const formModel = inject<Record<string, any>>('formModel', {})
-const formRules = inject<Record<string, any[]>>('formRules', {})
-const registerField = inject<(field: any) => void>('formRegisterField', () => {})
+const formModel = inject<Record<string, any> | undefined>('formModel', undefined)
+const formResetting = inject<Ref<boolean>>('formResetting', ref(false))
+const validateFormField = inject<(prop: string, trigger?: 'blur' | 'change') => Promise<boolean>>('formValidateField', async () => true)
 
 const error = computed(() => (props.prop ? errors.value[props.prop] : ''))
 
-onMounted(() => {
-  if (props.prop) {
-    registerField({
-      prop: props.prop,
-      validate: async () => {
-        const rules = formRules[props.prop!]
-        if (!rules) return true
-        const value = formModel[props.prop!]
-        for (const rule of rules) {
-          if (rule.required && (value === undefined || value === '' || value === null)) {
-            return false
-          }
-          if (rule.pattern && !rule.pattern.test(String(value))) {
-            return false
-          }
-          if (rule.validator) {
-            const result = await rule.validator(value)
-            if (result !== true) return false
-          }
-          if (rule.asyncValidator) {
-            const result = await rule.asyncValidator(value)
-            if (result !== true) return false
-          }
-        }
-        return true
-      }
-    })
-  }
-})
+/** 触发本字段校验（供输入组件通过 formItemContext 调用） */
+const triggerValidate = (trigger?: 'blur' | 'change') => {
+  if (!props.prop) return
+  validateFormField(props.prop, trigger)
+}
+
+// 向插槽内的输入组件暴露字段上下文，输入组件在 blur/change 时调用 triggerValidate
+provide('wFormItemContext', { prop: props.prop, triggerValidate })
+
+// change 触发：监听 model 值变化（覆盖所有写入 model 的输入组件，无需逐个接入）
+if (props.prop && formModel) {
+  watch(() => formModel[props.prop!], () => {
+    if (!formResetting.value) triggerValidate('change')
+  })
+}
+
+defineExpose({ validate: () => triggerValidate(), clearValidate: () => { if (props.prop) delete errors.value[props.prop] } })
 </script>
 
 <style scoped>

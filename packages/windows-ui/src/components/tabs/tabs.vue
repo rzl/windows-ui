@@ -78,9 +78,9 @@ watch(() => props.tabs, () => { panes.value = [] }, { immediate: true })
 
 <style scoped>
 .w-tabs { border: 1px solid #919b9c; }
-.w-tabs__header { display: flex; background: linear-gradient(180deg, #f8f8f8, #e0e0e0); border-bottom: 1px solid #919b9c; }
-.w-tabs__item { padding: 6px 16px; cursor: pointer; font-size: var(--w-font-size-base); display: flex; align-items: center; gap: 4px; border-right: 1px solid #d4d0c8; }
-.w-tabs__item:hover { background: #f0f0f0; }
+.w-tabs__header { display: flex; background: linear-gradient(180deg, var(--w-xp-face-start), var(--w-fill-color-dark)); border-bottom: 1px solid #919b9c; }
+.w-tabs__item { padding: 6px 16px; cursor: pointer; font-size: var(--w-font-size-base); display: flex; align-items: center; gap: 4px; border-right: 1px solid var(--w-fill-color-darker); }
+.w-tabs__item:hover { background: var(--w-fill-color-light); }
 .w-tabs__item.is-active { background: var(--w-bg-color); border-bottom: 1px solid var(--w-bg-color); position: relative; top: 1px; font-weight: bold; }
 .w-tabs__item.is-disabled { opacity: 0.5; cursor: not-allowed; }
 .w-tabs__content { background: var(--w-bg-color); }

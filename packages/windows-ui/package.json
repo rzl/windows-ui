@@ -3,13 +3,26 @@
   "version": "1.0.0",
   "description": "A Vue 3 UI library inspired by Windows XP",
   "main": "./dist/windows-ui.umd.js",
-  "module": "./dist/windows-ui.es.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/windows-ui.umd.js"
+    },
+    "./package.json": "./package.json",
+    "./*": "./dist/*"
+  },
+  "sideEffects": [
+    "*.css",
+    "**/*.css"
+  ],
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vue-tsc --noEmit && vite build && vite build --mode umd",
     "dev": "vite build --watch",
     "test": "vitest run",
     "test:watch": "vitest"
