@@ -192,6 +192,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import * as monitorApi from '@/api/monitor'
+import { toastSuccess, toastWarning } from '@/utils/toast'
 
 const server = ref<any>({})
 const onlineUsers = ref<any[]>([])
@@ -333,7 +334,7 @@ async function handleSaveRetentionPolicy() {
 async function handleRunCleanup() {
   if (!confirm('确定立即清理所有过期数据吗？此操作不可恢复。')) return
   const result = await monitorApi.runCleanup()
-  alert(`清理完成：公共监控数据 ${result.total} 条，自定义接口日志 ${result.customApiTotal} 条`)
+  toastSuccess(`清理完成：公共监控数据 ${result.total} 条，自定义接口日志 ${result.customApiTotal} 条`)
   await loadRetentionPolicies()
 }
 
@@ -416,7 +417,7 @@ function openAlertRuleDialog(row?: any) {
 
 async function handleSaveAlertRule() {
   if (!alertRuleForm.name || !alertRuleForm.type || alertRuleForm.threshold === undefined) {
-    alert('请填写完整规则信息')
+    toastWarning('请填写完整规则信息')
     return
   }
   const payload = {
@@ -459,7 +460,7 @@ async function handleCheckAlerts() {
   await loadAlertRecords()
   const unread = await monitorApi.getUnreadAlertCount()
   unreadAlertCount.value = unread
-  alert('检查完成')
+  toastSuccess('检查完成')
 }
 
 function formatUptime(seconds: number) {

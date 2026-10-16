@@ -23,6 +23,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as reportApi from '@/api/report'
+import { toastError } from '@/utils/toast'
 
 const route = useRoute()
 const reportCode = computed(() => route.params.code as string)
@@ -75,7 +76,7 @@ async function handleExport() {
     link.click()
     URL.revokeObjectURL(link.href)
   } catch (err: any) {
-    alert(err.message || '导出失败')
+    toastError(err.message || '导出失败')
   }
 }
 </script>

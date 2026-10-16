@@ -40,7 +40,6 @@ const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)
 const msgBoxRef = ref<any>(null)
 
-const alert = (msg: string) => window.alert(msg)
 
 const title = t('Notification 通知')
 

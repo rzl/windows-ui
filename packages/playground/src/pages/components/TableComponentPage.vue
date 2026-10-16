@@ -157,6 +157,7 @@ import {
   codeVirtualScroll,
   codeVirtualX
 } from './table-demo-codes'
+import { message } from '../../utils/message'
 
 const { t } = useI18n()
 const title = t('Table 表格')
@@ -476,8 +477,8 @@ const multiHeaderData = [
   { name: t('赵六'), age: 35, department: t('技术部'), baseSalary: '22,000', bonus: '6,000', status: t('在职') }
 ]
 
-const handleEdit = (row: any) => alert(t('编辑: ') + row.name)
-const handleDelete = (row: any, index: number) => alert(t('删除第 ') + (index + 1) + t(' 行: ') + row.name)
+const handleEdit = (row: any) => message(t('编辑: ') + row.name)
+const handleDelete = (row: any, index: number) => message(t('删除第 ') + (index + 1) + t(' 行: ') + row.name)
 
 const TableCode1 = codeBasic
 const TableCode2 = codeSlot

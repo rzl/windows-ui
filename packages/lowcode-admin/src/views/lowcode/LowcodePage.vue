@@ -150,7 +150,7 @@ import * as printApi from '@/api/print'
 import request from '@/api/request'
 import { useAuthStore } from '@/stores/auth'
 import { getFieldTypeMeta } from '@/utils/pluginManager'
-import { toastError, toastInfo, toastSuccess } from '@/utils/toast'
+import { toastError, toastInfo, toastSuccess, toastWarning } from '@/utils/toast'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -558,7 +558,7 @@ function openSaveQueryDialog() {
 
 async function handleSaveQuery() {
   if (!saveQueryForm.name.trim()) {
-    alert('请输入查询名称')
+    toastWarning('请输入查询名称')
     return
   }
   const existing = savedQueries.value.find((q) => q.name === saveQueryForm.name.trim())
@@ -576,9 +576,9 @@ async function handleSaveQuery() {
     }
     saveQueryDialogVisible.value = false
     await loadSavedQueries()
-    alert('保存成功')
+    toastSuccess('保存成功')
   } catch (err: any) {
-    alert(err.message || '保存失败')
+    toastError(err.message || '保存失败')
   }
 }
 
@@ -589,7 +589,7 @@ async function handleDeleteSavedQuery(id: string) {
     if (selectedSavedQuery.value === id) selectedSavedQuery.value = undefined
     await loadSavedQueries()
   } catch (err: any) {
-    alert(err.message || '删除失败')
+    toastError(err.message || '删除失败')
   }
 }
 
@@ -598,7 +598,7 @@ async function handleSetDefaultSavedQuery(id: string) {
     await lowcodeApi.setDefaultSavedQuery(modelCode.value, id)
     await loadSavedQueries()
   } catch (err: any) {
-    alert(err.message || '设置失败')
+    toastError(err.message || '设置失败')
   }
 }
 
@@ -668,7 +668,7 @@ async function exportAllExcel() {
     const blob = await lowcodeApi.exportDynamicExcel(modelCode.value, { columns })
     downloadBlob(blob, `${modelCode.value}.xlsx`)
   } catch (err: any) {
-    alert(err.message || '导出失败')
+    toastError(err.message || '导出失败')
   }
 }
 
@@ -680,7 +680,7 @@ async function exportSelectedExcel() {
     const blob = await lowcodeApi.exportDynamicExcel(modelCode.value, { ids, columns })
     downloadBlob(blob, `${modelCode.value}_selected.xlsx`)
   } catch (err: any) {
-    alert(err.message || '导出失败')
+    toastError(err.message || '导出失败')
   }
 }
 
@@ -753,7 +753,7 @@ async function downloadImportTemplate() {
     const blob = await lowcodeApi.getImportTemplate(modelCode.value)
     downloadBlob(blob, `${modelCode.value}_template.xlsx`)
   } catch (err: any) {
-    alert(err.message || '下载模板失败')
+    toastError(err.message || '下载模板失败')
   }
 }
 
@@ -787,16 +787,16 @@ async function handleFileChange(e: Event) {
     const result = await lowcodeApi.importDynamicExcel(modelCode.value, file)
     const msg = `导入完成：成功 ${result.success} 条，失败 ${result.failure} 条`
     if (result.failures?.length) {
-      const details = result.failures.map((f: any) => `第 ${f.row} 行：${f.reason}`).join('\n')
-      alert(`${msg}\n\n失败详情：\n${details}`)
+      const details = result.failures.map((f: any) => `第 ${f.row} 行：${f.reason}`).join('；')
+      toastError(`${msg}，失败详情：${details}`)
     } else {
-      alert(msg)
+      toastInfo(msg)
     }
     target.value = ''
     selectedRows.value = []
     await loadData()
   } catch (err: any) {
-    alert(err.message || '导入失败')
+    toastError(err.message || '导入失败')
   }
 }
 </script>

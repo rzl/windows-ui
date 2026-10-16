@@ -109,6 +109,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as customApiApi from '@/api/customApi'
 import CustomApiVersionPanel from './CustomApiVersionPanel.vue'
+import { toastError } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -255,7 +256,7 @@ async function handleSave() {
     }
     router.push('/lowcode/custom-api')
   } catch (error: any) {
-    alert(error.message || '保存失败')
+    toastError(error.message || '保存失败')
   }
 }
 

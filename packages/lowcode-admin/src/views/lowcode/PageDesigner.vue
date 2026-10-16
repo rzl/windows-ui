@@ -12,6 +12,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import * as pageApi from '@/api/page'
+import { toastSuccess } from '@/utils/toast'
 
 defineOptions({ name: 'PageDesigner' })
 
@@ -25,7 +26,7 @@ async function loadPage(pageCode: string) {
 
 async function savePage(data: any) {
   await pageApi.savePage(data)
-  alert('保存成功')
+  toastSuccess('保存成功')
 }
 
 function goBack() {

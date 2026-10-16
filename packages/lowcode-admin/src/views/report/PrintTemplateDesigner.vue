@@ -104,6 +104,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as printApi from '@/api/print'
 import * as lowcodeApi from '@/api/lowcode'
+import { toastSuccess } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -271,7 +272,7 @@ async function handleSave() {
     pageStyle: template.pageStyle || {},
     status: template.status ?? 1
   })
-  alert('保存成功')
+  toastSuccess('保存成功')
 }
 
 async function previewVisibleChange(visible: boolean) {

@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import * as externalDatasourceApi from '@/api/external-datasource'
+import { toastError } from '@/utils/toast'
 
 const dataSources = ref<any[]>([])
 const total = ref(0)
@@ -183,7 +184,7 @@ async function handleSave() {
     closeDialog()
     await loadData()
   } catch {
-    alert('配置 JSON 格式错误')
+    toastError('配置 JSON 格式错误')
   }
 }
 
@@ -215,7 +216,7 @@ async function testCurrent() {
     testResult.value = await externalDatasourceApi.testExternalDataSource(row.id)
     testVisible.value = true
   } catch {
-    alert('配置 JSON 格式错误')
+    toastError('配置 JSON 格式错误')
   }
 }
 </script>

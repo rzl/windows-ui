@@ -31,6 +31,7 @@ import { ref } from 'vue'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import type { PageConfig } from '@windows-ui/core'
+import { message } from '../../utils/message'
 
 const { t } = useI18n()
 const title = 'PageDesigner 页面设计器'
@@ -114,11 +115,11 @@ function handleSave(data: any) {
   // eslint-disable-next-line no-console
   console.log('page save', data)
   savedConfig.value = data.config
-  window.alert(t('已保存，配置见控制台'))
+  message(t('已保存，配置见控制台'))
 }
 
 function handleBack() {
-  window.alert(t('返回事件'))
+  message(t('返回事件'))
 }
 
 function handlePreview() {

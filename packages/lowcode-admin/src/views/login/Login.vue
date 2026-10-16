@@ -23,6 +23,7 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { toastError, toastWarning } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -47,7 +48,7 @@ function getRedirectPath(): string {
 
 async function handleLogin() {
   if (!form.username || !form.password) {
-    alert('请输入用户名和密码')
+    toastWarning('请输入用户名和密码')
     return
   }
   loading.value = true
@@ -56,7 +57,7 @@ async function handleLogin() {
     await auth.fetchProfile()
     router.push(getRedirectPath())
   } catch (e: any) {
-    alert(e.message || '登录失败')
+    toastError(e.message || '登录失败')
   } finally {
     loading.value = false
   }

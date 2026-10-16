@@ -322,7 +322,7 @@
           </w-form-item>
 
           <w-form-item><template #label><router-link :to="'/nav/page-header'" class="component-label-link">PageHeader 页头</router-link></template>
-            <w-page-header title="页面标题" @back="alert('返回')" />
+            <w-page-header title="页面标题" @back="message('返回')" />
           </w-form-item>
 
           <w-form-item><template #label><router-link :to="'/nav/steps'" class="component-label-link">Steps 步骤条</router-link></template>
@@ -403,7 +403,7 @@
           </w-form-item>
 
           <w-form-item><template #label><router-link :to="'/feedback/popconfirm'" class="component-label-link">Popconfirm 气泡确认框</router-link></template>
-            <w-popconfirm title="确认删除？" @confirm="alert('已删除')">
+            <w-popconfirm title="确认删除？" @confirm="message('已删除')">
               <w-button type="danger" size="small">删除</w-button>
             </w-popconfirm>
           </w-form-item>
@@ -474,6 +474,7 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { message } from '../../utils/message'
 
 const form = reactive({
   input: '',
@@ -509,10 +510,10 @@ const statusOptions = [
 ]
 
 function onSearch(model: Record<string, any>) {
-  alert('搜索: ' + JSON.stringify(model))
+  message('搜索: ' + JSON.stringify(model))
 }
 function onReset() {
-  alert('已重置')
+  message('已重置')
 }
 
 const autocompleteOptions = [
@@ -589,9 +590,6 @@ const notifyRef = ref<any>(null)
 const msgBoxRef = ref<any>(null)
 const showTour = ref(false)
 
-function alert(msg: string) {
-  window.alert(msg)
-}
 
 function checkPermission(code: string) {
   const permissions = ['user:view', 'user:edit']

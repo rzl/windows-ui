@@ -99,6 +99,7 @@ import { useRoute, useRouter } from 'vue-router'
 import * as reportApi from '@/api/report'
 import * as lowcodeApi from '@/api/lowcode'
 import * as externalDatasourceApi from '@/api/external-datasource'
+import { toastError, toastSuccess } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -250,7 +251,7 @@ async function loadExternalFields(id: string, savedColumns?: any[]) {
       }
     }
   } catch (err: any) {
-    alert(err.message || '加载外部数据源字段失败')
+    toastError(err.message || '加载外部数据源字段失败')
   }
 }
 
@@ -322,7 +323,7 @@ async function handleSave() {
     config,
     status: report.status ? 1 : 0
   })
-  alert('报表配置已保存')
+  toastSuccess('报表配置已保存')
 }
 
 function goRun() {

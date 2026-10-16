@@ -11,7 +11,7 @@
                 <w-alert title="错误提示" :description="t('操作失败，请重试')" type="error" />
               </w-space>
             </demo-block>
-            <demo-block :title="t('可关闭')" :code="AlertCode2"><w-alert title="可关闭提示" :description="t('点击右侧 X 关闭此消息')" type="info" closable @close="alert('已关闭')" /></demo-block>
+            <demo-block :title="t('可关闭')" :code="AlertCode2"><w-alert title="可关闭提示" :description="t('点击右侧 X 关闭此消息')" type="info" closable @close="message('已关闭')" /></demo-block>
             <demo-block :title="t('居中显示')" :code="AlertCode3"><w-alert title="居中提示" :description="t('内容居中对齐')" type="info" center /></demo-block>
             <demo-block :title="t('仅标题')" :code="AlertCode4"><w-alert title="这是一个没有描述的提示" type="success" /></demo-block>
             <demo-block :title="t('自定义标题')" :code="AlertCode5">
@@ -41,6 +41,7 @@ import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
 const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false })
@@ -49,7 +50,6 @@ const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)
 const msgBoxRef = ref<any>(null)
 
-const alert = (msg: string) => window.alert(msg)
 
 const title = t('Alert 提示')
 
@@ -59,7 +59,7 @@ const AlertCode1 = `<w-space direction="vertical" style="width:100%">
   <w-alert title="警告提示" description="请注意此操作的潜在风险" type="warning" />
   <w-alert title="错误提示" description="操作失败，请重试" type="error" />
 </w-space>`
-const AlertCode2 = `<w-alert title="可关闭提示" description="点击右侧 X 关闭此消息" type="info" closable @close="alert('已关闭')" />`
+const AlertCode2 = `<w-alert title="可关闭提示" description="点击右侧 X 关闭此消息" type="info" closable @close="message('已关闭')" />`
 const AlertCode3 = `<w-alert title="居中提示" description="内容居中对齐" type="info" center />`
 const AlertCode4 = `<w-alert title="这是一个没有描述的提示" type="success" />`
 const AlertCode5 = `<w-alert type="info">

@@ -300,6 +300,7 @@ import { getFieldTypeOptions, getFieldTypeMeta, mapFieldTypeToFormType } from '@
 import RelationPanel from '@/components/model-designer/RelationPanel.vue'
 import ModelVersionPanel from './ModelVersionPanel.vue'
 import LinkageRuleDialog from '@/components/model-designer/LinkageRuleDialog.vue'
+import { toastError, toastSuccess, toastWarning } from '@/utils/toast'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -719,7 +720,7 @@ function saveOptionConfig() {
     try {
       config.params = optionForm.paramsText ? JSON.parse(optionForm.paramsText) : {}
     } catch {
-      alert('额外参数 JSON 格式错误')
+      toastError('额外参数 JSON 格式错误')
       return
     }
   }
@@ -751,7 +752,7 @@ async function handleSaveField() {
     try {
       data.refFilter = JSON.parse(data.refFilterText)
     } catch {
-      alert('筛选条件 JSON 格式错误')
+      toastError('筛选条件 JSON 格式错误')
       return
     }
   } else {
@@ -764,7 +765,7 @@ async function handleSaveField() {
       try {
         data.options = data.optionsText ? JSON.parse(data.optionsText) : undefined
       } catch {
-        alert('选项 JSON 格式错误')
+        toastError('选项 JSON 格式错误')
         return
       }
     }
@@ -821,7 +822,7 @@ async function handleDeleteField(row: any) {
   if (!checkDesignPermission()) return
   const relationTip = getFieldRelationTip(row)
   if (relationTip) {
-    alert(relationTip)
+    toastWarning(relationTip)
     return
   }
   const message = `确定删除字段 "${row.display_name}" 吗？\n\n警告：该操作会从物理表中删除对应列，该列的历史数据将永久丢失且不可恢复。`
@@ -841,7 +842,7 @@ async function handleBatchDeleteFields() {
   if (!rows.length) return
   const relationTips = rows.map((row) => getFieldRelationTip(row)).filter(Boolean)
   if (relationTips.length) {
-    alert(`以下字段无法删除：\n${relationTips.join('\n')}`)
+    toastWarning(`以下字段无法删除：${relationTips.join('；')}`)
     return
   }
   const names = rows.map((row) => row.display_name).join('、')
@@ -866,7 +867,7 @@ async function handleExportModel() {
 
 function checkDesignPermission() {
   if (!isAdmin.value) {
-    alert('您没有模型设计权限')
+    toastWarning('您没有模型设计权限')
     return false
   }
   return true
@@ -904,7 +905,7 @@ async function saveFormConfig() {
     config,
     status: 1
   })
-  alert('表单配置已保存')
+  toastSuccess('表单配置已保存')
 }
 
 function openLayoutDialog() {
@@ -918,7 +919,7 @@ function saveLayoutConfig() {
     formConfig.layout = layout
     layoutDialogVisible.value = false
   } catch {
-    alert('JSON 格式错误')
+    toastError('JSON 格式错误')
   }
 }
 
@@ -927,7 +928,7 @@ async function saveModelSetting() {
   await lowcodeApi.updateModel(modelId, {
     enableAudit: model.enableAudit ? 1 : 0
   })
-  alert('模型设置已保存')
+  toastSuccess('模型设置已保存')
 }
 
 async function saveTableConfig() {
@@ -968,7 +969,7 @@ async function saveTableConfig() {
     },
     status: 1
   })
-  alert('列表配置已保存')
+  toastSuccess('列表配置已保存')
 }
 </script>
 

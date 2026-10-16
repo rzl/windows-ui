@@ -33,7 +33,6 @@ const transferData = [{ key: '1', label: t('项目1') }, { key: '2', label: t('�
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('李四'), value: 'lisi' }, { label: t('王五'), value: 'wangwu' }]
 
-const message = (msg: string) => alert(msg)
 
 const title = t('Switch 开关')
 

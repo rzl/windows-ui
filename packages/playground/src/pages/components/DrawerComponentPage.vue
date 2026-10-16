@@ -57,7 +57,7 @@
         <w-button @click="drawers.customAction = true">自定义操作</w-button>
         <w-drawer v-model="drawers.customAction" title="操作">
           <template #action>
-            <w-icon name="info" size="small" style="cursor:pointer" @click="alert('更多信息')" />
+            <w-icon name="info" size="small" style="cursor:pointer" @click="message('更多信息')" />
           </template>
           <p>使用 action 插槽在关闭按钮左侧插入自定义操作。</p>
         </w-drawer>
@@ -72,6 +72,7 @@ import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
 const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false })
@@ -80,7 +81,6 @@ const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)
 const msgBoxRef = ref<any>(null)
 
-const alert = (msg: string) => window.alert(msg)
 
 const title = t('Drawer 抽屉')
 
@@ -122,7 +122,7 @@ const DrawerCode5 = `<w-button @click="drawers.customHeader = true">自定义标
 const DrawerCode6 = `<w-button @click="drawers.customAction = true">自定义操作</w-button>
 <w-drawer v-model="drawers.customAction" title="操作">
   <template #action>
-    <w-icon name="info" size="small" style="cursor:pointer" @click="alert('更多信息')" />
+    <w-icon name="info" size="small" style="cursor:pointer" @click="message('更多信息')" />
   </template>
   <p>使用 action 插槽在关闭按钮左侧插入自定义操作。</p>
 </w-drawer>`

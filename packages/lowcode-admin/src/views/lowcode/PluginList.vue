@@ -55,6 +55,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as pluginApi from '@/api/plugin'
 import { initPlugins } from '@/utils/pluginManager'
+import { toastError } from '@/utils/toast'
 
 const router = useRouter()
 const plugins = ref<any[]>([])
@@ -208,7 +209,7 @@ async function handleInstall() {
     selectedExample.value = ''
     await loadData()
   } catch (error: any) {
-    alert(error.message || '安装失败')
+    toastError(error.message || '安装失败')
   }
 }
 

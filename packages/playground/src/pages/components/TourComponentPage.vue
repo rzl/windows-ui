@@ -11,7 +11,7 @@
               <w-button @click="showTour2 = true">{{ t('自定义漫游') }}</w-button>
               <w-tour v-model:visible="showTour2" :steps="[{ title: '欢迎', description: '欢迎使用' }, { title: '完成', description: '设置完成' }]">
                 <template #header="{ step, index }"><w-icon name="info" size="small" /><span style="margin-left:4px">第{{ index + 1 }}步：{{ step.title }}</span></template>
-                <template #action="{ index }"><w-icon name="help" size="small" style="cursor:pointer" @click="alert('帮助 ' + index)" /></template>
+                <template #action="{ index }"><w-icon name="help" size="small" style="cursor:pointer" @click="message('帮助 ' + index)" /></template>
               </w-tour>
             </demo-block>
 
@@ -24,13 +24,13 @@ import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
 const form = reactive({ date: '', page: 1, segment: 'day' })
 const showTour = ref(false)
 const showTour2 = ref(false)
 
-const alert = (msg: string) => window.alert(msg)
 
 const calendarEvents = [{ date: new Date().toISOString().slice(0, 10), title: t('今日事件') }]
 const tableData = [{ name: t('张三'), age: 28, address: t('北京') }, { name: t('李四'), age: 32, address: t('上海') }, { name: t('王五'), age: 24, address: t('广州') }]
@@ -53,7 +53,7 @@ const TourCode2 = `${tourCommonCode}\n\n<w-button @click="showTour2 = true">自�
     <span style="margin-left:4px">第{{ index + 1 }}步：{{ step.title }}</span>
   </template>
   <template #action="{ index }">
-    <w-icon name="help" size="small" style="cursor:pointer" @click="alert('帮助 ' + index)" />
+    <w-icon name="help" size="small" style="cursor:pointer" @click="message('帮助 ' + index)" />
   </template>
 </w-tour>`
 </script>

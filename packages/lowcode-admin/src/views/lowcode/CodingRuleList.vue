@@ -60,6 +60,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import * as lowcodeApi from '@/api/lowcode'
+import { toastInfo } from '@/utils/toast'
 
 const list = ref<any[]>([])
 const total = ref(0)
@@ -138,7 +139,7 @@ async function handleDelete(row: any) {
 
 async function testGenerate(row: any) {
   const code = await lowcodeApi.generateCode(row.code)
-  alert(`生成结果：${code}`)
+  toastInfo(`生成结果：${code}`)
 }
 </script>
 

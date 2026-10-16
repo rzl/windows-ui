@@ -16,7 +16,6 @@ import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 const { t } = useI18n()
 
-const alert = (msg: string) => window.alert(msg)
 
 const title = t('Breadcrumb 面包屑')
 

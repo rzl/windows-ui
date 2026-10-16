@@ -3,7 +3,7 @@
     <h1 class="page-title">{{ title }}</h1>
     <demo-section :title="title" :description="t('页面标题区')" id="page-header" doc="page-header">
 
-      <demo-block :title="t('基础用法')" :code="PageHeaderCode1"><w-page-header title="页面标题" @back="alert('返回')" /></demo-block>
+      <demo-block :title="t('基础用法')" :code="PageHeaderCode1"><w-page-header title="页面标题" @back="message('返回')" /></demo-block>
       <demo-block :title="t('带操作')" :code="PageHeaderCode2">
         <w-page-header title="详情页" show-back>
           <template #extra>
@@ -32,13 +32,13 @@
 import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
-const alert = (msg: string) => window.alert(msg)
 
 const title = t('Page Header 页头')
 
-const PageHeaderCode1 = `<w-page-header title="页面标题" @back="alert('返回')" />`
+const PageHeaderCode1 = `<w-page-header title="页面标题" @back="message('返回')" />`
 const PageHeaderCode2 = `<w-page-header title="详情页" show-back>
   <template #extra>
     <w-button size="small">编辑</w-button>

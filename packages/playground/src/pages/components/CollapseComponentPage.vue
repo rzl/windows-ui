@@ -25,7 +25,7 @@
             <span>{{ index + 1 }}. {{ item.title }}</span>
           </template>
           <template #action="{ index }">
-            <w-icon name="delete" size="small" style="cursor:pointer" @click="alert('删除 ' + index)" />
+            <w-icon name="delete" size="small" style="cursor:pointer" @click="message('删除 ' + index)" />
           </template>
         </w-collapse>
       </demo-block>
@@ -39,6 +39,7 @@ import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
 const form = reactive({ date: '', page: 1, segment: 'day' })
@@ -49,7 +50,6 @@ const tableData = [{ name: t('张三'), age: 28, address: t('北京') }, { name:
 const tableColumns = [{ prop: 'name', label: t('姓名') }, { prop: 'age', label: t('年龄') }, { prop: 'address', label: t('地址') }]
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 
-const alert = (msg: string) => window.alert(msg)
 
 const title = t('Collapse 折叠面板')
 
@@ -70,7 +70,7 @@ const CollapseCode3 = `<w-collapse :items="[
     <span>{{ index + 1 }}. {{ item.title }}</span>
   </template>
   <template #action="{ index }">
-    <w-icon name="delete" size="small" style="cursor:pointer" @click="alert('删除 ' + index)" />
+    <w-icon name="delete" size="small" style="cursor:pointer" @click="message('删除 ' + index)" />
   </template>
 </w-collapse>`
 </script>

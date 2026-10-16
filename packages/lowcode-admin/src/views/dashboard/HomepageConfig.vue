@@ -75,6 +75,7 @@
 <script setup lang="ts">
 import { onMounted, reactive } from 'vue'
 import * as dashboardApi from '@/api/dashboard'
+import { toastSuccess } from '@/utils/toast'
 
 const config = reactive<any>({
   code: 'default',
@@ -167,7 +168,7 @@ async function handleSave() {
     widgets: config.widgets,
     status: 1
   })
-  alert('保存成功')
+  toastSuccess('保存成功')
 }
 </script>
 

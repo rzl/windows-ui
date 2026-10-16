@@ -48,6 +48,7 @@ import { useI18n } from 'vue-i18n'
 import { reactive, ref } from 'vue'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+import { message } from '../../utils/message'
 
 const { t } = useI18n()
 const title = 'CrudTable 高级表格'
@@ -124,15 +125,16 @@ function handlePageChange(page: number) {
 }
 
 function handleEdit(row: any) {
-  alert(t('编辑：') + row.username)
+  message(t('编辑：') + row.username)
 }
 
 function handleDelete(row: any) {
-  alert(t('删除：') + row.username)
+  message(t('删除：') + row.username)
 }
 
 const codeBasic = `&lt;script setup&gt;
 import { reactive, ref } from 'vue'
+import { message } from '../../utils/message'
 
 const allData = Array.from({ length: 35 }, (_, i) => ({
   id: i + 1,
@@ -206,11 +208,11 @@ function handlePageChange(page) {
 }
 
 function handleEdit(row) {
-  alert('编辑：' + row.username)
+  message('编辑：' + row.username)
 }
 
 function handleDelete(row) {
-  alert('删除：' + row.username)
+  message('删除：' + row.username)
 }
 &lt;/script&gt;
 

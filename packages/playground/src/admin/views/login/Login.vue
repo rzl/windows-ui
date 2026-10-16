@@ -40,6 +40,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { message } from '../../../utils/message'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -60,11 +61,11 @@ refreshCaptcha()
 
 async function handleLogin() {
   if (!form.username || !form.password) {
-    alert('请输入用户名和密码')
+    message.warning('请输入用户名和密码')
     return
   }
   if (form.captcha !== captcha.value) {
-    alert('验证码错误')
+    message.error('验证码错误')
     refreshCaptcha()
     return
   }
@@ -73,7 +74,7 @@ async function handleLogin() {
     await auth.login({ username: form.username, password: form.password })
     router.push('/')
   } catch (e: any) {
-    alert(e.message)
+    message.error(e.message)
   } finally {
     loading.value = false
   }

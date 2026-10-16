@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive } from 'vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
 const form = reactive({
@@ -32,7 +33,6 @@ const transferData = [{ key: '1', label: t('项目1') }, { key: '2', label: t('�
 const treeData = [{ label: t('节点1'), value: '1', children: [{ label: t('子节点1-1'), value: '1-1' }] }, { label: t('节点2'), value: '2' }]
 const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('李四'), value: 'lisi' }, { label: t('王五'), value: 'wangwu' }]
 
-const message = (msg: string) => alert(msg)
 
 const title = t('Color Picker 颜色选择器')
 

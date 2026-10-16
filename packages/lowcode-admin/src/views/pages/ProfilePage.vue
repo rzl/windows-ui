@@ -61,6 +61,7 @@ import { reactive, ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import * as authApi from '@/api/auth'
 import type { FormRule } from '@windows-ui/core'
+import { toastError, toastSuccess } from '@/utils/toast'
 
 const auth = useAuthStore()
 
@@ -126,9 +127,9 @@ async function handleFileChange(e: Event) {
   try {
     const res = await authApi.uploadAvatar(file)
     form.avatar = res.url
-    alert('头像上传成功')
+    toastSuccess('头像上传成功')
   } catch (err: any) {
-    alert(err.message || '头像上传失败')
+    toastError(err.message || '头像上传失败')
   }
 }
 
@@ -141,9 +142,9 @@ async function saveProfile() {
     await authApi.updateProfile({ ...form })
     await auth.fetchProfile()
     initForm()
-    alert('个人信息保存成功')
+    toastSuccess('个人信息保存成功')
   } catch (err: any) {
-    alert(err.message || '保存失败')
+    toastError(err.message || '保存失败')
   } finally {
     loading.value = false
   }
@@ -162,9 +163,9 @@ async function savePassword() {
     passwordForm.oldPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
-    alert('密码修改成功')
+    toastSuccess('密码修改成功')
   } catch (err: any) {
-    alert(err.message || '密码修改失败')
+    toastError(err.message || '密码修改失败')
   } finally {
     passwordLoading.value = false
   }

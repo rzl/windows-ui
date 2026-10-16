@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import RichEditor from '@/components/RichEditor.vue'
+import { message } from '../../../utils/message'
 
 const form = reactive({
   title: '',
@@ -26,7 +27,7 @@ const form = reactive({
 })
 
 function handleSubmit() {
-  alert(`标题: ${form.title}\n内容长度: ${form.content.length}`)
+  message.success(`发布成功：${form.title}，内容长度 ${form.content.length}`)
 }
 </script>
 

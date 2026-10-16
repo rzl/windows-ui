@@ -51,6 +51,7 @@
 import { computed, ref, watch } from 'vue'
 import * as relationApi from '@/api/relation'
 import * as lowcodeApi from '@/api/lowcode'
+import { toastError } from '@/utils/toast'
 
 const props = defineProps<{
   modelValue: boolean
@@ -160,7 +161,7 @@ async function handleSave() {
     visible.value = false
     emit('saved')
   } catch (error: any) {
-    alert(error.message || '保存失败')
+    toastError(error.message || '保存失败')
   }
 }
 </script>

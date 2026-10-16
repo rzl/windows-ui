@@ -206,6 +206,7 @@ import * as reportApi from '@/api/report'
 import * as dashboardApi from '@/api/dashboard'
 import * as printApi from '@/api/print'
 import * as pageApi from '@/api/page'
+import { toastSuccess, toastWarning } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -368,7 +369,7 @@ async function handleSave() {
       widgets: portalConfig.widgets
     }
   })
-  alert('保存成功')
+  toastSuccess('保存成功')
 }
 
 function addWidget() {
@@ -424,7 +425,7 @@ async function openSnapshotDialog() {
 
 async function createSnapshot() {
   if (!snapshotForm.version) {
-    alert('请输入版本号')
+    toastWarning('请输入版本号')
     return
   }
   await appApi.createSnapshot(app.id, {
@@ -441,14 +442,14 @@ async function loadVersions() {
 
 async function publish(row: any) {
   await appApi.publishVersion(app.id, row.id)
-  alert('发布成功')
+  toastSuccess('发布成功')
   await loadVersions()
 }
 
 async function rollback(row: any) {
   if (!confirm(`确定回滚到 ${row.version} 吗？`)) return
   await appApi.rollbackVersion(app.id, row.id)
-  alert('回滚成功')
+  toastSuccess('回滚成功')
   await loadVersions()
   await loadData()
 }

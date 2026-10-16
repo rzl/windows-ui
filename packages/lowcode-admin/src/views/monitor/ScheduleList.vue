@@ -73,6 +73,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import * as scheduleApi from '@/api/schedule'
+import { toastError, toastSuccess } from '@/utils/toast'
 
 const tasks = ref<any[]>([])
 const total = ref(0)
@@ -159,7 +160,7 @@ async function handleSave() {
     try {
       data.handlerConfig.api = JSON.parse(apiConfigText.value || '{}')
     } catch {
-      alert('接口配置 JSON 格式错误')
+      toastError('接口配置 JSON 格式错误')
       return
     }
   }
@@ -178,7 +179,7 @@ async function handleDelete(row: any) {
 async function handleRun(row: any) {
   await scheduleApi.runTask(row.id)
   await loadData()
-  alert('执行完成')
+  toastSuccess('执行完成')
 }
 
 async function openLog(row: any) {

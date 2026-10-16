@@ -113,6 +113,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import * as appApi from '@/api/app'
+import { toastError } from '@/utils/toast'
 
 const router = useRouter()
 const apps = ref<any[]>([])
@@ -228,7 +229,7 @@ async function handleImport() {
     importText.value = ''
     await loadData()
   } catch {
-    alert('JSON 格式错误')
+    toastError('JSON 格式错误')
   }
 }
 

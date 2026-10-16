@@ -30,6 +30,7 @@ import { useI18n } from 'vue-i18n'
 import { reactive, ref } from 'vue'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
+import { message } from '../../utils/message'
 
 const { t } = useI18n()
 const title = 'DynamicForm 动态表单'
@@ -59,7 +60,7 @@ const fields3 = [
 ]
 
 function handleSubmit() {
-  alert(t('提交：') + JSON.stringify(formModel))
+  message(t('提交：') + JSON.stringify(formModel))
 }
 
 function handleReset() {
@@ -81,7 +82,7 @@ const fields = [
 ]
 
 function handleSubmit() {
-  alert(JSON.stringify(formModel))
+  message(JSON.stringify(formModel))
 }
 
 function handleReset() {

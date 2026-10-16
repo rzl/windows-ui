@@ -88,7 +88,7 @@
         <w-button @click="dialogs.customAction = true">自定义操作</w-button>
         <w-dialog v-model="dialogs.customAction" title="操作按钮">
           <template #action>
-            <w-icon name="info" size="small" style="cursor:pointer" @click="alert('更多信息')" />
+            <w-icon name="info" size="small" style="cursor:pointer" @click="message('更多信息')" />
           </template>
           <p>使用 action 插槽在全屏按钮左侧插入自定义图标或按钮。</p>
           <template #footer>
@@ -106,6 +106,7 @@ import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive, ref } from 'vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
 const dialogs = reactive({ basic: false, wide: false, mask: false, nested: false, noDrag: false, full: false, fullDefault: false, customHeader: false, customAction: false })
@@ -114,7 +115,6 @@ const msgRef = ref<any>(null)
 const notifyRef = ref<any>(null)
 const msgBoxRef = ref<any>(null)
 
-const alert = (msg: string) => window.alert(msg)
 
 const title = t('Dialog 对话框')
 
@@ -178,7 +178,7 @@ const DialogCode8 = `<w-button @click="dialogs.customHeader = true">自定义标
 const DialogCode9 = `<w-button @click="dialogs.customAction = true">自定义操作</w-button>
 <w-dialog v-model="dialogs.customAction" title="操作按钮">
   <template #action>
-    <w-icon name="info" size="small" style="cursor:pointer" @click="alert('更多信息')" />
+    <w-icon name="info" size="small" style="cursor:pointer" @click="message('更多信息')" />
   </template>
   <p>使用 action 插槽在全屏按钮左侧插入自定义图标或按钮。</p>
   <template #footer>

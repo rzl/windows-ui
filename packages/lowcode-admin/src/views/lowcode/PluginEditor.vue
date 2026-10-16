@@ -52,6 +52,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as pluginApi from '@/api/plugin'
 import { initPlugins } from '@/utils/pluginManager'
+import { toastError } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -127,7 +128,7 @@ async function handleSave() {
     await initPlugins()
     router.push('/lowcode/plugin')
   } catch (error: any) {
-    alert(error.message || '保存失败')
+    toastError(error.message || '保存失败')
   }
 }
 </script>

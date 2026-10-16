@@ -74,6 +74,7 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as dashboardApi from '@/api/dashboard'
+import { toastError, toastSuccess } from '@/utils/toast'
 
 const route = useRoute()
 const code = route.params.code as string
@@ -168,7 +169,7 @@ async function getPreviewOption() {
     }
     return null
   } catch (e: any) {
-    alert('数据源执行失败：' + (e.message || '未知错误'))
+    toastError('数据源执行失败：' + (e.message || '未知错误'))
     return null
   }
 }
@@ -229,7 +230,7 @@ async function handleSave() {
   if (dataSource.type === 'static') {
     const option = getOption()
     if (!option) {
-      alert('ECharts 配置 JSON 格式错误')
+      toastError('ECharts 配置 JSON 格式错误')
       return
     }
     config.option = option
@@ -240,7 +241,7 @@ async function handleSave() {
     config,
     status: dashboard.status
   })
-  alert('保存成功')
+  toastSuccess('保存成功')
 }
 </script>
 

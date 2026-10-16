@@ -89,6 +89,7 @@ import * as flowApi from '@/api/flow'
 import * as lowcodeApi from '@/api/lowcode'
 import * as monitorApi from '@/api/monitor'
 import * as userApi from '@/api/user'
+import { toastError, toastSuccess, toastWarning } from '@/utils/toast'
 
 const tasks = ref<any[]>([])
 const total = ref(0)
@@ -201,7 +202,7 @@ async function openDetail(row: any) {
     businessData.value = detail
     traceData.value = trace
   } catch (error: any) {
-    alert(error.message || '加载详情失败')
+    toastError(error.message || '加载详情失败')
   }
 }
 
@@ -239,7 +240,7 @@ function closeTransferDialog() {
 
 async function confirmTransfer() {
   if (!currentTask.value || !transferForm.targetUserId) {
-    alert('请选择转办目标用户')
+    toastWarning('请选择转办目标用户')
     return
   }
   await flowApi.transferTask(currentTask.value.id, transferForm.targetUserId)
@@ -251,7 +252,7 @@ async function confirmTransfer() {
 async function handleUrge(row: any) {
   if (!confirm('确定催办该任务吗？')) return
   await flowApi.urgeTask(row.id)
-  alert('催办成功')
+  toastSuccess('催办成功')
 }
 
 function handleTerminate(row: any) {
@@ -266,14 +267,14 @@ function closeTerminateDialog() {
 
 async function confirmTerminate() {
   if (!currentTask.value || !terminateForm.reason.trim()) {
-    alert('请填写终止原因')
+    toastWarning('请填写终止原因')
     return
   }
   await flowApi.terminateInstance(currentTask.value.instance_id, terminateForm.reason)
   closeTerminateDialog()
   closeDetail()
   await loadData()
-  alert('流程已强制终止')
+  toastSuccess('流程已强制终止')
 }
 
 async function confirmAction() {
@@ -294,7 +295,7 @@ async function confirmAction() {
     closeDetail()
     await loadData()
   } catch (error: any) {
-    alert(error.message || '操作失败')
+    toastError(error.message || '操作失败')
   }
 }
 </script>

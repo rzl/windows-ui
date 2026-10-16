@@ -113,6 +113,7 @@ import { reactive, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { message } from '../../../utils/message'
 
 const auth = useAuthStore()
 const app = useAppStore()
@@ -168,19 +169,19 @@ function resetSettings() {
 }
 
 function saveInfo() {
-  alert('保存成功')
+  message.success('保存成功')
 }
 
 function changePassword() {
   if (!pwdForm.oldPassword || !pwdForm.newPassword) {
-    alert('请填写完整密码信息')
+    message.warning('请填写完整密码信息')
     return
   }
   if (pwdForm.newPassword !== pwdForm.confirmPassword) {
-    alert('两次输入的新密码不一致')
+    message.warning('两次输入的新密码不一致')
     return
   }
-  alert('密码修改成功')
+  message.success('密码修改成功')
   pwdForm.oldPassword = ''
   pwdForm.newPassword = ''
   pwdForm.confirmPassword = ''

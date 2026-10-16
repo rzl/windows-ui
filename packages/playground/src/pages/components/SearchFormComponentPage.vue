@@ -28,6 +28,7 @@ import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
 import { reactive } from 'vue'
+import { message } from '../../utils/message'
 const { t } = useI18n()
 
 const searchModel = reactive({ name: '', status: '' })
@@ -40,11 +41,11 @@ const statusOptions = [
 ]
 
 function onSearch(model: Record<string, any>) {
-  alert(t('搜索: ') + JSON.stringify(model))
+  message(t('搜索: ') + JSON.stringify(model))
 }
 
 function onReset() {
-  alert(t('已重置'))
+  message(t('已重置'))
 }
 
 const title = t('SearchForm 搜索表单')
@@ -58,11 +59,11 @@ const statusOptions = [
 ]
 
 function onSearch(model) {
-  alert(JSON.stringify(model))
+  message(JSON.stringify(model))
 }
 
 function onReset() {
-  alert('已重置')
+  message('已重置')
 }`
 
 const SearchFormCode1 = `${searchFormCommonCode}\n\nconst searchModel = reactive({ name: '', status: '' })\n\n<w-search-form :model="searchModel" @search="onSearch" @reset="onReset">
