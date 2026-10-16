@@ -34,6 +34,21 @@ describe('DynamicForm', () => {
     expect(valid).toBe(false)
   })
 
+  it('必填字段 label 前应显示红色必填星号', () => {
+    const model = reactive({ name: '', remark: '' })
+    const fields = [
+      { prop: 'name', label: '姓名', type: 'input' as const, required: true },
+      { prop: 'remark', label: '备注', type: 'input' as const }
+    ]
+    const wrapper = mountDynamicForm({ model, fields })
+    const stars = wrapper.findAll('.w-form-item__required')
+    expect(stars.length).toBe(1)
+    expect(stars[0].text()).toBe('*')
+    // 非必填字段不应显示星号
+    const remarkItem = wrapper.findAll('.w-form-item').find((i) => i.text().includes('备注'))
+    expect(remarkItem?.find('.w-form-item__required').exists()).toBe(false)
+  })
+
   it('dependsOn 依赖条件不满足时应隐藏字段', async () => {
     const model = reactive({ type: '1' })
     const fields = [
