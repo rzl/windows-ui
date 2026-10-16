@@ -52,3 +52,6 @@ packages/server/data/
 packages/server/exports/
 uploads/
 .kimi/*
+
+# AI agent session files
+.zcode/
