@@ -154,7 +154,23 @@ lowcode_models
 | seq_length | 序号位数 |
 | current_seq | 当前序号 |
 
-生成规则：`{prefix}{date}{seq}`。
+生成规则：`{prefix}{date}{seq}`；`date_format` 为空字符串表示不拼接日期（如员工工号 `EMP0001`）。
+
+### 内置默认编码规则
+
+由迁移 `20261016010000_add_default_coding_and_validation_rules.ts` 写入全局租户，可按需修改或停用，删除后重新执行迁移会恢复：
+
+| code | 名称 | 前缀 | 日期格式 | 序号位数 | 生成示例 |
+|------|------|------|----------|----------|----------|
+| order_no | 订单编号 | SO | YYYYMMDD | 4 | SO202610160001 |
+| contract_no | 合同编号 | HT | YYYYMMDD | 4 | HT202610160001 |
+| document_no | 单据编号 | DOC | YYYYMMDD | 4 | DOC202610160001 |
+| request_no | 申请单号 | REQ | YYYYMMDD | 3 | REQ20261016001 |
+| employee_no | 员工工号 | EMP | （空） | 4 | EMP0001 |
+| customer_no | 客户编号 | KH | （空） | 4 | KH0001 |
+| material_no | 物料编码 | WL | （空） | 5 | WL00001 |
+
+迁移为幂等插入：按 `(tenant_id, code)` 判断已存在则跳过，不会覆盖用户手工创建或修改过的规则。
 
 ## 校验规则（lowcode_validation_rules）
 
@@ -166,6 +182,25 @@ lowcode_models
 | message | 校验失败提示 |
 
 通过后端接口 `/lowcode/validation-rules/:code/validate` 可校验字段值。
+
+### 内置默认校验规则
+
+由同一迁移写入全局租户，字段设计器中可直接选用：
+
+| code | 名称 | 正则 | 说明 |
+|------|------|------|------|
+| mobile | 手机号码 | `^1[3-9]\d{9}$` | 大陆 11 位手机号 |
+| telephone | 座机电话 | `^0\d{2,3}-\d{7,8}$` | 如 010-12345678 |
+| email | 电子邮箱 | `^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$` | 常规邮箱格式 |
+| id_card | 身份证号 | `^\d{17}[\dXx]$` | 18 位，末位可为 X |
+| postal_code | 邮政编码 | `^\d{6}$` | 6 位数字 |
+| url | 网址 | `^https?:\/\/\S+$` | http/https 开头 |
+| positive_integer | 正整数 | `^[1-9]\d*$` | 不含 0 与前导零 |
+| integer | 整数 | `^-?\d+$` | 可为负 |
+| number | 数字 | `^-?\d+(\.\d+)?$` | 整数或小数 |
+| chinese | 中文 | `^[\u4e00-\u9fa5]+$` | 仅中文 |
+| english | 英文字母 | `^[A-Za-z]+$` | 仅字母 |
+| alphanumeric | 字母和数字 | `^[A-Za-z0-9]+$` | 不含特殊字符 |
 
 ## 流程定义（flow_definitions）
 
