@@ -283,8 +283,10 @@ async function applyRuleScope(
     case 'roles':
       if (rule.role_ids?.length) {
         if (!rule.role_ids.includes(user.roleId)) {
-          // 不附加条件，表示该规则允许该用户
+          // 规则限定的角色不包含当前用户：不通过该规则获得任何数据（与 users 分支语义一致）
+          builder.whereRaw('1 = 0')
         }
+        // 角色匹配：不附加行级条件，配合 custom_filter 决定可见范围
       }
       break
     case 'users':

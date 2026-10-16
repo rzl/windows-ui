@@ -15,9 +15,10 @@
 | 通用组件扩展 | [phase-1](../../by-phase/phase-1.md) | WCrudTable、WDynamicForm、WQueryBuilder | ✅ |
 | 页面模板 | [phase-4](../../by-phase/phase-4.md) | 结果页、异常页（403/404/500）、个人页 | ✅ |
 | 多租户基础框架 | [phase-34](../../by-phase/phase-34.md) | tenants 表、JWT 传递 tenantId、核心系统表租户隔离 | ✅ |
+| 安全加固与正确性修复 | [phase-36](../../by-phase/phase-36.md) | 内部服务共享密钥、JWT 治理、设计时 RBAC、上传/日志/WS 加固、元数据缓存与前端构建拆分 | ✅ |
 
 ## 待增强
 
-- [ ] 前端包构建产物体积优化
+- [x] 前端包构建产物体积优化（[phase-36](../../by-phase/phase-36.md)：manualChunks 拆分 + 流程设计器按需加载，入口 550KB → 31.5KB）
 - [ ] 后端错误监控与告警
 - [ ] 页面模板扩展（空白页、登录页模板）

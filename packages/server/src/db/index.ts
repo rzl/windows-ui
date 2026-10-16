@@ -11,6 +11,21 @@ export const db = knex({
   connection: {
     filename: dbPath
   },
+  pool: {
+    min: 2,
+    max: 10,
+    // 每个连接建立时设置 SQLite pragma：
+    // WAL 允许读写并发、busy_timeout 等待锁而不是立即报 SQLITE_BUSY、
+    // NORMAL 同步模式在 WAL 下兼顾性能与安全
+    afterCreate: (conn: any, done: (err: Error | null) => void) => {
+      conn.serialize(() => {
+        conn.run('PRAGMA journal_mode = WAL')
+        conn.run('PRAGMA busy_timeout = 5000')
+        conn.run('PRAGMA synchronous = NORMAL')
+        conn.run('PRAGMA foreign_keys = ON', (err: any) => (done as any)(err || null, conn))
+      })
+    }
+  },
   useNullAsDefault: true,
   migrations: {
     directory: path.resolve(__dirname, '../../migrations'),
@@ -30,6 +45,11 @@ const IGNORE_TABLES = ['sql_metrics', 'api_metrics', 'alert_rules', 'alert_recor
 
 db.on('query', (querySpec: any) => {
   queryTimes.set(querySpec.__knexQueryUid, Date.now())
+})
+
+// 查询失败时清理计时条目，否则 Map 会随失败查询无限增长（内存泄漏）
+db.on('query-error', (_err: any, querySpec: any) => {
+  queryTimes.delete(querySpec.__knexQueryUid)
 })
 
 db.on('query-response', (_response: any, querySpec: any) => {

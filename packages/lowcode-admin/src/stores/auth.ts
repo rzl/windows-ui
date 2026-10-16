@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import * as authApi from '@/api/auth'
 import type { LoginForm } from '@/api/auth'
 import { connectWebSocket, disconnectWebSocket, watchVisibilityForReconnect } from '@/utils/websocket'
+import { initPlugins } from '@/utils/pluginManager'
+import { toastError } from '@/utils/toast'
 import { useAppStore } from './app'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -18,7 +20,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   function showError(message: string) {
     errorMessage.value = message
-    // 也可以调用组件库 message
+    // 弹出全局消息提示（LowcodeLayout 挂载前降级为 console）
+    toastError(message)
     console.error(message)
   }
 
@@ -60,6 +63,8 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('lowcode_tenant_code', form.tenantCode)
     }
     userInfo.value = result.userInfo
+    // 登录前拉取的插件列表被裁剪过（不含运行时代码），登录后需重新初始化
+    await initPlugins()
     initWebSocket()
     return result
   }

@@ -77,6 +77,9 @@
       </main>
     </div>
 
+    <!-- 全局消息提示宿主：注册后请求层可通过 toast 工具弹出提示 -->
+    <w-message ref="messageRef" />
+
     <div
       v-if="tabMenu.visible"
       class="tab-menu-overlay"
@@ -142,13 +145,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useMenuStore } from '@/stores/menu'
 import { useLowcodeLocale, type LocaleType } from '@/locale'
 import { useScreen } from '@/composables/useScreen'
+import { setMessageApi } from '@/utils/toast'
 import NotificationCenter from '@/components/NotificationCenter.vue'
 
 const route = useRoute()
@@ -158,6 +162,12 @@ const app = useAppStore()
 const menu = useMenuStore()
 const { t } = useLowcodeLocale()
 const { isMobile } = useScreen()
+
+// 注册全局消息 API，供请求拦截器等非组件上下文使用
+const messageRef = ref<any>(null)
+onMounted(() => {
+  setMessageApi(messageRef.value)
+})
 
 watch(isMobile, (val) => {
   app.setMobile(val)

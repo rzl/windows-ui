@@ -75,10 +75,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, reactive, ref } from 'vue'
 import * as flowApi from '@/api/flow'
 import * as lowcodeApi from '@/api/lowcode'
-import FlowDesigner from '@/components/flow-designer/FlowDesigner.vue'
+
+// 设计器（含 @vue-flow 全家桶约 226KB）仅在打开编辑弹窗时才加载，
+// 避免流程列表页静态引入拖累首屏
+const FlowDesigner = defineAsyncComponent(() => import('@/components/flow-designer/FlowDesigner.vue'))
 
 const flows = ref<any[]>([])
 const total = ref(0)

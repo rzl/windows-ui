@@ -141,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as lowcodeApi from '@/api/lowcode'
 import * as dictApi from '@/api/dict'
@@ -150,6 +150,7 @@ import * as printApi from '@/api/print'
 import request from '@/api/request'
 import { useAuthStore } from '@/stores/auth'
 import { getFieldTypeMeta } from '@/utils/pluginManager'
+import { toastError, toastInfo, toastSuccess } from '@/utils/toast'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -683,24 +684,35 @@ async function exportSelectedExcel() {
   }
 }
 
+// 导出任务轮询定时器，组件卸载时清理避免后台继续轮询
+let exportPollTimer: ReturnType<typeof setTimeout> | null = null
+onUnmounted(() => {
+  if (exportPollTimer) {
+    clearTimeout(exportPollTimer)
+    exportPollTimer = null
+  }
+})
+
 async function startAsyncExport(options: { ids?: (string | number)[]; columns?: any[] }) {
   const result = await lowcodeApi.createExportTask(modelCode.value, options)
   const taskId = result.id
-  alert('导出任务已创建，请稍候...')
+  toastInfo('导出任务已创建，请稍候...')
 
   const poll = async () => {
+    exportPollTimer = null
     const task = await lowcodeApi.getExportTask(modelCode.value, taskId)
     if (task.status === 'success') {
       const blob = await lowcodeApi.downloadExportFile(modelCode.value, taskId)
       downloadBlob(blob, `${modelCode.value}_${Date.now()}.xlsx`)
+      toastSuccess('导出完成，文件已下载')
     } else if (task.status === 'error') {
-      alert(task.message || '导出失败')
+      toastError(task.message || '导出失败')
     } else {
-      setTimeout(poll, 1000)
+      exportPollTimer = setTimeout(poll, 1000)
     }
   }
 
-  setTimeout(poll, 1000)
+  exportPollTimer = setTimeout(poll, 1000)
 }
 
 function getExportColumns() {

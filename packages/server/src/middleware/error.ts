@@ -10,13 +10,21 @@ export function errorHandler(
 ) {
   logger.error(err.message, { stack: err.stack })
 
+  // 业务错误：返回真实 HTTP 状态码与业务信息
   if (err instanceof AppError) {
-    return res.status(200).json(error(err.message, err.code))
+    const code = err.code >= 400 && err.code < 600 ? err.code : 500
+    return res.status(code).json(error(err.message, err.code))
   }
 
   if (err.name === 'ValidationError' || err.name === 'ZodError') {
-    return res.status(200).json(error(err.message, 400))
+    return res.status(400).json(error(err.message, 400))
   }
 
-  res.status(200).json(error(err.message || '服务器内部错误', 500))
+  // multer 错误（文件超限、类型不符等）
+  if (err.name === 'MulterError') {
+    return res.status(400).json(error(`上传失败: ${err.message}`, 400))
+  }
+
+  // 未知错误：详情只写日志，不泄露给客户端（避免暴露 SQL / 内部路径等信息）
+  res.status(500).json(error('服务器内部错误', 500))
 }

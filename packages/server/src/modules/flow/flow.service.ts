@@ -1,6 +1,6 @@
 import { db } from '../../db'
 import { AppError } from '../../utils/response'
-import { tenantWhere, setTenantId } from '../../utils/tenant'
+import { tenantWhere, setTenantId, SUPER_ADMIN_ROLE_ID } from '../../utils/tenant'
 import type { AuthRequest } from '../../middleware/auth'
 import * as monitorService from '../monitor/monitor.service'
 import { newId } from '../../utils/id'
@@ -186,20 +186,23 @@ export async function startFlowInstance(
 
   const tenantFilter = tenantWhere(req)
   const instanceId = newId()
-  await db('flow_instances').insert({
-    id: instanceId,
-    ...tenantFilter,
-    flow_code: flowCode,
-    business_key: businessKey,
-    business_data: JSON.stringify(businessData),
-    status: 'running',
-    current_node_id: nextNode.id,
-    starter_id: starter?.id || null,
-    starter_name: starter?.nickname || starter?.username || null,
-    definition_version: def.version || 1
-  })
+  // 实例创建与首节点进入放在同一事务，避免 enterNode 失败（如会签节点未配置审批人）留下孤儿实例
+  await db.transaction(async (trx) => {
+    await trx('flow_instances').insert({
+      id: instanceId,
+      ...tenantFilter,
+      flow_code: flowCode,
+      business_key: businessKey,
+      business_data: JSON.stringify(businessData),
+      status: 'running',
+      current_node_id: nextNode.id,
+      starter_id: starter?.id || null,
+      starter_name: starter?.nickname || starter?.username || null,
+      definition_version: def.version || 1
+    })
 
-  await enterNode(req, instanceId, nextNode)
+    await enterNode(req, instanceId, nextNode, trx)
+  })
 
   return { instanceId, currentNodeId: nextNode.id }
 }
@@ -354,6 +357,9 @@ export async function transferTask(req: AuthRequest, taskId: string, targetUserI
   if (!task) throw new AppError('任务不存在', 404)
   if (task.status !== 'pending') throw new AppError('任务已处理', 400)
 
+  // 仅审批人本人/被委托人/超级管理员可转办
+  await assertTaskOperator(req, task, operator)
+
   const target = await db('users').where(tenantWhere(req)).where({ id: targetUserId, status: 1 }).first()
   if (!target) throw new AppError('目标用户不存在或已禁用', 400)
 
@@ -378,62 +384,105 @@ export async function transferTask(req: AuthRequest, taskId: string, targetUserI
   return true
 }
 
+/** 审批操作越权校验：仅审批人本人/被委托人/超级管理员可处理任务（operator.id === 0 表示系统自动流转） */
+async function assertTaskOperator(req: AuthRequest, task: any, operator?: any) {
+  if (!operator || operator.id === 0) return
+  if (operator.roleId === SUPER_ADMIN_ROLE_ID || operator.permissions?.includes('*')) return
+
+  if (task.assignee_type === 'user' && task.assignee_value === String(operator.id)) return
+  if (task.assignee_type === 'role' && task.assignee_value === String(operator.roleId)) return
+  if (task.assignee_type === 'dept' && operator.deptId && task.assignee_value === String(operator.deptId)) return
+
+  // 委托：操作人是原审批人的被委托人
+  const delegations = await getActiveDelegations(req, operator.id)
+  if (delegations.some((d) => d.delegator_id === task.assignee_value)) return
+
+  throw new AppError('只有审批人可以处理该任务', 403)
+}
+
 async function handleTask(req: AuthRequest, taskId: string, action: 'approve' | 'reject', comment: string, operator?: any) {
   const task = await db('flow_tasks').where({ id: taskId }).where(tenantWhere(req)).first()
   if (!task) throw new AppError('任务不存在', 404)
-  if (task.status !== 'pending') throw new AppError('任务已处理', 400)
 
   const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: task.instance_id }).first()
   if (!instance) throw new AppError('流程实例不存在', 404)
+  if (instance.status !== 'running') throw new AppError('流程实例已结束，无法继续审批', 400)
 
-  const def = await getFlowDefinitionByCode(req, instance.flow_code)
+  await assertTaskOperator(req, task, operator)
+
+  // 按实例保存的定义版本取流程定义，保证在途实例不随定义修改/回滚变化；版本缺失时回退最新版
+  let def = await db('flow_definitions')
+    .where({ code: instance.flow_code, version: instance.definition_version || 1 })
+    .where(tenantWhere(req))
+    .first()
+  if (!def) def = await getFlowDefinitionByCode(req, instance.flow_code)
   const config = def.config as FlowConfig
   const businessData = parseBusinessData(instance)
 
-  await db('flow_tasks')
-    .where({ id: taskId })
-    .where(tenantWhere(req))
-    .update({
-      status: action === 'approve' ? 'approved' : 'rejected',
-      comment,
-      operator_id: operator?.id || null,
-      operator_name: operator?.nickname || operator?.username || null,
-      update_time: db.fn.now()
-    })
+  let completedStatus: 'completed' | 'rejected' | null = null
 
-  const currentNode = config.nodes.find((n) => n.id === task.node_id)
-  if (currentNode?.type === 'sign') {
-    const shouldMove = await checkSignComplete(req, instance.id, currentNode)
-    if (!shouldMove) return true
-  }
-
-  const transition = findMatchedTransition(config, task.node_id, action, businessData)
-  if (!transition) throw new AppError(`当前节点未配置${action === 'approve' ? '通过' : '驳回'}流转`, 400)
-
-  const nextNode = config.nodes.find((n) => n.id === transition.to)
-  if (!nextNode) throw new AppError('流转目标节点不存在', 400)
-
-  if (nextNode.type === 'end') {
-    const finalStatus = action === 'approve' ? 'completed' : 'rejected'
-    await db('flow_instances')
-      .where({ id: instance.id })
+  await db.transaction(async (trx) => {
+    // 乐观锁：仅当任务仍为 pending 时更新，防止双人同时审批导致双重推进
+    const updated = await trx('flow_tasks')
+      .where({ id: taskId })
       .where(tenantWhere(req))
+      .where('status', 'pending')
       .update({
-        status: finalStatus,
-        current_node_id: null,
+        status: action === 'approve' ? 'approved' : 'rejected',
+        comment,
+        operator_id: operator?.id || null,
+        operator_name: operator?.nickname || operator?.username || null,
         update_time: db.fn.now()
       })
-    await sendFlowResultMessage(req, instance, finalStatus, operator?.nickname || operator?.username)
-  } else {
-    await db('flow_instances')
-      .where({ id: instance.id })
-      .where(tenantWhere(req))
-      .update({
-        current_node_id: nextNode.id,
-        update_time: db.fn.now()
-      })
+    if (!updated) throw new AppError('任务已处理', 400)
 
-    await enterNode(req, instance.id, nextNode)
+    const currentNode = config.nodes.find((n) => n.id === task.node_id)
+    if (currentNode?.type === 'sign') {
+      const shouldMove = await checkSignComplete(req, instance.id, currentNode, trx)
+      if (!shouldMove) return
+      // 会签达成后取消同节点剩余 pending 任务，避免残留任务从旧节点重复推进
+      await trx('flow_tasks')
+        .where(tenantWhere(req))
+        .where({ instance_id: instance.id, node_id: task.node_id, status: 'pending' })
+        .update({ status: 'cancelled', update_time: db.fn.now() })
+    }
+
+    const transition = findMatchedTransition(config, task.node_id, action, businessData)
+    if (!transition) throw new AppError(`当前节点未配置${action === 'approve' ? '通过' : '驳回'}流转`, 400)
+
+    const nextNode = config.nodes.find((n) => n.id === transition.to)
+    if (!nextNode) throw new AppError('流转目标节点不存在', 400)
+
+    if (nextNode.type === 'end') {
+      const finalStatus = action === 'approve' ? 'completed' : 'rejected'
+      const moved = await trx('flow_instances')
+        .where({ id: instance.id })
+        .where(tenantWhere(req))
+        .where('status', 'running')
+        .update({
+          status: finalStatus,
+          current_node_id: null,
+          update_time: db.fn.now()
+        })
+      if (!moved) throw new AppError('流程实例状态已变化，请刷新后重试', 409)
+      completedStatus = finalStatus
+    } else {
+      const moved = await trx('flow_instances')
+        .where({ id: instance.id })
+        .where(tenantWhere(req))
+        .where('status', 'running')
+        .update({
+          current_node_id: nextNode.id,
+          update_time: db.fn.now()
+        })
+      if (!moved) throw new AppError('流程实例状态已变化，请刷新后重试', 409)
+
+      await enterNode(req, instance.id, nextNode, trx)
+    }
+  })
+
+  if (completedStatus) {
+    await sendFlowResultMessage(req, instance, completedStatus, operator?.nickname || operator?.username)
   }
 
   return true
@@ -524,7 +573,7 @@ async function sendFlowResultMessage(
   }
 }
 
-async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode) {
+async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode, executor: any = db) {
   const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: instanceId }).first()
   const flow = instance
     ? await db('flow_definitions')
@@ -539,7 +588,7 @@ async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode) {
 
   if (node.type === 'approve') {
     const taskId = newId()
-    await db('flow_tasks').insert({
+    await executor('flow_tasks').insert({
       id: taskId,
       ...tenantWhere(req),
       instance_id: instanceId,
@@ -561,7 +610,7 @@ async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode) {
         ? [{ type: node.assigneeType, value: node.assigneeValue }]
         : []
     if (!assignees.length) throw new AppError('会签节点未配置审批人', 400)
-    await db('flow_tasks').insert(
+    await executor('flow_tasks').insert(
       assignees.map((a) => ({
         id: newId(),
         ...tenantWhere(req),
@@ -576,19 +625,19 @@ async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode) {
         timeout_action: timeoutAction
       }))
     )
-    const tasks = await db('flow_tasks')
+    const tasks = await executor('flow_tasks')
       .where(tenantWhere(req))
       .where({ instance_id: instanceId, node_id: node.id, status: 'pending' })
       .select('id', 'assignee_type', 'assignee_value')
     await Promise.all(
-      tasks.map(async (t) => {
+      tasks.map(async (t: any) => {
         const receiverIds = await getReceiverUserIds(req, t.assignee_type, t.assignee_value)
         await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(req, instanceId, t.id, node.name, rid, flowName)))
       })
     )
   } else if (node.type === 'cc') {
     const taskId = newId()
-    await db('flow_tasks').insert({
+    await executor('flow_tasks').insert({
       id: taskId,
       ...tenantWhere(req),
       instance_id: instanceId,
@@ -602,7 +651,7 @@ async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode) {
     })
     const receiverIds = await getReceiverUserIds(req, node.assigneeType, node.assigneeValue)
     await Promise.all(receiverIds.map((rid) => sendFlowTaskMessage(req, instanceId, taskId, node.name, rid, flowName)))
-    await autoMoveToNextNode(req, instanceId, node, 'approve')
+    await autoMoveToNextNode(req, instanceId, node, 'approve', executor)
   } else if (node.type === 'condition') {
     const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: instanceId }).first()
     if (!instance) return
@@ -613,17 +662,17 @@ async function enterNode(req: AuthRequest, instanceId: string, node: FlowNode) {
     if (transition) {
       const nextNode = config.nodes.find((n) => n.id === transition.to)
       if (nextNode) {
-        await db('flow_instances')
+        await executor('flow_instances')
           .where({ id: instanceId })
           .where(tenantWhere(req))
           .update({ current_node_id: nextNode.id, update_time: db.fn.now() })
-        await enterNode(req, instanceId, nextNode)
+        await enterNode(req, instanceId, nextNode, executor)
       }
     }
   }
 }
 
-async function autoMoveToNextNode(req: AuthRequest, instanceId: string, node: FlowNode, action: string) {
+async function autoMoveToNextNode(req: AuthRequest, instanceId: string, node: FlowNode, action: string, executor: any = db) {
   const instance = await db('flow_instances').where(tenantWhere(req)).where({ id: instanceId }).first()
   if (!instance) return
   const def = await getFlowDefinitionByCode(req, instance.flow_code)
@@ -635,7 +684,7 @@ async function autoMoveToNextNode(req: AuthRequest, instanceId: string, node: Fl
   if (!nextNode) return
 
   if (nextNode.type === 'end') {
-    await db('flow_instances')
+    await executor('flow_instances')
       .where({ id: instanceId })
       .where(tenantWhere(req))
       .update({
@@ -644,20 +693,20 @@ async function autoMoveToNextNode(req: AuthRequest, instanceId: string, node: Fl
         update_time: db.fn.now()
       })
   } else {
-    await db('flow_instances')
+    await executor('flow_instances')
       .where({ id: instanceId })
       .where(tenantWhere(req))
       .update({ current_node_id: nextNode.id, update_time: db.fn.now() })
-    await enterNode(req, instanceId, nextNode)
+    await enterNode(req, instanceId, nextNode, executor)
   }
 }
 
-async function checkSignComplete(req: AuthRequest, instanceId: string, node: FlowNode): Promise<boolean> {
-  const tasks = await db('flow_tasks')
+async function checkSignComplete(req: AuthRequest, instanceId: string, node: FlowNode, executor: any = db): Promise<boolean> {
+  const tasks = await executor('flow_tasks')
     .where(tenantWhere(req))
     .where({ instance_id: instanceId, node_id: node.id })
-  const pendingCount = tasks.filter((t) => t.status === 'pending').length
-  const approvedCount = tasks.filter((t) => t.status === 'approved').length
+  const pendingCount = tasks.filter((t: any) => t.status === 'pending').length
+  const approvedCount = tasks.filter((t: any) => t.status === 'approved').length
 
   if (node.signType === 'any') {
     return approvedCount > 0
@@ -970,22 +1019,27 @@ export async function terminateInstance(req: AuthRequest, instanceId: string, re
   if (instance.status !== 'running') throw new AppError('只能终止运行中的流程实例', 400)
   if (!reason?.trim()) throw new AppError('终止原因不能为空', 400)
 
-  await db('flow_instances')
-    .where({ id: instanceId })
-    .where(tenantWhere(req))
-    .update({
-      status: 'terminated',
-      current_node_id: null,
-      terminated_by: operator?.id || null,
-      terminated_reason: reason,
-      terminated_time: new Date().toISOString(),
-      update_time: db.fn.now()
-    })
+  await db.transaction(async (trx) => {
+    // 条件更新做并发保护，避免与审批操作同时推进
+    const moved = await trx('flow_instances')
+      .where({ id: instanceId })
+      .where(tenantWhere(req))
+      .where('status', 'running')
+      .update({
+        status: 'terminated',
+        current_node_id: null,
+        terminated_by: operator?.id || null,
+        terminated_reason: reason,
+        terminated_time: new Date().toISOString(),
+        update_time: db.fn.now()
+      })
+    if (!moved) throw new AppError('流程实例状态已变化，终止失败', 409)
 
-  await db('flow_tasks')
-    .where(tenantWhere(req))
-    .where({ instance_id: instanceId, status: 'pending' })
-    .update({ status: 'terminated', update_time: db.fn.now() })
+    await trx('flow_tasks')
+      .where(tenantWhere(req))
+      .where({ instance_id: instanceId, status: 'pending' })
+      .update({ status: 'terminated', update_time: db.fn.now() })
+  })
 
   if (instance.starter_id) {
     const flow = await db('flow_definitions')

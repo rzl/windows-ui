@@ -10,13 +10,27 @@ import type { LoginDto, RefreshDto, UpdateProfileDto, ChangePasswordDto } from '
 import { getRoleDataPermissionIds } from '../lowcode/data-permission.service'
 
 function generateTokens(payload: { id: string; username: string; roleId: string; tenantId: string }) {
-  const accessToken = jwt.sign(payload, config.jwt.secret as jwt.Secret, {
+  // 通过 tokenType 声明区分两类令牌，refresh 令牌不能直接当访问令牌使用
+  const accessToken = jwt.sign({ ...payload, tokenType: 'access' }, config.jwt.secret as jwt.Secret, {
     expiresIn: config.jwt.accessExpires as jwt.SignOptions['expiresIn']
   })
-  const refreshToken = jwt.sign(payload, config.jwt.secret as jwt.Secret, {
+  const refreshToken = jwt.sign({ ...payload, tokenType: 'refresh' }, config.jwt.secret as jwt.Secret, {
     expiresIn: config.jwt.refreshExpires as jwt.SignOptions['expiresIn']
   })
   return { accessToken, refreshToken }
+}
+
+/** 读取令牌的过期时间（秒级时间戳），解析失败返回 null */
+function getTokenExpiry(token: string): number | null {
+  const decoded = jwt.decode(token) as { exp?: number } | null
+  return decoded?.exp ? decoded.exp * 1000 : null
+}
+
+function revokeToken(token: string) {
+  if (!token) return
+  const expiresAt = getTokenExpiry(token)
+  // 无法解析过期时间的令牌按 24 小时兜底，避免黑名单无限增长
+  tokenBlacklist.add(token, expiresAt ?? Date.now() + 24 * 60 * 60 * 1000)
 }
 
 export async function login(dto: LoginDto) {
@@ -74,7 +88,13 @@ export async function refresh(dto: RefreshDto) {
       username: string
       roleId: string
       tenantId: string
+      tokenType?: string
     }
+    if (decoded.tokenType && decoded.tokenType !== 'refresh') {
+      throw new Error('令牌类型错误')
+    }
+    // 轮换：旧 refresh 令牌立即吊销，只能用新令牌继续刷新
+    revokeToken(dto.refreshToken)
     return generateTokens({
       id: decoded.id,
       username: decoded.username,
@@ -86,8 +106,9 @@ export async function refresh(dto: RefreshDto) {
   }
 }
 
-export function logout(token: string) {
-  tokenBlacklist.add(token)
+export function logout(token: string, refreshToken?: string) {
+  revokeToken(token)
+  if (refreshToken) revokeToken(refreshToken)
   return true
 }
 

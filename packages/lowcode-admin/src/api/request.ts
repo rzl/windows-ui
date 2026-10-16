@@ -125,7 +125,29 @@ instance.interceptors.request.use(
 )
 
 instance.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
+  async (response: AxiosResponse<ApiResponse>) => {
+    // 二进制响应（Excel 导出/模板下载等）成功时直接返回 Blob 交给调用方
+    if (response.config.responseType === 'blob') {
+      const blob = response.data as unknown as Blob
+      // 后端出错时返回的是 JSON Blob，解析后走统一错误逻辑，避免把错误信息当文件下载
+      if (blob instanceof Blob && (blob.type.includes('json') || blob.type.includes('text'))) {
+        try {
+          const parsed = JSON.parse(await blob.text()) as ApiResponse
+          if (parsed && typeof parsed.code === 'number' && parsed.code !== 200) {
+            const message = parsed.message || '请求失败'
+            if (parsed.code === 401) {
+              return handleUnauthorized(message, response.config as RetryConfig)
+            }
+            showError(message)
+            return Promise.reject(new Error(message))
+          }
+        } catch {
+          // 非 JSON 内容，按正常二进制文件处理
+        }
+      }
+      return response.data
+    }
+
     const data = response.data
     if (data.code === 200) {
       return data.data
@@ -138,10 +160,7 @@ instance.interceptors.response.use(
       return handleUnauthorized(message, response.config as RetryConfig)
     }
 
-    if (typeof window !== 'undefined') {
-      const auth = useAuthStore()
-      auth.showError?.(message)
-    }
+    showError(message)
     return Promise.reject(new Error(message))
   },
   (error) => {
@@ -153,12 +172,15 @@ instance.interceptors.response.use(
       return handleUnauthorized(message, error.config as RetryConfig)
     }
 
-    if (typeof window !== 'undefined') {
-      const auth = useAuthStore()
-      auth.showError?.(message)
-    }
+    showError(message)
     return Promise.reject(new Error(message))
   }
 )
+
+function showError(message: string) {
+  if (typeof window === 'undefined') return
+  const auth = useAuthStore()
+  auth.showError?.(message)
+}
 
 export default instance

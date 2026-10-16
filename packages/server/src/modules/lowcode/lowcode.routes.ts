@@ -1,6 +1,7 @@
 import { Router, type Router as RouterType } from 'express'
 import multer from 'multer'
 import { authMiddleware } from '../../middleware/auth'
+import { requirePermission } from '../../middleware/permission'
 import * as lowcodeController from './lowcode.controller'
 import * as dataPermissionController from './data-permission.controller'
 import * as fieldPermissionController from './field-permission.controller'
@@ -11,45 +12,48 @@ import * as savedQueryController from './saved-query.controller'
 const router: RouterType = Router()
 const upload = multer({ storage: multer.memoryStorage() })
 
+// 设计时写操作（模型/字段/表单/规则等）要求 lowcode:design 权限，超管自动放行
+const design = requirePermission('lowcode:design')
+
 router.use(authMiddleware)
 
 // 数据模型
 router.get('/models', lowcodeController.getModels)
 router.get('/models/:id/export', lowcodeController.exportModel)
-router.post('/models/import', upload.single('file'), lowcodeController.importModel)
+router.post('/models/import', design, upload.single('file'), lowcodeController.importModel)
 router.get('/models/:id/versions', modelVersionController.getVersions)
-router.post('/models/:id/versions', modelVersionController.createVersion)
-router.post('/models/:id/versions/:versionId/rollback', modelVersionController.rollbackVersion)
-router.delete('/models/:id/versions/:versionId', modelVersionController.deleteVersion)
+router.post('/models/:id/versions', design, modelVersionController.createVersion)
+router.post('/models/:id/versions/:versionId/rollback', design, modelVersionController.rollbackVersion)
+router.delete('/models/:id/versions/:versionId', design, modelVersionController.deleteVersion)
 router.get('/models/:id', lowcodeController.getModel)
 router.get('/models/code/:code', lowcodeController.getModelByCode)
 router.get('/models/code/:code/permission', lowcodeController.getModelPermission)
-router.post('/models', lowcodeController.createModel)
-router.put('/models/:id', lowcodeController.updateModel)
-router.delete('/models/:id', lowcodeController.deleteModel)
+router.post('/models', design, lowcodeController.createModel)
+router.put('/models/:id', design, lowcodeController.updateModel)
+router.delete('/models/:id', design, lowcodeController.deleteModel)
 
 // 字段
-router.post('/fields', lowcodeController.createField)
-router.put('/fields/:id', lowcodeController.updateField)
-router.delete('/fields/:id', lowcodeController.deleteField)
-router.post('/fields/batch-delete', lowcodeController.batchDeleteFields)
+router.post('/fields', design, lowcodeController.createField)
+router.put('/fields/:id', design, lowcodeController.updateField)
+router.delete('/fields/:id', design, lowcodeController.deleteField)
+router.post('/fields/batch-delete', design, lowcodeController.batchDeleteFields)
 
 // 表单/列表配置
-router.post('/forms', lowcodeController.saveForm)
-router.post('/tables', lowcodeController.saveTable)
+router.post('/forms', design, lowcodeController.saveForm)
+router.post('/tables', design, lowcodeController.saveTable)
 
 // 编码规则
 router.get('/coding-rules', lowcodeController.getCodingRules)
-router.post('/coding-rules', lowcodeController.createCodingRule)
-router.put('/coding-rules/:id', lowcodeController.updateCodingRule)
-router.delete('/coding-rules/:id', lowcodeController.deleteCodingRule)
+router.post('/coding-rules', design, lowcodeController.createCodingRule)
+router.put('/coding-rules/:id', design, lowcodeController.updateCodingRule)
+router.delete('/coding-rules/:id', design, lowcodeController.deleteCodingRule)
 router.get('/coding-rules/:ruleCode/generate', lowcodeController.generateCode)
 
 // 校验规则
 router.get('/validation-rules', lowcodeController.getValidationRules)
-router.post('/validation-rules', lowcodeController.createValidationRule)
-router.put('/validation-rules/:id', lowcodeController.updateValidationRule)
-router.delete('/validation-rules/:id', lowcodeController.deleteValidationRule)
+router.post('/validation-rules', design, lowcodeController.createValidationRule)
+router.put('/validation-rules/:id', design, lowcodeController.updateValidationRule)
+router.delete('/validation-rules/:id', design, lowcodeController.deleteValidationRule)
 router.post('/validation-rules/:ruleCode/validate', lowcodeController.validateField)
 router.post('/validation-rules/batch', lowcodeController.validateBatch)
 
@@ -59,24 +63,24 @@ router.post('/options/execute', lowcodeController.executeFieldOptions)
 // 数据权限规则
 router.get('/data-permissions', dataPermissionController.getRules)
 router.get('/data-permissions/:id', dataPermissionController.getRuleById)
-router.post('/data-permissions', dataPermissionController.createRule)
-router.put('/data-permissions/:id', dataPermissionController.updateRule)
-router.delete('/data-permissions/:id', dataPermissionController.deleteRule)
+router.post('/data-permissions', design, dataPermissionController.createRule)
+router.put('/data-permissions/:id', design, dataPermissionController.updateRule)
+router.delete('/data-permissions/:id', design, dataPermissionController.deleteRule)
 
 // 字段权限规则
 router.get('/field-permissions', fieldPermissionController.getRules)
 router.get('/field-permissions/:id', fieldPermissionController.getRuleById)
-router.post('/field-permissions', fieldPermissionController.createRule)
-router.put('/field-permissions/:id', fieldPermissionController.updateRule)
-router.delete('/field-permissions/:id', fieldPermissionController.deleteRule)
+router.post('/field-permissions', design, fieldPermissionController.createRule)
+router.put('/field-permissions/:id', design, fieldPermissionController.updateRule)
+router.delete('/field-permissions/:id', design, fieldPermissionController.deleteRule)
 
 // 关联关系
 router.get('/relations', relationController.getRelations)
 router.get('/relations/:id', relationController.getRelationById)
 router.get('/relations/:code/options', relationController.getRelationOptions)
-router.post('/relations', relationController.createRelation)
-router.put('/relations/:id', relationController.updateRelation)
-router.delete('/relations/:id', relationController.deleteRelation)
+router.post('/relations', design, relationController.createRelation)
+router.put('/relations/:id', design, relationController.updateRelation)
+router.delete('/relations/:id', design, relationController.deleteRelation)
 
 // 常用查询
 router.get('/:modelCode/saved-queries', savedQueryController.getSavedQueries)
@@ -85,7 +89,7 @@ router.put('/:modelCode/saved-queries/:id', savedQueryController.updateSavedQuer
 router.delete('/:modelCode/saved-queries/:id', savedQueryController.deleteSavedQuery)
 router.post('/:modelCode/saved-queries/:id/default', savedQueryController.setDefaultSavedQuery)
 
-// 动态 CRUD（放在最后避免路径冲突）
+// 动态 CRUD（放在最后避免路径冲突，运行时权限在 service 内按模型/按钮/行级校验）
 router.get('/:modelCode', lowcodeController.dynamicList)
 router.post('/:modelCode/import', lowcodeController.dynamicImport)
 router.post('/:modelCode/export', lowcodeController.exportDynamicExcel)

@@ -241,7 +241,7 @@ async function executeApiDataSource(apiConfig?: DataSourceConfig['api']) {
     params: apiConfig.params,
     data: apiConfig.body,
     headers: {
-      'x-dashboard-service': '1'
+      'x-internal-token': appConfig.internalSecret
     }
   })
   return response.data?.data

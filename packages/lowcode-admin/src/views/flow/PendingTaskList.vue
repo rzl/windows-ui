@@ -146,6 +146,8 @@ function formatTraceDesc(task: any) {
     parts.push('抄送')
   } else if (task.status === 'terminated') {
     parts.push('已终止')
+  } else if (task.status === 'cancelled') {
+    parts.push('已取消（会签已由他人完成或流程已流转）')
   }
   if (task.transferredFrom) parts.push(`由用户 #${task.transferredFrom} 转办`)
   if (task.delegatedFrom) parts.push(`受用户 #${task.delegatedFrom} 委托代处理`)

@@ -14,7 +14,8 @@ import { applyDataPermissionWhere, assertRowPermission as assertDataPermissionRo
 import { assertFieldWritable, filterHiddenFields, getFieldPermissionMap } from './field-permission.service'
 import * as pluginService from '../plugin/plugin.service'
 import * as relationService from './relation.service'
-import { rebuildTableWithoutColumns } from '../../utils/rebuildTable'
+import { rebuildTableWithoutColumns, rebuildTableWithColumnTypes, createSystemColumnIndexes, getTableColumns } from '../../utils/rebuildTable'
+import { getCachedMetadata, setCachedMetadata, invalidateMetadataCache } from '../../utils/metadata-cache'
 import * as queryService from './query.service'
 
 const RESERVED_FIELDS = ['id', 'create_time', 'update_time']
@@ -109,6 +110,15 @@ export async function getModelById(req: AuthRequest, id: string) {
 }
 
 export async function getModelByCode(req: AuthRequest, code: string) {
+  // 元数据高频读取（单次列表请求会多次调用），走进程内缓存，设计时变更自动失效
+  const tenantId = getTenantId(req) ?? 'all'
+  const cacheKey = `model-code:${tenantId}:${code}`
+  const cached = getCachedMetadata(cacheKey)
+  if (cached) {
+    // 返回深拷贝，避免调用方修改缓存对象
+    return JSON.parse(JSON.stringify(cached))
+  }
+
   const model = await db('lowcode_models')
     .where({ code })
     .where(tenantWhere(req))
@@ -125,7 +135,9 @@ export async function getModelByCode(req: AuthRequest, code: string) {
   const tables = await db('lowcode_tables')
     .where({ model_id: model.id })
     .where(tenantWhere(req))
-  return { ...model, fields, forms, tables }
+  const result = { ...model, fields, forms, tables }
+  setCachedMetadata(cacheKey, result)
+  return JSON.parse(JSON.stringify(result))
 }
 
 async function fillDictOptions(req: AuthRequest, fields: any[]) {
@@ -199,20 +211,24 @@ export async function createModel(req: AuthRequest, data: any) {
   if (exists) throw new AppError('模型编码或表名已存在', 400)
 
   const id = newId()
-  await db('lowcode_models').insert(
-    setTenantId({ id, ...{
-      code,
-      name: data.name,
-      table_name: tableName,
-      description: data.description,
-      data_permission: data.dataPermission || 'all',
-      status: data.status ?? 1,
-      enable_audit: data.enableAudit ? 1 : 0
-    } }, req)
-  )
+  // 元数据写入与物理表创建放在同一事务，避免出现"有模型无表"的脏状态
+  await db.transaction(async (trx) => {
+    await trx('lowcode_models').insert(
+      setTenantId({ id, ...{
+        code,
+        name: data.name,
+        table_name: tableName,
+        description: data.description,
+        data_permission: data.dataPermission || 'all',
+        status: data.status ?? 1,
+        enable_audit: data.enableAudit ? 1 : 0
+      } }, req)
+    )
 
-  // 自动创建物理表（仅 id + 时间戳 + tenant_id）
-  await createPhysicalTable(tableName)
+    // 自动创建物理表（仅 id + 时间戳 + tenant_id 等系统列）并补系统列索引
+    await createPhysicalTable(tableName, trx)
+  })
+  invalidateMetadataCache()
 
   return db('lowcode_models').where({ id }).first()
 }
@@ -235,6 +251,7 @@ export async function updateModel(req: AuthRequest, id: string, data: any) {
       enable_audit: data.enableAudit ? 1 : 0,
       update_time: db.fn.now()
     })
+  invalidateMetadataCache()
   return db('lowcode_models').where({ id }).first()
 }
 
@@ -245,11 +262,13 @@ export async function deleteModel(req: AuthRequest, id: string) {
     .first()
   if (!model) throw new AppError('模型不存在', 404)
 
-  // 删除物理表
-  await db.schema.dropTableIfExists(model.table_name)
-
-  // 元数据由外键级联删除
-  await db('lowcode_models').where({ id }).where(tenantWhere(req)).del()
+  // 物理表删除与元数据删除放在同一事务，失败一起回滚
+  await db.transaction(async (trx) => {
+    await trx.schema.dropTableIfExists(model.table_name)
+    // 元数据由外键级联删除
+    await trx('lowcode_models').where({ id }).where(tenantWhere(req)).del()
+  })
+  invalidateMetadataCache()
   return true
 }
 
@@ -274,31 +293,35 @@ export async function createField(req: AuthRequest, data: any) {
   if (exists) throw new AppError('字段已存在', 400)
 
   const id = newId()
-  await db('lowcode_fields').insert(
-    setTenantId({ id, ...{
-      model_id: data.modelId,
-      field_name: fieldName,
-      display_name: data.displayName,
-      type: data.type || 'string',
-      length: data.length ?? 255,
-      required: data.required ? 1 : 0,
-      default_value: data.defaultValue,
-      default_value_type: data.defaultValueType || 'constant',
-      default_value_expr: data.defaultValueExpr || null,
-      options: data.options ? JSON.stringify(data.options) : null,
-      validation_rule: data.validationRule || null,
-      dict_code: data.dictCode || null,
-      ref_model: data.refModel || null,
-      ref_display_field: data.refDisplayField || null,
-      ref_relation: data.refRelation || null,
-      ref_filter: data.refFilter ? JSON.stringify(data.refFilter) : null,
-      sort: data.sort ?? 0,
-      status: data.status ?? 1
-    } }, req)
-  )
+  // 元数据写入与物理列创建放在同一事务，避免出现"有元数据无物理列"的脏状态
+  await db.transaction(async (trx) => {
+    await trx('lowcode_fields').insert(
+      setTenantId({ id, ...{
+        model_id: data.modelId,
+        field_name: fieldName,
+        display_name: data.displayName,
+        type: data.type || 'string',
+        length: data.length ?? 255,
+        required: data.required ? 1 : 0,
+        default_value: data.defaultValue,
+        default_value_type: data.defaultValueType || 'constant',
+        default_value_expr: data.defaultValueExpr || null,
+        options: data.options ? JSON.stringify(data.options) : null,
+        validation_rule: data.validationRule || null,
+        dict_code: data.dictCode || null,
+        ref_model: data.refModel || null,
+        ref_display_field: data.refDisplayField || null,
+        ref_relation: data.refRelation || null,
+        ref_filter: data.refFilter ? JSON.stringify(data.refFilter) : null,
+        sort: data.sort ?? 0,
+        status: data.status ?? 1
+      } }, req)
+    )
 
-  // 同步到物理表
-  await addPhysicalColumn(model.table_name, fieldName, data)
+    // 同步到物理表
+    await addPhysicalColumn(model.table_name, fieldName, data, trx)
+  })
+  invalidateMetadataCache()
 
   return db('lowcode_fields').where({ id }).first()
 }
@@ -316,30 +339,36 @@ export async function updateField(req: AuthRequest, id: string, data: any) {
     .first()
   if (!model) throw new AppError('模型不存在', 404)
 
-  await db('lowcode_fields')
-    .where({ id })
-    .where(tenantWhere(req))
-    .update({
-      display_name: data.displayName,
-      type: data.type,
-      length: data.length,
-      required: data.required ? 1 : 0,
-      default_value: data.defaultValue,
-      default_value_type: data.defaultValueType || 'constant',
-      default_value_expr: data.defaultValueExpr || null,
-      options: data.options ? JSON.stringify(data.options) : null,
-      validation_rule: data.validationRule || null,
-      dict_code: data.dictCode || null,
-      ref_model: data.refModel || null,
-      ref_display_field: data.refDisplayField || null,
-      ref_relation: data.refRelation || null,
-      ref_filter: data.refFilter ? JSON.stringify(data.refFilter) : null,
-      sort: data.sort,
-      status: data.status
-    })
+  // 类型变化时物理列需要重建（SQLite 不支持 ALTER COLUMN）
+  const typeChanged = Boolean(data.type && data.type !== field.type)
 
-  // 同步物理表字段类型（SQLite 支持有限，先尝试 alter）
-  await alterPhysicalColumn(model.table_name, field.field_name, data)
+  await db.transaction(async (trx) => {
+    await trx('lowcode_fields')
+      .where({ id })
+      .where(tenantWhere(req))
+      .update({
+        display_name: data.displayName,
+        type: data.type,
+        length: data.length,
+        required: data.required ? 1 : 0,
+        default_value: data.defaultValue,
+        default_value_type: data.defaultValueType || 'constant',
+        default_value_expr: data.defaultValueExpr || null,
+        options: data.options ? JSON.stringify(data.options) : null,
+        validation_rule: data.validationRule || null,
+        dict_code: data.dictCode || null,
+        ref_model: data.refModel || null,
+        ref_display_field: data.refDisplayField || null,
+        ref_relation: data.refRelation || null,
+        ref_filter: data.refFilter ? JSON.stringify(data.refFilter) : null,
+        sort: data.sort,
+        status: data.status
+      })
+
+    // 同步物理表字段类型
+    await alterPhysicalColumn(model.table_name, field.field_name, data, trx)
+  })
+  invalidateMetadataCache()
 
   return db('lowcode_fields').where({ id }).first()
 }
@@ -363,6 +392,7 @@ export async function deleteField(req: AuthRequest, id: string) {
     await trx('lowcode_fields').where({ id }).where(tenantWhere(req)).del()
     await rebuildTableWithoutColumns(model.table_name, [field.field_name])
   })
+  invalidateMetadataCache()
 
   return true
 }
@@ -394,6 +424,7 @@ export async function batchDeleteFields(req: AuthRequest, ids: number[]) {
     await trx('lowcode_fields').whereIn('id', ids).where(tenantWhere(req)).del()
     await rebuildTableWithoutColumns(model.table_name, columnsToRemove)
   })
+  invalidateMetadataCache()
 
   return true
 }
@@ -489,6 +520,7 @@ export async function saveForm(req: AuthRequest, data: any) {
         config: JSON.stringify(data.config),
         status: data.status ?? 1
       })
+    invalidateMetadataCache()
     return db('lowcode_forms').where({ id: exists.id }).first()
   }
 
@@ -501,6 +533,7 @@ export async function saveForm(req: AuthRequest, data: any) {
       status: data.status ?? 1
     } }, req)
   )
+  invalidateMetadataCache()
   return db('lowcode_forms').where({ id }).first()
 }
 
@@ -524,6 +557,7 @@ export async function saveTable(req: AuthRequest, data: any) {
         config: JSON.stringify(data.config),
         status: data.status ?? 1
       })
+    invalidateMetadataCache()
     return db('lowcode_tables').where({ id: exists.id }).first()
   }
 
@@ -536,16 +570,30 @@ export async function saveTable(req: AuthRequest, data: any) {
       status: data.status ?? 1
     } }, req)
   )
+  invalidateMetadataCache()
   return db('lowcode_tables').where({ id }).first()
 }
 
 // ---------- 动态表操作 ----------
 
-async function createPhysicalTable(tableName: string) {
-  const exists = await db.schema.hasTable(tableName)
-  if (exists) return
+// 已补齐系统列索引的表（进程内幂等标记）
+const indexEnsuredTables = new Set<string>()
 
-  await db.schema.createTable(tableName, (table) => {
+/** 存量表一次性补齐系统列索引（动态表早期版本没有索引，租户过滤全表扫描） */
+export async function ensureDynamicTableIndexes(tableName: string) {
+  if (indexEnsuredTables.has(tableName)) return
+  indexEnsuredTables.add(tableName)
+  await createSystemColumnIndexes(tableName)
+}
+
+async function createPhysicalTable(tableName: string, executor: any = db) {
+  const exists = await executor.schema.hasTable(tableName)
+  if (exists) {
+    indexEnsuredTables.add(tableName)
+    return
+  }
+
+  await executor.schema.createTable(tableName, (table: any) => {
     table.string('id', 36).primary()
     table.string('tenant_id', 36).nullable()
     table.string('create_by', 36).nullable()
@@ -554,59 +602,134 @@ async function createPhysicalTable(tableName: string) {
     table.timestamp('create_time').defaultTo(db.fn.now())
     table.timestamp('update_time').defaultTo(db.fn.now())
   })
+
+  // 系统列索引：tenant_id / create_by / dept_id / create_time 是最高频的过滤与排序条件
+  await createSystemColumnIndexes(tableName, executor)
+  indexEnsuredTables.add(tableName)
 }
 
-async function addPhysicalColumn(tableName: string, columnName: string, fieldData: any) {
-  const exists = await db.schema.hasColumn(tableName, columnName)
+/** 按字段类型构建物理列（新增列与类型变更重建共用同一映射） */
+function buildColumnByFieldType(table: any, columnName: string, fieldData: any, pluginDbType?: string) {
+  if (pluginDbType) {
+    buildColumn(table, columnName, pluginDbType, fieldData.length)
+    return
+  }
+
+  switch (fieldData.type) {
+    case 'string':
+    case 'select':
+    case 'radio':
+    case 'date':
+      table.string(columnName, fieldData.length || 255)
+      break
+    case 'text':
+    case 'textarea':
+      table.text(columnName)
+      break
+    case 'number':
+    case 'integer':
+      table.integer(columnName)
+      break
+    case 'boolean':
+    case 'switch':
+      table.tinyint(columnName)
+      break
+    case 'datetime':
+      table.datetime(columnName)
+      break
+    case 'ref':
+    case 'upload':
+    case 'cascader':
+      table.string(columnName, 36)
+      break
+    case 'rich-text':
+      table.text(columnName)
+      break
+    default:
+      table.string(columnName, 255)
+  }
+}
+
+/** 字段类型 → 列类型种类（用于判断类型是否真的发生变化） */
+function columnKindOfType(type: string, pluginDbType?: string): string {
+  const dbType = pluginDbType || type
+  switch (dbType) {
+    case 'text':
+    case 'textarea':
+    case 'rich-text':
+      return 'text'
+    case 'number':
+    case 'integer':
+      return 'integer'
+    case 'boolean':
+    case 'switch':
+    case 'tinyint':
+      return 'tinyint'
+    case 'datetime':
+      return 'datetime'
+    case 'decimal':
+      return 'decimal'
+    case 'json':
+      return 'json'
+    default:
+      // string/select/radio/date/ref/upload/cascader 等都归为字符串列
+      return 'string'
+  }
+}
+
+/** SQLite 声明类型 → 列类型种类 */
+function columnKindOfDeclaredType(declared: string): string {
+  const upper = String(declared || '').toUpperCase()
+  if (upper.includes('TINYINT') || upper.includes('BOOLEAN')) return 'tinyint'
+  if (upper.includes('DATETIME') || upper.includes('TIMESTAMP')) return 'datetime'
+  if (upper.includes('JSON')) return 'json'
+  if (upper.includes('DECIMAL') || upper.includes('NUMERIC') || upper.includes('REAL') || upper.includes('FLOA') || upper.includes('DOUB')) return 'decimal'
+  if (upper.includes('INT')) return 'integer'
+  if (upper.includes('TEXT')) return 'text'
+  return 'string'
+}
+
+async function addPhysicalColumn(tableName: string, columnName: string, fieldData: any, executor: any = db) {
+  const exists = await executor.schema.hasColumn(tableName, columnName)
   if (exists) return
 
   const pluginDbType = await pluginService.getFieldDbType(fieldData.type)
 
-  await db.schema.table(tableName, (table) => {
-    if (pluginDbType) {
-      buildColumn(table, columnName, pluginDbType, fieldData.length)
-      return
-    }
-
-    switch (fieldData.type) {
-      case 'string':
-      case 'select':
-      case 'radio':
-      case 'date':
-        table.string(columnName, fieldData.length || 255)
-        break
-      case 'text':
-      case 'textarea':
-        table.text(columnName)
-        break
-      case 'number':
-      case 'integer':
-        table.integer(columnName)
-        break
-      case 'boolean':
-      case 'switch':
-        table.tinyint(columnName)
-        break
-      case 'datetime':
-        table.datetime(columnName)
-        break
-      case 'ref':
-      case 'upload':
-      case 'cascader':
-        table.string(columnName, 36)
-        break
-      case 'rich-text':
-        table.text(columnName)
-        break
-      default:
-        table.string(columnName, 255)
-    }
+  await executor.schema.table(tableName, (table: any) => {
+    buildColumnByFieldType(table, columnName, fieldData, pluginDbType)
   })
 }
 
-async function alterPhysicalColumn(tableName: string, columnName: string, fieldData: any) {
-  // SQLite 对 alter column 支持有限，这里仅做占位
-  // 生产环境建议根据数据库类型做迁移
+/**
+ * 字段类型变更时同步物理列。
+ * SQLite 不支持 ALTER COLUMN，这里比较"列类型种类"，发生跨种类变化时
+ * 通过重建物理表保留数据（同种类的长度调整如 varchar(255)→varchar(100) 不重建）。
+ */
+async function alterPhysicalColumn(tableName: string, columnName: string, fieldData: any, executor: any = db) {
+  const pluginDbType = await pluginService.getFieldDbType(fieldData.type)
+  const targetKind = columnKindOfType(fieldData.type, pluginDbType)
+
+  const columns = await getTableColumns(tableName, executor)
+  const current = columns.find((c: any) => c.name === columnName)
+
+  if (!current) {
+    // 物理列缺失（历史脏数据），直接补列
+    await addPhysicalColumn(tableName, columnName, fieldData, executor)
+    return true
+  }
+
+  if (columnKindOfDeclaredType(current.type) === targetKind) {
+    // 类型种类未变化，无需重建
+    return true
+  }
+
+  // 跨种类变更：重建表保留数据。
+  // 注意：新列不加 NOT NULL/默认值约束，避免历史 NULL 数据迁移失败
+  await rebuildTableWithColumnTypes(tableName, {
+    alterColumnName: columnName,
+    alterColumn: (table, name) => buildColumnByFieldType(table, name, fieldData, pluginDbType)
+  }, executor)
+
   return true
 }
 
@@ -661,7 +784,14 @@ export async function getModelPermission(req: AuthRequest, modelCode: string, us
 
 export async function dynamicList(req: AuthRequest, modelCode: string, query: any, user?: any) {
   const model = await getModelByCode(req, modelCode)
-  const { keyword, filters, page = 1, pageSize = 10, sortBy, sortOrder, expand } = query
+  const { keyword, filters, sortBy, sortOrder, expand } = query
+
+  // 存量动态表补齐系统列索引（进程内幂等）
+  await ensureDynamicTableIndexes(model.table_name)
+
+  // pageSize 上限保护，防止一次性拉取过大结果集
+  const page = Math.max(Number(query.page) || 1, 1)
+  const pageSize = Math.min(Math.max(Number(query.pageSize) || 10, 1), 1000)
 
   const fields = model.fields.filter((f: any) => f.status === 1)
   const fieldNames = fields.map((f: any) => f.field_name)

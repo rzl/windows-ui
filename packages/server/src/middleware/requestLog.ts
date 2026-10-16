@@ -2,6 +2,19 @@ import type { Request, Response, NextFunction } from 'express'
 import * as monitorService from '../modules/monitor/monitor.service'
 import type { AuthRequest } from './auth'
 
+/** 敏感字段名（密码、令牌、密钥）不入日志 */
+const SENSITIVE_KEY_PATTERN = /password|passwd|secret|token|credential|authorization/i
+
+function sanitizeParams(params: any): any {
+  if (!params || typeof params !== 'object') return params
+  if (Array.isArray(params)) return params
+  const cleaned: Record<string, any> = {}
+  for (const [key, value] of Object.entries(params)) {
+    cleaned[key] = SENSITIVE_KEY_PATTERN.test(key) ? '******' : value
+  }
+  return cleaned
+}
+
 export function requestLogMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   const start = Date.now()
   const originalEnd = res.end.bind(res)
@@ -20,7 +33,7 @@ export function requestLogMiddleware(req: AuthRequest, res: Response, next: Next
       action: req.method + ' ' + req.path,
       method: req.method,
       path: req.path,
-      params: req.method === 'GET' ? req.query : req.body,
+      params: sanitizeParams(req.method === 'GET' ? req.query : req.body),
       ip: req.ip || 'unknown',
       duration,
       status: res.statusCode < 400 ? 1 : 0

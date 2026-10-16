@@ -10,6 +10,15 @@ export async function getPlugins(req: AuthRequest, res: Response) {
 
 export async function getActivePlugins(req: AuthRequest, res: Response) {
   const result = await pluginService.getActivePlugins(req)
+  // 未登录请求只返回插件元信息，不暴露运行时脚本源码
+  if (!req.user) {
+    const sanitized = (Array.isArray(result) ? result : []).map((plugin: any) => {
+      const { runtime_code, runtime_url, ...meta } = plugin
+      return meta
+    })
+    res.json(success(sanitized))
+    return
+  }
   res.json(success(result))
 }
 

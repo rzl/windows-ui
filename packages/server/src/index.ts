@@ -4,6 +4,7 @@ import { config } from './config'
 import { logger } from './utils/logger'
 import { wsManager } from './utils/websocket'
 import type { AuthRequest } from './middleware/auth'
+import { ADMIN_ROLE_ID, GLOBAL_TENANT_ID } from './utils/id'
 import { startScheduler } from './modules/schedule/scheduler'
 import { checkAlerts } from './modules/monitor/alert.service'
 import { runCleanup, cleanupCustomApiLogs } from './modules/monitor/data-governance.service'
@@ -15,8 +16,10 @@ const server = http.createServer(app)
 // 初始化 WebSocket
 wsManager.init(server)
 
-// 系统级后台任务使用的 req（超级管理员身份，跨租户）
-const systemReq = { user: { id: '', username: 'system', roleId: '', tenantId: '' } } as unknown as AuthRequest
+// 系统级后台任务使用的 req（超级管理员身份，跨租户，tenantWhere 不过滤）
+const systemReq = {
+  user: { id: '', username: 'system', roleId: ADMIN_ROLE_ID, tenantId: GLOBAL_TENANT_ID }
+} as unknown as AuthRequest
 
 server.listen(PORT, '127.0.0.1', () => {
   logger.info(`Server running on http://127.0.0.1:${PORT}`)

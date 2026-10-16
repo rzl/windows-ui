@@ -2,6 +2,7 @@ import { db } from '../../db'
 import { AppError } from '../../utils/response'
 import { tenantWhere, setTenantId, GLOBAL_TENANT_ID } from '../../utils/tenant'
 import { newId } from '../../utils/id'
+import { getCachedMetadata, setCachedMetadata, invalidateMetadataCache } from '../../utils/metadata-cache'
 import type { AuthRequest } from '../../middleware/auth'
 
 export interface PluginForm {
@@ -41,7 +42,15 @@ export async function getPlugins(req: AuthRequest) {
 }
 
 export async function getActivePlugins(req: AuthRequest) {
-  return db('lowcode_plugins').where({ status: 1 }).where(tenantWhere(req)).orderBy('id', 'asc')
+  // 活动插件被动态 CRUD 高频读取（字段类型解析），走进程内缓存
+  const tenantId = tenantWhere(req).tenant_id ?? 'all'
+  const cacheKey = `plugins-active:${tenantId}`
+  const cached = getCachedMetadata(cacheKey)
+  if (cached) return JSON.parse(JSON.stringify(cached))
+
+  const plugins = await db('lowcode_plugins').where({ status: 1 }).where(tenantWhere(req)).orderBy('id', 'asc')
+  setCachedMetadata(cacheKey, plugins)
+  return JSON.parse(JSON.stringify(plugins))
 }
 
 export async function getPluginById(req: AuthRequest, id: string) {
@@ -77,6 +86,7 @@ export async function createPlugin(req: AuthRequest, data: PluginForm) {
       update_time: db.fn.now()
     }, req)
   )
+  invalidateMetadataCache()
   return getPluginById(req, id)
 }
 
@@ -99,18 +109,21 @@ export async function updatePlugin(req: AuthRequest, id: string, data: PluginFor
       update_time: db.fn.now()
     }, req)
   )
+  invalidateMetadataCache()
   return getPluginById(req, id)
 }
 
 export async function deletePlugin(req: AuthRequest, id: string) {
   const plugin = await getPluginById(req, id)
   await db('lowcode_plugins').where({ id }).where(tenantWhere(req)).del()
+  invalidateMetadataCache()
   return plugin
 }
 
 export async function setPluginStatus(req: AuthRequest, id: string, status: number) {
   const plugin = await getPluginById(req, id)
   await db('lowcode_plugins').where({ id }).where(tenantWhere(req)).update({ status, update_time: db.fn.now() })
+  invalidateMetadataCache()
   return getPluginById(req, id)
 }
 

@@ -31,6 +31,11 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
+// 404 兜底
+app.use((_req, res) => {
+  res.status(404).json({ code: 404, message: '接口不存在', data: null })
+})
+
 // 错误处理
 app.use(errorHandler)
 

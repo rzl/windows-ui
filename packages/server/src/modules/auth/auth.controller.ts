@@ -26,7 +26,8 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
 export function logout(req: Request, res: Response) {
   const authHeader = req.headers.authorization
   const token = authHeader ? authHeader.substring(7) : ''
-  authService.logout(token)
+  const refreshToken = typeof req.body?.refreshToken === 'string' ? req.body.refreshToken : undefined
+  authService.logout(token, refreshToken)
   res.json(success(null, '退出成功'))
 }
 

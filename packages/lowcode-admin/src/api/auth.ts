@@ -43,7 +43,9 @@ export function login(data: LoginForm) {
 }
 
 export function logout() {
-  return request.post('/auth/logout')
+  // 同时上送 refresh 令牌，后端一并吊销
+  const refreshToken = localStorage.getItem('lowcode_refresh_token') || ''
+  return request.post('/auth/logout', { refreshToken })
 }
 
 export function refreshToken(refreshToken: string) {

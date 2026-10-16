@@ -13,7 +13,9 @@ let callbacks: WebSocketCallbacks = {}
 
 function getWebSocketUrl(): string {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${protocol}//${window.location.host}`
+  // 身份在握手阶段凭 JWT 确认，服务端不再信任客户端申报
+  const token = localStorage.getItem('lowcode_token') || ''
+  return `${protocol}//${window.location.host}/?token=${encodeURIComponent(token)}`
 }
 
 export function connectWebSocket(userId: string, username: string, cbs?: WebSocketCallbacks) {

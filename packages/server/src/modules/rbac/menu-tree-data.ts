@@ -1,5 +1,5 @@
 import type { Knex } from 'knex'
-import { newId, GLOBAL_TENANT_ID } from '../../utils/id.ts'
+import { newId, GLOBAL_TENANT_ID } from '../../utils/id'
 
 /**
  * 系统固定菜单树（三级结构）
