@@ -137,7 +137,7 @@ provide('formLabelWidth', computed(() => props.labelWidth))
 provide('formErrors', errors)
 // 用 reactive 包装，保证 model 为普通对象时 form-item 的 change 监听依然生效（对已是 reactive 的对象返回原代理）
 provide('formModel', props.model ? reactive(props.model) : undefined)
-provide('formRules', props.rules)
+provide('formRules', computed(() => props.rules))
 provide('formResetting', resetting)
 provide('formValidateField', validateField)
 

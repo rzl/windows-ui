@@ -19,6 +19,21 @@
               </w-form>
             </demo-block>
 
+            <demo-block :title="t('必填表单')" :code="FormCode2">
+              <w-form ref="requiredFormRef" :model="requiredForm" :rules="requiredRules">
+                <w-form-item :label="t('用户名')" prop="name">
+                  <w-input v-model="requiredForm.name" />
+                </w-form-item>
+                <w-form-item :label="t('备注')" required>
+                  <w-input v-model="requiredForm.remark" />
+                </w-form-item>
+                <w-form-item>
+                  <w-button type="primary" @click="submitRequired">{{ t('提交') }}</w-button>
+                  <w-button @click="resetRequired">{{ t('重置') }}</w-button>
+                </w-form-item>
+              </w-form>
+            </demo-block>
+
     </demo-section>
   </div>
 </template>
@@ -27,7 +42,7 @@
 import { useI18n } from 'vue-i18n'
 import DemoSection from '../../components/DemoSection.vue'
 import DemoBlock from '../../components/DemoBlock.vue'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 const { t } = useI18n()
 
 const form = reactive({
@@ -47,6 +62,17 @@ const mentionOptions = [{ label: t('张三'), value: 'zhangsan' }, { label: t('�
 
 const message = (msg: string) => alert(msg)
 
+// 必填表单示例
+const requiredFormRef = ref()
+const requiredForm = reactive({ name: '', remark: '' })
+const requiredRules = {
+  name: [{ required: true, message: '请输入用户名' }]
+}
+const submitRequired = () => requiredFormRef.value.validate().then((valid: boolean) => {
+  if (valid) message(t('提交成功'))
+})
+const resetRequired = () => requiredFormRef.value.resetFields()
+
 const title = t('Form 表单')
 
 const FormCode1 = `<w-form>
@@ -62,6 +88,34 @@ const FormCode1 = `<w-form>
   </w-form-item>
   <w-form-item><w-button type="primary">提交</w-button></w-form-item>
 </w-form>`
+
+const FormCode2 = `<w-form ref="formRef" :model="form" :rules="rules">
+  <!-- rules 含 required: true，label 左侧自动显示红色 * -->
+  <w-form-item label="用户名" prop="name">
+    <w-input v-model="form.name" />
+  </w-form-item>
+  <!-- 无校验规则，通过 required 属性手动标记必填 -->
+  <w-form-item label="备注" required>
+    <w-input v-model="form.remark" />
+  </w-form-item>
+  <w-form-item>
+    <w-button type="primary" @click="submit">提交</w-button>
+    <w-button @click="reset">重置</w-button>
+  </w-form-item>
+</w-form>
+
+<script setup>
+import { ref, reactive } from 'vue'
+const formRef = ref()
+const form = reactive({ name: '', remark: '' })
+const rules = {
+  name: [{ required: true, message: '请输入用户名' }]
+}
+const submit = () => formRef.value.validate().then(valid => {
+  if (valid) alert('提交成功')
+})
+const reset = () => formRef.value.resetFields()
+<\/script>`
 </script>
 
 <style scoped>

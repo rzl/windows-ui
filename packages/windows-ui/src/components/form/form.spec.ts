@@ -130,6 +130,45 @@ describe('FormItem', () => {
     expect(wrapper.find('input').exists()).toBe(true)
   })
 
+  it('rules 含 required 规则时 label 前显示红色必填星号', () => {
+    const wrapper = mount(Form, {
+      props: {
+        model: { name: '', email: '' },
+        rules: {
+          name: [{ required: true, message: '姓名必填' }],
+          email: [{ pattern: /^\S+@\S+\.\S+$/, message: '邮箱格式错误' }]
+        }
+      },
+      slots: {
+        default: `
+          <form-item label="姓名" prop="name"><input /></form-item>
+          <form-item label="邮箱" prop="email"><input /></form-item>
+        `
+      },
+      global: { components: { FormItem } }
+    })
+    const items = wrapper.findAllComponents(FormItem)
+    expect(items[0].find('.w-form-item__required').exists()).toBe(true)
+    expect(items[0].find('.w-form-item__required').text()).toBe('*')
+    expect(items[1].find('.w-form-item__required').exists()).toBe(false)
+  })
+
+  it('无 rules 时可通过 required 属性显示必填星号', () => {
+    const wrapper = mount(FormItem, {
+      props: { label: '备注', required: true },
+      slots: { default: '<input />' }
+    })
+    expect(wrapper.find('.w-form-item__required').exists()).toBe(true)
+  })
+
+  it('无 prop 且未标记 required 时不显示必填星号', () => {
+    const wrapper = mount(FormItem, {
+      props: { label: '操作' },
+      slots: { default: '<button>提交</button>' }
+    })
+    expect(wrapper.find('.w-form-item__required').exists()).toBe(false)
+  })
+
   it('注入 formErrors 后应根据 prop 显示错误', async () => {
     const wrapper = mount(Form, {
       props: {

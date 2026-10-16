@@ -32,6 +32,37 @@ const resetForm = () => formRef.value.resetFields()
 </script>
 ```
 
+## 必填标识
+
+字段满足以下任一条件时，label 左侧会自动显示红色 `*`，直观体现必填：
+
+- `rules` 中该字段存在 `required: true` 的规则（自动推断，无需额外配置）
+- `w-form-item` 显式传入 `required` 属性（无校验规则时也可手动标记）
+
+```vue
+<template>
+  <w-form :model="form" :rules="rules">
+    <!-- rules.name 含 required: true，自动显示红色 * -->
+    <w-form-item label="用户名" prop="name">
+      <w-input v-model="form.name" />
+    </w-form-item>
+    <!-- 无规则，通过 required 属性手动标记 -->
+    <w-form-item label="备注" required>
+      <w-input v-model="form.remark" />
+    </w-form-item>
+  </w-form>
+</template>
+
+<script setup>
+import { reactive } from 'vue'
+import { WForm, WFormItem, WInput } from '@windows-ui/core'
+const form = reactive({ name: '', remark: '' })
+const rules = {
+  name: [{ required: true, message: '请输入用户名' }]
+}
+</script>
+```
+
 ## 验证规则
 
 | 规则名 | 说明 | 示例 |
@@ -92,6 +123,29 @@ const resetForm = () => formRef.value.resetFields()
 | validateField | 组件暴露的方法 |
 | resetFields | 组件暴露的方法 |
 | clearValidate | 组件暴露的方法 |
+
+### FormItem Props
+
+| 属性名 | 说明 | 类型 | 默认值 |
+|--------|------|------|--------|
+| label | 标签文本 | string | - |
+| prop | 对应 model 的字段名，用于校验与错误显示 | string | - |
+| required | 显式标记必填，label 左侧显示红色 `*`（优先于 rules 推断） | boolean | false |
+| size | 尺寸 | string | default（继承 Form / 全局 size） |
+
+### FormItem Slots
+
+| 插槽名 | 说明 |
+|--------|------|
+| default | 表单控件内容 |
+| label | 自定义标签内容 |
+
+### FormItem Methods
+
+| 方法名 | 说明 |
+|--------|------|
+| validate | 触发本字段校验 |
+| clearValidate | 清除本字段验证错误 |
 
 ## 样式说明
 

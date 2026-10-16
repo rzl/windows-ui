@@ -14,6 +14,7 @@
 - [x] validate / resetFields / clearValidate 方法
 - [x] 移动端响应式适配（≤768px 时 label 与内容区纵向堆叠，label 宽度自适应）
 - [x] 异步验证支持（validator 返回 Promise）
+- [x] 必填星号标识：rules 含 required 规则或 form-item 传入 required 属性时，label 左侧显示红色 *
 ## 待优化项
 - [ ] 单元测试覆盖
 - [ ] 性能优化
@@ -30,3 +31,4 @@
 - 2026-06-29: 补齐文档中已声明但缺失的 Props/API（如 size、border、contentPosition、preview-src-list、row/col 等）
 - 2026-10-15: 表单容器默认去掉右边框与底边框，仅保留顶部/左侧 2px 白色凸起边，便于嵌入对话框等容器
 - 2026-10-15: 校验体系重写：新增 change 触发（form-item 监听 model 自动校验）与 blur 触发（w-input 内置），rules 支持 trigger 字段过滤；新增 validateField / clearValidate(fields) 方法；resetFields 改为恢复挂载时初始值（原实现会把字段清成 undefined）；移除未使用的 fieldRefs 注册死代码；默认错误文案接入 i18n
+- 2026-10-16: 新增必填星号标识：rules 中字段含 required: true 规则时 label 左侧自动显示红色 *；w-form-item 新增 required 属性支持无规则时手动标记；formRules 注入改为 computed 保持响应式

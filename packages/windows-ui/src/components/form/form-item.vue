@@ -1,6 +1,7 @@
 <template>
   <div :class="['w-form-item', `w-form-item--${size}`]">
     <label v-if="label || $slots.label" class="w-form-item__label" :style="{ width: labelWidth }">
+      <span v-if="isRequired" class="w-form-item__required">*</span>
       <slot name="label">{{ label }}</slot>
     </label>
     <div class="w-form-item__content">
@@ -15,7 +16,13 @@ import { inject, computed, provide, ref, watch, type Ref } from 'vue'
 import { useGlobalSize } from '../../utils/prefix'
 
 defineOptions({ name: 'WFormItem' })
-const props = defineProps({ label: String, prop: String, size: { type: String, default: undefined } })
+const props = defineProps({
+  label: String,
+  prop: String,
+  /** 显式标记必填（显示红色星号），优先于 rules 推断 */
+  required: Boolean,
+  size: { type: String, default: undefined }
+})
 
 const globalSize = useGlobalSize()
 const formSize = inject<Ref<string>>('formSize', ref(globalSize.value))
@@ -28,11 +35,19 @@ const labelWidth = computed(() => {
 })
 
 const errors = inject<Ref<Record<string, string>>>('formErrors', ref({}))
+const formRules = inject<Ref<Record<string, { required?: boolean }[]> | undefined>>('formRules', ref(undefined))
 const formModel = inject<Record<string, any> | undefined>('formModel', undefined)
 const formResetting = inject<Ref<boolean>>('formResetting', ref(false))
 const validateFormField = inject<(prop: string, trigger?: 'blur' | 'change') => Promise<boolean>>('formValidateField', async () => true)
 
 const error = computed(() => (props.prop ? errors.value[props.prop] : ''))
+
+/** 是否必填：显式 required 属性，或 rules 中该字段存在 required: true 的规则 */
+const isRequired = computed(() => {
+  if (props.required) return true
+  const rules = props.prop ? formRules?.value?.[props.prop] : undefined
+  return Array.isArray(rules) ? rules.some((r) => r?.required) : false
+})
 
 /** 触发本字段校验（供输入组件通过 formItemContext 调用） */
 const triggerValidate = (trigger?: 'blur' | 'change') => {
@@ -56,6 +71,7 @@ defineExpose({ validate: () => triggerValidate(), clearValidate: () => { if (pro
 <style scoped>
 .w-form-item { display: flex; align-items: flex-start; margin-bottom: 12px; }
 .w-form-item__label { width: 100px; text-align: right; padding-right: 8px; font-size: var(--w-font-size-base); display: flex; align-items: center; justify-content: flex-end; min-height: var(--w-component-size); }
+.w-form-item__required { color: var(--w-color-danger); margin-right: 2px; }
 .w-form-item__content { flex: 1; }
 .w-form-item__error { color: var(--w-color-danger); font-size: var(--w-font-size-small); margin-top: 2px; }
 .w-form-item--small .w-form-item__label { font-size: var(--w-font-size-small); min-height: var(--w-component-size-small); }
