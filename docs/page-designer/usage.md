@@ -37,7 +37,6 @@ async function savePage(data: any) {
 | loadPage | `(code: string) => Promise<any>` | — | 加载页面数据回调 |
 | savePage | `(data: any) => Promise<any>` | — | 保存页面数据回调 |
 | isMobile | `boolean` | `false` | 是否启用移动端面板切换布局 |
-| mode | `'light' \| 'dark' \| 'auto'` | `'auto'` | 设计器主题模式，`auto` 跟随系统偏好 |
 
 ## Events
 
@@ -149,13 +148,15 @@ registerComponent({
 
 ## 深色模式
 
-页面设计器支持独立切换深色模式，工具栏提供「深色/浅色」按钮，也可通过 `mode` prop 控制：
+页面设计器不自行管理深色模式，与其他组件一致，深色状态由 `WConfigProvider` 的 `mode` 属性统一控制（切换全局 `html.dark` 类）：
 
 ```vue
-<w-page-designer code="sales_dashboard" mode="dark" />
+<w-config-provider mode="dark">
+  <w-page-designer code="sales_dashboard" />
+</w-config-provider>
 ```
 
-深色模式通过切换 `html.dark` 类实现，依赖 `variables.css` 与 `dark.css` 中已定义的深色变量与组件覆盖样式。
+设计器样式依赖 `variables.css` 与 `dark.css` 中已定义的深色变量与组件覆盖样式，跟随 `html.dark` 类自动适配。
 
 ## 组件库
 
@@ -177,7 +178,7 @@ registerComponent({
 - 选中节点后按 `Delete` / `Backspace` 可快速删除，`Esc` 取消选中。
 - 从左侧组件库拖拽组件到画布或容器时，根画布与容器区域会高亮提示；拖入容器后会自动选中子组件并记录历史。
 - 拖拽节点工具栏的「拖动排序」图标，可将节点在同级列表中排序；拖拽到目标节点上方/下方/容器内部时会显示对应高亮提示，松开后自动记录历史。
-- 工具栏提供撤销、重做、复制、粘贴、缩放、网格、深色模式、预览、保存等图标操作。
+- 工具栏提供撤销、重做、复制、粘贴、缩放、网格、预览、保存等图标操作。
 
 ## 撤销/重做
 

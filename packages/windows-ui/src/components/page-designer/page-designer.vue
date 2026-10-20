@@ -7,7 +7,6 @@
       :show-grid="showGrid"
       :has-selected="!!selectedNode"
       :has-clipboard="!!clipboardNode"
-      :is-dark="isDark"
       @back="goBack"
       @undo="undo"
       @redo="redo"
@@ -20,7 +19,6 @@
       @preview="handlePreview"
       @preview-config="handlePreviewConfig"
       @save="handleSave"
-      @toggle-dark="toggleDark"
     />
 
     <div v-if="isMobile" class="mobile-panel-tabs">
@@ -164,20 +162,14 @@ const inputTag = withPrefix('input')
 
 defineOptions({ name: 'WPageDesigner' })
 
-type ThemeMode = 'light' | 'dark' | 'auto'
-
-const props = withDefaults(
-  defineProps<{
-    code?: string
-    page?: any
-    config?: PageConfig
-    loadPage?: (code: string) => Promise<any>
-    savePage?: (data: any) => Promise<any>
-    isMobile?: boolean
-    mode?: ThemeMode
-  }>(),
-  { mode: 'auto' }
-)
+const props = defineProps<{
+  code?: string
+  page?: any
+  config?: PageConfig
+  loadPage?: (code: string) => Promise<any>
+  savePage?: (data: any) => Promise<any>
+  isMobile?: boolean
+}>()
 
 const emit = defineEmits(['save', 'back', 'preview'])
 
@@ -204,30 +196,6 @@ const maxZoom = 2
 const zoomStep = 0.1
 const showGrid = ref(false)
 const pageInfoConfigText = ref('')
-const activeMode = ref<ThemeMode>(props.mode)
-
-function isSystemDark() {
-  if (typeof window === 'undefined' || !window.matchMedia) return false
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-}
-
-const isDark = computed(() => {
-  if (activeMode.value === 'dark') return true
-  if (activeMode.value === 'light') return false
-  return isSystemDark()
-})
-
-function applyDarkClass() {
-  if (typeof document === 'undefined') return
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
-function toggleDark() {
-  activeMode.value = isDark.value ? 'light' : 'dark'
-}
-
-watch(isDark, applyDarkClass, { immediate: true })
-watch(() => props.mode, (mode) => { activeMode.value = mode })
 
 const currentPage = computed(() => allPages.find((p) => p.code === activePageCode.value))
 const currentPageName = computed({

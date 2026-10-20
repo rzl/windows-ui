@@ -387,23 +387,20 @@ describe('WPageDesigner', () => {
     expect(wrapperLarge.find('.component-library').classes()).toContain('component-library--large')
   })
 
-  it('点击深色模式按钮应切换 html.dark 类', async () => {
+  it('不应自行切换全局 html.dark 类（暗色由 WConfigProvider 统一管理）', async () => {
     document.documentElement.classList.remove('dark')
     const wrapper = mount(PageDesigner, {
-      props: { code: 'test', mode: 'light' },
+      props: { code: 'test' },
       global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
     })
     await wrapper.vm.$nextTick()
     expect(document.documentElement.classList.contains('dark')).toBe(false)
 
-    const darkBtn = wrapper.findAll('button').find((el) => el.attributes('title') === '切换深色')
-    expect(darkBtn).toBeTruthy()
-    await darkBtn!.trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    const darkBtn = wrapper.findAll('button').find((el) => ['切换深色', '切换浅色'].includes(el.attributes('title') || ''))
+    expect(darkBtn).toBeUndefined()
 
-    // 清理，避免影响后续测试
-    document.documentElement.classList.remove('dark')
+    wrapper.unmount()
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 
   it('工具栏操作按钮应使用图标而非文字', async () => {
@@ -412,7 +409,7 @@ describe('WPageDesigner', () => {
       global: { stubs: ['WDialog', 'WPageRenderer', 'WPagePropertyEditor'] }
     })
     await wrapper.vm.$nextTick()
-    const titles = ['返回', '撤销 (Ctrl+Z)', '重做 (Ctrl+Shift+Z)', '复制 (Ctrl+C)', '粘贴 (Ctrl+V)', '放大', '显示网格', '切换深色', '预览', '预览配置', '保存']
+    const titles = ['返回', '撤销 (Ctrl+Z)', '重做 (Ctrl+Shift+Z)', '复制 (Ctrl+C)', '粘贴 (Ctrl+V)', '放大', '显示网格', '预览', '预览配置', '保存']
     for (const title of titles) {
       const btn = wrapper.findAll('button').find((el) => el.attributes('title') === title)
       expect(btn, `缺少 title="${title}" 的工具栏按钮`).toBeTruthy()
