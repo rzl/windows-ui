@@ -303,6 +303,8 @@ async function loadModel() {
       ? JSON.parse(data.forms[0].config)
       : data.forms[0].config
     formConfig.fields = saved.fields || []
+    // 表单布局：legacy FormLayout 与页面设计器 schema（components）均由 w-dynamic-form 内部分流渲染
+    formConfig.layout = saved.layout
   } else {
     // 默认使用全部字段
     formConfig.fields = (data.fields || []).map((f: any) => ({

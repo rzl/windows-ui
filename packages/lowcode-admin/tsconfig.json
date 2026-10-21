@@ -17,6 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
+      "@windows-ui/core": ["../windows-ui/src/index.ts"],
       "@/*": ["src/*"]
     }
   },

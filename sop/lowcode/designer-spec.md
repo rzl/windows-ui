@@ -4,6 +4,22 @@
 
 ## 表单设计器
 
+### 表单布局可视化设计器
+
+「表单设计」标签页的「布局配置」按钮会打开基于页面设计器（`WPageDesigner`）的全屏布局设计器（`FormLayoutDesignerDialog`，位于 `lowcode-admin/src/components/form-layout-designer/`）。
+
+实现要点：
+
+- **全量组件面板**：布局设计器直接使用页面设计器完整组件库（布局 / 展示 / 表单 / 数据 / 交互五个分组）；`form-field / form-grid / form-subtable` 三种表单专用节点由设计器打开时动态注册，自动混入对应分组。
+- **运行时全量委托**：`WDynamicForm` 的 PageNode 布局将 `form-field / form-grid / form-subtable` 注册为页面设计器插件组件（桥接字段运行时），其余全部节点委托给页面设计器渲染器 `render-component`，并以表单记录为 `formData` 注入 `PageContext`——页面设计器的全部内置组件、插件市场自定义组件、iframe 嵌入（模型 / 仪表盘 / 报表）均可在表单布局中使用；字段节点的校验、联动、选项等行为由字段运行时保证，与 legacy 布局完全一致。
+- **动态注册设计时组件**：打开设计器时通过 `registerComponent` 注册 `form-field / form-grid / form-subtable`，画布渲染读取模块级上下文中的当前模型字段元数据（`setFormLayoutDesignContext`），关闭时 `unregisterComponent` 注销，避免污染自定义页面设计器；text/divider/image 为页面设计器内置类型，无需注册。
+- **schema**：设计器直接保存页面设计器节点树（`{ components: [...] }`，类型 `PageFormLayout`），运行时由 `WDynamicForm` 的 PageNode 布局引擎（core `dynamic-form/page-layout-engine.ts`）渲染，设计时画布与运行时行为一致。
+- **旧数据兼容**：历史遗留的 legacy `FormLayout`（`root/fieldset/tabs/grid/subtable`）在打开设计器时由 `convert.ts` 的 `formLayoutToComponents` 单向迁移为节点树，保存后即升级为新 schema；运行时两种 schema 按 `components` 字段自动分流，legacy 渲染路径保留。
+- **字段运行时**：`WDynamicForm` 将字段级行为（校验 / 联动 / 动态选项 / 默认值 / 编码规则）抽取为 `form-runtime.ts` 的 `createFieldRuntime`，两种布局引擎共用，行为完全一致。
+- **保存链路**：设计器保存 → 直接以 `{ components }` 覆盖 `formConfig.layout` → 复用「保存表单配置」接口持久化；空画布等同清除布局（运行时回退默认两列栅格）。
+- **运行时加载**：`LowcodePage.loadModel` 读取 `saved.layout` 传入 `WDynamicForm` 的 `layout` prop（2026-10-21 修复：此前运行页从未加载布局配置，布局仅停留在设计端）。
+- **JSON 兜底**：「布局JSON」按钮保留手写方式，两种方式编辑同一份数据。
+
 ### 字段配置项
 
 | 属性 | 类型 | 说明 |

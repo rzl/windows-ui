@@ -49,7 +49,8 @@
           <div class="toolbar">
             <template v-if="isAdmin">
               <w-button type="primary" size="small" @click="saveFormConfig">保存表单配置</w-button>
-              <w-button size="small" @click="openLayoutDialog">布局配置</w-button>
+              <w-button size="small" @click="layoutDesignerVisible = true">布局配置</w-button>
+              <w-button size="small" @click="openLayoutDialog">布局JSON</w-button>
             </template>
             <w-tag v-else type="warning">只读模式</w-tag>
           </div>
@@ -277,6 +278,15 @@
       </template>
     </w-dialog>
 
+    <!-- 表单布局可视化设计器 -->
+    <form-layout-designer-dialog
+      v-model:visible="layoutDesignerVisible"
+      :layout="formConfig.layout"
+      :form-fields="formFieldsMeta"
+      :models="modelOptionsForLayout"
+      @save="handleLayoutDesignerSave"
+    />
+
     <!-- 联动规则配置弹窗 -->
     <linkage-rule-dialog
       :visible="linkageRuleDialogVisible"
@@ -300,6 +310,8 @@ import { getFieldTypeOptions, getFieldTypeMeta, mapFieldTypeToFormType } from '@
 import RelationPanel from '@/components/model-designer/RelationPanel.vue'
 import ModelVersionPanel from './ModelVersionPanel.vue'
 import LinkageRuleDialog from '@/components/model-designer/LinkageRuleDialog.vue'
+import FormLayoutDesignerDialog from '@/components/form-layout-designer/FormLayoutDesignerDialog.vue'
+import type { FormLayoutFieldMeta } from '@/components/form-layout-designer/context'
 import { toastError, toastSuccess, toastWarning } from '@/utils/toast'
 
 const route = useRoute()
@@ -330,6 +342,7 @@ const fieldDialogVisible = ref(false)
 const fieldForm = reactive<any>({})
 const optionDialogVisible = ref(false)
 const layoutDialogVisible = ref(false)
+const layoutDesignerVisible = ref(false)
 const layoutText = ref('')
 const linkageRuleDialogVisible = ref(false)
 const currentLinkageField = ref('')
@@ -441,6 +454,24 @@ const formTypeOptions = [
   { label: '级联选择', value: 'cascader' },
   { label: '富文本', value: 'rich-text' }
 ]
+
+/** 表单布局设计器上下文：当前模型的表单字段元数据 */
+const formFieldsMeta = computed<FormLayoutFieldMeta[]>(() =>
+  fields.value.map((f) => {
+    const cfg = formConfigMap[f.field_name]
+    return {
+      field: f.field_name,
+      label: f.display_name || f.field_name,
+      type: cfg?.type || mapFieldTypeToFormType(f.type),
+      required: !!cfg?.required,
+      options: cfg?.options
+    }
+  })
+)
+
+const modelOptionsForLayout = computed(() =>
+  models.value.map((m: any) => ({ label: m.name, value: m.code }))
+)
 
 const fieldColumns = [
   { type: 'selection', width: 50 },
@@ -911,6 +942,11 @@ async function saveFormConfig() {
 function openLayoutDialog() {
   layoutText.value = formConfig.layout ? JSON.stringify(formConfig.layout, null, 2) : ''
   layoutDialogVisible.value = true
+}
+
+async function handleLayoutDesignerSave(layout: any) {
+  formConfig.layout = layout
+  await saveFormConfig()
 }
 
 function saveLayoutConfig() {
