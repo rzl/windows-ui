@@ -97,7 +97,7 @@
     <w-dialog v-model="dialogVisible" :title="dialogTitle" width="560">
       <w-dynamic-form
         ref="dynamicFormRef"
-        v-model="formModel"
+        :model="formModel"
         :fields="formFields"
         :columns="2"
         :layout="formLayout"
