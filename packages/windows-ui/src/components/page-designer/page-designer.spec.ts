@@ -736,4 +736,21 @@ describe('WPageDesigner', () => {
     await wrapper.vm.$nextTick()
     expect((wrapper.vm as any).config.components[0].props.content).toBe('原始文本')
   })
+
+  it('传入 componentGroups 时应替代内置组件面板分组', async () => {
+    const wrapper = mount(PageDesigner, {
+      props: {
+        code: 'test',
+        componentGroups: [
+          { key: 'fields', title: '表单字段', items: [{ label: '输入框', value: 'input', icon: 'component' }] }
+        ]
+      },
+      global: { stubs: ['WDialog', 'WPageRenderer'] }
+    })
+    await wrapper.vm.$nextTick()
+    const libraryText = wrapper.find('.component-library').text()
+    expect(libraryText).toContain('表单字段')
+    expect(libraryText).not.toContain('展示')
+    expect(libraryText).not.toContain('交互')
+  })
 })

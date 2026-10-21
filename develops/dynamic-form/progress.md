@@ -31,3 +31,6 @@
 - 2026-06-13：新增 upload / cascader / rich-text 三种字段类型
 - 2026-06-24：新增移动端响应式适配，≤768px 时 grid 布局自动降为 1 列，新增 mobileColumns prop
 - 2026-06-25：新增 `ref` 字段对关联关系（refRelation）的支持，loadRefOptions 增加 relationCode 参数
+- 2026-10-21：字段运行时抽取为 `form-runtime.ts`（createFieldRuntime），字段级行为（校验/联动/选项/默认值/编码）与控件渲染与布局引擎解耦；修复显式布局下 linkageRules 隐藏不生效的问题
+- 2026-10-21：新增 PageNode 布局引擎（`page-layout-engine.ts`），`layout` 支持页面设计器节点树（form-field/form-grid/card/tabs/form-subtable/text/divider/image），按 schema 形态自动分流；子表编辑器抽取为 `renderSubTableEditor` 共享
+- 2026-10-21：PageNode 布局改为全量委托页面设计器渲染器——form-field/form-grid/form-subtable 注册为页面设计器插件组件桥接字段运行时，其余节点（含插件市场自定义组件）由 render-component 渲染并以表单记录为 formData 注入 PageContext

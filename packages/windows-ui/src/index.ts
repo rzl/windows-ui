@@ -364,6 +364,7 @@ export {
 
 export {
   registerComponent,
+  unregisterComponent,
   registerChart,
   getComponent,
   getChart,
@@ -380,13 +381,16 @@ export type {
   PageDataSource,
   PageContext,
   PageComponentDefinition,
+  PropertySchemaField,
+  ComponentGroup,
   ChartPluginDefinition
 } from './components/page-designer/types'
 
 export type { FormRule } from './components/form/form.vue'
 export type { DynamicField } from './components/dynamic-form/dynamic-form.vue'
 export type { AdvancedQueryField, AdvancedCondition, AdvancedConditionGroup, AdvancedQueryCondition } from './components/advanced-query-builder/advanced-query-builder.vue'
-export type { LinkageRule, LinkageCondition, LinkageAction } from './components/dynamic-form/dynamic-form.vue'
+export type { LinkageRule, LinkageCondition, LinkageAction, FormLayout } from './components/dynamic-form/dynamic-form.vue'
+export type { PageFormLayout } from './components/dynamic-form/page-layout-engine'
 export { vLoading, vInfiniteScroll, vPermission }
 export { setPermissionChecker, clearPermissionChecker } from './directives/permission'
 export { vClickOutside } from './directives/click-outside'

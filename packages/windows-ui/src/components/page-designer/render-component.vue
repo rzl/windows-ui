@@ -266,23 +266,18 @@
     <component
       :is="tabsTag"
       v-else-if="node.type === 'tabs'"
-      v-model="activeTabName"
+      :model-value="activeTabIndex"
       :tabs="tabsForRenderer"
+      @update:model-value="setActiveTabIndex"
     >
-      <component
-        :is="tabPaneTag"
-        v-for="tab in node.props.tabs"
-        :key="tab.name"
-        :label="tab.label"
-        :name="tab.name"
-      >
+      <template #default="{ active }">
         <render-component
-          v-for="(child, idx) in childrenForTab(tab.name)"
+          v-for="(child, idx) in childrenForTab(tabsForRenderer[Number(active)]?.name)"
           :key="child.id || idx"
           :node="child"
           :page-code="pageCode"
         />
-      </component>
+      </template>
     </component>
 
     <!-- 折叠面板 -->
@@ -383,7 +378,6 @@ const timelineTag = withPrefix('timeline')
 const rowTag = withPrefix('row')
 const colTag = withPrefix('col')
 const tabsTag = withPrefix('tabs')
-const tabPaneTag = withPrefix('tab-pane')
 const collapseTag = withPrefix('collapse')
 const collapseItemTag = withPrefix('collapse-item')
 
@@ -462,6 +456,20 @@ const tabsForRenderer = computed(() => {
     name: tab.name
   }))
 })
+
+// WTabs 在 tabs 模式下按索引解析 modelValue，这里负责名称与索引的互转
+const activeTabIndex = computed(() => {
+  const list = tabsForRenderer.value
+  const idx = list.findIndex((tab: { name: string | number }) => String(tab.name) === String(activeTabName.value))
+  return idx >= 0 ? idx : 0
+})
+
+function setActiveTabIndex(index: number) {
+  const tab = tabsForRenderer.value[Number(index)]
+  if (tab) {
+    activeTabName.value = String(tab.name)
+  }
+}
 
 function childrenForTab(tabName: string | number) {
   if (!props.node.children) return []

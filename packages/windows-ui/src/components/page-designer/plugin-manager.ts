@@ -20,6 +20,10 @@ export function registerComponent(def: PageComponentDefinition) {
   componentRegistry.set(def.type, def)
 }
 
+export function unregisterComponent(type: string) {
+  componentRegistry.delete(type)
+}
+
 export function getComponent(type: string): PageComponentDefinition | undefined {
   return componentRegistry.get(type)
 }

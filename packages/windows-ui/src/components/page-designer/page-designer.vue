@@ -169,6 +169,8 @@ const props = defineProps<{
   loadPage?: (code: string) => Promise<any>
   savePage?: (data: any) => Promise<any>
   isMobile?: boolean
+  /** 自定义组件面板分组（传入后替代内置分组，用于受限组件面板场景） */
+  componentGroups?: ComponentGroup[]
 }>()
 
 const emit = defineEmits(['save', 'back', 'preview'])
@@ -596,13 +598,24 @@ function toggleGroup(key: string) {
   expandedGroups[key] = !expandedGroups[key]
 }
 
-const componentGroups = computed<ComponentGroup[]>(() => [
+const defaultComponentGroups = computed<ComponentGroup[]>(() => [
   { key: 'layout', title: '布局', items: layoutTypes.value },
   { key: 'display', title: '展示', items: displayTypes.value },
   { key: 'form', title: '表单', items: formTypes.value },
   { key: 'data', title: '数据', items: dataTypes.value },
   { key: 'action', title: '交互', items: actionTypes.value }
 ])
+
+const componentGroups = computed<ComponentGroup[]>(() => {
+  if (props.componentGroups?.length) return props.componentGroups
+  return defaultComponentGroups.value
+})
+
+watch(() => props.componentGroups, (groups) => {
+  for (const group of groups || []) {
+    if (expandedGroups[group.key] === undefined) expandedGroups[group.key] = true
+  }
+}, { immediate: true, deep: true })
 
 const mobileTabs = [
   { label: '组件库', value: 'library' as const },

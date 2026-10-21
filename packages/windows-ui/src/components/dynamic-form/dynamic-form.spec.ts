@@ -141,4 +141,36 @@ describe('DynamicForm', () => {
     await nextTick()
     expect(model.discount).toBe('0.8')
   })
+  it('显式布局下 linkageRules 满足条件时也应隐藏字段', async () => {
+    const model = reactive({ type: '1' })
+    const fields = [
+      { prop: 'type', label: '类型', type: 'input' as const },
+      {
+        prop: 'extra',
+        label: '扩展',
+        type: 'input' as const,
+        linkageRules: [
+          {
+            logic: 'and' as const,
+            conditions: [{ field: 'type', operator: 'eq' as const, value: '2' }],
+            actions: [{ type: 'hide' as const }]
+          }
+        ]
+      }
+    ]
+    const wrapper = mountDynamicForm({
+      model,
+      fields,
+      layout: { type: 'root', children: ['type', 'extra'] }
+    })
+    await nextTick()
+    await nextTick()
+    expect(wrapper.findAll('.w-form-item').length).toBe(2)
+
+    model.type = '2'
+    await nextTick()
+    await nextTick()
+    expect(wrapper.findAll('.w-form-item').length).toBe(1)
+  })
+
 })

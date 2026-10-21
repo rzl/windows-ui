@@ -272,6 +272,7 @@ watch(isMobile, (val, oldVal) => {
   flex-direction: column;
   width: 100% !important;
   height: 100% !important;
+  max-height: none;
   border: none;
   border-radius: 0;
 }

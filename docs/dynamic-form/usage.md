@@ -82,6 +82,31 @@ const fields = [
 | generateCode | (ruleCode) => Promise<string> | - | 编码规则生成函数，用于 `codingRule` 字段自动生成编码 |
 | userInfo | object | - | 当前用户信息，用于 `currentUser` / `currentDept` 默认值 |
 
+## 页面设计器布局（PageNode schema）
+
+除 legacy `FormLayout`（`root/fieldset/tabs/grid/subtable`）外，`layout` 还支持页面设计器节点树（含 `components` 数组的 `PageFormLayout`）。组件内部按 schema 形态自动分流渲染，两种 schema 的校验、联动、动态选项、默认值、编码规则等字段行为完全一致（共用同一份字段运行时）。
+
+PageNode 布局的渲染原则：`form-field / form-grid / form-subtable` 由字段运行时桥接渲染（保证校验、联动等字段行为），**其余全部节点委托页面设计器渲染器**——页面设计器的全部内置组件（文本、图片、分隔线、统计卡片、图表、公告、标签、进度条、表格、列表、按钮、嵌入模型等）以及插件市场注册的自定义组件都可直接放进表单布局，内置表单控件还会通过 `props.field` 直接读写表单记录。
+
+| 表单专用节点 | 说明 |
+|------|------|
+| form-field | 模型字段，`props.field` 绑定字段名 |
+| form-grid | N 列字段栅格，`props.span` 为列数（移动端降为 `mobileColumns`） |
+| form-subtable | 子表，`props.field/columns/title` |
+| 其他节点 | 委托页面设计器渲染器按通用规则渲染（card / tabs / text / alert / statistic 等） |
+
+```ts
+const layout = {
+  components: [
+    { id: 'g1', type: 'form-grid', props: { span: 2 }, styles: {}, children: [
+      { id: 'f1', type: 'form-field', props: { field: 'name' }, styles: {} },
+      { id: 'f2', type: 'form-field', props: { field: 'phone' }, styles: {} }
+    ] },
+    { id: 't1', type: 'text', props: { content: '请如实填写', tag: 'p' }, styles: {} }
+  ]
+}
+```
+
 ## 移动端适配
 
 WDynamicForm 已针对移动端进行响应式适配：当视口宽度 ≤768px 时，表单 grid 布局会自动降为 `mobileColumns` 指定的列数（默认 1 列），避免多列字段在窄屏下被过度压缩。
@@ -328,7 +353,7 @@ async function loadRefOptions(modelCode, displayField, keyword, relationCode) {
 | model | - | object | {} |
 | fields | - | array | [] |
 | columns | 列配置 | number | 1 |
-| layout | 布局 | object | - |
+| layout | 布局 | object | - | 支持 legacy FormLayout 或页面设计器 PageFormLayout（含 components），按 schema 自动分流 |
 | mobileColumns | - | number | 1 |
 | validateRules | - | function | - |
 | loadOptions | - | function | - |

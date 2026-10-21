@@ -37,6 +37,7 @@ async function savePage(data: any) {
 | loadPage | `(code: string) => Promise<any>` | — | 加载页面数据回调 |
 | savePage | `(data: any) => Promise<any>` | — | 保存页面数据回调 |
 | isMobile | `boolean` | `false` | 是否启用移动端面板切换布局 |
+| componentGroups | `ComponentGroup[]` | — | 自定义组件面板分组；传入后替代内置分组，用于受限组件面板场景 |
 
 ## Events
 
@@ -122,10 +123,10 @@ async function savePage(data: any) {
 
 ## 扩展组件
 
-通过 `registerComponent` 注册自定义页面组件：
+通过 `registerComponent` 注册自定义页面组件，`unregisterComponent` 注销：
 
 ```ts
-import { registerComponent } from '@windows-ui/core'
+import { registerComponent, unregisterComponent } from '@windows-ui/core'
 
 registerComponent({
   type: 'my-component',
@@ -135,6 +136,26 @@ registerComponent({
   defaultNode: () => ({ type: 'my-component', props: { title: '示例' }, styles: {} }),
   render: ({ node }) => h('div', node.props.title)
 })
+
+unregisterComponent('my-component')
+```
+
+## 受限组件面板
+
+当设计器只允许使用部分组件时（例如低代码平台的表单布局设计器），可通过 `componentGroups` 传入自定义分组，完全替代内置组件面板：
+
+```ts
+const componentGroups = [
+  {
+    key: 'layout',
+    title: '布局',
+    items: [{ label: '分组卡片', value: 'card', icon: 'card' }]
+  }
+]
+```
+
+```html
+<w-page-designer :config="config" :component-groups="componentGroups" />
 ```
 
 ## 主题定制
