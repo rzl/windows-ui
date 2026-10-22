@@ -34,3 +34,4 @@
 - 2026-10-21：字段运行时抽取为 `form-runtime.ts`（createFieldRuntime），字段级行为（校验/联动/选项/默认值/编码）与控件渲染与布局引擎解耦；修复显式布局下 linkageRules 隐藏不生效的问题
 - 2026-10-21：新增 PageNode 布局引擎（`page-layout-engine.ts`），`layout` 支持页面设计器节点树（form-field/form-grid/card/tabs/form-subtable/text/divider/image），按 schema 形态自动分流；子表编辑器抽取为 `renderSubTableEditor` 共享
 - 2026-10-21：PageNode 布局改为全量委托页面设计器渲染器——form-field/form-grid/form-subtable 注册为页面设计器插件组件桥接字段运行时，其余节点（含插件市场自定义组件）由 render-component 渲染并以表单记录为 formData 注入 PageContext
+- 2026-10-21：表单布局 PageContext 增强——展示类组件（统计卡片/文本/图片等）经绑定字段读取记录值，插件表单组件经 props.field 双向绑定记录字段

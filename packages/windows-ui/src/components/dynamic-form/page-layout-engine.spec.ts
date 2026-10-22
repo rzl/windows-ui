@@ -185,4 +185,18 @@ describe('DynamicForm PageNode 布局（页面设计器渲染器桥接）', () =
     const valid = await (wrapper.vm as any).validate()
     expect(valid).toBe(false)
   })
+  it('统计卡片绑定模型字段后应显示记录值', () => {
+    const model = reactive({ z6: '123' })
+    const wrapper = mountForm({
+      model,
+      fields: [{ prop: 'z6', label: '数量', type: 'input' as const }],
+      layout: {
+        components: [
+          node({ type: 'statistic', props: { title: '数量', field: 'z6' }, dataSource: { type: 'static', value: 0 } })
+        ]
+      }
+    })
+    expect(wrapper.text()).toContain('数量')
+    expect(wrapper.text()).toContain('123')
+  })
 })

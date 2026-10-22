@@ -6,7 +6,7 @@
       v-if="node.type === 'text'"
       :style="{ textAlign: node.props.align || 'left' }"
     >
-      {{ node.props.content }}
+      {{ boundFieldValue() ?? node.props.content }}
     </component>
 
     <!-- 统计卡片 -->
@@ -50,7 +50,7 @@
     <component
       :is="progressTag"
       v-else-if="node.type === 'progress'"
-      :percentage="node.props.percentage ?? 50"
+      :percentage="boundFieldValue() ?? node.props.percentage ?? 50"
       :status="node.props.status"
       :width="node.props.width ?? 200"
       :show-text="node.props.showText ?? true"
@@ -70,7 +70,7 @@
     <component
       :is="badgeTag"
       v-else-if="node.type === 'badge'"
-      :value="node.props.value"
+      :value="boundFieldValue() ?? node.props.value"
       :is-dot="node.props.isDot"
       :type="node.props.type || 'danger'"
     >
@@ -96,7 +96,7 @@
     <img
       v-else-if="node.type === 'image'"
       class="render-image"
-      :src="node.props.src || ''"
+      :src="boundFieldValue() ?? (node.props.src || '')"
       :alt="node.props.alt || ''"
       :style="imageStyle"
       @click="handleEvent(node.events?.onClick)"
@@ -407,7 +407,21 @@ const modelValue = computed({
   }
 })
 
+// 字段绑定：node.props.field 指向 formData 键时，展示值优先取记录/页面数据
+// （用于统计卡片、文本、图片、徽标、进度条、表格、列表等展示类组件）
+function boundFieldValue(): any {
+  const field = props.node.props?.field as string | undefined
+  if (field && pageContext && pageContext.formData[field] !== undefined) {
+    return pageContext.formData[field]
+  }
+  return undefined
+}
+
 const displayValue = computed(() => {
+  const bound = boundFieldValue()
+  if (bound !== undefined) {
+    return bound
+  }
   if (dataValue.value !== null && dataValue.value !== undefined) {
     return dataValue.value
   }
@@ -441,11 +455,15 @@ const tableColumns = computed(() => {
 })
 
 const tableData = computed(() => {
+  const bound = boundFieldValue()
+  if (Array.isArray(bound)) return bound
   if (Array.isArray(dataValue.value)) return dataValue.value
   return props.node.props?.data || []
 })
 
 const listData = computed(() => {
+  const bound = boundFieldValue()
+  if (Array.isArray(bound)) return bound
   if (Array.isArray(dataValue.value)) return dataValue.value
   return props.node.props?.items || []
 })

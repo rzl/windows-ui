@@ -98,6 +98,7 @@ export const builtInPropertySchemas: Record<string, PropertySchemaField[]> = {
   ],
   text: [
     { type: 'textarea', key: 'props.content', label: '内容', rows: 3, default: '文本内容' },
+    { type: 'input', key: 'props.field', label: '绑定字段', placeholder: 'formData 中的键名，绑定后以数据为准' },
     { type: 'select', key: 'props.tag', label: '标签', options: tagOptions, default: 'p' },
     { type: 'select', key: 'props.align', label: '对齐', options: alignOptions, default: 'left' }
   ],
@@ -128,6 +129,7 @@ export const builtInPropertySchemas: Record<string, PropertySchemaField[]> = {
   ],
   progress: [
     { type: 'number', key: 'props.percentage', label: '百分比', min: 0, max: 100, default: 50 },
+    { type: 'input', key: 'props.field', label: '绑定字段', placeholder: 'formData 中的数值键名' },
     { type: 'select', key: 'props.status', label: '状态', options: progressStatusOptions, default: '' },
     { type: 'number', key: 'props.width', label: '宽度', min: 50, max: 600, default: 200 },
     { type: 'switch', key: 'props.showText', label: '显示文字', default: true }
@@ -141,6 +143,7 @@ export const builtInPropertySchemas: Record<string, PropertySchemaField[]> = {
   badge: [
     { type: 'input', key: 'props.text', label: '包裹文字', default: '徽标' },
     { type: 'input', key: 'props.value', label: '数值' },
+    { type: 'input', key: 'props.field', label: '绑定字段', placeholder: 'formData 中的数值键名' },
     { type: 'select', key: 'props.type', label: '类型', options: commonTypeOptions, default: 'danger' },
     { type: 'switch', key: 'props.isDot', label: '圆点', default: false }
   ],
@@ -153,6 +156,7 @@ export const builtInPropertySchemas: Record<string, PropertySchemaField[]> = {
   ],
   image: [
     { type: 'input', key: 'props.src', label: '图片地址' },
+    { type: 'input', key: 'props.field', label: '绑定字段', placeholder: 'formData 中存图片地址的键名' },
     { type: 'input', key: 'props.alt', label: '替代文本' },
     { type: 'input', key: 'props.width', label: '宽度', placeholder: '100% 或 300px', default: '100%' },
     { type: 'input', key: 'props.height', label: '高度', placeholder: 'auto 或 200px', default: 'auto' },
@@ -166,11 +170,13 @@ export const builtInPropertySchemas: Record<string, PropertySchemaField[]> = {
   ],
   table: [
     { type: 'input', key: 'props.title', label: '标题', default: '示例表格' },
+    { type: 'input', key: 'props.field', label: '绑定字段', placeholder: 'formData 中的数组键名，作为行数据' },
     { type: 'input', key: 'props.height', label: '高度', placeholder: '如 300px，留空自适应' },
     { type: 'items', key: 'props.columns', label: '列配置（JSON）', placeholder: '[{"prop":"name","label":"名称","width":120}]', default: [] },
     { type: 'dataSource', key: 'dataSource', label: '数据源', default: { type: 'static', value: [] } }
   ],
   list: [
+    { type: 'input', key: 'props.field', label: '绑定字段', placeholder: 'formData 中的数组键名，作为列表数据' },
     { type: 'input', key: 'props.itemTitle', label: '标题字段', placeholder: '默认 title', default: 'title' },
     { type: 'input', key: 'props.itemDesc', label: '描述字段', placeholder: '默认 description', default: 'description' },
     { type: 'input', key: 'props.itemIcon', label: '图标字段', placeholder: '默认 icon' },
