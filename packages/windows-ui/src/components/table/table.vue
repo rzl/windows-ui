@@ -181,6 +181,13 @@
                   @mousedown.stop="(e: MouseEvent) => startResize(e, col)"
                   @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, col)"
                 />
+                <!-- 首个右侧冻结列在左缘提供拖拽手柄（贴屏幕右缘时右缘手柄难以命中），位移方向与列宽相反 -->
+                <span
+                  v-if="col.__isFirstRight"
+                  class="w-table__resize-handle is-left-edge"
+                  @mousedown.stop="(e: MouseEvent) => startResize(e, col, true)"
+                  @touchstart.stop.prevent="(e: TouchEvent) => startResize(e, col, true)"
+                />
               </template>
             </th>
           </tr>
@@ -670,6 +677,8 @@ watch(() => props.defaultExpandAll, rebuildFlatRows)
 // ----- 列顺序与列宽持久化 -----
 const savedColumnOrder = ref<string[]>([])
 const columnWidths = ref<Record<string, number>>({})
+// 无 width 的"弹性列"被拖拽过之后，固定为真实列宽（记录其 key）
+const flexPinnedKeys = ref<Set<string>>(new Set())
 
 const orderedColumns = computed((): ColumnItem[] => {
   if (!props.storageKey || !savedColumnOrder.value.length) return props.columns
@@ -702,6 +711,7 @@ function loadColumnState() {
       const parsed = JSON.parse(raw)
       if (Array.isArray(parsed.order)) savedColumnOrder.value = parsed.order
       if (parsed.widths) Object.assign(columnWidths.value, parsed.widths)
+      if (Array.isArray(parsed.pinned)) flexPinnedKeys.value = new Set(parsed.pinned)
     }
   } catch {
     // ignore
@@ -712,7 +722,8 @@ function saveColumnState() {
   if (!props.storageKey) return
   const data = {
     order: savedColumnOrder.value,
-    widths: columnWidths.value
+    widths: columnWidths.value,
+    pinned: Array.from(flexPinnedKeys.value)
   }
   localStorage.setItem(`w-table-${props.storageKey}`, JSON.stringify(data))
 }
@@ -770,6 +781,7 @@ const initColumnWidths = () => {
   }
   walk(props.columns)
   columnWidths.value = widths
+  flexPinnedKeys.value = new Set()
   loadColumnState()
 }
 watch(() => props.columns, initColumnWidths, { deep: true, immediate: true })
@@ -778,6 +790,8 @@ watch(() => props.columns, initColumnWidths, { deep: true, immediate: true })
 const resizingCol = ref<string | null>(null)
 const resizeStartX = ref(0)
 const resizeStartWidth = ref(0)
+// 从列左缘拖拽（首个 fixed:right 列的左缘手柄），位移方向与列宽增减相反
+const resizeFromLeft = ref(false)
 const resizedCols = ref<Set<string>>(new Set())
 
 const getClientX = (e: MouseEvent | TouchEvent): number => {
@@ -785,14 +799,23 @@ const getClientX = (e: MouseEvent | TouchEvent): number => {
   return e.clientX
 }
 
-const startResize = (e: MouseEvent | TouchEvent, col: any) => {
+const startResize = (e: MouseEvent | TouchEvent, col: any, fromLeft = false) => {
   if (col.__isPadding) return
   e.preventDefault()
   const key = col.__key || col.prop || String(col.type)
   resizingCol.value = key
   resizedCols.value.add(key)
   resizeStartX.value = getClientX(e)
+  // 无 width 的弹性列平时仅靠 min-width 吸收剩余空间，直接拖没有可见效果；
+  // 拖拽开始时先按当前渲染宽度把它固定成真实列宽
+  if (!col.width && col.type !== 'selection' && col.type !== 'expand' && !flexPinnedKeys.value.has(key)) {
+    flexPinnedKeys.value = new Set([...flexPinnedKeys.value, key])
+    const thEl = (e.currentTarget as HTMLElement | null)?.parentElement as HTMLElement | null
+    const rendered = thEl?.offsetWidth || 0
+    if (rendered > 0) columnWidths.value[key] = rendered
+  }
   resizeStartWidth.value = colContentWidthPx(col)
+  resizeFromLeft.value = fromLeft
   document.body.style.cursor = 'col-resize'
   document.body.style.userSelect = 'none'
   document.addEventListener('mousemove', handleResize)
@@ -805,7 +828,7 @@ const handleResize = (e: MouseEvent | TouchEvent) => {
   e.preventDefault()
   if (!resizingCol.value) return
   const delta = getClientX(e) - resizeStartX.value
-  const newWidth = Math.max(30, resizeStartWidth.value + delta)
+  const newWidth = Math.max(30, resizeStartWidth.value + (resizeFromLeft.value ? -delta : delta))
   columnWidths.value[resizingCol.value] = newWidth
 }
 
@@ -1027,7 +1050,7 @@ const renderLastFlexibleColIndex = computed(() => {
   const cols = renderColumns.value
   for (let i = cols.length - 1; i >= 0; i--) {
     const c = cols[i]
-    if (!c.__isPadding && !c.width && c.type !== 'selection' && c.type !== 'expand') return i
+    if (!c.__isPadding && !c.width && c.type !== 'selection' && c.type !== 'expand' && !flexPinnedKeys.value.has(c.__key)) return i
   }
   return -1
 })
@@ -1664,6 +1687,7 @@ defineExpose({ resetColumnWidths })
 /* resize handle */
 .w-table th { position: relative; }
 .w-table__resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 10; }
+.w-table__resize-handle.is-left-edge { left: 0; right: auto; }
 .w-table__resize-handle:hover { background: var(--w-color-primary); opacity: 0.4; }
 .w-table th.is-drag-over { background: var(--w-color-primary); color: #fff; }
 .w-table tr.is-drag-over td { border-bottom: 2px solid var(--w-color-primary); }

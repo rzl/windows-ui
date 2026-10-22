@@ -184,3 +184,122 @@ describe('Table', () => {
     wrapper.unmount()
   })
 })
+
+describe('Table 列宽拖拽', () => {
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0))
+
+  const dragHandle = async (wrapper: ReturnType<typeof mount>, thIndex: number, handleClass: string, deltaX: number) => {
+    const th = wrapper.findAll('thead th')[thIndex]
+    const handle = th.find(`.w-table__resize-handle${handleClass}`)
+    expect(handle.exists(), `第 ${thIndex} 列应存在拖拽手柄 ${handleClass}`).toBe(true)
+    await handle.trigger('mousedown', { clientX: 200 })
+    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 200 + deltaX }))
+    document.dispatchEvent(new MouseEvent('mouseup'))
+    await flush()
+  }
+
+  const colStyleOf = (wrapper: ReturnType<typeof mount>, index: number) =>
+    (wrapper.findAll('col')[index].element as HTMLElement).style
+
+  it('普通列拖拽右缘手柄应更新列宽', async () => {
+    const wrapper = mount(Table, {
+      props: {
+        data,
+        columns: [
+          { prop: 'name', label: '姓名', width: 100 },
+          { prop: 'age', label: '年龄', width: 100 },
+          { prop: 'op', label: '操作', width: 120, fixed: 'right' }
+        ]
+      },
+      global: { stubs: ['WCheckbox', 'WIcon', 'WButton', 'WEmpty'] }
+    })
+    await dragHandle(wrapper, 0, '', 40)
+    expect(colStyleOf(wrapper, 0).width).toBe('140px')
+    wrapper.unmount()
+  })
+
+  it('无 width 的弹性列拖拽后应固定为真实列宽', async () => {
+    const wrapper = mount(Table, {
+      props: {
+        data,
+        columns: [
+          { prop: 'name', label: '姓名', width: 100 },
+          { prop: 'age', label: '年龄' },
+          { prop: 'op', label: '操作', width: 120, fixed: 'right' }
+        ]
+      },
+      global: { stubs: ['WCheckbox', 'WIcon', 'WButton', 'WEmpty'] }
+    })
+    // 拖拽前弹性列只有 min-width，没有固定 width
+    expect(colStyleOf(wrapper, 1).width).toBe('')
+    expect(colStyleOf(wrapper, 1).minWidth).toBe('80px')
+    await dragHandle(wrapper, 1, '', -30)
+    // 拖拽后弹性列被固定成真实列宽（jsdom 下以 min-width 兜底值为基准）
+    expect(colStyleOf(wrapper, 1).width).toBe('50px')
+    expect(colStyleOf(wrapper, 1).minWidth).toBe('50px')
+    expect(colStyleOf(wrapper, 1).maxWidth).toBe('50px')
+    wrapper.unmount()
+  })
+
+  it('弹性列固定后，弹性角色应转移给其他无 width 列', async () => {
+    const wrapper = mount(Table, {
+      props: {
+        data,
+        columns: [
+          { prop: 'name', label: '姓名', width: 100 },
+          { prop: 'age', label: '年龄' },
+          { prop: 'email', label: '邮箱' },
+          { prop: 'op', label: '操作', width: 120, fixed: 'right' }
+        ]
+      },
+      global: { stubs: ['WCheckbox', 'WIcon', 'WButton', 'WEmpty'] }
+    })
+    await dragHandle(wrapper, 1, '', 20)
+    // age 被固定，email 成为新的弹性列（仍只有 min-width）
+    expect(colStyleOf(wrapper, 1).width).toBe('100px')
+    expect(colStyleOf(wrapper, 2).width).toBe('')
+    expect(colStyleOf(wrapper, 2).minWidth).toBe('80px')
+    wrapper.unmount()
+  })
+
+  it('首个右侧冻结列应提供左缘手柄且拖拽方向相反', async () => {
+    const wrapper = mount(Table, {
+      props: {
+        data,
+        columns: [
+          { prop: 'name', label: '姓名', width: 100 },
+          { prop: 'age', label: '年龄', width: 100 },
+          { prop: 'op', label: '操作', width: 120, fixed: 'right' }
+        ]
+      },
+      global: { stubs: ['WCheckbox', 'WIcon', 'WButton', 'WEmpty'] }
+    })
+    const opTh = wrapper.findAll('thead th')[2]
+    expect(opTh.find('.w-table__resize-handle:not(.is-left-edge)').exists()).toBe(true)
+    // 鼠标向左移 40px，列应变宽（左缘手柄方向反转）
+    await dragHandle(wrapper, 2, '.is-left-edge', -40)
+    expect(colStyleOf(wrapper, 2).width).toBe('160px')
+    wrapper.unmount()
+  })
+
+  it('弹性列拖拽结果应随 storageKey 持久化', async () => {
+    const wrapper = mount(Table, {
+      props: {
+        data,
+        storageKey: 'spec-flex-persist',
+        columns: [
+          { prop: 'name', label: '姓名', width: 100 },
+          { prop: 'age', label: '年龄' },
+          { prop: 'op', label: '操作', width: 120, fixed: 'right' }
+        ]
+      },
+      global: { stubs: ['WCheckbox', 'WIcon', 'WButton', 'WEmpty'] }
+    })
+    await dragHandle(wrapper, 1, '', 10)
+    const saved = JSON.parse(localStorage.getItem('w-table-spec-flex-persist') || '{}')
+    expect(saved.pinned).toContain('age')
+    expect(saved.widths.age).toBe(90)
+    localStorage.removeItem('w-table-spec-flex-persist')
+    wrapper.unmount()
+  })
+})
